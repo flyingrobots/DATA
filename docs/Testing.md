@@ -103,7 +103,7 @@ The `DevCycleCommand` integrates configuration by:
 
 ## Configuration Validation
 
-data automatically validates and sanitizes configuration values:
+D.A.T.A. automatically validates and sanitizes configuration values:
 
 ### Validation Rules
 
@@ -227,7 +227,7 @@ DEBUG=data:config ./build/data test run
 ```
 
 ### Invalid Configuration Values
-data will automatically fix invalid values and continue execution. Check logs for validation warnings:
+D.A.T.A. will automatically fix invalid values and continue execution. Check logs for validation warnings:
 
 ```
 WARN: Invalid minimum_coverage "invalid", using default 80

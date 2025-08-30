@@ -1,6 +1,9 @@
 # GitHub Issue Format
 
+> [!warning]- _Not Started_
+
 ## Issue Title
+
 Optimize performance for large schema analysis and test scanning
 
 ### Core Information
@@ -26,6 +29,7 @@ Initial implementation focused on correctness over performance, with no optimiza
 ### Example
 
 Performance bottlenecks:
+
 ```mermaid
 graph TD
     A[1000 SQL Operations] --> B[Sequential Analysis]

@@ -1,6 +1,9 @@
 # GitHub Issue Format
 
+> [!warning]- _Not Started_
+
 ## Issue Title
+
 Standardize error types across test coverage modules
 
 ### Core Information
@@ -26,6 +29,7 @@ All modules currently throw generic Error objects with message strings, rather t
 ### Example
 
 Current inconsistent approach:
+
 ```javascript
 // In TestRequirementAnalyzer
 throw new Error('Invalid operation structure');
@@ -91,6 +95,7 @@ module.exports = {
 ```
 
 Usage:
+
 ```javascript
 // Now we can handle specific errors
 try {

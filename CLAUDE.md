@@ -57,7 +57,7 @@ data db compile --deploy-functions
 
 ## Architecture
 
-### Command Class Hierdata
+### Command Class Hierarchy
 - **Command** (src/lib/Command.js): Base class with event emission and logging
 - **SupabaseCommand**: Commands using Supabase API
 - **DatabaseCommand**: Direct database access commands

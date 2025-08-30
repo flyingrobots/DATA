@@ -1,6 +1,9 @@
 # GitHub Issue Format
 
+> [!warning]- _Not Started_
+
 ## Issue Title
+
 Fix inconsistent async/await and promise patterns
 
 ### Core Information
@@ -39,6 +42,7 @@ graph TD
 ```
 
 Examples of inconsistency:
+
 ```javascript
 // Promise chain style (older pattern)
 scanDirectory(dir) {

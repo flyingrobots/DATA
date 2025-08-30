@@ -54,7 +54,7 @@ And the `git diff` approach for migrations becomes SO clean:
 # Current prod is at data/prod/2025-08-28T10:15:00Z
 # You've modified sql/tables.sql and sql/functions.sql
 
-data migrate generate --name add-notifications
+data db migrate generate --name add-notifications
 # D.A.T.A. responds: "Analyzing database differentials..."
 git diff data/prod/latest HEAD -- sql/ | 
   data-sql-parser | 
@@ -68,10 +68,8 @@ git diff data/prod/latest HEAD -- sql/ |
 
 This also means rollbacks are deterministic:
 
-bash
-
 ```bash
-data rollback --to-previous
+data db migrate rollback --to-previous
 # "Captain, initiating temporal database reversion."
 # Finds: data/prod/2025-08-28T10:15:00Z
 # Generates: reverse migration from git diff
@@ -148,8 +146,8 @@ npm install -g @purrfect-firs/data
 ### Install from source
 
 ```bash
-git clone https://github.com/yourusername/data.git
-cd data
+git clone https://github.com/yourusername/supa-data.git
+cd supa-data
 npm install
 npm link
 ```
@@ -213,6 +211,13 @@ data db migrate history         # View migration history
 data db migrate verify          # Verify migration integrity
 data db migrate squash          # Combine multiple migrations
 data db migrate clean           # Remove old migration artifacts
+
+# Alternative: Use npm scripts
+npm run migrate:generate
+npm run migrate:test
+npm run migrate:promote
+npm run migrate:status
+npm run migrate:rollback
 ```
 
 ### Edge Functions
@@ -260,8 +265,9 @@ data test ci-coverage --enforce --min-coverage 80
 
 ```bash
 # Execute queries
+# Note: query command syntax needs verification
 data db query "SELECT * FROM users LIMIT 10"
-data db query migration.sql --file
+data db query --file migration.sql
 
 # Reset database (be careful!)
 data db reset
@@ -283,7 +289,7 @@ data db compile
 
 ### Process Management
 
-data includes robust process management via `ChildProcessWrapper`:
+D.A.T.A. includes robust process management via `ChildProcessWrapper`:
 - Command whitelisting to prevent injection
 - Automatic timeout and cleanup
 - Cross-platform support (Unix/Windows)
@@ -305,14 +311,14 @@ command.emit('error', { message: 'Failed', error });
 reporter.attach(command);
 ```
 
-### Command Hierdata
+### Command Hierarchy
 
 - **Command**: Base class with event emission and logging
 - **SupabaseCommand**: Commands that use Supabase API
 - **DatabaseCommand**: Commands that need direct database access
 - **TestCommand**: Commands for testing operations
 
-## Extending data
+## Extending D.A.T.A.
 
 ### Creating a New Command
 
@@ -434,7 +440,7 @@ VERBOSE=1 data db migrate test
 
 ## Known Issues
 
-See [docs/issues/data.md](docs/issues/data.md) for a comprehensive list of known issues and planned improvements.
+See [issues/README.md](issues/README.md) for a comprehensive list of known issues and planned improvements.
 
 ### Priority Issues Being Addressed
 

@@ -1,6 +1,9 @@
 # GitHub Issue Format
 
+> [!warning]- _Not Started_
+
 ## Issue Title
+
 Replace console methods with proper logging levels
 
 ### Core Information
@@ -26,6 +29,7 @@ Quick implementation used console methods directly rather than establishing a lo
 ### Example
 
 Current scattered logging:
+
 ```javascript
 // In TestTemplateGenerator.js
 console.error(`Failed to render pattern ${patternName}:`, error);
@@ -133,6 +137,7 @@ class TestRequirementAnalyzer {
 ```
 
 Configuration via .datarc.json:
+
 ```json
 {
   "logging": {

@@ -1,6 +1,9 @@
 # GitHub Issue Format
 
+> [!warning]- _Not Started_
+
 ## Issue Title
+
 Add comprehensive end-to-end integration tests for coverage enforcement
 
 ### Core Information
@@ -26,6 +29,7 @@ Development focused on unit testing individual components but didn't include int
 ### Example
 
 Missing test scenarios:
+
 ```mermaid
 graph LR
     A[Migration Operations] --> B[Requirement Analysis]
