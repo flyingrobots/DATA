@@ -13,6 +13,17 @@ This directory contains documented issues identified during code reviews and dev
 
 ## Current Issues (2025-08-30)
 
+### 🔴🔴🔴 CRITICAL SHOW-STOPPER (Blocks ALL Work)
+
+#### 0. [Runtime Migration to Deno](./2025-08-30/runtime-migration-to-deno.md)
+- **Component:** ENTIRE CODEBASE
+- **Impact:** Cannot test Edge Functions accurately; ES module chaos blocks development
+- **Fix Time:** 8-12 hours
+- **Status:** 🚨 **IN PROGRESS - ALL OTHER WORK BLOCKED**
+- **Priority:** **SUPERSEDES ALL OTHER ISSUES**
+
+---
+
 ### 🔴 Critical Issues (Production Blockers)
 
 #### 1. [Deployment Blocking Vulnerability](./2025-08-30/deployment-blocking-vulnerability.md)
@@ -122,11 +133,12 @@ graph LR
 
 | Severity | Count | Est. Hours | Status |
 |----------|-------|------------|--------|
+| **SHOW-STOPPER** | **1** | **8-12** | **🚨 IN PROGRESS (BLOCKS ALL)** |
 | Critical | 3 | 14-22 | ✅ 100% Complete (3/3 fixed) |
 | High | 4 | 25-37 | ✅ 50% Complete (2/4 fixed) |
 | Medium | 2 | 18-24 | ⏳ 0% Complete (0/2 fixed) |
 | Low | 2 | 10-14 | ⏳ 0% Complete (0/2 fixed) |
-| **Total** | **11** | **67-97** | **45% Complete (5/11 fixed)** |
+| **Total** | **12** | **75-109** | **42% Complete (5/12 fixed)** |
 
 ### Issue Categories
 
