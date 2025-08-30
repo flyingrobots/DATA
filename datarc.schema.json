@@ -1,0 +1,242 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "data Configuration",
+  "description": "Configuration schema for data CLI tool",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to the JSON schema file"
+    },
+    "test": {
+      "type": "object",
+      "description": "Test configuration settings",
+      "properties": {
+        "minimum_coverage": {
+          "type": "number",
+          "description": "Minimum code coverage percentage required",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 80
+        },
+        "test_timeout": {
+          "type": "number",
+          "description": "Test timeout in seconds",
+          "minimum": 1,
+          "default": 300
+        },
+        "output_formats": {
+          "type": "array",
+          "description": "Output format types for test results",
+          "items": {
+            "type": "string",
+            "enum": ["console", "junit", "json", "tap", "html"]
+          },
+          "default": ["console"]
+        },
+        "parallel": {
+          "type": "boolean",
+          "description": "Run tests in parallel",
+          "default": false
+        },
+        "verbose": {
+          "type": "boolean",
+          "description": "Enable verbose test output",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "environments": {
+      "type": "object",
+      "description": "Environment-specific configurations",
+      "patternProperties": {
+        "^[a-zA-Z][a-zA-Z0-9_-]*$": {
+          "type": "object",
+          "properties": {
+            "db": {
+              "type": "string",
+              "description": "Database connection URL",
+              "format": "uri",
+              "pattern": "^postgresql://.*"
+            },
+            "supabase_url": {
+              "type": "string",
+              "description": "Supabase project URL",
+              "format": "uri"
+            },
+            "supabase_anon_key": {
+              "type": "string",
+              "description": "Supabase anonymous key"
+            },
+            "supabase_service_role_key": {
+              "type": "string",
+              "description": "Supabase service role key"
+            }
+          },
+          "required": ["db"],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "paths": {
+      "type": "object",
+      "description": "Directory path overrides",
+      "properties": {
+        "sql_dir": {
+          "type": "string",
+          "description": "SQL source files directory",
+          "default": "./sql"
+        },
+        "tests_dir": {
+          "type": "string",
+          "description": "Test files directory",
+          "default": "./tests"
+        },
+        "migrations_dir": {
+          "type": "string",
+          "description": "Migrations output directory",
+          "default": "./migrations"
+        },
+        "functions_dir": {
+          "type": "string",
+          "description": "Edge Functions directory",
+          "default": "./functions"
+        },
+        "schemas_dir": {
+          "type": "string",
+          "description": "Schema definitions directory",
+          "default": "./schemas"
+        }
+      },
+      "additionalProperties": false
+    },
+    "compile": {
+      "type": "object",
+      "description": "Compilation settings",
+      "properties": {
+        "auto_squash": {
+          "type": "boolean",
+          "description": "Automatically squash migrations when safe",
+          "default": false
+        },
+        "include_comments": {
+          "type": "boolean",
+          "description": "Include SQL comments in compiled output",
+          "default": true
+        },
+        "validate_syntax": {
+          "type": "boolean",
+          "description": "Validate SQL syntax before compilation",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "migrate": {
+      "type": "object",
+      "description": "Migration settings",
+      "properties": {
+        "auto_rollback": {
+          "type": "boolean",
+          "description": "Automatically rollback on failure",
+          "default": true
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "Default to dry-run mode for migrations",
+          "default": false
+        },
+        "lock_timeout": {
+          "type": "number",
+          "description": "Database lock timeout in seconds",
+          "minimum": 1,
+          "default": 10
+        },
+        "batch_size": {
+          "type": "number",
+          "description": "Number of migrations to run in a single batch",
+          "minimum": 1,
+          "default": 10
+        }
+      },
+      "additionalProperties": false
+    },
+    "functions": {
+      "type": "object",
+      "description": "Edge Functions deployment settings",
+      "properties": {
+        "deploy_on_migrate": {
+          "type": "boolean",
+          "description": "Deploy functions automatically with migrations",
+          "default": false
+        },
+        "import_map": {
+          "type": "string",
+          "description": "Path to import map file for Deno",
+          "default": "./import_map.json"
+        },
+        "verify_jwt": {
+          "type": "boolean",
+          "description": "Verify JWT in Edge Functions",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "safety": {
+      "type": "object",
+      "description": "Production safety settings",
+      "properties": {
+        "require_prod_flag": {
+          "type": "boolean",
+          "description": "Require --prod flag for production operations",
+          "default": true
+        },
+        "require_confirmation": {
+          "type": "boolean",
+          "description": "Require typed confirmation for destructive operations",
+          "default": true
+        },
+        "backup_before_migrate": {
+          "type": "boolean",
+          "description": "Create backup before production migrations",
+          "default": true
+        },
+        "max_affected_rows": {
+          "type": "number",
+          "description": "Maximum rows that can be affected by a single migration",
+          "minimum": 0,
+          "default": 10000
+        }
+      },
+      "additionalProperties": false
+    },
+    "logging": {
+      "type": "object",
+      "description": "Logging configuration",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error", "silent"],
+          "description": "Logging level",
+          "default": "info"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["text", "json"],
+          "description": "Log output format",
+          "default": "text"
+        },
+        "timestamps": {
+          "type": "boolean",
+          "description": "Include timestamps in logs",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

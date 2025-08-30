@@ -1,0 +1,15 @@
+{
+  "id": "20250828_140000",
+  "name": "user_authentication",
+  "generated": "2025-08-29T04:59:26.446Z",
+  "status": "promoted",
+  "testing": {
+    "tested_at": "2025-08-28T14:30:00.000Z",
+    "tests_passed": 12,
+    "tests_failed": 0
+  },
+  "promotion": {
+    "promoted_at": "2025-08-28T15:00:00.000Z",
+    "promoted_by": "admin@example.com"
+  }
+}

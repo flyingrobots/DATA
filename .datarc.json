@@ -1,0 +1,26 @@
+{
+  "environments": {
+    "local": {
+      "db": "postgresql://postgres:postgres@127.0.0.1:54332/postgres"
+    }
+  },
+  "test": {
+    "minimum_coverage": 80,
+    "test_timeout": 300,
+    "parallel_execution": false,
+    "output_formats": ["console", "junit", "json"],
+    "coverage_enforcement": true,
+    "excluded_functions": ["internal_*", "migration_*"],
+    "debounce_delay": 1000,
+    "auto_compile": true
+  },
+  "safety": {
+    "requireConfirmation": true,
+    "productionWarnings": true,
+    "colorOutput": true
+  },
+  "ui": {
+    "theme": "mountain",
+    "reporter": "ink"
+  }
+}

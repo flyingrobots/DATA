@@ -1,0 +1,58 @@
+{
+  "env": {
+    "node": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:promise/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "project": false
+  },
+  "rules": {
+    // TypeScript rules for async/await
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-misused-promises": "error",
+    "@typescript-eslint/await-thenable": "error",
+    
+    // Promise plugin rules
+    "promise/catch-or-return": "error",
+    "promise/no-return-wrap": "error",
+    "promise/param-names": "error",
+    "promise/always-return": "error",
+    
+    // Require await in async functions
+    "require-await": "error",
+    
+    // Additional async/await rules
+    "no-async-promise-executor": "error",
+    "no-await-in-loop": "warn",
+    "no-return-await": "error",
+    "prefer-promise-reject-errors": "error",
+    
+    // General best practices
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-console": "off",
+    "semi": ["error", "always"],
+    "quotes": ["error", "single", { "avoidEscape": true }]
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "promise"
+  ],
+  "overrides": [
+    {
+      "files": ["*.js"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-require-imports": "off"
+      }
+    }
+  ]
+}

@@ -1,0 +1,368 @@
+{
+  "project": "D.A.T.A. Test Coverage Enforcement",
+  "version": "1.0.0",
+  "description": "Parallel execution waves for optimal task completion",
+  "execution_strategy": "S.L.A.P.S. (Specialized Logical Agent Parallel System)",
+  "waves": [
+    {
+      "id": "W1",
+      "name": "Foundation",
+      "description": "Initialize all base classes and schemas",
+      "parallel_tasks": [
+        {
+          "task_id": "T001",
+          "agent": "SCHEMA",
+          "description": "Create TestRequirementAnalyzer class"
+        },
+        {
+          "task_id": "T002",
+          "agent": "SCHEMA",
+          "description": "Define test requirement schema"
+        },
+        {
+          "task_id": "T010",
+          "agent": "SCANNER",
+          "description": "Create pgTAPTestScanner class"
+        },
+        {
+          "task_id": "T020",
+          "agent": "ENFORCER",
+          "description": "Create CoverageEnforcer class"
+        },
+        {
+          "task_id": "T029",
+          "agent": "GENERATOR",
+          "description": "Create TestTemplateGenerator class"
+        },
+        {
+          "task_id": "T038",
+          "agent": "VISUALIZER",
+          "description": "Create CoverageVisualizer class"
+        }
+      ],
+      "estimated_hours": 2,
+      "critical": true
+    },
+    {
+      "id": "W2",
+      "name": "Mapping Implementation",
+      "description": "Implement all AST to test requirement mappings",
+      "parallel_tasks": [
+        {
+          "task_id": "T003",
+          "agent": "MAPPER-1",
+          "description": "Implement table test mapping"
+        },
+        {
+          "task_id": "T004",
+          "agent": "MAPPER-2",
+          "description": "Implement column test mapping"
+        },
+        {
+          "task_id": "T005",
+          "agent": "MAPPER-3",
+          "description": "Implement function test mapping"
+        },
+        {
+          "task_id": "T006",
+          "agent": "MAPPER-4",
+          "description": "Implement index test mapping"
+        },
+        {
+          "task_id": "T007",
+          "agent": "MAPPER-5",
+          "description": "Implement RLS policy test mapping"
+        },
+        {
+          "task_id": "T008",
+          "agent": "MAPPER-6",
+          "description": "Implement trigger test mapping"
+        }
+      ],
+      "estimated_hours": 3,
+      "critical": true
+    },
+    {
+      "id": "W3",
+      "name": "Scanner Implementation",
+      "description": "Implement all pgTAP test parsing capabilities",
+      "parallel_tasks": [
+        {
+          "task_id": "T011",
+          "agent": "SCANNER-1",
+          "description": "Implement test file discovery"
+        },
+        {
+          "task_id": "T012",
+          "agent": "SCANNER-2",
+          "description": "Parse has_table assertions"
+        },
+        {
+          "task_id": "T013",
+          "agent": "SCANNER-3",
+          "description": "Parse has_column assertions"
+        },
+        {
+          "task_id": "T014",
+          "agent": "SCANNER-4",
+          "description": "Parse has_function assertions"
+        },
+        {
+          "task_id": "T015",
+          "agent": "SCANNER-5",
+          "description": "Parse has_index assertions"
+        },
+        {
+          "task_id": "T016",
+          "agent": "SCANNER-6",
+          "description": "Parse policy_exists assertions"
+        },
+        {
+          "task_id": "T017",
+          "agent": "SCANNER-7",
+          "description": "Parse has_trigger assertions"
+        }
+      ],
+      "estimated_hours": 2,
+      "critical": true
+    },
+    {
+      "id": "W4",
+      "name": "Template Generation",
+      "description": "Build all test template generators",
+      "parallel_tasks": [
+        {
+          "task_id": "T030",
+          "agent": "TEMPLATE-1",
+          "description": "Build table test templates"
+        },
+        {
+          "task_id": "T031",
+          "agent": "TEMPLATE-2",
+          "description": "Build column test templates"
+        },
+        {
+          "task_id": "T032",
+          "agent": "TEMPLATE-3",
+          "description": "Build function test templates"
+        },
+        {
+          "task_id": "T033",
+          "agent": "TEMPLATE-4",
+          "description": "Build index test templates"
+        },
+        {
+          "task_id": "T034",
+          "agent": "TEMPLATE-5",
+          "description": "Build RLS test templates"
+        },
+        {
+          "task_id": "T037",
+          "agent": "TEMPLATE-6",
+          "description": "Add template CLI command"
+        }
+      ],
+      "estimated_hours": 2,
+      "critical": false
+    },
+    {
+      "id": "W5",
+      "name": "Aggregation",
+      "description": "Aggregate and process collected data",
+      "parallel_tasks": [
+        {
+          "task_id": "T009",
+          "agent": "AGGREGATOR-1",
+          "description": "Create test requirement aggregator"
+        },
+        {
+          "task_id": "T018",
+          "agent": "AGGREGATOR-2",
+          "description": "Build coverage database"
+        },
+        {
+          "task_id": "T035",
+          "agent": "AGGREGATOR-3",
+          "description": "Create test pattern library"
+        }
+      ],
+      "estimated_hours": 3,
+      "critical": true
+    },
+    {
+      "id": "W6",
+      "name": "Core Integration",
+      "description": "Integrate enforcement engine",
+      "sequential_tasks": [
+        {
+          "task_id": "T021",
+          "agent": "INTEGRATOR",
+          "description": "Implement coverage comparison"
+        },
+        {
+          "task_id": "T022",
+          "agent": "INTEGRATOR",
+          "description": "Create coverage gap analyzer"
+        },
+        {
+          "task_id": "T025",
+          "agent": "INTEGRATOR",
+          "description": "Integrate with MigrationOrchestrator"
+        },
+        {
+          "task_id": "T026",
+          "agent": "INTEGRATOR",
+          "description": "Implement deployment blocking"
+        }
+      ],
+      "estimated_hours": 4,
+      "critical": true
+    },
+    {
+      "id": "W7",
+      "name": "Enhancement Features",
+      "description": "Add reporting and visualization",
+      "parallel_tasks": [
+        {
+          "task_id": "T023",
+          "agent": "REPORTER",
+          "description": "Implement coverage reporting"
+        },
+        {
+          "task_id": "T024",
+          "agent": "CONFIG",
+          "description": "Add enforcement configuration"
+        },
+        {
+          "task_id": "T027",
+          "agent": "BYPASS",
+          "description": "Add bypass mechanism"
+        },
+        {
+          "task_id": "T028",
+          "agent": "EVENTS",
+          "description": "Create enforcement events"
+        },
+        {
+          "task_id": "T039",
+          "agent": "VISUAL-1",
+          "description": "Build coverage matrix display"
+        },
+        {
+          "task_id": "T040",
+          "agent": "VISUAL-2",
+          "description": "Add progress indicators"
+        },
+        {
+          "task_id": "T041",
+          "agent": "METRICS",
+          "description": "Create coverage metrics"
+        }
+      ],
+      "estimated_hours": 3,
+      "critical": false
+    },
+    {
+      "id": "W8",
+      "name": "Polish",
+      "description": "Final features and optimizations",
+      "parallel_tasks": [
+        {
+          "task_id": "T019",
+          "agent": "CACHE",
+          "description": "Implement coverage caching"
+        },
+        {
+          "task_id": "T036",
+          "agent": "CUSTOM",
+          "description": "Implement template customization"
+        },
+        {
+          "task_id": "T042",
+          "agent": "CLI",
+          "description": "Integrate with CliReporter"
+        },
+        {
+          "task_id": "T043",
+          "agent": "BADGE",
+          "description": "Add coverage badges"
+        }
+      ],
+      "estimated_hours": 2,
+      "critical": false
+    },
+    {
+      "id": "W9",
+      "name": "Testing",
+      "description": "Comprehensive testing phase",
+      "sequential_tasks": [
+        {
+          "task_id": "T044",
+          "agent": "TESTER",
+          "description": "Write unit tests"
+        },
+        {
+          "task_id": "T045",
+          "agent": "TESTER",
+          "description": "Write integration tests"
+        }
+      ],
+      "estimated_hours": 8,
+      "critical": true
+    },
+    {
+      "id": "W10",
+      "name": "Finalization",
+      "description": "Documentation and optimization",
+      "parallel_tasks": [
+        {
+          "task_id": "T046",
+          "agent": "DOCS",
+          "description": "Update documentation"
+        },
+        {
+          "task_id": "T047",
+          "agent": "OPTIMIZER",
+          "description": "Performance optimization"
+        }
+      ],
+      "estimated_hours": 4,
+      "critical": false
+    }
+  ],
+  "agent_types": {
+    "SCHEMA": "Schema and type definition specialist",
+    "SCANNER": "Test file parsing specialist",
+    "ENFORCER": "Coverage enforcement specialist",
+    "GENERATOR": "Template generation specialist",
+    "VISUALIZER": "UI/UX visualization specialist",
+    "MAPPER": "AST mapping specialist",
+    "TEMPLATE": "Test template specialist",
+    "AGGREGATOR": "Data aggregation specialist",
+    "INTEGRATOR": "System integration specialist",
+    "REPORTER": "Reporting specialist",
+    "TESTER": "Testing specialist",
+    "DOCS": "Documentation specialist",
+    "OPTIMIZER": "Performance optimization specialist"
+  },
+  "execution_metrics": {
+    "total_waves": 10,
+    "parallel_waves": 8,
+    "sequential_waves": 2,
+    "max_parallel_agents": 7,
+    "estimated_total_hours": 40,
+    "parallelization_savings": "63 hours (61%)"
+  },
+  "deployment_strategy": {
+    "phase1": ["W1", "W2", "W3"],
+    "phase2": ["W4", "W5"],
+    "phase3": ["W6", "W7"],
+    "phase4": ["W8", "W9", "W10"]
+  },
+  "metadata": {
+    "created": "2025-08-30",
+    "author": "Lt. Commander Data",
+    "stardate": "2025.241",
+    "note": "Deploy agents from ~/.claude/@lib/agents/ using S.L.A.P.S. orchestration"
+  }
+}

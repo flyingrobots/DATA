@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../datarc.schema.json",
+  "test": {
+    "minimum_coverage": 80,
+    "test_timeout": 300,
+    "output_formats": ["console", "json"]
+  },
+  "environments": {
+    "local": {
+      "db": "postgresql://postgres:postgres@localhost:54322/postgres"
+    }
+  }
+}

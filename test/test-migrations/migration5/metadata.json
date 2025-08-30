@@ -1,0 +1,15 @@
+{
+  "id": "20250828_123456",
+  "name": "test_migration",
+  "generated": "2025-08-29T04:59:26.446Z",
+  "status": "tested",
+  "testing": {
+    "tested_at": "2025-08-28T13:00:00.000Z",
+    "tests_passed": 5,
+    "tests_failed": 0
+  },
+  "promotion": {
+    "promoted_at": null,
+    "promoted_by": null
+  }
+}
