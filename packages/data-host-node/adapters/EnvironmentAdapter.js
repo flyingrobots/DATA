@@ -1,10 +1,12 @@
+import { EnvironmentPort } from '../../data-core/ports/index.js';
+
 /**
  * Node.js implementation of the Environment port.
  * Wraps process.env and related APIs to provide standardized environment access.
  * 
  * @class EnvironmentAdapter
  */
-export class EnvironmentAdapter {
+export class EnvironmentAdapter extends EnvironmentPort {
   /**
    * Create a new EnvironmentAdapter instance.
    * 
@@ -14,6 +16,7 @@ export class EnvironmentAdapter {
    * @param {boolean} [options.caseSensitive=true] - Case sensitive variable names
    */
   constructor(options = {}) {
+    super();
     this.defaults = options.defaults || {};
     this.prefix = options.prefix || '';
     this.caseSensitive = options.caseSensitive !== false;

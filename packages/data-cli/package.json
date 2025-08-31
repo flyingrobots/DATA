@@ -1,0 +1,19 @@
+{
+  "name": "@data/cli",
+  "version": "1.0.0",
+  "description": "D.A.T.A. CLI - Database Automation, Testing & Alignment",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "data": "./bin/data.js"
+  },
+  "dependencies": {
+    "@data/core": "file:../data-core",
+    "@data/host-node": "file:../data-host-node",
+    "@data/templates": "file:../data-templates",
+    "commander": "^12.1.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

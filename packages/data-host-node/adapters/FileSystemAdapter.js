@@ -1,5 +1,6 @@
 import { promises as fs, constants } from 'fs';
 import { dirname, resolve } from 'path';
+import { FileSystemPort } from '../../data-core/ports/index.js';
 
 /**
  * Node.js implementation of the FileSystem port.
@@ -7,7 +8,7 @@ import { dirname, resolve } from 'path';
  * 
  * @class FileSystemAdapter
  */
-export class FileSystemAdapter {
+export class FileSystemAdapter extends FileSystemPort {
   /**
    * Create a new FileSystemAdapter instance.
    * 
@@ -16,6 +17,7 @@ export class FileSystemAdapter {
    * @param {number} [options.mode=0o644] - Default file creation mode
    */
   constructor(options = {}) {
+    super();
     this.encoding = options.encoding || 'utf8';
     this.defaultMode = options.mode || 0o644;
   }

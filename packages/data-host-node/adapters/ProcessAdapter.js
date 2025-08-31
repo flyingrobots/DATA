@@ -1,5 +1,6 @@
 import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
+import { ProcessPort } from '../../data-core/ports/index.js';
 
 const execAsync = promisify(exec);
 
@@ -9,7 +10,7 @@ const execAsync = promisify(exec);
  * 
  * @class ProcessAdapter
  */
-export class ProcessAdapter {
+export class ProcessAdapter extends ProcessPort {
   /**
    * Create a new ProcessAdapter instance.
    * 
@@ -19,6 +20,7 @@ export class ProcessAdapter {
    * @param {string} [options.encoding='utf8'] - Default output encoding
    */
   constructor(options = {}) {
+    super();
     this.defaultShell = options.shell || '/bin/sh';
     this.defaultTimeout = options.timeout || 30000;
     this.encoding = options.encoding || 'utf8';
