@@ -1,0 +1,30 @@
+{
+  "name": "@data/core",
+  "version": "0.1.0",
+  "description": "Pure JavaScript logic core for D.A.T.A. with zero I/O dependencies",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./lib/*": "./lib/*.js",
+    "./ports": "./ports/index.js"
+  },
+  "keywords": [
+    "data",
+    "database",
+    "migration",
+    "sql",
+    "dependency-injection",
+    "ports-adapters"
+  ],
+  "author": "D.A.T.A. Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "index.js",
+    "lib/",
+    "ports/"
+  ]
+}
