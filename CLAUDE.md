@@ -209,3 +209,4 @@ For TypeScript projects, use `@typescript-eslint/no-floating-promises` to catch 
 - Fixed error handling in CompileCommand constructor to properly display errors
 - Added `isProd` property to start event emissions
 - Fixed MigrationCompiler config property naming (sqlDir vs rootDir)
+- CRITICAL: ABSOLUTELY ZERO TYPESCRIPT ALLOWED, CLAUDE. Very slim exceptions to this rule (Edge Function generation nonsense). For information, see @import @docs/decisions/000-javascript-not-typescript.md

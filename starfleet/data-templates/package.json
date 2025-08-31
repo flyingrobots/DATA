@@ -1,0 +1,29 @@
+{
+  "name": "@supa-data/templates",
+  "version": "1.0.0",
+  "description": "Template generation system for Supabase Edge Functions with Deno runtime",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./lib/TemplateEngine": "./lib/TemplateEngine.js",
+    "./lib/EdgeFunctionGenerator": "./lib/EdgeFunctionGenerator.js"
+  },
+  "keywords": [
+    "supabase",
+    "edge-functions",
+    "deno",
+    "templates",
+    "web-api"
+  ],
+  "author": "Flyingrobots Development Team",
+  "license": "MIT",
+  "dependencies": {},
+  "peerDependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "deno": ">=1.40.0"
+  }
+}

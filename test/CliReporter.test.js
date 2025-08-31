@@ -7,7 +7,7 @@ import { createRequire } from 'module';
 import { EventEmitter } from 'events';
 
 const require = createRequire(import.meta.url);
-const CliReporter = require('../src/reporters/CliReporter');
+const CliReporter = require('../packages/data-cli/src/reporters/CliReporter');
 const { CommandEvent, ProgressEvent, ErrorEvent, SuccessEvent, WarningEvent } = require('../src/lib/events/CommandEvents');
 
 describe('CliReporter', () => {

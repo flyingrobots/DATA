@@ -9,8 +9,8 @@
 
 const path = require('path');
 const { performance } = require('perf_hooks');
-const RunCommand = require('../src/commands/test/RunCommand');
-const CacheCommand = require('../src/commands/test/CacheCommand');
+const RunCommand = require('../packages/data-cli/src/commands/test/RunCommand');
+const CacheCommand = require('../packages/data-cli/src/commands/test/CacheCommand');
 
 /**
  * Performance validation test suite

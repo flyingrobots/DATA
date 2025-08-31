@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import Command from '../src/lib/Command.js';
+import Command from '../packages/data-cli/src/lib/Command.js';
 import {
   ProgressEvent,
   WarningEvent,

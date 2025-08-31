@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import CommandRouter from '../src/lib/CommandRouter.js';
+import CommandRouter from '../packages/data-cli/src/lib/CommandRouter.js';
 import { z } from 'zod';
 
 describe('CommandRouter', () => {

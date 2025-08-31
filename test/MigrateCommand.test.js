@@ -89,7 +89,7 @@ describe('MigrateCommand', () => {
     }
 
     // Now import MigrateCommand after all mocks are set up
-    const module = await import('../src/commands/db/MigrateCommand.js');
+    const module = await import('../packages/data-cli/src/commands/db/MigrateCommand.js');
     MigrateCommand = module.default;
     command = new MigrateCommand();
   });
