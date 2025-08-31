@@ -21,6 +21,9 @@ import {
   SuccessEvent,
   WarningEvent
 } from '../events/CommandEvents.js';
+import MemoryMonitor from './MemoryMonitor.js';
+import StreamingCoverageDatabase from './StreamingCoverageDatabase.js';
+import BatchProcessor from './BatchProcessor.js';
 
 /**
  * @typedef {Object} TestAssertion
@@ -164,6 +167,16 @@ class pgTAPTestScanner extends EventEmitter {
      * @type {AbortController} For cancelling operations
      */
     this.abortController = new AbortController();
+    
+    /**
+     * @type {StreamingCoverageDatabase} Memory-aware coverage database
+     */
+    this.streamingDB = null;
+    
+    /**
+     * @type {BatchProcessor} Batch processing utility
+     */
+    this.batchProcessor = null;
     
     /**
      * @type {Map<string, RegExp>} pgTAP assertion patterns
@@ -1956,7 +1969,7 @@ class pgTAPTestScanner extends EventEmitter {
     this.emit('progress', new ProgressEvent('Building coverage database with memory management...'));
     
     // Check if we should use streaming mode based on file count and memory
-    const initialMemory = this._getCurrentMemoryUsage();
+    const initialMemory = MemoryMonitor.getMemoryUsage();
     const shouldStream = this.options.enableStreaming && 
                         (this.testFiles.length > this.options.batchSize || 
                          initialMemory.heapUsed > (this.options.maxMemoryMB * 0.5));
@@ -1981,8 +1994,8 @@ class pgTAPTestScanner extends EventEmitter {
       
       // Check memory every 10 files
       if (i % 10 === 0) {
-        const memUsage = this._getCurrentMemoryUsage();
-        if (this._shouldTriggerCleanup(memUsage.heapUsed)) {
+        const memUsage = MemoryMonitor.getMemoryUsage();
+        if (MemoryMonitor.shouldTriggerCleanup(memUsage.heapUsed, this.options.maxMemoryMB)) {
           this._performMemoryCleanup();
         }
       }
@@ -2011,43 +2024,33 @@ class pgTAPTestScanner extends EventEmitter {
     this.memoryState.streamingMode = true;
     const database = this._createEmptyDatabase();
     
-    // Process in batches
-    const batchSize = this.options.batchSize;
-    const totalBatches = Math.ceil(this.testFiles.length / batchSize);
-    
-    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
-      const start = batchIndex * batchSize;
-      const end = Math.min(start + batchSize, this.testFiles.length);
-      const batch = this.testFiles.slice(start, end);
-      
-      // Check memory before each batch
-      const memUsage = this._getCurrentMemoryUsage();
-      if (this._shouldTriggerCleanup(memUsage.heapUsed)) {
-        this._performMemoryCleanup();
+    // Use BatchProcessor for memory-managed processing
+    await this.batchProcessor.processBatches(
+      this.testFiles,
+      async (batch, batchIndex) => {
+        // Check if streaming DB should limit objects
+        if (this.streamingDB) {
+          for (const testFile of batch) {
+            if (!this.streamingDB.addObject('files', testFile.filePath, testFile)) {
+              this.emit('warning', {
+                type: 'memory_limit',
+                message: `File processing limit reached at batch ${batchIndex}`
+              });
+              break;
+            }
+          }
+        }
+        
+        // Process batch files
+        for (const testFile of batch) {
+          this._processFileForDatabase(testFile, database);
+        }
+        
+        this.memoryState.batchesProcessed++;
+        
+        return batch.map(f => f.filePath);
       }
-
-      // Process batch
-      for (const testFile of batch) {
-        this._processFileForDatabase(testFile, database);
-      }
-
-      this.memoryState.batchesProcessed++;
-
-      // Emit progress
-      this.emit('progress', {
-        type: 'batch_progress',
-        batch: batchIndex + 1,
-        totalBatches,
-        filesProcessed: end,
-        totalFiles: this.testFiles.length,
-        memoryUsage: memUsage
-      });
-
-      // Yield to event loop for large batches
-      if (batch.length > 50) {
-        await new Promise(resolve => setImmediate(resolve));
-      }
-    }
+    );
 
     this._identifyCoverageGaps(database);
     this.coverageDatabase = database;
@@ -2877,6 +2880,10 @@ class pgTAPTestScanner extends EventEmitter {
    * @private
    */
   _initializeMemoryMonitoring() {
+    // Initialize streaming database and batch processor
+    this.streamingDB = new StreamingCoverageDatabase(this.options);
+    this.batchProcessor = new BatchProcessor(this, this.options);
+    
     // Set up periodic memory monitoring
     if (this.options.cleanupInterval > 0) {
       this.memoryMonitoringInterval = setInterval(() => {
@@ -2895,32 +2902,23 @@ class pgTAPTestScanner extends EventEmitter {
    * @private
    */
   _checkMemoryUsage() {
-    const usage = process.memoryUsage();
-    const currentMB = Math.round(usage.heapUsed / 1024 / 1024);
-    
-    this.memoryState.currentUsageMB = currentMB;
-    this.memoryState.maxUsageMB = Math.max(this.memoryState.maxUsageMB, currentMB);
+    const usage = MemoryMonitor.getMemoryUsage();
+    this.memoryState.currentUsageMB = usage.heapUsed;
+    this.memoryState.maxUsageMB = Math.max(this.memoryState.maxUsageMB, usage.heapUsed);
 
-    if (this._shouldTriggerCleanup(currentMB)) {
+    if (MemoryMonitor.shouldTriggerCleanup(usage.heapUsed, this.options.maxMemoryMB)) {
       this._performMemoryCleanup();
     }
 
     // Emit memory status
     this.emit('memory_status', {
-      current: currentMB,
+      current: usage.heapUsed,
       max: this.memoryState.maxUsageMB,
       threshold: this.options.maxMemoryMB * 0.8,
       streamingMode: this.memoryState.streamingMode
     });
   }
 
-  /**
-   * Check if memory cleanup should be triggered
-   * @private
-   */
-  _shouldTriggerCleanup(currentMB) {
-    return currentMB > (this.options.maxMemoryMB * 0.8);
-  }
 
   /**
    * Perform memory cleanup operations
@@ -2942,18 +2940,20 @@ class pgTAPTestScanner extends EventEmitter {
     // Limit object accumulation
     this._limitObjectAccumulation();
 
-    // Force garbage collection if enabled and available
-    if (this.options.enableGC && global.gc) {
-      global.gc();
-      this.memoryState.gcCount++;
+    // Force garbage collection if enabled
+    if (this.options.enableGC) {
+      const gcResult = MemoryMonitor.forceGC();
+      if (gcResult) {
+        this.memoryState.gcCount++;
+      }
     }
 
     this.memoryState.lastCleanup = Date.now();
     
     this.emit('cleanup', {
       type: 'memory_cleanup',
-      memoryUsage: this._getCurrentMemoryUsage(),
-      gcPerformed: this.options.enableGC && global.gc
+      memoryUsage: MemoryMonitor.getMemoryUsage(),
+      gcPerformed: this.options.enableGC && MemoryMonitor.forceGC()
     });
   }
 
@@ -2988,19 +2988,6 @@ class pgTAPTestScanner extends EventEmitter {
     });
   }
 
-  /**
-   * Get current memory usage
-   * @private
-   */
-  _getCurrentMemoryUsage() {
-    const usage = process.memoryUsage();
-    return {
-      rss: Math.round(usage.rss / 1024 / 1024), // MB
-      heapUsed: Math.round(usage.heapUsed / 1024 / 1024), // MB
-      heapTotal: Math.round(usage.heapTotal / 1024 / 1024), // MB
-      external: Math.round(usage.external / 1024 / 1024), // MB
-    };
-  }
 
   /**
    * Cleanup resources
@@ -3027,7 +3014,8 @@ class pgTAPTestScanner extends EventEmitter {
   getMemoryStats() {
     return {
       ...this.memoryState,
-      currentUsage: this._getCurrentMemoryUsage(),
+      currentUsage: MemoryMonitor.getMemoryUsage(),
+      streamingDBStats: this.streamingDB?.getStats() || null,
       options: {
         maxMemoryMB: this.options.maxMemoryMB,
         batchSize: this.options.batchSize,

@@ -1,8 +1,8 @@
 # DATA — Database Automation, Testing, and Alignment 🖖
 
-> [!warning] **Work in Progress**
-> This project is actively in pre-release, ***use at your own risk!***
-> **See** [/issues/README.md](the issues README) to get a sense of current progress.
+> [!warning]- **Work in Progress**  
+> This project is actively in pre-release, ***use at your own risk!***  
+> **See** [/issues/README.md](the issues README) to get a sense of current progress.  
 > **Recommended:** Await a public release before using.
 
 **Golden SQL in git → deterministic migrations → tested → safe to deploy. Zero drift.**
@@ -185,9 +185,36 @@ $ data align production
 | **Rollback story** | ✅ Tag-based | ⚠️ Down scripts | ⚠️ Rollback tags | ❌ Manual |
 | **TUI preview** | ✅ LCARS mode | ❌ | ❌ | ❌ |
 
-## 9. File Structure
+## 9. Project Structure
+
+### SQL Directory Organization (Required)
+
+Your `/sql/` directory MUST follow this numbered structure per Supa Fleet Directive 34.1:
+
+```
+/sql/
+  001_extensions/   -- PostgreSQL extensions (uuid-ossp, pgcrypto, etc.)
+  002_schemas/      -- Schema definitions  
+  003_types/        -- Custom types and enums
+  004_tables/       -- Table definitions
+  005_functions/    -- Stored procedures and functions
+  006_views/        -- Views and materialized views
+  007_policies/     -- RLS (Row Level Security) policies
+  008_triggers/     -- Database triggers
+  009_indexes/      -- Index definitions
+  010_data/         -- Seed/initial data
+```
+
+**The numerical prefix is CRITICAL** - it controls compilation order:
+- Extensions must exist before tables use them
+- Schemas before tables are placed in them
+- Tables before foreign keys reference them
+- Functions before triggers call them
+
+### Operational Directory
 
 D.A.T.A. creates a `.data/` directory for operational files:
+
 ```
 .data/
   cache/    -- Cached data for performance
@@ -239,6 +266,7 @@ data status --personality tng
 ## Advanced Features
 
 ### Drift Detection
+
 ```bash
 data analyze production
 # Shows exact differences between repo and production
@@ -246,6 +274,7 @@ data analyze production
 ```
 
 ### Migration Preview
+
 ```bash
 data automate --dry-run
 # See exactly what SQL will be generated
@@ -253,6 +282,7 @@ data automate --dry-run
 ```
 
 ### Custom Test Runners
+
 ```json
 {
   "test": {
@@ -264,6 +294,7 @@ data automate --dry-run
 ```
 
 ### Environment-Specific Configuration
+
 ```json
 {
   "environments": {
@@ -279,11 +310,13 @@ data automate --dry-run
 ## Installation
 
 ### From NPM
+
 ```bash
 npm install -g @starfleet/data
 ```
 
 ### From Source
+
 ```bash
 git clone https://github.com/starfleet/supa-data.git
 cd supa-data
@@ -292,6 +325,7 @@ npm link
 ```
 
 ### Requirements
+
 - Node.js >= 18.0.0
 - Git
 - PostgreSQL or Supabase project
@@ -300,6 +334,7 @@ npm link
 ## Troubleshooting
 
 ### "Working directory not clean"
+
 ```bash
 git status  # Check what's modified
 git add . && git commit -m "Save work"
@@ -308,11 +343,13 @@ git stash
 ```
 
 ### "Behind origin/main"
+
 ```bash
 git pull origin main
 ```
 
 ### "Tests failing"
+
 ```bash
 data test --verbose
 # Fix the failing tests
