@@ -1,5 +1,5 @@
 {
-  "name": "@supa-data/templates",
+  "name": "@starfleet/templates",
   "version": "1.0.0",
   "description": "Template generation system for Supabase Edge Functions with Deno runtime",
   "type": "module",

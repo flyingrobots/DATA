@@ -75,17 +75,17 @@ class Config {
       path.join(os.homedir(), '.datarc.json'),
       path.join(os.homedir(), '.datarc')
     ].filter(Boolean);
-    
+
     // Try to load config from each path
     const configPromises = paths.map(async (configFile) => {
       try {
         const content = await fs.readFile(configFile, 'utf8');
         const rawConfig = JSON.parse(content);
-        
+
         // Create new Config with defaults
         const config = new Config(null, envVars);
         const defaults = config.getDefaultConfig();
-        
+
         // Validate and merge with Zod
         const parseResult = safeParsedataConfig(rawConfig);
         if (parseResult.success) {
@@ -100,21 +100,21 @@ class Config {
           // Fall back to manual merge for partial configs
           config.data = config.merge(defaults, rawConfig);
         }
-        
+
         return config;
       } catch {
         // Continue to next path
         return null;
       }
     });
-    
+
     const configs = await Promise.all(configPromises);
     const validConfig = configs.find(config => config !== null);
-    
+
     if (validConfig) {
       return validConfig;
     }
-    
+
     // Return default config if no file found
     return new Config(null, envVars);
   }
@@ -124,7 +124,7 @@ class Config {
    */
   merge(defaults, overrides) {
     const result = { ...defaults };
-    
+
     for (const key in overrides) {
       if (typeof overrides[key] === 'object' && !Array.isArray(overrides[key]) && overrides[key] !== null) {
         result[key] = this.merge(defaults[key] || {}, overrides[key]);
@@ -132,7 +132,7 @@ class Config {
         result[key] = overrides[key];
       }
     }
-    
+
     return result;
   }
 
@@ -148,19 +148,19 @@ class Config {
    */
   async save(configPath = null) {
     const filePath = configPath || path.join(process.cwd(), '.datarc.json');
-    
+
     // Validate before saving
     const parseResult = safeParsedataConfig(this.data);
     if (!parseResult.success) {
       throw new Error(`Cannot save invalid configuration: ${parseResult.error.message}`);
     }
-    
+
     // Add schema reference for IDE support
     const configWithSchema = {
       $schema: './datarc.schema.json',
       ...parseResult.data
     };
-    
+
     const content = JSON.stringify(configWithSchema, null, 2);
     await fs.writeFile(filePath, content, 'utf8');
   }
@@ -171,7 +171,7 @@ class Config {
   get(path) {
     const keys = path.split('.');
     let value = this.data;
-    
+
     for (const key of keys) {
       if (value && typeof value === 'object') {
         value = value[key];
@@ -179,7 +179,7 @@ class Config {
         return undefined;
       }
     }
-    
+
     return value;
   }
 
@@ -190,14 +190,14 @@ class Config {
     const keys = path.split('.');
     const lastKey = keys.pop();
     let target = this.data;
-    
+
     for (const key of keys) {
       if (!target[key] || typeof target[key] !== 'object') {
         target[key] = {};
       }
       target = target[key];
     }
-    
+
     target[lastKey] = value;
   }
 

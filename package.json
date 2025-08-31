@@ -4,6 +4,7 @@
   "description": "🖖 D.A.T.A. - Database Automation, Testing, and Alignment for PostgreSQL/Supabase",
   "type": "module",
   "private": true,
+  "packageManager": "pnpm@9.0.0",
   "workspaces": [
     "starfleet/*"
   ],

@@ -1,13 +1,17 @@
 /**
  * OutputConfig - Centralized path configuration for data
- * 
+ *
  * A proper class with typed properties for all paths.
  * Uses dependency injection - no singletons!
  */
 
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
 
+/**
+ * OutputConfig class
+ * @class
+ */
 class OutputConfig {
   constructor(
     configPath = null,
@@ -34,7 +38,7 @@ class OutputConfig {
     this.tempDir = null;
     this.logFile = null;
     this.errorLogFile = null;
-    
+
     // Build configuration from various sources
     this._setDefaults();
     this._applyAutoDetection();
@@ -58,7 +62,7 @@ class OutputConfig {
 
   _setDefaults() {
     const cwd = process.cwd();
-    
+
     this.projectRoot = cwd;
     this.supabaseDir = path.join(cwd, 'supabase');
     this.migrationsDir = path.join(cwd, 'supabase', 'migrations');
@@ -77,7 +81,7 @@ class OutputConfig {
 
   _applyAutoDetection() {
     const cwd = process.cwd();
-    
+
     // Check if we're inside a supabase directory
     if (fs.existsSync(path.join(cwd, 'config.toml'))) {
       this.supabaseDir = cwd;
@@ -85,7 +89,7 @@ class OutputConfig {
       this._updateRelativePaths();
       return;
     }
-    
+
     // Check if we have a supabase subdirectory
     if (fs.existsSync(path.join(cwd, 'supabase', 'config.toml'))) {
       this.projectRoot = cwd;
@@ -93,23 +97,23 @@ class OutputConfig {
       this._updateRelativePaths();
       return;
     }
-    
+
     // Search up the tree for a project root
     let searchDir = cwd;
     let depth = 0;
     const maxDepth = 5;
-    
+
     while (depth < maxDepth) {
       const parentDir = path.dirname(searchDir);
       if (parentDir === searchDir) break;
-      
+
       if (fs.existsSync(path.join(parentDir, 'supabase', 'config.toml'))) {
         this.projectRoot = parentDir;
         this.supabaseDir = path.join(parentDir, 'supabase');
         this._updateRelativePaths();
         return;
       }
-      
+
       searchDir = parentDir;
       depth++;
     }
@@ -144,18 +148,18 @@ class OutputConfig {
 
   _loadConfigFile(configPath) {
     const configFile = configPath || this.dataConfig;
-    
+
     if (!fs.existsSync(configFile)) {
       return;
     }
-    
+
     try {
       const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-      
+
       if (config.paths) {
         Object.assign(this, config.paths);
       }
-      
+
       if (config.directories) {
         Object.assign(this, config.directories);
       }
@@ -189,7 +193,7 @@ class OutputConfig {
       'dataConfig', 'buildDir', 'cacheDir', 'tempDir',
       'logFile', 'errorLogFile'
     ];
-    
+
     for (const prop of pathProps) {
       if (this[prop] && typeof this[prop] === 'string' && !path.isAbsolute(this[prop])) {
         this[prop] = path.resolve(this[prop]);
@@ -204,7 +208,7 @@ class OutputConfig {
       this.tempDir,
       this.migrationsDir
     ];
-    
+
     for (const dir of createIfMissing) {
       if (dir && !fs.existsSync(dir)) {
         try {
@@ -229,7 +233,7 @@ class OutputConfig {
   debug() {
     console.log('\nOutputConfig Paths:');
     console.log('═'.repeat(60));
-    
+
     const categories = {
       'Core': ['projectRoot', 'supabaseDir'],
       'Supabase': ['migrationsDir', 'testsDir', 'sqlDir', 'functionsDir', 'seedDir'],
@@ -237,7 +241,7 @@ class OutputConfig {
       'Output': ['buildDir', 'cacheDir', 'tempDir'],
       'Logs': ['logFile', 'errorLogFile']
     };
-    
+
     for (const [category, props] of Object.entries(categories)) {
       console.log(`\n${category}:`);
       for (const prop of props) {
@@ -248,9 +252,9 @@ class OutputConfig {
         console.log(`  ${mark} ${prop}: ${display}`);
       }
     }
-    
+
     console.log('\n' + '═'.repeat(60) + '\n');
   }
 }
 
-module.exports = OutputConfig;
+export default OutputConfig;

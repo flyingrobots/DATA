@@ -8,8 +8,8 @@
     "data": "./src/index.js"
   },
   "dependencies": {
-    "@starfleet/data-core": "^1.0.0",
-    "@starfleet/data-host-node": "^1.0.0",
+    "@starfleet/data-core": "workspace:*",
+    "@starfleet/data-host-node": "workspace:*",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.11.0",
     "commander": "^12.0.0",

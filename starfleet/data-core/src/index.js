@@ -1,5 +1,5 @@
 /**
- * @supa-data/core - Pure JavaScript Logic Core
+ * @starfleet/core - Pure JavaScript Logic Core
  * 
  * This module exports all the pure business logic classes and utilities
  * that have zero I/O dependencies. Perfect for testing, server-side rendering,
