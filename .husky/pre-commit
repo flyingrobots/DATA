@@ -1,104 +1,33 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -euo pipefail
 
-# D.A.T.A. Pre-commit Hook with JSDoc Generation
-# 1. Generates JSDoc for staged JavaScript files
-# 2. Runs ESLint checks for async/await issues
+echo "🖖 D.A.T.A. pre-commit"
 
-echo "🖖 D.A.T.A. Pre-commit Hook - Ensuring code quality and documentation..."
+GIT_ROOT="$(git rev-parse --show-toplevel)"
+cd "$GIT_ROOT"
 
-# Get the root directory of the git repository
-GIT_ROOT=$(git rev-parse --show-toplevel)
+# Only staged JS/TS files in repo (not node_modules / dist)
+STAGED="$(git diff --cached --name-only --diff-filter=ACM \
+  | grep -E '\.(mjs|cjs|js|ts|tsx)$' \
+  | grep -Ev '(^|/)(node_modules|dist|build)/' || true)"
 
-# Change to the git root directory
-cd "$GIT_ROOT" || exit 1
-
-# Get list of staged JavaScript files (exclude node_modules and only include src/, bin/, scripts/)
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.js$' | grep -E '^(src/|bin/|scripts/)' | grep -v node_modules)
-
-if [ -z "$STAGED_FILES" ]; then
-  echo "ℹ️  No JavaScript files to process"
+if [ -z "$STAGED" ]; then
+  echo "✅ No JS/TS staged — skipping lint"
   exit 0
 fi
 
-echo "📁 Processing files:"
-echo "$STAGED_FILES" | sed 's/^/  - /'
-echo ""
-
-# Step 1: Generate JSDoc for staged files
-echo "🤖 Generating JSDoc documentation..."
-
-# Check if JSDoc generation should be skipped
-if [ "$SKIP_JSDOC" = "true" ]; then
-  echo "⏭️  Skipping JSDoc generation (SKIP_JSDOC=true)"
+# Prefer pnpm if available, otherwise fallback
+if command -v pnpm >/dev/null 2>&1; then
+  echo "🔧 Linting with pnpm exec eslint"
+  pnpm exec eslint --max-warnings=0 $STAGED
 else
-  # Convert file list to space-separated arguments for the JSDoc generator
-  JSDOC_FILES=""
-  for file in $STAGED_FILES; do
-    JSDOC_FILES="$JSDOC_FILES $file"
-  done
-
-  # Run JSDoc generation
-  node "$GIT_ROOT/scripts/jsdoc/generate-jsdoc.js" $JSDOC_FILES
-
-  JSDOC_EXIT=$?
-
-  if [ $JSDOC_EXIT -eq 0 ]; then
-    echo "✅ JSDoc generation completed"
-    
-    # Re-stage files that may have been updated with JSDoc
-    for file in $STAGED_FILES; do
-      if [ -f "$file" ]; then
-        git add "$file"
-      fi
-    done
-  else
-    echo "⚠️  JSDoc generation had issues, but continuing with commit"
-    echo "💡 Tip: Set SKIP_JSDOC=true to skip JSDoc generation"
-  fi
+  echo "🔧 Linting with npx eslint"
+  npx eslint --max-warnings=0 $STAGED
 fi
 
-echo ""
+# Optional: run related tests (uncomment once tests exist)
+# if command -v pnpm >/dev/null 2>&1; then
+#   pnpm exec vitest --run --passWithNoTests --findRelatedTests $STAGED
+# fi
 
-# Step 2: Run ESLint checks
-echo "🔍 Running ESLint checks..."
-
-# Run ESLint on staged files
-npx eslint $STAGED_FILES
-
-ESLINT_EXIT=$?
-
-if [ $ESLINT_EXIT -eq 0 ]; then
-  echo "✅ ESLint checks passed!"
-else
-  echo "❌ ESLint found issues. Please fix them before committing."
-  echo ""
-  echo "💡 Tip: You can run 'npm run lint:fix' to auto-fix some issues"
-  echo "💡 Tip: Set SKIP_JSDOC=true if JSDoc generation is causing issues"
-  exit 1
-fi
-
-# Step 3: Check specifically for async/await issues
-echo ""
-echo "🔍 Checking for floating promises and async issues..."
-
-# Look for common async/await problems in staged files
-for file in $STAGED_FILES; do
-  # Check for .then() without catch
-  if grep -E '\.then\([^)]*\)[^.]*(;|$)' "$file" > /dev/null 2>&1; then
-    echo "⚠️  Warning: $file may have unhandled promises (.then without .catch)"
-  fi
-  
-  # Check for async functions without await
-  if grep -E 'async\s+[^{]*\{[^}]*\}' "$file" | grep -v await > /dev/null 2>&1; then
-    echo "⚠️  Warning: $file may have async functions without await"
-  fi
-done
-
-echo ""
-echo "🎯 Pre-commit checks complete! Code quality and documentation ensured."
-echo ""
-echo "💡 To skip JSDoc generation: SKIP_JSDOC=true git commit"
-echo "💡 To manually generate JSDoc: npm run jsdoc:generate"
-echo "💡 To generate JSDoc for specific files: npm run jsdoc:files -- file1.js file2.js"
-
-exit 0
+echo "✅ Hook OK"

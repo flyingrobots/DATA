@@ -11,6 +11,11 @@
     "./ports/*": "./src/ports/*",
     "./domain/*": "./src/domain/*"
   },
+  "scripts": {
+    "lint": "eslint \"src/**/*.{js,mjs,cjs,ts,tsx}\"",
+    "test": "vitest --run --passWithNoTests",
+    "build": "echo \"No build needed for pure JS\""
+  },
   "keywords": [
     "data",
     "database",

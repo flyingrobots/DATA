@@ -7,6 +7,11 @@
   "bin": {
     "data": "./src/index.js"
   },
+  "scripts": {
+    "lint": "eslint \"src/**/*.{js,mjs,cjs,ts,tsx}\"",
+    "test": "vitest --run --passWithNoTests",
+    "build": "echo \"No build needed for pure JS\""
+  },
   "dependencies": {
     "@starfleet/data-core": "workspace:*",
     "@starfleet/data-host-node": "workspace:*",

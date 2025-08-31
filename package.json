@@ -11,9 +11,9 @@
   "scripts": {
     "postinstall": "./scripts/setup/post-install.sh",
     "build": "pnpm -r --filter @starfleet/* run build",
-    "lint": "eslint src/**/*.js",
-    "lint:fix": "eslint src/**/*.js --fix",
-    "test": "vitest",
+    "lint": "pnpm -r --filter @starfleet/* run lint",
+    "lint:fix": "pnpm -r --filter @starfleet/* run lint --fix",
+    "test": "pnpm -r --filter @starfleet/* run test",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage",
     "verify": "pnpm -r --filter @starfleet/* run lint && pnpm -r --filter @starfleet/* run test && pnpm -r --filter @starfleet/* run build",
