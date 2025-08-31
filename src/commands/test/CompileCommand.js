@@ -37,27 +37,10 @@ class CompileCommand extends BuildCommand {
       // Validate test directory structure
       await this.validateTestDirectory();
       
-      // Load the migration compiler
-      const compilerPath = path.resolve(__dirname, '../../../build/compile-migration.js');
-      const { MigrationCompiler } = require(compilerPath);
-      
-      // Configure compiler for test directory
-      const testCompiler = new MigrationCompiler({
-        sqlDir: this.inputDir,  // tests directory
-        outputDir: this.outputDir,  // migrations directory
-        directories: [], // Use files directly from tests directory
-        validateSql: true // Enable validation for test files
-      });
-      
-      // Attach event listeners for progress reporting
-      this.attachTestCompilerEvents(testCompiler);
-      
-      // Override the compiler methods for test-specific behavior
-      await this.configureTestCompiler(testCompiler);
-      
-      // Run compilation
-      this.progress('Compiling pgTAP test files...');
-      const result = await this.compileTestDirectory(testCompiler);
+      // TODO: Implement native test compilation
+      // The legacy build system has been removed. This command needs to be reimplemented
+      // using a native test compiler approach
+      throw new Error('Test compilation not yet implemented. Legacy build system has been removed.');
       
       // Validate pgTAP function signatures
       await this.validatePgTapFunctions(result.outputFile);

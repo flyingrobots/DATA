@@ -22,8 +22,6 @@
     "migrate:history": "data db migrate history",
     "migrate:verify": "data db migrate verify",
     "migrate:squash": "data db migrate squash",
-    "db:diff": "node build/differ.js",
-    "db:compile": "node build/compile-migration.js",
     "migrate:dev": "npm run migrate:generate && npm run migrate:test",
     "migrate:prod": "npm run migrate:test && npm run migrate:promote",
     "migrate:ci": "npm run migrate:verify && npm run migrate:test"
