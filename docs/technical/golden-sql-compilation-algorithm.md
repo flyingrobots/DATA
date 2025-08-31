@@ -13,29 +13,29 @@ The Golden SQL algorithm is the SECRET SAUCE that makes D.A.T.A. special. It tre
 "Golden SQL" refers to the authoritative SQL files stored in `/sql/` that define your ENTIRE database schema. These files are:
 
 1. **The Single Source of Truth** - What's in Git IS the database
-2. **Organized in Numbered Directories** - Controls compilation order
+2. **Organized in Named Directories** - D.A.T.A. handles compilation order
 3. **Version Controlled** - Every change is tracked
 4. **Deterministic** - Same input always produces same output
 
-## Directory Structure (Supa Fleet Directive 34.1)
+## Directory Structure
 
-Per Star Fleet (Supa Fleet) protocol, SQL files MUST be organized as:
+SQL files are organized in named directories:
 
 ```
 /sql/
-  001_extensions/     -- PostgreSQL extensions (MUST come first)
-  002_schemas/        -- Schema definitions
-  003_types/          -- Custom types and enums  
-  004_tables/         -- Table definitions
-  005_functions/      -- Stored procedures
-  006_views/          -- Views and materialized views
-  007_policies/       -- RLS policies
-  008_triggers/       -- Triggers
-  009_indexes/        -- Indexes
-  010_data/           -- Seed data
+  extensions/     -- PostgreSQL extensions
+  schemas/        -- Schema definitions
+  types/          -- Custom types and enums  
+  tables/         -- Table definitions
+  functions/      -- Stored procedures
+  views/          -- Views and materialized views
+  policies/       -- RLS policies
+  triggers/       -- Triggers
+  indexes/        -- Indexes
+  data/           -- Seed data
 ```
 
-This numerical ordering is CRITICAL because it ensures:
+D.A.T.A. internally processes these in the correct order to ensure:
 - Extensions are created before they're used
 - Schemas exist before tables are placed in them
 - Tables exist before foreign keys reference them
@@ -47,7 +47,7 @@ This numerical ordering is CRITICAL because it ensures:
 
 The `MigrationCompiler` concatenates all SQL files into a single "compiled" migration:
 
-1. **Read numbered directories** in order (001, 002, 003...)
+1. **Read directories** in dependency-resolved order (extensions, schemas, types...)
 2. **Process each directory**:
    - Find all `.sql` files recursively
    - Sort them alphabetically for consistency
@@ -101,7 +101,7 @@ This enables:
    data init
    
    # Write your SQL files
-   vim sql/004_tables/users.sql
+   vim sql/tables/users.sql
    ```
 
 2. **First Compilation** (Full):

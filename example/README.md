@@ -4,32 +4,32 @@ This directory demonstrates the required structure for a D.A.T.A.-managed databa
 
 ## SQL Directory Structure
 
-The `/sql/` directory follows Supa Fleet Directive 34.1 with numbered directories that control compilation order:
+The `/sql/` directory uses standard directory names that D.A.T.A. processes in the correct order:
 
 ```
 sql/
-├── 001_extensions/   # PostgreSQL extensions (must come first)
-├── 002_schemas/      # Schema definitions
-├── 003_types/        # Custom types and enums
-├── 004_tables/       # Table definitions
-├── 005_functions/    # Stored procedures and functions
-├── 006_views/        # Views and materialized views
-├── 007_policies/     # Row Level Security policies
-├── 008_triggers/     # Database triggers
-├── 009_indexes/      # Index definitions
-└── 010_data/         # Seed/initial data
+├── extensions/   # PostgreSQL extensions
+├── schemas/      # Schema definitions
+├── types/        # Custom types and enums
+├── tables/       # Table definitions
+├── functions/    # Stored procedures and functions
+├── views/        # Views and materialized views
+├── policies/     # Row Level Security policies
+├── triggers/     # Database triggers
+├── indexes/      # Index definitions
+└── data/         # Seed/initial data
 ```
 
 ## Example SQL Files
 
 Place your SQL files in the appropriate directories:
 
-### 001_extensions/uuid.sql
+### extensions/uuid.sql
 ```sql
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 ```
 
-### 004_tables/users.sql
+### tables/users.sql
 ```sql
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 ```
 
-### 007_policies/users_rls.sql
+### policies/users_rls.sql
 ```sql
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
@@ -69,9 +69,23 @@ CREATE POLICY "Users can view own record"
    data align production
    ```
 
+## Demo Scripts
+
+### functions-demo.sh
+A demonstration script showing Edge Functions integration with D.A.T.A.:
+```bash
+./functions-demo.sh
+```
+
+This script demonstrates:
+- Validating Edge Functions
+- Deploying functions alongside migrations
+- Checking deployment status
+- Production deployment with safety gates
+
 ## Important Notes
 
-- The numerical prefix (001, 002, etc.) is **REQUIRED** and controls order
+- Directory names should match the standard names (extensions, tables, etc.)
+- D.A.T.A. automatically handles the compilation order
 - Each directory should contain related SQL files
 - Files within a directory are processed alphabetically
-- Dependencies must be resolved by the directory ordering

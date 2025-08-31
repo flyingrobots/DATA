@@ -12,19 +12,33 @@ const path = require('path');
 const { glob } = require('glob');
 
 /**
- * Expected directory structure (from USS Purrfect Paws spec):
+ * Expected directory structure with internal ordering:
  * /sql/
- *   001_extensions/   -- PostgreSQL extensions
- *   002_schemas/      -- Schema definitions  
- *   003_types/        -- Custom types and enums
- *   004_tables/       -- Table definitions
- *   005_functions/    -- Stored procedures
- *   006_views/        -- Views and materialized views
- *   007_policies/     -- RLS policies
- *   008_triggers/     -- Triggers
- *   009_indexes/      -- Indexes
- *   010_data/         -- Seed data
+ *   extensions/   -- PostgreSQL extensions (processed first)
+ *   schemas/      -- Schema definitions  
+ *   types/        -- Custom types and enums
+ *   tables/       -- Table definitions
+ *   functions/    -- Stored procedures
+ *   views/        -- Views and materialized views
+ *   policies/     -- RLS policies
+ *   triggers/     -- Triggers
+ *   indexes/      -- Indexes
+ *   data/         -- Seed data (processed last)
  */
+
+// Internal processing order - ensures dependencies are resolved
+const DIRECTORY_ORDER = [
+  'extensions',
+  'schemas',
+  'types',
+  'tables',
+  'functions',
+  'views',
+  'policies',
+  'triggers',
+  'indexes',
+  'data'
+];
 class MigrationCompiler extends EventEmitter {
   constructor(config = {}) {
     super();
@@ -81,8 +95,8 @@ class MigrationCompiler extends EventEmitter {
       // Write header
       await this.writeHeader(outputFile);
       
-      // Process numbered directories in order
-      const directories = await this.getNumberedDirectories();
+      // Process directories in dependency-resolved order
+      const directories = await this.getOrderedDirectories();
       
       for (const dir of directories) {
         await this.processDirectory(dir, outputFile);
@@ -141,33 +155,49 @@ class MigrationCompiler extends EventEmitter {
   }
 
   /**
-   * Get numbered directories in order
+   * Get directories in dependency-resolved order
    */
-  async getNumberedDirectories() {
+  async getOrderedDirectories() {
     const entries = await fs.readdir(this.config.sqlDir, { withFileTypes: true });
     
-    // Filter for directories that match pattern: 001_name, 002_name, etc.
-    const numberedDirs = entries
+    // Get all directories
+    const availableDirs = entries
       .filter(entry => entry.isDirectory())
-      .filter(entry => /^\d{3}_/.test(entry.name))
-      .map(entry => entry.name)
-      .sort(); // Alphabetical sort works for 001, 002, etc.
+      .map(entry => entry.name);
     
-    if (numberedDirs.length === 0) {
+    // Order directories according to DIRECTORY_ORDER
+    const orderedDirs = [];
+    for (const dirName of DIRECTORY_ORDER) {
+      if (availableDirs.includes(dirName)) {
+        orderedDirs.push(dirName);
+      }
+    }
+    
+    // Add any directories not in our standard list (for custom directories)
+    const customDirs = availableDirs.filter(dir => !DIRECTORY_ORDER.includes(dir));
+    if (customDirs.length > 0) {
       this.emit('warning', {
-        message: 'No numbered directories found. Looking for SQL files in root.',
+        message: `Found non-standard directories: ${customDirs.join(', ')}. These will be processed last.`,
+        timestamp: new Date()
+      });
+      orderedDirs.push(...customDirs.sort());
+    }
+    
+    if (orderedDirs.length === 0) {
+      this.emit('warning', {
+        message: 'No directories found. Looking for SQL files in root.',
         timestamp: new Date()
       });
       return ['']; // Process root directory
     }
     
     this.emit('progress', {
-      message: `Found ${numberedDirs.length} numbered directories`,
-      directories: numberedDirs,
+      message: `Processing ${orderedDirs.length} directories in order`,
+      directories: orderedDirs,
       timestamp: new Date()
     });
     
-    return numberedDirs;
+    return orderedDirs;
   }
 
   /**
