@@ -13,13 +13,17 @@
  * - ESM module exports
  */
 
-// Export all port interfaces
+// Export all port interfaces and dependency injection system
 export {
   FileSystemPort,
   CryptoPort,
   ProcessPort,
   EnvironmentPort,
-  validatePort
+  validatePort,
+  DIContainer,
+  PortFactory,
+  wireDataCore,
+  createPortFactory
 } from './ports/index.js';
 
 // Export SQL dependency graph functionality
@@ -49,6 +53,20 @@ export {
  */
 export const VERSION = '0.1.0';
 
+// Import validatePort and port classes for use in DataCore
+import { 
+  validatePort as validate, 
+  FileSystemPort,
+  CryptoPort,
+  ProcessPort,
+  EnvironmentPort
+} from './ports/index.js';
+
+// Import core classes for DataCore
+import { SqlGraph } from './lib/SqlGraph.js';
+import { DiffEngine, SchemaState } from './lib/DiffEngine.js';
+import { PlanCompiler } from './lib/PlanCompiler.js';
+
 /**
  * Core migration workflow orchestrator
  * Demonstrates the complete migration pipeline using dependency injection
@@ -61,10 +79,10 @@ export class DataCore {
    * @param {EnvironmentPort} environmentPort - Environment access
    */
   constructor(fileSystemPort, cryptoPort, processPort, environmentPort) {
-    validatePort(fileSystemPort, FileSystemPort);
-    validatePort(cryptoPort, CryptoPort);
-    validatePort(processPort, ProcessPort);
-    validatePort(environmentPort, EnvironmentPort);
+    validate(fileSystemPort, FileSystemPort);
+    validate(cryptoPort, CryptoPort);
+    validate(processPort, ProcessPort);
+    validate(environmentPort, EnvironmentPort);
 
     this.fileSystemPort = fileSystemPort;
     this.cryptoPort = cryptoPort;

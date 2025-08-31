@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "imports": {
+    {{#if supabaseIntegration}}
+    "supabase": "https://esm.sh/@supabase/supabase-js@2"{{#if jwtVerification}},{{/if}}
+    {{/if}}
+    {{#if jwtVerification}}
+    "djwt": "https://deno.land/x/djwt@v3.0.0/mod.ts"
+    {{/if}}
+  },
+  "tasks": {
+    "dev": "deno run --allow-net --allow-env --watch index.ts",
+    "serve": "supabase functions serve {{functionNameKebab}}",
+    "deploy": "supabase functions deploy {{functionNameKebab}}",
+    "logs": "supabase functions logs {{functionNameKebab}}",
+    "test": "deno test --allow-all tests/"
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "semiColons": false,
+    "singleQuote": true,
+    "proseWrap": "preserve"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "include": ["ban-untagged-todo"],
+      "exclude": ["no-unused-vars"]
+    }
+  }
+}

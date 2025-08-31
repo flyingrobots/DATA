@@ -11,6 +11,7 @@
 
 // Import all adapter implementations
 import { FileSystemAdapter } from './adapters/FileSystemAdapter.js';
+import { CryptoAdapter } from './adapters/CryptoAdapter.js';
 import { ProcessAdapter } from './adapters/ProcessAdapter.js';
 import { EnvironmentAdapter } from './adapters/EnvironmentAdapter.js';
 import { GlobAdapter } from './adapters/GlobAdapter.js';
@@ -20,6 +21,7 @@ import { GlobAdapter } from './adapters/GlobAdapter.js';
  * 
  * @param {Object} [config] - Global configuration options
  * @param {Object} [config.fileSystem] - FileSystem adapter options
+ * @param {Object} [config.crypto] - Crypto adapter options
  * @param {Object} [config.process] - Process adapter options
  * @param {Object} [config.environment] - Environment adapter options
  * @param {Object} [config.glob] - Glob adapter options
@@ -42,6 +44,7 @@ import { GlobAdapter } from './adapters/GlobAdapter.js';
 export function createNodeAdapters(config = {}) {
   return {
     fileSystem: new FileSystemAdapter(config.fileSystem),
+    crypto: new CryptoAdapter(config.crypto),
     process: new ProcessAdapter(config.process),
     environment: new EnvironmentAdapter(config.environment),
     glob: new GlobAdapter(config.glob)
@@ -189,6 +192,7 @@ export function wireAdapters(core, adapters) {
 // Export individual adapter classes for advanced use cases
 export {
   FileSystemAdapter,
+  CryptoAdapter,
   ProcessAdapter,
   EnvironmentAdapter,
   GlobAdapter
@@ -197,6 +201,7 @@ export {
 /**
  * @typedef {Object} NodeAdapters
  * @property {FileSystemAdapter} fileSystem - File system operations adapter
+ * @property {CryptoAdapter} crypto - Cryptographic operations adapter
  * @property {ProcessAdapter} process - Process execution adapter
  * @property {EnvironmentAdapter} environment - Environment variables adapter
  * @property {GlobAdapter} glob - File pattern matching adapter

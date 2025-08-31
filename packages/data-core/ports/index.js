@@ -103,3 +103,7 @@ export function validatePort(port, PortClass) {
     throw new Error(`Port must be instance of ${PortClass.name}`);
   }
 }
+
+// Export dependency injection components
+export { DIContainer } from './DIContainer.js';
+export { PortFactory, wireDataCore, createPortFactory } from './PortFactory.js';
