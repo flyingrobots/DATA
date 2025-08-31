@@ -2,10 +2,10 @@
  * Configuration management for data CLI
  */
 
-const fs = require('fs').promises;
-const path = require('path');
-const os = require('os');
-const { safeParsedataConfig, mergeConfigs } = require('./schemas/dataConfigSchema');
+import { promises as fs } from 'fs';
+import path from 'path';
+import os from 'os';
+import { safeParsedataConfig, mergeConfigs } from './schemas/dataConfigSchema.js';
 
 /**
  * Configuration class for data CLI
@@ -220,4 +220,4 @@ class Config {
   }
 }
 
-module.exports = Config;
+export default Config;
