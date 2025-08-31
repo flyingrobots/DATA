@@ -9,6 +9,10 @@ import BuildCommand from '../../lib/BuildCommand.js';
  * Compile SQL sources into migration file
  * Enhanced with optional functions deployment integration
  */
+/**
+ * CompileCommand class
+ * @class
+ */
 class CompileCommand extends BuildCommand {
   constructor(
     inputDir,

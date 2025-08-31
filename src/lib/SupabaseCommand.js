@@ -1,21 +1,63 @@
 /**
- * SupabaseCommand - Base class for commands that use Supabase API
+ * @fileoverview SupabaseCommand - Base class for commands that use Supabase API
  *
- * Replaces raw PostgreSQL connections with Supabase client
- * Provides automatic connection management and cleanup
+ * Replaces raw PostgreSQL connections with Supabase client for better
+ * integration with modern PostgreSQL/Supabase ecosystems. Provides
+ * automatic connection management, cleanup, and schema utilities.
+ *
+ * @module SupabaseCommand
+ * @requires Command
+ * @requires @supabase/supabase-js
+ * @since 1.0.0
  */
 
 import Command from './Command.js';
 import { createClient } from '@supabase/supabase-js';
 
+/**
+ * @typedef {Object} SqlExecutionResult
+ * @property {boolean} success - Whether SQL execution succeeded
+ * @property {string} [error] - Error message if execution failed
+ * @property {number} [rows_affected] - Number of rows affected by the operation
+ */
+
+/**
+ * @typedef {Object} SchemaOperationOptions
+ * @property {boolean} [cascade=true] - Whether to use CASCADE when dropping objects
+ * @property {string} [schemaName] - Custom schema name for operations
+ */
+
+/**
+ * Base class for commands that interact with Supabase/PostgreSQL databases.
+ *
+ * Extends the Command class with Supabase-specific functionality including
+ * client management, RPC execution, schema operations, and automatic cleanup.
+ * Uses lazy initialization for optimal resource usage.
+ *
+ * @class
+ * @extends Command
+ * @example
+ * class MyDatabaseCommand extends SupabaseCommand {
+ *   async performExecute() {
+ *     const supabase = this.getSupabase();
+ *     const { data } = await supabase.from('users').select('*');
+ *     return data;
+ *   }
+ * }
+ */
 class SupabaseCommand extends Command {
   /**
-   * Create a SupabaseCommand instance
-   * @param {string} supabaseUrl - Supabase project URL (optional, uses env var)
-   * @param {string} serviceRoleKey - Service role key for admin operations (optional, uses env var)
-   * @param {Object} logger - Logger instance (optional)
-   * @param {boolean} isProd - Whether running in production mode
-   * @param {boolean} requiresConfirmation - Whether to require confirmation in production (default: true)
+   * Creates a new SupabaseCommand instance with credentials and configuration.
+   *
+   * Initializes Supabase connection parameters with fallback to environment variables.
+   * Validates that at least one authentication key is available before proceeding.
+   *
+   * @param {string|null} [supabaseUrl=null] - Supabase project URL (falls back to SUPABASE_URL env var or localhost)
+   * @param {string|null} [serviceRoleKey=null] - Service role key for admin operations (falls back to env var)
+   * @param {Object|null} [logger=null] - Pino logger instance (optional)
+   * @param {boolean} [isProd=false] - Whether running in production mode
+   * @param {boolean} [requiresConfirmation=true] - Whether to require user confirmation in production
+   * @throws {Error} When neither SUPABASE_SERVICE_ROLE_KEY nor SUPABASE_ANON_KEY is available
    */
   constructor(
     supabaseUrl = null,
@@ -44,9 +86,21 @@ class SupabaseCommand extends Command {
   }
 
   /**
-   * Get Supabase client (lazy initialization)
-   * @param {boolean} useServiceRole - Use service role key (default: true)
-   * @returns {Object} Supabase client
+   * Gets or creates a Supabase client with lazy initialization.
+   *
+   * Creates the Supabase client on first access with appropriate authentication
+   * key based on the useServiceRole parameter. Configures client for optimal
+   * CLI usage with disabled session persistence and auto-refresh.
+   *
+   * @param {boolean} [useServiceRole=true] - Whether to use service role key (admin) or anon key (read-only)
+   * @returns {Object} Configured Supabase client instance
+   * @throws {Error} When required authentication key is not configured
+   * @example
+   * // Get admin client for DDL operations
+   * const supabase = this.getSupabase(true);
+   * 
+   * // Get read-only client for queries
+   * const supabase = this.getSupabase(false);
    */
   getSupabase(useServiceRole = true) {
     if (!this.supabase) {
@@ -109,11 +163,22 @@ class SupabaseCommand extends Command {
   }
 
   /**
-   * Call an RPC function
-   * @param {string} functionName - Name of the RPC function
-   * @param {Object} params - Parameters to pass to the function
-   * @param {boolean} useServiceRole - Use service role key (default: false for RPC)
-   * @returns {Promise<Object>} RPC result
+   * Executes a PostgreSQL RPC (Remote Procedure Call) function.
+   *
+   * Calls a stored procedure or function in the database through Supabase RPC interface.
+   * Automatically handles authentication and error processing.
+   *
+   * @param {string} functionName - Name of the PostgreSQL function to call
+   * @param {Object} [params={}] - Parameters to pass to the function as key-value pairs
+   * @param {boolean} [useServiceRole=false] - Whether to use service role for admin functions
+   * @returns {Promise<*>} Function return value (type depends on the PostgreSQL function)
+   * @throws {Error} When RPC call fails or function returns error
+   * @example
+   * // Call a custom function with parameters
+   * const result = await this.rpc('get_user_stats', { user_id: 123 });
+   * 
+   * // Call admin function with service role
+   * const result = await this.rpc('admin_cleanup', {}, true);
    */
   async rpc(functionName, params = {}, useServiceRole = false) {
     const supabase = this.getSupabase(useServiceRole);

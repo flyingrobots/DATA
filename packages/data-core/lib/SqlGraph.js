@@ -11,6 +11,10 @@ import { FileSystemPort, validatePort } from '../ports/index.js';
 /**
  * Represents a node in the SQL dependency graph
  */
+/**
+ * SqlNode class
+ * @class
+ */
 export class SqlNode {
   /**
    * @param {string} name - Name of the SQL object (table, view, function, etc.)
@@ -68,6 +72,10 @@ export class SqlNode {
 
 /**
  * SQL dependency graph builder and analyzer
+ */
+/**
+ * SqlGraph class
+ * @class
  */
 export class SqlGraph {
   /**

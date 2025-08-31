@@ -9,6 +9,10 @@ import { z } from 'zod';
 /**
  * Migration command that uses router pattern for subcommands
  */
+/**
+ * MigrateCommand class
+ * @class
+ */
 class MigrateCommand extends Command {
   static description = 'Database migration management commands';
   

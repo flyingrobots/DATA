@@ -31,6 +31,10 @@ export const OperationType = {
 /**
  * Represents a single migration operation
  */
+/**
+ * MigrationOperation class
+ * @class
+ */
 export class MigrationOperation {
   /**
    * @param {number} type - Operation type from OperationType enum
@@ -96,6 +100,10 @@ export class MigrationOperation {
 
 /**
  * Database schema state representation
+ */
+/**
+ * SchemaState class
+ * @class
  */
 export class SchemaState {
   /**
@@ -174,6 +182,10 @@ export class SchemaState {
 
 /**
  * Migration diff calculator and operation generator
+ */
+/**
+ * DiffEngine class
+ * @class
  */
 export class DiffEngine {
   /**

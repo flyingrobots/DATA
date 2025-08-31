@@ -6,6 +6,10 @@ import Command from './Command.js';
  * This class provides database connection handling for commands that need
  * to execute SQL queries or manage database state.
  */
+/**
+ * DatabaseCommand class
+ * @class
+ */
 class DatabaseCommand extends Command {
   /**
    * Create a DatabaseCommand instance

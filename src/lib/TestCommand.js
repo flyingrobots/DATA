@@ -7,6 +7,10 @@ import PathResolver from './PathResolver.js';
  * Commands that compile and run tests need both database access
  * and file system operations.
  */
+/**
+ * TestCommand class
+ * @class
+ */
 class TestCommand extends DatabaseCommand {
   /**
    * Create a TestCommand instance
