@@ -1,14 +1,14 @@
 /**
  * Edge Functions Validation Command
- * 
+ *
  * Validates Edge Functions syntax, structure, and dependencies
  * without deploying them
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const Command = require('../../lib/Command');
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
+const Command = require("../../lib/Command");
 
 class ValidateCommand extends Command {
   constructor(config, logger = null, isProd = false) {
@@ -21,7 +21,7 @@ class ValidateCommand extends Command {
    * @param {string[]|null} functionNames - Specific functions to validate, or null for all
    */
   async performExecute(functionNames = null) {
-    this.progress('🔍 Starting Edge Functions validation');
+    this.progress("🔍 Starting Edge Functions validation");
 
     try {
       // Check functions directory exists
@@ -31,15 +31,16 @@ class ValidateCommand extends Command {
       }
 
       // Get functions to validate
-      const functionsToValidate = await this.resolveFunctionsList(functionNames);
-      
+      const functionsToValidate =
+        await this.resolveFunctionsList(functionNames);
+
       if (functionsToValidate.length === 0) {
-        this.warn('No functions found to validate');
+        this.warn("No functions found to validate");
         return;
       }
 
       this.progress(`📋 Validating ${functionsToValidate.length} function(s)`, {
-        functions: functionsToValidate
+        functions: functionsToValidate,
       });
 
       // Validate each function
@@ -50,33 +51,32 @@ class ValidateCommand extends Command {
       }
 
       // Emit validation summary
-      const valid = results.filter(r => r.isValid);
-      const invalid = results.filter(r => !r.isValid);
+      const valid = results.filter((r) => r.isValid);
+      const invalid = results.filter((r) => !r.isValid);
 
-      this.emit('validation-complete', {
+      this.emit("validation-complete", {
         total: results.length,
         valid: valid.length,
         invalid: invalid.length,
-        results
+        results,
       });
 
       if (invalid.length > 0) {
         this.warn(`Validation completed with ${invalid.length} issue(s)`, {
-          invalid: invalid.map(f => ({
+          invalid: invalid.map((f) => ({
             function: f.function,
-            issues: f.issues
-          }))
+            issues: f.issues,
+          })),
         });
       } else {
         this.success(`✅ All ${valid.length} function(s) passed validation`, {
-          validated: valid.map(v => v.function)
+          validated: valid.map((v) => v.function),
         });
       }
 
       return results;
-
     } catch (error) {
-      this.error('Functions validation failed', error);
+      this.error("Functions validation failed", error);
       throw error;
     }
   }
@@ -94,20 +94,22 @@ class ValidateCommand extends Command {
           missing.push(name);
         }
       }
-      
+
       if (missing.length > 0) {
-        throw new Error(`Functions not found: ${missing.join(', ')}`);
+        throw new Error(`Functions not found: ${missing.join(", ")}`);
       }
-      
+
       return functionNames;
     }
 
     // Get all functions in directory
-    const entries = fs.readdirSync(this.outputConfig.functionsDir, { withFileTypes: true });
+    const entries = fs.readdirSync(this.outputConfig.functionsDir, {
+      withFileTypes: true,
+    });
     return entries
-      .filter(entry => entry.isDirectory())
-      .map(entry => entry.name)
-      .filter(name => !name.startsWith('.'));
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((name) => !name.startsWith("."));
   }
 
   /**
@@ -116,22 +118,28 @@ class ValidateCommand extends Command {
   async validateFunction(functionName) {
     this.progress(`🔍 Validating function: ${functionName}`);
 
-    const functionPath = path.join(this.outputConfig.functionsDir, functionName);
+    const functionPath = path.join(
+      this.outputConfig.functionsDir,
+      functionName,
+    );
     const issues = [];
     let isValid = true;
 
     // Check for required files
-    const indexPath = path.join(functionPath, 'index.ts');
+    const indexPath = path.join(functionPath, "index.ts");
     if (!fs.existsSync(indexPath)) {
-      issues.push('Missing index.ts file');
+      issues.push("Missing index.ts file");
       isValid = false;
     } else {
       // Validate file content
       try {
-        const content = fs.readFileSync(indexPath, 'utf8');
-        const contentIssues = this.validateFunctionContent(functionName, content);
+        const content = fs.readFileSync(indexPath, "utf8");
+        const contentIssues = this.validateFunctionContent(
+          functionName,
+          content,
+        );
         issues.push(...contentIssues);
-        
+
         if (contentIssues.length > 0) {
           isValid = false;
         }
@@ -142,13 +150,13 @@ class ValidateCommand extends Command {
     }
 
     // Check for deno.json configuration
-    const denoJsonPath = path.join(functionPath, 'deno.json');
+    const denoJsonPath = path.join(functionPath, "deno.json");
     if (fs.existsSync(denoJsonPath)) {
       try {
-        const denoConfig = JSON.parse(fs.readFileSync(denoJsonPath, 'utf8'));
+        const denoConfig = JSON.parse(fs.readFileSync(denoJsonPath, "utf8"));
         const denoIssues = this.validateDenoConfig(functionName, denoConfig);
         issues.push(...denoIssues);
-        
+
         if (denoIssues.length > 0) {
           isValid = false;
         }
@@ -159,17 +167,20 @@ class ValidateCommand extends Command {
     }
 
     // Check for common dependencies
-    const dependencyIssues = this.validateDependencies(functionName, functionPath);
+    const dependencyIssues = this.validateDependencies(
+      functionName,
+      functionPath,
+    );
     issues.push(...dependencyIssues);
 
     const result = {
       function: functionName,
       path: functionPath,
       isValid,
-      issues: issues.length > 0 ? issues : ['No issues found']
+      issues: issues.length > 0 ? issues : ["No issues found"],
     };
 
-    this.emit('function-validated', result);
+    this.emit("function-validated", result);
 
     return result;
   }
@@ -181,20 +192,22 @@ class ValidateCommand extends Command {
     const issues = [];
 
     // Check for basic Edge Function structure
-    if (!content.includes('serve(') && !content.includes('Deno.serve(')) {
-      issues.push('Missing serve() handler - Edge Function must use Deno.serve() or serve()');
+    if (!content.includes("serve(") && !content.includes("Deno.serve(")) {
+      issues.push(
+        "Missing serve() handler - Edge Function must use Deno.serve() or serve()",
+      );
     }
 
     // Check for proper CORS handling in public functions
-    if (functionName.includes('webhook') || functionName.includes('api')) {
-      if (!content.includes('cors') && !content.includes('Access-Control')) {
-        issues.push('CORS handling recommended for public endpoints');
+    if (functionName.includes("webhook") || functionName.includes("api")) {
+      if (!content.includes("cors") && !content.includes("Access-Control")) {
+        issues.push("CORS handling recommended for public endpoints");
       }
     }
 
     // Check for error handling
-    if (!content.includes('try') && !content.includes('catch')) {
-      issues.push('Consider adding try/catch error handling');
+    if (!content.includes("try") && !content.includes("catch")) {
+      issues.push("Consider adding try/catch error handling");
     }
 
     // Check for environment variable usage
@@ -206,7 +219,9 @@ class ValidateCommand extends Command {
     }
 
     if (envVars.length > 0) {
-      this.progress(`Function ${functionName} uses environment variables: ${envVars.join(', ')}`);
+      this.progress(
+        `Function ${functionName} uses environment variables: ${envVars.join(", ")}`,
+      );
     }
 
     // Removed overly aggressive secret detection
@@ -225,10 +240,10 @@ class ValidateCommand extends Command {
     // Check for common Deno config issues
     if (denoConfig.imports) {
       const imports = denoConfig.imports;
-      
+
       // Validate import URLs
       for (const [key, url] of Object.entries(imports)) {
-        if (!url.startsWith('https://')) {
+        if (!url.startsWith("https://")) {
           issues.push(`Import map entry "${key}" should use HTTPS URL`);
         }
       }
@@ -237,8 +252,10 @@ class ValidateCommand extends Command {
     // Check for appropriate permissions
     if (denoConfig.permissions && denoConfig.permissions.allow) {
       const allows = denoConfig.permissions.allow;
-      if (allows.includes('--allow-all')) {
-        issues.push('Avoid --allow-all permission - specify minimal required permissions');
+      if (allows.includes("--allow-all")) {
+        issues.push(
+          "Avoid --allow-all permission - specify minimal required permissions",
+        );
       }
     }
 
@@ -252,13 +269,18 @@ class ValidateCommand extends Command {
     const issues = [];
 
     // Check if function uses import_map.json
-    const importMapPath = path.join(this.outputConfig.functionsDir, 'import_map.json');
+    const importMapPath = path.join(
+      this.outputConfig.functionsDir,
+      "import_map.json",
+    );
     if (fs.existsSync(importMapPath)) {
       try {
-        const importMap = JSON.parse(fs.readFileSync(importMapPath, 'utf8'));
-        this.progress(`Function ${functionName} has access to import map with ${Object.keys(importMap.imports || {}).length} imports`);
+        const importMap = JSON.parse(fs.readFileSync(importMapPath, "utf8"));
+        this.progress(
+          `Function ${functionName} has access to import map with ${Object.keys(importMap.imports || {}).length} imports`,
+        );
       } catch (error) {
-        issues.push('import_map.json exists but is invalid JSON');
+        issues.push("import_map.json exists but is invalid JSON");
       }
     }
 

@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const { promisify } = require('util');
+const path = require("path");
+const fs = require("fs");
+const { promisify } = require("util");
 
 /**
  * A utility class for resolving and ensuring the existence of file and directory paths.
@@ -27,7 +27,7 @@ class PathResolver {
    */
   async resolveDirectoryForRead(dirPath) {
     const absolutePath = path.resolve(dirPath);
-    
+
     try {
       await this.fsAccess(absolutePath, this.fs.constants.R_OK);
       const stats = await this.fsStat(absolutePath);
@@ -36,10 +36,12 @@ class PathResolver {
       }
       return absolutePath;
     } catch (error) {
-      if (error.code === 'ENOENT') {
-        throw new Error(`Directory does not exist for reading: ${absolutePath}`);
+      if (error.code === "ENOENT") {
+        throw new Error(
+          `Directory does not exist for reading: ${absolutePath}`,
+        );
       }
-      if (error.code === 'EACCES') {
+      if (error.code === "EACCES") {
         throw new Error(`Directory is not readable: ${absolutePath}`);
       }
       throw error;
@@ -54,19 +56,21 @@ class PathResolver {
    */
   async resolveDirectoryForWrite(dirPath) {
     const absolutePath = path.resolve(dirPath);
-    
+
     try {
       // Try to create the directory (will succeed if it already exists)
       await this.fsMkdir(absolutePath, { recursive: true });
-      
+
       // Verify write access
       await this.fsAccess(absolutePath, this.fs.constants.W_OK);
       return absolutePath;
     } catch (error) {
-      if (error.code === 'EACCES') {
+      if (error.code === "EACCES") {
         throw new Error(`Directory is not writable: ${absolutePath}`);
       }
-      throw new Error(`Failed to create/access directory for writing: ${absolutePath} - ${error.message}`);
+      throw new Error(
+        `Failed to create/access directory for writing: ${absolutePath} - ${error.message}`,
+      );
     }
   }
 
@@ -78,7 +82,7 @@ class PathResolver {
    */
   async resolveFileForRead(filePath) {
     const absolutePath = path.resolve(filePath);
-    
+
     try {
       await this.fsAccess(absolutePath, this.fs.constants.R_OK);
       const stats = await this.fsStat(absolutePath);
@@ -87,10 +91,10 @@ class PathResolver {
       }
       return absolutePath;
     } catch (error) {
-      if (error.code === 'ENOENT') {
+      if (error.code === "ENOENT") {
         throw new Error(`File does not exist for reading: ${absolutePath}`);
       }
-      if (error.code === 'EACCES') {
+      if (error.code === "EACCES") {
         throw new Error(`File is not readable: ${absolutePath}`);
       }
       throw error;
@@ -106,24 +110,24 @@ class PathResolver {
   async resolveFileForWrite(filePath) {
     const absolutePath = path.resolve(filePath);
     const parentDir = path.dirname(absolutePath);
-    
+
     // Ensure parent directory exists and is writable
     await this.resolveDirectoryForWrite(parentDir);
-    
+
     // Check if file exists and is writable, or if parent dir is writable for new file
     try {
       await this.fsAccess(absolutePath, this.fs.constants.W_OK);
     } catch (error) {
-      if (error.code === 'ENOENT') {
+      if (error.code === "ENOENT") {
         // File doesn't exist, that's OK for writing, just check parent dir
         // (already checked above)
-      } else if (error.code === 'EACCES') {
+      } else if (error.code === "EACCES") {
         throw new Error(`File exists but is not writable: ${absolutePath}`);
       } else {
         throw error;
       }
     }
-    
+
     return absolutePath;
   }
 

@@ -1,12 +1,12 @@
 /**
  * TestTemplateGenerator with Pattern Library
- * 
+ *
  * Generates pgTAP test templates for missing coverage based on requirements.
  * Creates properly structured and formatted test SQL files following project conventions.
  * Includes a comprehensive pattern library for consistent test generation.
  */
 
-const TestPatternLibrary = require('./TestPatternLibrary');
+const TestPatternLibrary = require("./TestPatternLibrary");
 
 /**
  * @typedef {Object} TestRequirement
@@ -95,7 +95,7 @@ class TestTemplateGenerator {
       function: this.generateFunctionTemplate.bind(this),
       table: this.generateTableTemplate.bind(this),
       column: this.generateColumnTemplate.bind(this),
-      index: this.generateIndexTemplate.bind(this)
+      index: this.generateIndexTemplate.bind(this),
     };
 
     /**
@@ -103,14 +103,14 @@ class TestTemplateGenerator {
      * @private
      */
     this.testDirectories = {
-      rpc: '002_rpc_tests',
-      rls: '003_rls_tests',
-      trigger: '004_trigger_tests',
-      constraint: '005_constraint_tests',
-      function: '006_function_tests',
-      table: '001_table_tests',
-      column: '007_column_tests',
-      index: '008_index_tests'
+      rpc: "002_rpc_tests",
+      rls: "003_rls_tests",
+      trigger: "004_trigger_tests",
+      constraint: "005_constraint_tests",
+      function: "006_function_tests",
+      table: "001_table_tests",
+      column: "007_column_tests",
+      index: "008_index_tests",
     };
 
     /**
@@ -121,7 +121,7 @@ class TestTemplateGenerator {
       planCount: 6,
       setupRequired: true,
       includeSecurity: true,
-      includeValidation: true
+      includeValidation: true,
     };
   }
 
@@ -150,10 +150,12 @@ class TestTemplateGenerator {
       type: requirement.type,
       metadata: {
         name: requirement.name,
-        schema: requirement.schema || 'public',
+        schema: requirement.schema || "public",
         generatedAt: new Date().toISOString(),
-        description: requirement.description || `Test for ${requirement.type}: ${requirement.name}`
-      }
+        description:
+          requirement.description ||
+          `Test for ${requirement.type}: ${requirement.name}`,
+      },
     };
   }
 
@@ -164,7 +166,7 @@ class TestTemplateGenerator {
    */
   generateBatch(requirements) {
     if (!Array.isArray(requirements)) {
-      throw new Error('Requirements must be an array');
+      throw new Error("Requirements must be an array");
     }
 
     const templates = [];
@@ -181,12 +183,11 @@ class TestTemplateGenerator {
           summary[requirement.type] = 0;
         }
         summary[requirement.type]++;
-
       } catch (error) {
         errors.push({
           index,
           requirement,
-          error: error.message
+          error: error.message,
         });
       }
     });
@@ -195,7 +196,7 @@ class TestTemplateGenerator {
       templates,
       totalGenerated: templates.length,
       errors,
-      summary
+      summary,
     };
   }
 
@@ -245,29 +246,29 @@ class TestTemplateGenerator {
   generateEnhancedTemplate(requirement, additionalPatterns = []) {
     const errors = [];
     const warnings = [];
-    
+
     // Create checkpoint for rollback
     const checkpoint = {
       requirement: JSON.parse(JSON.stringify(requirement)),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
-    
+
     try {
       // Start with base template
       const baseTemplate = this.generateTemplate(requirement);
       if (!baseTemplate || !baseTemplate.content) {
-        throw new Error('Failed to generate base template');
+        throw new Error("Failed to generate base template");
       }
-      
+
       // Get recommended patterns for this test type
       const recommendedPatterns = this.getRecommendedPatterns(requirement.type);
       const allPatterns = [...recommendedPatterns];
-      
+
       // Add any additional patterns requested with error handling
       for (const patternName of additionalPatterns) {
         try {
           const pattern = this.getPattern(patternName);
-          if (pattern && !allPatterns.find(p => p.name === patternName)) {
+          if (pattern && !allPatterns.find((p) => p.name === patternName)) {
             allPatterns.push(pattern);
           } else if (!pattern) {
             warnings.push(`Pattern '${patternName}' not found in library`);
@@ -280,23 +281,29 @@ class TestTemplateGenerator {
 
       // Extract variables from requirement for pattern rendering
       const variables = this.extractPatternVariables(requirement);
-      
+
       // Generate enhanced content by incorporating relevant patterns
       let enhancedContent = baseTemplate.content;
-      
+
       try {
         // Add pattern-based enhancements with error recovery
-        const patternEnhancements = this.generatePatternEnhancements(requirement, allPatterns, variables);
+        const patternEnhancements = this.generatePatternEnhancements(
+          requirement,
+          allPatterns,
+          variables,
+        );
         if (patternEnhancements.trim()) {
-          enhancedContent += '\n\n-- =========================================================================\n';
-          enhancedContent += '-- ENHANCED PATTERNS FROM LIBRARY\n';
-          enhancedContent += '-- =========================================================================\n\n';
+          enhancedContent +=
+            "\n\n-- =========================================================================\n";
+          enhancedContent += "-- ENHANCED PATTERNS FROM LIBRARY\n";
+          enhancedContent +=
+            "-- =========================================================================\n\n";
           enhancedContent += patternEnhancements;
         }
       } catch (patternError) {
-        errors.push({ 
-          phase: 'pattern_enhancement', 
-          error: patternError.message 
+        errors.push({
+          phase: "pattern_enhancement",
+          error: patternError.message,
         });
         // Continue with base template content if pattern enhancement fails
         enhancedContent = baseTemplate.content;
@@ -308,46 +315,49 @@ class TestTemplateGenerator {
         content: this.formatTest(enhancedContent),
         metadata: {
           ...baseTemplate.metadata,
-          patternsUsed: allPatterns.map(p => p.name),
-          enhancementLevel: 'advanced',
-          generationMethod: 'pattern-enhanced',
+          patternsUsed: allPatterns.map((p) => p.name),
+          enhancementLevel: "advanced",
+          generationMethod: "pattern-enhanced",
           errors: errors.length > 0 ? errors : undefined,
-          warnings: warnings.length > 0 ? warnings : undefined
-        }
+          warnings: warnings.length > 0 ? warnings : undefined,
+        },
       };
 
       // Validate the generated template before returning
       if (!this._validateTemplate(enhancedTemplate)) {
-        throw new Error('Generated template failed validation');
+        throw new Error("Generated template failed validation");
       }
 
       return enhancedTemplate;
-
     } catch (enhancementError) {
       // Rollback to basic template if enhancement completely fails
-      console.warn(`Enhancement failed for ${requirement.type} test '${requirement.name}': ${enhancementError.message}`);
-      console.warn('Falling back to basic template generation');
-      
+      console.warn(
+        `Enhancement failed for ${requirement.type} test '${requirement.name}': ${enhancementError.message}`,
+      );
+      console.warn("Falling back to basic template generation");
+
       try {
         const basicTemplate = this.generateTemplate(checkpoint.requirement);
-        
+
         // Validate basic template before returning
         if (!this._validateTemplate(basicTemplate)) {
-          throw new Error('Basic template fallback also failed validation');
+          throw new Error("Basic template fallback also failed validation");
         }
 
         return {
           ...basicTemplate,
           metadata: {
             ...basicTemplate.metadata,
-            enhancementLevel: 'basic',
-            generationMethod: 'fallback',
+            enhancementLevel: "basic",
+            generationMethod: "fallback",
             enhancementErrors: [enhancementError.message],
-            fallbackReason: 'Enhancement failed - using basic template'
-          }
+            fallbackReason: "Enhancement failed - using basic template",
+          },
         };
       } catch (fallbackError) {
-        throw new Error(`Both enhanced and basic template generation failed: Enhancement: ${enhancementError.message}, Fallback: ${fallbackError.message}`);
+        throw new Error(
+          `Both enhanced and basic template generation failed: Enhancement: ${enhancementError.message}, Fallback: ${fallbackError.message}`,
+        );
       }
     }
   }
@@ -361,56 +371,72 @@ class TestTemplateGenerator {
   _validateTemplate(template) {
     try {
       // Check basic template structure
-      if (!template || typeof template !== 'object') {
-        console.error('Template validation failed: Template must be an object');
+      if (!template || typeof template !== "object") {
+        console.error("Template validation failed: Template must be an object");
         return false;
       }
 
       // Check required properties
-      if (!template.content || typeof template.content !== 'string') {
-        console.error('Template validation failed: Template must have content string');
+      if (!template.content || typeof template.content !== "string") {
+        console.error(
+          "Template validation failed: Template must have content string",
+        );
         return false;
       }
 
-      if (!template.metadata || typeof template.metadata !== 'object') {
-        console.error('Template validation failed: Template must have metadata object');
+      if (!template.metadata || typeof template.metadata !== "object") {
+        console.error(
+          "Template validation failed: Template must have metadata object",
+        );
         return false;
       }
 
       const content = template.content;
 
       // Validate pgTAP structure - must have BEGIN (with or without semicolon for functions)
-      if (!content.includes('BEGIN') && !content.includes('begin')) {
-        console.error('Template validation failed: Missing pgTAP BEGIN statement');
+      if (!content.includes("BEGIN") && !content.includes("begin")) {
+        console.error(
+          "Template validation failed: Missing pgTAP BEGIN statement",
+        );
         return false;
       }
 
       // Check for pgTAP plan statement (could be SELECT plan() or RETURN NEXT tap.plan())
-      const hasPlan = content.includes('SELECT plan(') || 
-                      content.includes('select plan(') ||
-                      content.includes('tap.plan(') ||
-                      content.includes('TAP.PLAN(');
-      
+      const hasPlan =
+        content.includes("SELECT plan(") ||
+        content.includes("select plan(") ||
+        content.includes("tap.plan(") ||
+        content.includes("TAP.PLAN(");
+
       if (!hasPlan) {
-        console.error('Template validation failed: Missing pgTAP plan() statement');
+        console.error(
+          "Template validation failed: Missing pgTAP plan() statement",
+        );
         return false;
       }
 
       // Check for proper pgTAP function endings (PostgreSQL functions use END; and tap.finish())
-      const hasEnd = content.includes('END;') || content.includes('end;');
-      const hasRollback = content.includes('ROLLBACK;') || content.includes('rollback;');
-      const hasCommit = content.includes('COMMIT;') || content.includes('commit;');
-      
+      const hasEnd = content.includes("END;") || content.includes("end;");
+      const hasRollback =
+        content.includes("ROLLBACK;") || content.includes("rollback;");
+      const hasCommit =
+        content.includes("COMMIT;") || content.includes("commit;");
+
       if (!hasEnd && !hasRollback && !hasCommit) {
-        console.error('Template validation failed: Missing proper ending statement (END, ROLLBACK, or COMMIT)');
+        console.error(
+          "Template validation failed: Missing proper ending statement (END, ROLLBACK, or COMMIT)",
+        );
         return false;
       }
 
       // Validate that content has at least one actual test function call
-      const testFunctionPattern = /(tap\.|^|\s)(ok|is|isnt|like|unlike|pass|fail|throws_ok|lives_ok|cmp_ok|is_empty|isnt_empty|has_table|has_column|has_function|has_view|has_trigger|has_index)\s*\(/i;
-      
+      const testFunctionPattern =
+        /(tap\.|^|\s)(ok|is|isnt|like|unlike|pass|fail|throws_ok|lives_ok|cmp_ok|is_empty|isnt_empty|has_table|has_column|has_function|has_view|has_trigger|has_index)\s*\(/i;
+
       if (!testFunctionPattern.test(content)) {
-        console.error('Template validation failed: No pgTAP test functions found in content');
+        console.error(
+          "Template validation failed: No pgTAP test functions found in content",
+        );
         return false;
       }
 
@@ -420,41 +446,51 @@ class TestTemplateGenerator {
         /;\s*DELETE\s+FROM\s+(?!.*WHERE)/i,
         /;\s*UPDATE\s+.*SET\s+.*(?!WHERE)/i,
         /UNION\s+SELECT/i,
-        /--\s*'[^']*'[^;]*;/  // SQL comments with quotes followed by statements (more specific injection pattern)
+        /--\s*'[^']*'[^;]*;/, // SQL comments with quotes followed by statements (more specific injection pattern)
       ];
 
       for (const pattern of suspiciousPatterns) {
         if (pattern.test(content)) {
-          console.error(`Template validation failed: Suspicious SQL pattern detected: ${pattern}`);
+          console.error(
+            `Template validation failed: Suspicious SQL pattern detected: ${pattern}`,
+          );
           return false;
         }
       }
 
       // Validate metadata structure
       const metadata = template.metadata;
-      
+
       // Check for name (required in all templates)
-      if (!metadata.name || typeof metadata.name !== 'string') {
-        console.error('Template validation failed: Metadata missing name');
+      if (!metadata.name || typeof metadata.name !== "string") {
+        console.error("Template validation failed: Metadata missing name");
         return false;
       }
 
-      // Check for schema (required in all templates)  
-      if (!metadata.schema || typeof metadata.schema !== 'string') {
-        console.error('Template validation failed: Metadata missing schema');
+      // Check for schema (required in all templates)
+      if (!metadata.schema || typeof metadata.schema !== "string") {
+        console.error("Template validation failed: Metadata missing schema");
         return false;
       }
 
       // Check for reasonable plan count
-      if (metadata.planCount && (typeof metadata.planCount !== 'number' || metadata.planCount < 1 || metadata.planCount > 1000)) {
-        console.error('Template validation failed: Invalid planCount in metadata');
+      if (
+        metadata.planCount &&
+        (typeof metadata.planCount !== "number" ||
+          metadata.planCount < 1 ||
+          metadata.planCount > 1000)
+      ) {
+        console.error(
+          "Template validation failed: Invalid planCount in metadata",
+        );
         return false;
       }
 
       return true;
-
     } catch (validationError) {
-      console.error(`Template validation failed with exception: ${validationError.message}`);
+      console.error(
+        `Template validation failed with exception: ${validationError.message}`,
+      );
       return false;
     }
   }
@@ -467,35 +503,35 @@ class TestTemplateGenerator {
   generateBestPracticesDoc(testType) {
     const practices = this.patternLibrary.getBestPractices(testType);
     const examples = this.patternLibrary.getUsageExamples(testType);
-    
+
     let doc = `-- =========================================================================\n`;
     doc += `-- BEST PRACTICES FOR ${testType.toUpperCase()} TESTS\n`;
     doc += `-- =========================================================================\n\n`;
-    
+
     if (practices.length > 0) {
       doc += `-- Best Practices:\n`;
-      practices.forEach(practice => {
+      practices.forEach((practice) => {
         doc += `-- • ${practice}\n`;
       });
       doc += `\n`;
     }
-    
+
     if (examples.length > 0) {
       doc += `-- Usage Examples:\n`;
-      examples.forEach(example => {
+      examples.forEach((example) => {
         doc += `-- • ${example}\n`;
       });
       doc += `\n`;
     }
-    
+
     const recommendedPatterns = this.getRecommendedPatterns(testType);
     if (recommendedPatterns.length > 0) {
       doc += `-- Recommended Patterns:\n`;
-      recommendedPatterns.forEach(pattern => {
+      recommendedPatterns.forEach((pattern) => {
         doc += `-- • ${pattern.name}: ${pattern.description}\n`;
       });
     }
-    
+
     return doc;
   }
 
@@ -514,18 +550,18 @@ class TestTemplateGenerator {
   generateUsageExamples() {
     return {
       basicUsage: {
-        description: 'Basic template generation (existing functionality)',
+        description: "Basic template generation (existing functionality)",
         code: `const generator = new TestTemplateGenerator();
 const requirement = {
   type: 'table',
   name: 'users',
   schema: 'public'
 };
-const template = generator.generateTemplate(requirement);`
+const template = generator.generateTemplate(requirement);`,
       },
-      
+
       enhancedUsage: {
-        description: 'Enhanced template generation with patterns',
+        description: "Enhanced template generation with patterns",
         code: `const generator = new TestTemplateGenerator();
 const requirement = {
   type: 'rls',
@@ -541,11 +577,11 @@ const requirement = {
 const enhancedTemplate = generator.generateEnhancedTemplate(
   requirement, 
   ['privilege_escalation_test'] // Additional patterns
-);`
+);`,
       },
-      
+
       patternAccess: {
-        description: 'Direct pattern access and customization',
+        description: "Direct pattern access and customization",
         code: `const generator = new TestTemplateGenerator();
 
 // Get recommended patterns for a test type
@@ -556,22 +592,22 @@ const securityPatterns = generator.getPatternsByCategory('security_testing');
 
 // Render a specific pattern
 const variables = { schema: 'public', tableName: 'posts' };
-const rendered = generator.renderPattern('table_exists_basic', variables);`
+const rendered = generator.renderPattern('table_exists_basic', variables);`,
       },
-      
+
       documentationGeneration: {
-        description: 'Generate documentation and best practices',
+        description: "Generate documentation and best practices",
         code: `const generator = new TestTemplateGenerator();
 
 // Generate best practices for a test type
 const bestPractices = generator.generateBestPracticesDoc('rls');
 
 // Generate complete pattern library documentation
-const libraryDoc = generator.generatePatternLibraryDoc();`
+const libraryDoc = generator.generatePatternLibraryDoc();`,
       },
-      
+
       batchGeneration: {
-        description: 'Batch generation with pattern enhancement',
+        description: "Batch generation with pattern enhancement",
         code: `const generator = new TestTemplateGenerator();
 const requirements = [
   { type: 'table', name: 'users', schema: 'public' },
@@ -585,8 +621,8 @@ const enhancedTemplates = requirements.map(req =>
 );
 
 // Or use batch generation (basic templates)
-const batchResult = generator.generateBatch(requirements);`
-      }
+const batchResult = generator.generateBatch(requirements);`,
+      },
     };
   }
 
@@ -596,21 +632,21 @@ const batchResult = generator.generateBatch(requirements);`
    * @returns {string} Formatted test SQL
    */
   formatTest(template) {
-    if (!template || typeof template !== 'string') {
-      throw new Error('Template content must be a non-empty string');
+    if (!template || typeof template !== "string") {
+      throw new Error("Template content must be a non-empty string");
     }
 
     // Remove excessive blank lines and normalize line endings
     let formatted = template
-      .replace(/\r\n/g, '\n')  // Normalize line endings
-      .replace(/\n{3,}/g, '\n\n')  // Reduce multiple blank lines to max 2
-      .trim();  // Remove leading/trailing whitespace
+      .replace(/\r\n/g, "\n") // Normalize line endings
+      .replace(/\n{3,}/g, "\n\n") // Reduce multiple blank lines to max 2
+      .trim(); // Remove leading/trailing whitespace
 
     // Ensure proper pgTAP structure formatting
     formatted = this.formatPgTapStructure(formatted);
 
     // Add final newline
-    return formatted + '\n';
+    return formatted + "\n";
   }
 
   /**
@@ -620,16 +656,16 @@ const batchResult = generator.generateBatch(requirements);`
    * @private
    */
   validateRequirement(requirement) {
-    if (!requirement || typeof requirement !== 'object') {
-      throw new Error('Requirement must be an object');
+    if (!requirement || typeof requirement !== "object") {
+      throw new Error("Requirement must be an object");
     }
 
-    if (!requirement.type || typeof requirement.type !== 'string') {
-      throw new Error('Requirement must have a valid type');
+    if (!requirement.type || typeof requirement.type !== "string") {
+      throw new Error("Requirement must have a valid type");
     }
 
-    if (!requirement.name || typeof requirement.name !== 'string') {
-      throw new Error('Requirement must have a valid name');
+    if (!requirement.name || typeof requirement.name !== "string") {
+      throw new Error("Requirement must have a valid name");
     }
 
     if (!this.templateGenerators[requirement.type]) {
@@ -638,7 +674,9 @@ const batchResult = generator.generateBatch(requirements);`
 
     // Validate name format
     if (!/^[a-zA-Z0-9_]+$/.test(requirement.name)) {
-      throw new Error('Name must contain only letters, numbers, and underscores');
+      throw new Error(
+        "Name must contain only letters, numbers, and underscores",
+      );
     }
   }
 
@@ -649,7 +687,9 @@ const batchResult = generator.generateBatch(requirements);`
    * @private
    */
   generateFilename(requirement) {
-    const sanitizedName = requirement.name.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    const sanitizedName = requirement.name
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "_");
     return `${sanitizedName}.test.sql`;
   }
 
@@ -660,7 +700,7 @@ const batchResult = generator.generateBatch(requirements);`
    * @private
    */
   getTestDirectory(testType) {
-    return this.testDirectories[testType] || '999_custom_tests';
+    return this.testDirectories[testType] || "999_custom_tests";
   }
 
   /**
@@ -670,16 +710,17 @@ const batchResult = generator.generateBatch(requirements);`
    * @private
    */
   generateRpcTemplate(requirement) {
-    const schema = requirement.schema || 'public';
+    const schema = requirement.schema || "public";
     const functionName = requirement.name;
     const testFunctionName = `run_${functionName}_tests`;
-    const planCount = this.calculatePlanCount(requirement, 'rpc');
-    
+    const planCount = this.calculatePlanCount(requirement, "rpc");
+
     // Build parameter placeholders if parameters are specified
-    const hasParams = requirement.parameters && requirement.parameters.length > 0;
-    const paramPlaceholder = hasParams ? 
-      `(${requirement.parameters.map(() => 'TODO: param').join(', ')})` : 
-      '()';
+    const hasParams =
+      requirement.parameters && requirement.parameters.length > 0;
+    const paramPlaceholder = hasParams
+      ? `(${requirement.parameters.map(() => "TODO: param").join(", ")})`
+      : "()";
 
     return `-- =========================================================================
 -- RPC FUNCTION TESTS: ${functionName}
@@ -690,7 +731,7 @@ const batchResult = generator.generateBatch(requirements);`
 -- 3. Function validates invalid inputs properly
 -- 4. Function respects security and authorization
 -- 5. Function returns expected data structure
-${requirement.description ? `-- \n-- Description: ${requirement.description}` : ''}
+${requirement.description ? `-- \n-- Description: ${requirement.description}` : ""}
 
 CREATE OR REPLACE FUNCTION test.${testFunctionName}()
 RETURNS SETOF TEXT
@@ -701,7 +742,7 @@ AS $$
 DECLARE
   v_admin_id uuid;
   v_user_id uuid;
-  v_result ${requirement.returnType || 'jsonb'};
+  v_result ${requirement.returnType || "jsonb"};
   v_test_data record;
 BEGIN
   -- Plan our tests (adjust count as needed)
@@ -722,7 +763,7 @@ BEGIN
   RETURN NEXT tap.has_function(
     '${schema}', 
     '${functionName}',
-    ${hasParams ? `ARRAY[${requirement.parameters.map(p => `'${p}'`).join(', ')}]` : 'ARRAY[]::text[]'},
+    ${hasParams ? `ARRAY[${requirement.parameters.map((p) => `'${p}'`).join(", ")}]` : "ARRAY[]::text[]"},
     'Function ${functionName} has correct signature'
   );
   
@@ -770,21 +811,25 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${functionName} RPC
    * @private
    */
   generateRlsTemplate(requirement) {
-    const schema = requirement.schema || 'public';
+    const schema = requirement.schema || "public";
     const tableName = requirement.name;
     const testFunctionName = `run_${tableName}_rls_tests`;
-    const planCount = this.calculatePlanCount(requirement, 'rls');
-    
+    const planCount = this.calculatePlanCount(requirement, "rls");
+
     // Extract policy metadata if available
     const policies = requirement.metadata?.policies || [];
     const testScenarios = requirement.metadata?.testScenarios || [];
-    
+
     // Generate core RLS tests
     let rlsTests = this.generateRlsEnablementTests(schema, tableName);
     rlsTests += this.generatePolicyExistenceTests(schema, tableName, policies);
     rlsTests += this.generatePolicyCommandTests(schema, tableName, policies);
     rlsTests += this.generatePolicyRolesTests(schema, tableName, policies);
-    rlsTests += this.generateMultiUserAccessTests(schema, tableName, testScenarios);
+    rlsTests += this.generateMultiUserAccessTests(
+      schema,
+      tableName,
+      testScenarios,
+    );
     rlsTests += this.generateSecurityEdgeCaseTests(schema, tableName);
 
     return `-- =========================================================================
@@ -797,7 +842,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${functionName} RPC
 -- 4. Policy role verification (policy_roles_are)
 -- 5. Multi-user access scenarios
 -- 6. Security edge cases and bypass scenarios
-${requirement.description ? `-- \n-- Description: ${requirement.description}` : ''}
+${requirement.description ? `-- \n-- Description: ${requirement.description}` : ""}
 
 CREATE OR REPLACE FUNCTION test.${testFunctionName}()
 RETURNS SETOF TEXT
@@ -844,10 +889,10 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive RLS policy test
    * @private
    */
   generateTriggerTemplate(requirement) {
-    const schema = requirement.schema || 'public';
+    const schema = requirement.schema || "public";
     const triggerName = requirement.name;
     const testFunctionName = `run_${triggerName}_tests`;
-    const planCount = this.calculatePlanCount(requirement, 'trigger');
+    const planCount = this.calculatePlanCount(requirement, "trigger");
 
     return `-- =========================================================================
 -- TRIGGER TESTS: ${triggerName}
@@ -857,7 +902,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive RLS policy test
 -- 2. Trigger fires on expected operations
 -- 3. Trigger performs expected data modifications
 -- 4. Trigger handles edge cases correctly
-${requirement.description ? `-- \n-- Description: ${requirement.description}` : ''}
+${requirement.description ? `-- \n-- Description: ${requirement.description}` : ""}
 
 CREATE OR REPLACE FUNCTION test.${testFunctionName}()
 RETURNS SETOF TEXT
@@ -916,10 +961,10 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${triggerName} trig
    * @private
    */
   generateConstraintTemplate(requirement) {
-    const schema = requirement.schema || 'public';
+    const schema = requirement.schema || "public";
     const constraintName = requirement.name;
     const testFunctionName = `run_${constraintName}_tests`;
-    const planCount = this.calculatePlanCount(requirement, 'constraint');
+    const planCount = this.calculatePlanCount(requirement, "constraint");
 
     return `-- =========================================================================
 -- CONSTRAINT TESTS: ${constraintName}
@@ -929,7 +974,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${triggerName} trig
 -- 2. Constraint allows valid data
 -- 3. Constraint rejects invalid data
 -- 4. Constraint behavior is consistent
-${requirement.description ? `-- \n-- Description: ${requirement.description}` : ''}
+${requirement.description ? `-- \n-- Description: ${requirement.description}` : ""}
 
 CREATE OR REPLACE FUNCTION test.${testFunctionName}()
 RETURNS SETOF TEXT
@@ -978,29 +1023,29 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${constraintName} c
    * @private
    */
   generateFunctionTemplate(requirement) {
-    const schema = requirement.schema || 'public';
+    const schema = requirement.schema || "public";
     const functionName = requirement.name;
     const testFunctionName = `run_${functionName}_function_tests`;
-    
+
     // Extract metadata with defaults
     const metadata = requirement.metadata || {};
     const parameterTypes = metadata.parameterTypes || [];
-    const returnType = metadata.returnType || 'text';
-    const language = metadata.language || 'plpgsql';
+    const returnType = metadata.returnType || "text";
+    const language = metadata.language || "plpgsql";
     const _isRpcFunction = metadata.isRpcFunction || false;
     const requiresSecurityTesting = metadata.requiresSecurityTesting || false;
     const testCases = metadata.testCases || [];
     const isVolatile = metadata.isVolatile || false;
-    
+
     // Calculate plan count based on test complexity
     let planCount = this.calculateFunctionPlanCount(requirement, metadata);
-    
+
     // Build parameter signature for testing
     const hasParams = parameterTypes.length > 0;
-    const parameterSignature = hasParams ? 
-      `ARRAY[${parameterTypes.map(type => `'${type}'`).join(', ')}]` : 
-      'ARRAY[]::text[]';
-    
+    const parameterSignature = hasParams
+      ? `ARRAY[${parameterTypes.map((type) => `'${type}'`).join(", ")}]`
+      : "ARRAY[]::text[]";
+
     // Generate sample test parameters based on types
     const sampleParams = this.generateSampleParameters(parameterTypes);
     const invalidParams = this.generateInvalidParameters(parameterTypes);
@@ -1017,8 +1062,8 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${constraintName} c
 -- 6. Behavioral tests with sample inputs
 -- 7. Error condition handling
 -- 8. Authorization scenarios (if applicable)
-${requirement.description ? `-- \n-- Description: ${requirement.description}` : ''}
-${metadata.tags ? `-- Tags: ${metadata.tags.join(', ')}` : ''}
+${requirement.description ? `-- \n-- Description: ${requirement.description}` : ""}
+${metadata.tags ? `-- Tags: ${metadata.tags.join(", ")}` : ""}
 
 CREATE OR REPLACE FUNCTION test.${testFunctionName}()
 RETURNS SETOF TEXT
@@ -1036,10 +1081,14 @@ BEGIN
   -- Plan our tests (adjust count as needed based on metadata)
   RETURN NEXT tap.plan(${planCount});
   
-  ${requiresSecurityTesting ? `-- Setup: Create test users for security testing
+  ${
+    requiresSecurityTesting
+      ? `-- Setup: Create test users for security testing
   v_admin_id := test.create_test_admin();
   v_user_id := test.create_test_user();
-  ` : ''}
+  `
+      : ""
+  }
   -- ===================================================================
   -- BASIC FUNCTION EXISTENCE AND SIGNATURE TESTS
   -- ===================================================================
@@ -1051,55 +1100,67 @@ BEGIN
     'Function ${functionName} exists'
   );
   
-  ${hasParams ? `-- Test 2: Function has correct parameter signature
+  ${
+    hasParams
+      ? `-- Test 2: Function has correct parameter signature
   RETURN NEXT tap.has_function(
     '${schema}',
     '${functionName}',
     ${parameterSignature},
-    'Function ${functionName} has correct parameter types: ${parameterTypes.join(', ')}'
+    'Function ${functionName} has correct parameter types: ${parameterTypes.join(", ")}'
   );
-  ` : `-- Test 2: Function has no parameters
+  `
+      : `-- Test 2: Function has no parameters
   RETURN NEXT tap.has_function(
     '${schema}',
     '${functionName}',
     ARRAY[]::text[],
     'Function ${functionName} takes no parameters'
   );
-  `}
+  `
+  }
   -- Test 3: Function returns correct type
   RETURN NEXT tap.function_returns(
     '${schema}',
     '${functionName}',
-    ${hasParams ? parameterSignature + ',' : ''}
+    ${hasParams ? parameterSignature + "," : ""}
     '${returnType}',
     'Function ${functionName} returns ${returnType}'
   );
   
-  ${language !== 'sql' ? `-- Test 4: Function uses correct language
+  ${
+    language !== "sql"
+      ? `-- Test 4: Function uses correct language
   RETURN NEXT tap.function_lang_is(
     '${schema}',
     '${functionName}',
-    ${hasParams ? parameterSignature + ',' : ''}
+    ${hasParams ? parameterSignature + "," : ""}
     '${language}',
     'Function ${functionName} is written in ${language}'
   );
-  ` : ''}
+  `
+      : ""
+  }
   
-  ${metadata.securityDefiner ? `-- Test 5: Function is security definer
+  ${
+    metadata.securityDefiner
+      ? `-- Test 5: Function is security definer
   RETURN NEXT tap.is_definer(
     '${schema}',
     '${functionName}',
-    ${hasParams ? parameterSignature + ',' : ''}
+    ${hasParams ? parameterSignature + "," : ""}
     'Function ${functionName} is security definer'
   );
-  ` : `-- Test 5: Function is NOT security definer (security invoker)
+  `
+      : `-- Test 5: Function is NOT security definer (security invoker)
   RETURN NEXT tap.isnt_definer(
     '${schema}',
     '${functionName}',
-    ${hasParams ? parameterSignature + ',' : ''}
+    ${hasParams ? parameterSignature + "," : ""}
     'Function ${functionName} is security invoker'
   );
-  `}
+  `
+  }
   
   -- ===================================================================
   -- BEHAVIORAL TESTS WITH SAMPLE INPUTS
@@ -1120,32 +1181,46 @@ BEGIN
       );
   END;
   
-  ${testCases.length > 0 ? testCases.map((testCase, index) => `
+  ${
+    testCases.length > 0
+      ? testCases
+          .map(
+            (testCase, index) => `
   -- Test ${7 + index}: Custom test case - ${testCase.description || `Test case ${index + 1}`}
   BEGIN
     ${testCase.input ? `SELECT ${schema}.${functionName}(${testCase.input}) INTO v_result;` : `SELECT ${schema}.${functionName}() INTO v_result;`}
     
-    ${testCase.expectedOutput !== undefined ? `RETURN NEXT tap.is(
+    ${
+      testCase.expectedOutput !== undefined
+        ? `RETURN NEXT tap.is(
       v_result,
-      ${typeof testCase.expectedOutput === 'string' ? `'${testCase.expectedOutput}'` : testCase.expectedOutput}::${returnType},
+      ${typeof testCase.expectedOutput === "string" ? `'${testCase.expectedOutput}'` : testCase.expectedOutput}::${returnType},
       'Function ${functionName} returns expected result: ${testCase.description || `test case ${index + 1}`}'
-    );` : `RETURN NEXT tap.ok(
+    );`
+        : `RETURN NEXT tap.ok(
       v_result IS NOT NULL,
       'Function ${functionName} executes successfully: ${testCase.description || `test case ${index + 1}`}'
-    );`}
+    );`
+    }
   EXCEPTION
     WHEN OTHERS THEN
       RETURN NEXT tap.fail(
         'Function ${functionName} test case failed: ${testCase.description || `test case ${index + 1}`} - ' || SQLERRM
       );
   END;
-  `).join('') : ''}
+  `,
+          )
+          .join("")
+      : ""
+  }
   
   -- ===================================================================
   -- ERROR CONDITION AND VALIDATION TESTS
   -- ===================================================================
   
-  ${hasParams ? `-- Test: Function handles invalid input appropriately
+  ${
+    hasParams
+      ? `-- Test: Function handles invalid input appropriately
   BEGIN
     v_error_caught := false;
     BEGIN
@@ -1161,9 +1236,13 @@ BEGIN
       'Function ${functionName} handles invalid input appropriately (either raises exception or returns null)'
     );
   END;
-  ` : ''}
+  `
+      : ""
+  }
   
-  ${requiresSecurityTesting ? `-- ===================================================================
+  ${
+    requiresSecurityTesting
+      ? `-- ===================================================================
   -- AUTHORIZATION AND SECURITY TESTS
   -- ===================================================================
   
@@ -1204,16 +1283,21 @@ BEGIN
         'Function ${functionName} should work with admin context: ' || SQLERRM
       );
   END;
-  ` : ''}
+  `
+      : ""
+  }
   
-  ${isVolatile ? `-- ===================================================================
+  ${
+    isVolatile
+      ? `-- ===================================================================
   -- SIDE EFFECTS AND STATE TESTS (for volatile functions)
   -- ===================================================================
   
   -- Test: Function maintains data consistency
   -- TODO: Add specific tests for function side effects
   RETURN NEXT tap.pass('TODO: Test function side effects and data consistency');
-  ` : `-- ===================================================================
+  `
+      : `-- ===================================================================
   -- IMMUTABILITY TESTS (for stable/immutable functions)
   -- ===================================================================
   
@@ -1222,9 +1306,13 @@ BEGIN
     v_result1 ${returnType};
     v_result2 ${returnType};
   BEGIN
-    ${sampleParams ? `SELECT ${schema}.${functionName}(${sampleParams}) INTO v_result1;
-    SELECT ${schema}.${functionName}(${sampleParams}) INTO v_result2;` : `SELECT ${schema}.${functionName}() INTO v_result1;
-    SELECT ${schema}.${functionName}() INTO v_result2;`}
+    ${
+      sampleParams
+        ? `SELECT ${schema}.${functionName}(${sampleParams}) INTO v_result1;
+    SELECT ${schema}.${functionName}(${sampleParams}) INTO v_result2;`
+        : `SELECT ${schema}.${functionName}() INTO v_result1;
+    SELECT ${schema}.${functionName}() INTO v_result2;`
+    }
     
     RETURN NEXT tap.is(
       v_result1,
@@ -1237,7 +1325,8 @@ BEGIN
         'Function ${functionName} consistency test failed: ' || SQLERRM
       );
   END;
-  `}
+  `
+  }
   
   -- ===================================================================
   -- PERFORMANCE AND RESOURCE TESTS (optional)
@@ -1308,9 +1397,9 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   -- =====================================================
   
 `;
-    
+
     if (policies && policies.length > 0) {
-      policies.forEach(policy => {
+      policies.forEach((policy) => {
         tests += `  -- Test: Policy '${policy.name}' exists
   RETURN NEXT tap.ok(
     (SELECT COUNT(*) > 0 FROM pg_policies 
@@ -1335,7 +1424,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   
 `;
     }
-    
+
     return tests;
   }
 
@@ -1353,11 +1442,11 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   -- =====================================================
   
 `;
-    
+
     if (policies && policies.length > 0) {
-      policies.forEach(policy => {
+      policies.forEach((policy) => {
         if (policy.commands && policy.commands.length > 0) {
-          policy.commands.forEach(cmd => {
+          policy.commands.forEach((cmd) => {
             tests += `  -- Test: Policy '${policy.name}' applies to ${cmd} command
   RETURN NEXT tap.ok(
     (SELECT COUNT(*) > 0 FROM pg_policies 
@@ -1384,7 +1473,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   
 `;
     }
-    
+
     return tests;
   }
 
@@ -1402,19 +1491,19 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   -- =====================================================
   
 `;
-    
+
     if (policies && policies.length > 0) {
-      policies.forEach(policy => {
+      policies.forEach((policy) => {
         if (policy.roles && policy.roles.length > 0) {
-          const _roleList = policy.roles.map(role => `'${role}'`).join(', ');
+          const _roleList = policy.roles.map((role) => `'${role}'`).join(", ");
           tests += `  -- Test: Policy '${policy.name}' applies to correct roles
   RETURN NEXT tap.set_eq(
     $$SELECT unnest(roles) FROM pg_policies 
       WHERE schemaname = '${schema}' 
       AND tablename = '${tableName}'
       AND policyname = '${policy.name}'$$,
-    $$VALUES (${policy.roles.map(role => `'${role}'`).join('), (')})$$,
-    'Policy "${policy.name}" applies to correct roles: ${policy.roles.join(', ')}'
+    $$VALUES (${policy.roles.map((role) => `'${role}'`).join("), (")})$$,
+    'Policy "${policy.name}" applies to correct roles: ${policy.roles.join(", ")}'
   );
   
 `;
@@ -1432,7 +1521,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   
 `;
     }
-    
+
     return tests;
   }
 
@@ -1450,7 +1539,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   -- =====================================================
   
 `;
-    
+
     // Anonymous user tests
     tests += `  -- Test: Anonymous access
   PERFORM test.set_auth_context(NULL, 'anon');
@@ -1461,7 +1550,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   );
   
 `;
-    
+
     // Authenticated user tests
     tests += `  -- Test: Authenticated user can access own data
   PERFORM test.set_auth_context(v_user1_id, 'authenticated');
@@ -1472,7 +1561,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   RETURN NEXT tap.pass('TODO: Test authenticated user can access own data in ${tableName}');
   
 `;
-    
+
     // Cross-user access restriction tests
     tests += `  -- Test: Users cannot access other users' data
   PERFORM test.set_auth_context(v_user2_id, 'authenticated');
@@ -1481,7 +1570,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   RETURN NEXT tap.pass('TODO: Test user cannot access other users data in ${tableName}');
   
 `;
-    
+
     // Admin access tests
     tests += `  -- Test: Admin users have elevated access
   PERFORM test.set_auth_context(v_admin_id, 'authenticated');
@@ -1489,21 +1578,21 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
   RETURN NEXT tap.pass('TODO: Test admin user has appropriate access to ${tableName}');
   
 `;
-    
+
     if (testScenarios && testScenarios.length > 0) {
       testScenarios.forEach((scenario, index) => {
-        tests += `  -- Custom Test Scenario ${index + 1}: ${scenario.description || 'Custom scenario'}
+        tests += `  -- Custom Test Scenario ${index + 1}: ${scenario.description || "Custom scenario"}
   PERFORM test.set_auth_context(
-    ${scenario.userId ? `'${scenario.userId}'::uuid` : 'NULL'}, 
-    '${scenario.role || 'authenticated'}'
+    ${scenario.userId ? `'${scenario.userId}'::uuid` : "NULL"}, 
+    '${scenario.role || "authenticated"}'
   );
   
-  RETURN NEXT tap.pass('TODO: Implement custom test scenario: ${scenario.description || 'custom scenario'}');
+  RETURN NEXT tap.pass('TODO: Implement custom test scenario: ${scenario.description || "custom scenario"}');
   
 `;
       });
     }
-    
+
     return tests;
   }
 
@@ -1558,30 +1647,43 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
    * @private
    */
   generateTableTemplate(requirement) {
-    const schema = requirement.schema || 'public';
+    const schema = requirement.schema || "public";
     const tableName = requirement.targetName || requirement.name;
     const testFunctionName = `run_${tableName}_table_tests`;
-    const planCount = this.calculatePlanCount(requirement, 'table');
-    
+    const planCount = this.calculatePlanCount(requirement, "table");
+
     // Extract metadata for comprehensive testing
     const metadata = requirement.metadata || {};
     const columns = metadata.columns || [];
     const expectedConstraints = metadata.expectedConstraints || [];
     const requiresRowLevelSecurity = metadata.requiresRowLevelSecurity || false;
     const indexes = metadata.indexes || [];
-    
+
     // Generate column test assertions
-    const columnTests = this.generateColumnTestAssertions(schema, tableName, columns);
-    
-    // Generate constraint test assertions  
-    const constraintTests = this.generateConstraintTestAssertions(schema, tableName, expectedConstraints);
-    
+    const columnTests = this.generateColumnTestAssertions(
+      schema,
+      tableName,
+      columns,
+    );
+
+    // Generate constraint test assertions
+    const constraintTests = this.generateConstraintTestAssertions(
+      schema,
+      tableName,
+      expectedConstraints,
+    );
+
     // Generate index test assertions
-    const indexTests = this.generateIndexTestAssertions(schema, tableName, indexes);
-    
+    const indexTests = this.generateIndexTestAssertions(
+      schema,
+      tableName,
+      indexes,
+    );
+
     // Generate RLS test assertions if required
-    const rlsTests = requiresRowLevelSecurity ? 
-      this.generateRlsTestAssertions(schema, tableName) : '';
+    const rlsTests = requiresRowLevelSecurity
+      ? this.generateRlsTestAssertions(schema, tableName)
+      : "";
 
     return `-- =========================================================================
 -- TABLE TESTS: ${tableName}
@@ -1593,7 +1695,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
 -- 4. Check constraints and unique constraints work as expected
 -- 5. Table ownership and privileges are set appropriately
 -- 6. Row Level Security is configured if required
-${requirement.description ? `-- \n-- Description: ${requirement.description}` : ''}
+${requirement.description ? `-- \n-- Description: ${requirement.description}` : ""}
 
 CREATE OR REPLACE FUNCTION test.${testFunctionName}()
 RETURNS SETOF TEXT
@@ -1701,20 +1803,20 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${tab
    * @private
    */
   generateIndexTemplate(requirement) {
-    const schema = requirement.schema || 'public';
+    const schema = requirement.schema || "public";
     const indexName = requirement.name;
-    const tableName = requirement.tableName || 'TODO_TABLE_NAME';
+    const tableName = requirement.tableName || "TODO_TABLE_NAME";
     const testFunctionName = `run_${indexName}_index_tests`;
-    const planCount = this.calculatePlanCount(requirement, 'index');
-    
+    const planCount = this.calculatePlanCount(requirement, "index");
+
     const isUnique = requirement.isUnique || false;
-    const indexType = requirement.indexType || 'btree';
+    const indexType = requirement.indexType || "btree";
     const isPartial = requirement.isPartial || false;
-    const indexedColumns = requirement.indexedColumns || ['TODO_COLUMN'];
-    const whereClause = requirement.whereClause || '';
-    
+    const indexedColumns = requirement.indexedColumns || ["TODO_COLUMN"];
+    const whereClause = requirement.whereClause || "";
+
     // Build column array string for pgTAP
-    const columnsArrayStr = indexedColumns.map(col => `'${col}'`).join(', ');
+    const columnsArrayStr = indexedColumns.map((col) => `'${col}'`).join(", ");
 
     return `-- =========================================================================
 -- INDEX TESTS: ${indexName}
@@ -1725,7 +1827,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${tab
 -- 3. Index type is correct (${indexType})
 -- 4. Index uniqueness constraint works as expected
 -- 5. Index performance characteristics are appropriate
-${requirement.description ? `-- \\n-- Description: ${requirement.description}` : ''}
+${requirement.description ? `-- \\n-- Description: ${requirement.description}` : ""}
 
 CREATE OR REPLACE FUNCTION test.${testFunctionName}()
 RETURNS SETOF TEXT
@@ -1767,7 +1869,9 @@ BEGIN
     'Index ${indexName} is of type ${indexType}'
   );
   
-${isUnique ? `  -- Test 4: Index enforces uniqueness
+${
+  isUnique
+    ? `  -- Test 4: Index enforces uniqueness
   RETURN NEXT tap.index_is_unique(
     '${schema}',
     '${tableName}',
@@ -1778,13 +1882,13 @@ ${isUnique ? `  -- Test 4: Index enforces uniqueness
   -- Test 5: Unique constraint validation - duplicate insertion should fail
   BEGIN
     -- Insert a test record first
-    INSERT INTO ${schema}.${tableName} (${indexedColumns.join(', ')}) 
-    VALUES (${'null, '.repeat(indexedColumns.length).slice(0, -2)}) -- TODO: Add appropriate test values
+    INSERT INTO ${schema}.${tableName} (${indexedColumns.join(", ")}) 
+    VALUES (${"null, ".repeat(indexedColumns.length).slice(0, -2)}) -- TODO: Add appropriate test values
     RETURNING id INTO v_test_record_id;
     
     -- Try to insert duplicate - should fail
     RETURN NEXT tap.throws_ok(
-      'INSERT INTO ${schema}.${tableName} (${indexedColumns.join(', ')}) VALUES (${'null, '.repeat(indexedColumns.length).slice(0, -2)})', -- TODO: Same test values
+      'INSERT INTO ${schema}.${tableName} (${indexedColumns.join(", ")}) VALUES (${"null, ".repeat(indexedColumns.length).slice(0, -2)})', -- TODO: Same test values
       '23505', -- Unique violation error code
       'Duplicate insertion properly rejected by unique index ${indexName}'
     );
@@ -1794,21 +1898,27 @@ ${isUnique ? `  -- Test 4: Index enforces uniqueness
       -- If setup fails, mark as TODO
       RETURN NEXT tap.pass('TODO: Set up unique constraint validation test');
   END;
-` : `  -- Test 4: Non-unique index allows duplicates (if applicable)
+`
+    : `  -- Test 4: Non-unique index allows duplicates (if applicable)
   -- TODO: Add test for non-unique index behavior if relevant
   RETURN NEXT tap.pass('TODO: Add non-unique index behavior test if applicable');
   
   -- Test 5: Index performance characteristics
   -- TODO: Add performance validation tests (comments about expected usage patterns)
   RETURN NEXT tap.pass('TODO: Add performance validation tests');
-`}
-${isPartial ? `  -- Test 6: Partial index WHERE clause validation
+`
+}
+${
+  isPartial
+    ? `  -- Test 6: Partial index WHERE clause validation
   -- TODO: Verify partial index WHERE clause: ${whereClause}
   RETURN NEXT tap.pass('TODO: Test partial index WHERE clause behavior');
-` : `  -- Test 6: Full index coverage (not partial)
+`
+    : `  -- Test 6: Full index coverage (not partial)
   -- TODO: Verify index covers all table rows (no WHERE clause)
   RETURN NEXT tap.pass('TODO: Verify full index coverage');
-`}
+`
+}
   -- Test 7: Index usage in query plans (performance validation)
   -- NOTE: This is a comment-based test for manual verification
   -- Query patterns that should use this index:
@@ -1831,9 +1941,9 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${indexName} index 
 -- Performance Notes:
 -- Index: ${indexName}
 -- Type: ${indexType}
--- Columns: ${indexedColumns.join(', ')}
--- Unique: ${isUnique ? 'Yes' : 'No'}
-${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : '-- Partial: No'}
+-- Columns: ${indexedColumns.join(", ")}
+-- Unique: ${isUnique ? "Yes" : "No"}
+${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : "-- Partial: No"}
 -- Expected usage patterns:
 --   TODO: Document expected query patterns that benefit from this index
 --   TODO: Document any specific performance requirements or SLA targets`;
@@ -1865,7 +1975,7 @@ ${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : '-- Partial: No'}
     columns.forEach((column, _index) => {
       const columnName = column.targetName || column.name;
       const metadata = column.metadata || {};
-      
+
       assertions += `
   -- Column: ${columnName}
   RETURN NEXT tap.has_column(
@@ -1888,8 +1998,10 @@ ${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : '-- Partial: No'}
       }
 
       if (metadata.expectedNotNull !== undefined) {
-        const assertion = metadata.expectedNotNull ? 'col_not_null' : 'col_is_null';
-        const description = metadata.expectedNotNull ? 'NOT NULL' : 'nullable';
+        const assertion = metadata.expectedNotNull
+          ? "col_not_null"
+          : "col_is_null";
+        const description = metadata.expectedNotNull ? "NOT NULL" : "nullable";
         assertions += `
   
   RETURN NEXT tap.${assertion}(
@@ -1987,7 +2099,7 @@ ${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : '-- Partial: No'}
   -- =========================================================================
   `;
 
-    expectedConstraints.forEach(constraintName => {
+    expectedConstraints.forEach((constraintName) => {
       assertions += `
   -- Constraint: ${constraintName}
   RETURN NEXT tap.has_check(
@@ -2005,7 +2117,7 @@ ${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : '-- Partial: No'}
   }
 
   /**
-   * Generate index test assertions  
+   * Generate index test assertions
    * @param {string} schema - Schema name
    * @param {string} tableName - Table name
    * @param {IndexTestRequirement[]} indexes - Index requirements
@@ -2031,10 +2143,10 @@ ${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : '-- Partial: No'}
   -- =========================================================================
   `;
 
-    indexes.forEach(index => {
+    indexes.forEach((index) => {
       const indexName = index.targetName || index.name;
       const metadata = index.metadata || {};
-      
+
       assertions += `
   -- Index: ${indexName}
   RETURN NEXT tap.has_index(
@@ -2112,14 +2224,14 @@ ${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : '-- Partial: No'}
    * @private
    */
   generateColumnTemplate(requirement) {
-    const schema = requirement.schema || 'public';
+    const schema = requirement.schema || "public";
     const tableName = requirement.tableName || requirement.metadata?.tableName;
     const columnName = requirement.name;
     const testFunctionName = `run_${tableName}_${columnName}_column_tests`;
-    const planCount = this.calculatePlanCount(requirement, 'column');
+    const planCount = this.calculatePlanCount(requirement, "column");
 
     if (!tableName) {
-      throw new Error('Column test requirement must specify tableName');
+      throw new Error("Column test requirement must specify tableName");
     }
 
     // Build test assertions based on column metadata
@@ -2134,7 +2246,7 @@ ${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : '-- Partial: No'}
 -- 3. Primary key and foreign key relationships work correctly
 -- 4. Data integrity is maintained during operations
 -- 5. Type conversions work as expected
-${requirement.description ? `-- \\n-- Description: ${requirement.description}` : ''}
+${requirement.description ? `-- \\n-- Description: ${requirement.description}` : ""}
 
 CREATE OR REPLACE FUNCTION test.${testFunctionName}()
 RETURNS SETOF TEXT
@@ -2144,7 +2256,7 @@ SET search_path = test, public, security
 AS $$
 DECLARE
   v_test_id uuid;
-  v_sample_value ${requirement.expectedType || 'text'};
+  v_sample_value ${requirement.expectedType || "text"};
 BEGIN
   -- Plan our tests (adjust count as needed)
   RETURN NEXT tap.plan(${planCount});
@@ -2176,7 +2288,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
    * @private
    */
   buildColumnAssertions(requirement) {
-    const schema = requirement.schema || 'public';
+    const schema = requirement.schema || "public";
     const tableName = requirement.tableName || requirement.metadata?.tableName;
     const columnName = requirement.name;
     const assertions = [];
@@ -2222,11 +2334,12 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
     '${columnName}',
     'Column ${columnName} has a default value'
   );`);
-      
+
       if (requirement.expectedDefaultValue !== undefined) {
-        const defaultValue = typeof requirement.expectedDefaultValue === 'string' 
-          ? `'${requirement.expectedDefaultValue}'` 
-          : requirement.expectedDefaultValue;
+        const defaultValue =
+          typeof requirement.expectedDefaultValue === "string"
+            ? `'${requirement.expectedDefaultValue}'`
+            : requirement.expectedDefaultValue;
         assertions.push(`  -- Test ${testNumber++}: Column has correct default value
   RETURN NEXT tap.col_default_is(
     '${schema}',
@@ -2250,7 +2363,11 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
     }
 
     // Test 6: Foreign key
-    if (requirement.isForeignKey === true && requirement.referencedTable && requirement.referencedColumn) {
+    if (
+      requirement.isForeignKey === true &&
+      requirement.referencedTable &&
+      requirement.referencedColumn
+    ) {
       assertions.push(`  -- Test ${testNumber++}: Foreign key relationship
   RETURN NEXT tap.fk_ok(
     '${schema}', '${tableName}', '${columnName}',
@@ -2268,7 +2385,10 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
   );`);
 
     // Test 8: Type conversion test (if applicable)
-    if (requirement.expectedType && this.isNumericType(requirement.expectedType)) {
+    if (
+      requirement.expectedType &&
+      this.isNumericType(requirement.expectedType)
+    ) {
       assertions.push(`  -- Test ${testNumber++}: Type conversion test
   RETURN NEXT tap.lives_ok(
     'SELECT ${columnName}::${requirement.expectedType} FROM ${schema}.${tableName} LIMIT 1',
@@ -2286,7 +2406,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
   );`);
     }
 
-    return assertions.join('\\n\\n');
+    return assertions.join("\\n\\n");
   }
 
   /**
@@ -2296,10 +2416,25 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
    * @private
    */
   isNumericType(dataType) {
-    const numericTypes = ['integer', 'int', 'int4', 'bigint', 'int8', 'smallint', 'int2',
-                         'decimal', 'numeric', 'real', 'float4', 'double precision', 'float8',
-                         'serial', 'bigserial', 'smallserial'];
-    return numericTypes.some(type => dataType.toLowerCase().includes(type));
+    const numericTypes = [
+      "integer",
+      "int",
+      "int4",
+      "bigint",
+      "int8",
+      "smallint",
+      "int2",
+      "decimal",
+      "numeric",
+      "real",
+      "float4",
+      "double precision",
+      "float8",
+      "serial",
+      "bigserial",
+      "smallserial",
+    ];
+    return numericTypes.some((type) => dataType.toLowerCase().includes(type));
   }
 
   /**
@@ -2318,7 +2453,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
       function: 4,
       table: 12,
       column: 5,
-      index: 8
+      index: 8,
     };
 
     let baseCount = baseCounts[testType] || 4;
@@ -2329,15 +2464,15 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
     }
 
     // For RLS tests, adjust based on policies and test scenarios
-    if (testType === 'rls' && requirement.metadata) {
+    if (testType === "rls" && requirement.metadata) {
       const metadata = requirement.metadata;
-      
+
       // Add tests for each specific policy
       if (metadata.policies && metadata.policies.length > 0) {
         baseCount += metadata.policies.length * 2; // 2 tests per policy (existence + commands)
-        
+
         // Additional tests for policies with role restrictions
-        metadata.policies.forEach(policy => {
+        metadata.policies.forEach((policy) => {
           if (policy.roles && policy.roles.length > 0) {
             baseCount += 1; // Policy role test
           }
@@ -2346,7 +2481,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
           }
         });
       }
-      
+
       // Add tests for custom test scenarios
       if (metadata.testScenarios && metadata.testScenarios.length > 0) {
         baseCount += metadata.testScenarios.length; // Custom scenario tests
@@ -2358,24 +2493,27 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
     }
 
     // For table tests, adjust based on metadata
-    if (testType === 'table' && requirement.metadata) {
+    if (testType === "table" && requirement.metadata) {
       const metadata = requirement.metadata;
-      
+
       // Add tests for each column
       if (metadata.columns && metadata.columns.length > 0) {
         baseCount += metadata.columns.length * 2; // 2 tests per column minimum
       }
-      
+
       // Add tests for constraints
-      if (metadata.expectedConstraints && metadata.expectedConstraints.length > 0) {
+      if (
+        metadata.expectedConstraints &&
+        metadata.expectedConstraints.length > 0
+      ) {
         baseCount += metadata.expectedConstraints.length * 2;
       }
-      
+
       // Add tests for indexes
       if (metadata.indexes && metadata.indexes.length > 0) {
         baseCount += metadata.indexes.length * 2;
       }
-      
+
       // Add tests for RLS if required
       if (metadata.requiresRowLevelSecurity) {
         baseCount += 3;
@@ -2383,7 +2521,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
     }
 
     // Column-specific adjustments
-    if (testType === 'column') {
+    if (testType === "column") {
       if (requirement.expectedType) baseCount += 1;
       if (requirement.expectedNotNull !== undefined) baseCount += 1;
       if (requirement.expectedHasDefault) baseCount += 1;
@@ -2395,7 +2533,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
     }
 
     // Index-specific adjustments
-    if (testType === 'index') {
+    if (testType === "index") {
       if (requirement.isUnique) {
         baseCount += 2; // Additional uniqueness constraint tests
       }
@@ -2405,7 +2543,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
       if (requirement.indexedColumns && requirement.indexedColumns.length > 3) {
         baseCount += 1; // More complex multi-column indexes
       }
-      if (requirement.indexType && requirement.indexType !== 'btree') {
+      if (requirement.indexType && requirement.indexType !== "btree") {
         baseCount += 1; // Non-standard index types need more validation
       }
     }
@@ -2459,19 +2597,19 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
       return null;
     }
 
-    const sampleValues = parameterTypes.map(type => {
+    const sampleValues = parameterTypes.map((type) => {
       const lowerType = type.toLowerCase();
-      
+
       // Handle array types
-      if (lowerType.includes('[]')) {
-        const baseType = lowerType.replace('[]', '');
+      if (lowerType.includes("[]")) {
+        const baseType = lowerType.replace("[]", "");
         return this.getSampleArrayValue(baseType);
       }
-      
+
       return this.getSampleValue(lowerType);
     });
 
-    return sampleValues.join(', ');
+    return sampleValues.join(", ");
   }
 
   /**
@@ -2485,12 +2623,12 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
       return null;
     }
 
-    const invalidValues = parameterTypes.map(type => {
+    const invalidValues = parameterTypes.map((type) => {
       const lowerType = type.toLowerCase();
       return this.getInvalidValue(lowerType);
     });
 
-    return invalidValues.join(', ');
+    return invalidValues.join(", ");
   }
 
   /**
@@ -2502,65 +2640,65 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
   getSampleValue(type) {
     const typeMap = {
       // Integer types
-      'integer': '42',
-      'int': '42',
-      'int4': '42',
-      'bigint': '123456789',
-      'int8': '123456789',
-      'smallint': '123',
-      'int2': '123',
+      integer: "42",
+      int: "42",
+      int4: "42",
+      bigint: "123456789",
+      int8: "123456789",
+      smallint: "123",
+      int2: "123",
 
       // Decimal types
-      'decimal': '123.45',
-      'numeric': '123.45',
-      'real': '123.45',
-      'float4': '123.45',
-      'double precision': '123.45',
-      'float8': '123.45',
+      decimal: "123.45",
+      numeric: "123.45",
+      real: "123.45",
+      float4: "123.45",
+      "double precision": "123.45",
+      float8: "123.45",
 
       // String types
-      'text': "'sample text'",
-      'varchar': "'sample varchar'",
-      'character varying': "'sample varchar'",
-      'char': "'S'",
-      'character': "'S'",
+      text: "'sample text'",
+      varchar: "'sample varchar'",
+      "character varying": "'sample varchar'",
+      char: "'S'",
+      character: "'S'",
 
       // Boolean
-      'boolean': 'true',
-      'bool': 'true',
+      boolean: "true",
+      bool: "true",
 
       // Date/Time
-      'date': "'2024-01-01'",
-      'time': "'12:00:00'",
-      'timestamp': "'2024-01-01 12:00:00'",
-      'timestamptz': "'2024-01-01 12:00:00+00'",
-      'interval': "'1 hour'",
+      date: "'2024-01-01'",
+      time: "'12:00:00'",
+      timestamp: "'2024-01-01 12:00:00'",
+      timestamptz: "'2024-01-01 12:00:00+00'",
+      interval: "'1 hour'",
 
       // UUID
-      'uuid': "'00000000-0000-0000-0000-000000000001'::uuid",
+      uuid: "'00000000-0000-0000-0000-000000000001'::uuid",
 
       // JSON
-      'json': "'{\"key\": \"value\"}'::json",
-      'jsonb': "'{\"key\": \"value\"}'::jsonb",
+      json: '\'{"key": "value"}\'::json',
+      jsonb: '\'{"key": "value"}\'::jsonb',
 
       // Binary
-      'bytea': "'\\x414243'",
+      bytea: "'\\x414243'",
 
       // Network types
-      'inet': "'192.168.1.1'",
-      'cidr': "'192.168.1.0/24'",
-      'macaddr': "'08:00:2b:01:02:03'",
+      inet: "'192.168.1.1'",
+      cidr: "'192.168.1.0/24'",
+      macaddr: "'08:00:2b:01:02:03'",
 
       // Geometric types (simplified)
-      'point': "'(1,2)'",
-      'polygon': "'((0,0),(1,1),(1,0))'",
-      'circle': "'<(0,0),1>'",
+      point: "'(1,2)'",
+      polygon: "'((0,0),(1,1),(1,0))'",
+      circle: "'<(0,0),1>'",
 
       // Default fallback
-      'default': "'sample_value'"
+      default: "'sample_value'",
     };
 
-    return typeMap[type] || typeMap['default'];
+    return typeMap[type] || typeMap["default"];
   }
 
   /**
@@ -2571,18 +2709,22 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
    */
   getSampleArrayValue(baseType) {
     const sampleValue = this.getSampleValue(baseType);
-    
+
     // For simple types, create an array
-    if (baseType.includes('int') || baseType.includes('numeric') || baseType.includes('decimal')) {
-      return 'ARRAY[1, 2, 3]';
-    } else if (baseType === 'text' || baseType.includes('varchar')) {
+    if (
+      baseType.includes("int") ||
+      baseType.includes("numeric") ||
+      baseType.includes("decimal")
+    ) {
+      return "ARRAY[1, 2, 3]";
+    } else if (baseType === "text" || baseType.includes("varchar")) {
       return "ARRAY['item1', 'item2', 'item3']";
-    } else if (baseType === 'boolean') {
-      return 'ARRAY[true, false]';
-    } else if (baseType === 'uuid') {
+    } else if (baseType === "boolean") {
+      return "ARRAY[true, false]";
+    } else if (baseType === "uuid") {
       return "ARRAY['00000000-0000-0000-0000-000000000001'::uuid, '00000000-0000-0000-0000-000000000002'::uuid]";
     }
-    
+
     return `ARRAY[${sampleValue}, ${sampleValue}]`;
   }
 
@@ -2595,43 +2737,43 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
   getInvalidValue(type) {
     const invalidMap = {
       // Integer types - use string that can't be converted
-      'integer': "'not_a_number'",
-      'int': "'not_a_number'",
-      'int4': "'not_a_number'",
-      'bigint': "'not_a_number'",
-      'int8': "'not_a_number'",
-      'smallint': "'not_a_number'",
+      integer: "'not_a_number'",
+      int: "'not_a_number'",
+      int4: "'not_a_number'",
+      bigint: "'not_a_number'",
+      int8: "'not_a_number'",
+      smallint: "'not_a_number'",
 
       // For numeric types, use invalid string
-      'decimal': "'invalid_decimal'",
-      'numeric': "'invalid_numeric'",
-      'real': "'invalid_real'",
+      decimal: "'invalid_decimal'",
+      numeric: "'invalid_numeric'",
+      real: "'invalid_real'",
 
       // For dates, use invalid format
-      'date': "'invalid-date'",
-      'timestamp': "'invalid-timestamp'",
-      'timestamptz': "'invalid-timestamp'",
+      date: "'invalid-date'",
+      timestamp: "'invalid-timestamp'",
+      timestamptz: "'invalid-timestamp'",
 
       // For UUID, use invalid format
-      'uuid': "'invalid-uuid-format'",
+      uuid: "'invalid-uuid-format'",
 
       // For JSON, use invalid syntax
-      'json': "'invalid json syntax{'",
-      'jsonb': "'invalid json syntax{'",
+      json: "'invalid json syntax{'",
+      jsonb: "'invalid json syntax{'",
 
       // For boolean, use invalid string
-      'boolean': "'maybe'",
-      'bool': "'maybe'",
+      boolean: "'maybe'",
+      bool: "'maybe'",
 
       // For network types, use invalid formats
-      'inet': "'invalid.ip.address'",
-      'cidr': "'invalid/cidr'",
+      inet: "'invalid.ip.address'",
+      cidr: "'invalid/cidr'",
 
       // Default: null (which might be invalid for NOT NULL columns)
-      'default': 'NULL'
+      default: "NULL",
     };
 
-    return invalidMap[type] || invalidMap['default'];
+    return invalidMap[type] || invalidMap["default"];
   }
 
   /**
@@ -2643,10 +2785,10 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
   formatPgTapStructure(content) {
     // Ensure consistent indentation for pgTAP functions
     return content
-      .replace(/^(\s*RETURN NEXT tap\.)/gm, '  $1')  // Standardize pgTAP function indentation
-      .replace(/^(\s*--)/gm, '$1')  // Keep comment indentation as-is
-      .replace(/^(\s*PERFORM)/gm, '  $1')  // Standardize PERFORM indentation
-      .replace(/^(\s*SELECT)/gm, '  $1');  // Standardize SELECT indentation
+      .replace(/^(\s*RETURN NEXT tap\.)/gm, "  $1") // Standardize pgTAP function indentation
+      .replace(/^(\s*--)/gm, "$1") // Keep comment indentation as-is
+      .replace(/^(\s*PERFORM)/gm, "  $1") // Standardize PERFORM indentation
+      .replace(/^(\s*SELECT)/gm, "  $1"); // Standardize SELECT indentation
   }
 
   /**
@@ -2657,50 +2799,50 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
    */
   extractPatternVariables(requirement) {
     const variables = {
-      schema: requirement.schema || 'public',
+      schema: requirement.schema || "public",
       tableName: requirement.name,
       columnName: requirement.name,
       functionName: requirement.name,
       indexName: requirement.name,
       constraintName: requirement.name,
-      policyName: requirement.name
+      policyName: requirement.name,
     };
 
     // Add metadata-based variables
     if (requirement.metadata) {
       const metadata = requirement.metadata;
-      
+
       // Table-specific variables
       if (metadata.tableName) {
         variables.tableName = metadata.tableName;
       }
-      
-      // Column-specific variables  
+
+      // Column-specific variables
       if (metadata.expectedType) {
         variables.dataType = metadata.expectedType;
       }
-      
+
       // Function-specific variables
       if (metadata.parameterTypes) {
         variables.parameterTypes = metadata.parameterTypes;
       }
-      
+
       if (metadata.returnType) {
         variables.returnType = metadata.returnType;
       }
-      
+
       // Index-specific variables
       if (metadata.indexedColumns) {
         variables.indexedColumns = metadata.indexedColumns;
       }
-      
+
       // RLS-specific variables
       if (metadata.policies) {
         variables.policies = metadata.policies;
       }
-      
+
       // Test data variables
-      variables.testId = 'test-id-' + Math.random().toString(36).substr(2, 9);
+      variables.testId = "test-id-" + Math.random().toString(36).substr(2, 9);
       variables.validValues = this.generateSampleTestData(requirement);
       variables.invalidValues = this.generateInvalidTestData(requirement);
     }
@@ -2717,28 +2859,30 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
    * @private
    */
   generatePatternEnhancements(requirement, patterns, variables) {
-    let enhancements = '';
-    
-    patterns.forEach(pattern => {
+    let enhancements = "";
+
+    patterns.forEach((pattern) => {
       try {
         // Skip patterns that are already covered by the base template
         if (this.isPatternCoveredByBase(pattern, requirement)) {
           return;
         }
-        
+
         // Render pattern with variables
-        const renderedPattern = this.patternLibrary.renderPattern(pattern.name, variables);
-        
+        const renderedPattern = this.patternLibrary.renderPattern(
+          pattern.name,
+          variables,
+        );
+
         enhancements += `-- Pattern: ${pattern.name} (${pattern.category})\n`;
         enhancements += `-- ${pattern.description}\n`;
-        enhancements += renderedPattern + '\n\n';
-        
+        enhancements += renderedPattern + "\n\n";
       } catch (error) {
         // Log pattern rendering errors but don't fail the whole generation
         enhancements += `-- Pattern ${pattern.name} could not be rendered: ${error.message}\n\n`;
       }
     });
-    
+
     return enhancements;
   }
 
@@ -2751,22 +2895,25 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
    */
   isPatternCoveredByBase(pattern, requirement) {
     // Basic existence patterns are usually covered by base templates
-    const basicPatterns = ['table_exists_basic', 'column_exists_basic'];
-    
+    const basicPatterns = ["table_exists_basic", "column_exists_basic"];
+
     if (basicPatterns.includes(pattern.name)) {
       return true;
     }
-    
+
     // For table tests, column structure validation is already covered
-    if (requirement.type === 'table' && pattern.name === 'column_structure_validation') {
+    if (
+      requirement.type === "table" &&
+      pattern.name === "column_structure_validation"
+    ) {
       return true;
     }
-    
+
     // For RLS tests, basic RLS checks are covered
-    if (requirement.type === 'rls' && pattern.name === 'rls_enablement_check') {
+    if (requirement.type === "rls" && pattern.name === "rls_enablement_check") {
       return true;
     }
-    
+
     return false;
   }
 
@@ -2778,15 +2925,15 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
    */
   generateSampleTestData(requirement) {
     const metadata = requirement.metadata || {};
-    
-    if (requirement.type === 'column' && metadata.expectedType) {
+
+    if (requirement.type === "column" && metadata.expectedType) {
       return this.getSampleValue(metadata.expectedType.toLowerCase());
     }
-    
-    if (requirement.type === 'table') {
-      return 'DEFAULT VALUES';
+
+    if (requirement.type === "table") {
+      return "DEFAULT VALUES";
     }
-    
+
     return "'sample_value'";
   }
 
@@ -2798,12 +2945,12 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
    */
   generateInvalidTestData(requirement) {
     const metadata = requirement.metadata || {};
-    
-    if (requirement.type === 'column' && metadata.expectedType) {
+
+    if (requirement.type === "column" && metadata.expectedType) {
       return this.getInvalidValue(metadata.expectedType.toLowerCase());
     }
-    
-    return 'NULL';
+
+    return "NULL";
   }
 }
 

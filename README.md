@@ -17,7 +17,7 @@ DATA generates deterministic migrations from your SQL source files and blocks un
 ```
 
 > [!warning]- **Work in Progress**  
-> This project is actively in pre-release, ***use at your own risk!***  
+> This project is actively in pre-release, **_use at your own risk!_**  
 > **See** [/issues/README.md](the issues README) to get a sense of current progress.
 
 ## How It Works
@@ -63,10 +63,10 @@ $ data align production
 # 2. Organize your SQL in named directories
 /sql/
   extensions/    # PostgreSQL extensions
-  tables/        # Table definitions  
+  tables/        # Table definitions
   policies/      # RLS policies
   # etc.
-  
+
 # 3. The DATA workflow
 data automate      # Generate migration plan
 data test          # Run your test suite
@@ -80,30 +80,30 @@ data align production --confirm  # Deploy to prod (with confirmation)
 DATA **blocks production deployments** unless:
 
 - ✅ **Clean repo** (no uncommitted/untracked files)
-- ✅ **Up-to-date** (not behind origin/main) 
+- ✅ **Up-to-date** (not behind origin/main)
 - ✅ **Correct branch** (main, configurable)
 - ✅ **Tests passing** (100% required, configurable)
 
-Large changes require typing confirmation. *"Proceeding without corrections would be... illogical."*
+Large changes require typing confirmation. _"Proceeding without corrections would be... illogical."_
 
 ## Core Commands
 
-| Command | Purpose |
-|---------|---------|
-| `data status` | Show current state vs environments |
-| `data automate` | Generate migration plan from SQL |
-| `data test` | Run test suite (required for prod) |
-| `data promote` | Tag the tested release |
-| `data align <env>` | Deploy to environment (🔐 **gated**) |
-| `data rollback --to-tag <tag>` | Revert to any previous tag |
-| `data analyze` | Detect drift between repo and DB |
+| Command                        | Purpose                              |
+| ------------------------------ | ------------------------------------ |
+| `data status`                  | Show current state vs environments   |
+| `data automate`                | Generate migration plan from SQL     |
+| `data test`                    | Run test suite (required for prod)   |
+| `data promote`                 | Tag the tested release               |
+| `data align <env>`             | Deploy to environment (🔐 **gated**) |
+| `data rollback --to-tag <tag>` | Revert to any previous tag           |
+| `data analyze`                 | Detect drift between repo and DB     |
 
 ## Git-First Deployments
 
 Every deployment creates an immutable git tag. Rollbacks are exact and boring:
 
 ```bash
-# Deploy creates tags automatically  
+# Deploy creates tags automatically
 data align production
 # → Creates: data/prod/2025.241.1430
 
@@ -118,13 +118,13 @@ data status
 
 ## Why DATA vs Others?
 
-| Feature | DATA | Flyway | Liquibase | Supabase CLI |
-|---------|------|--------|-----------|--------------|
-| **Golden SQL** | ✅ Git-native | ❌ Hand-written migrations | ❌ Changelog format | ❌ Hand-written |
-| **Deterministic** | ✅ Pure git diff | ⚠️ DB introspection | ⚠️ DB introspection | ❌ Manual |
-| **Production gates** | ✅ Non-negotiable | ⚠️ Optional | ⚠️ Optional | ❌ None |
-| **Rollback** | ✅ Tag-based | ⚠️ Down scripts | ⚠️ Manual tags | ❌ Manual |
-| **Personality** | 🖖 Lt. Commander Data | 😐 | 😐 | 😐 |
+| Feature              | DATA                  | Flyway                     | Liquibase           | Supabase CLI    |
+| -------------------- | --------------------- | -------------------------- | ------------------- | --------------- |
+| **Golden SQL**       | ✅ Git-native         | ❌ Hand-written migrations | ❌ Changelog format | ❌ Hand-written |
+| **Deterministic**    | ✅ Pure git diff      | ⚠️ DB introspection        | ⚠️ DB introspection | ❌ Manual       |
+| **Production gates** | ✅ Non-negotiable     | ⚠️ Optional                | ⚠️ Optional         | ❌ None         |
+| **Rollback**         | ✅ Tag-based          | ⚠️ Down scripts            | ⚠️ Manual tags      | ❌ Manual       |
+| **Personality**      | 🖖 Lt. Commander Data | 😐                         | 😐                  | 😐              |
 
 ## Example: Safety Gates in Action
 
@@ -134,10 +134,10 @@ $ data align production
 
 🔴 RED ALERT: Working directory not clean
    Modified: sql/tables/users.sql
-   
+
    Commander, your working directory contains uncommitted changes.
    Probability of catastrophic failure: 87.3%
-   
+
    Recommended action: git commit or git stash
 
 # After fixing
@@ -145,15 +145,15 @@ $ data align production
 
 ✅ All safety checks passed
    - Repository: clean ✅
-   - Branch: main (approved) ✅  
+   - Branch: main (approved) ✅
    - Tests: 147/147 passing (100%) ✅
-   
+
    Migration preview:
    + CREATE TABLE crew_evaluations
    + ALTER TABLE users ADD COLUMN shore_leave_balance
-   
+
    Type 'ENGAGE' to proceed: ENGAGE
-   
+
    Deployment successful. "Make it so" achieved.
 ```
 
@@ -168,7 +168,7 @@ The `/sql/` directory is where your "golden sql" files should live. You must sor
 ```
 /sql/
   extensions/   # PostgreSQL extensions
-  tables/       # Tables and relationships  
+  tables/       # Tables and relationships
   functions/    # Stored procedures
   policies/     # RLS policies
   indexes/      # Performance indexes
@@ -191,7 +191,7 @@ The `/sql/` directory is where your "golden sql" files should live. You must sor
     "minimum_coverage": 95,
     "enforce": true
   },
-  "personality": "android"  // android | quiet | tng
+  "personality": "android" // android | quiet | tng
 }
 ```
 
@@ -204,8 +204,8 @@ The `/sql/` directory is where your "golden sql" files should live. You must sor
     data automate
     data test
     data promote
-    
-- name: Deploy to Production  
+
+- name: Deploy to Production
   if: github.ref == 'refs/heads/main'
   run: data align production --confirm
 ```
@@ -230,11 +230,11 @@ npm install -g @starfleet/data
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| "Working directory not clean" | `git commit` or `git stash` |
-| "Behind origin/main" | `git pull origin main` |  
-| "Tests failing" | Fix tests, DATA won't deploy broken code |
+| Problem                       | Solution                                 |
+| ----------------------------- | ---------------------------------------- |
+| "Working directory not clean" | `git commit` or `git stash`              |
+| "Behind origin/main"          | `git pull origin main`                   |
+| "Tests failing"               | Fix tests, DATA won't deploy broken code |
 
 ## The Philosophy
 
@@ -242,13 +242,13 @@ npm install -g @starfleet/data
 
 DATA enforces bulletproof deployments through non-negotiable safety gates. This isn't about restricting developers—it's about giving them confidence. When DATA approves your deployment, you can sleep soundly.
 
-*"In my observations of human behavior, I have noticed that engineers sleep better when their deployments cannot accidentally destroy everything."* — Lt. Commander Data
+_"In my observations of human behavior, I have noticed that engineers sleep better when their deployments cannot accidentally destroy everything."_ — Lt. Commander Data
 
 ---
 
 **Live long and prosper.** 🖖
 
-*"Spot has been fed. Database operations may proceed."*
+_"Spot has been fed. Database operations may proceed."_
 
 ## Contributing
 

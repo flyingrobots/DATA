@@ -1,26 +1,21 @@
 /**
  * Test Generate Command
- * 
+ *
  * Generate pgTAP test templates for RPC functions and RLS policies.
  * Creates properly structured test files in the correct directories.
  */
 
-const fs = require('fs').promises;
-const path = require('path');
-const TestCommand = require('../../lib/TestCommand');
+const fs = require("fs").promises;
+const path = require("path");
+const TestCommand = require("../../lib/TestCommand");
 
 /**
  * Generate pgTAP test templates for RPC functions and RLS policies
  */
 class GenerateCommand extends TestCommand {
-  constructor(
-    testsDir,
-    outputDir,
-    logger = null,
-    isProd = false
-  ) {
+  constructor(testsDir, outputDir, logger = null, isProd = false) {
     super(null, null, testsDir, outputDir, logger, isProd);
-    
+
     // Test generation doesn't require database access
     this.requiresProductionConfirmation = false;
   }
@@ -33,30 +28,33 @@ class GenerateCommand extends TestCommand {
    * @returns {Promise<Object>} Generation result
    */
   async performExecute(options = {}) {
-    this.emit('generation:start', { type: options.type, name: options.name });
-    
+    this.emit("generation:start", { type: options.type, name: options.name });
+
     try {
       // Validate options
       this.validateGenerationOptions(options);
-      
+
       // Determine template type and generate
       let result;
-      if (options.type === 'rpc') {
+      if (options.type === "rpc") {
         result = await this.generateRpcTest(options.name);
-      } else if (options.type === 'rls') {
+      } else if (options.type === "rls") {
         result = await this.generateRlsTest(options.name);
       } else {
         throw new Error(`Unsupported test type: ${options.type}`);
       }
-      
+
       this.success(`Test template generated: ${result.outputFile}`);
-      this.emit('generation:complete', result);
-      
+      this.emit("generation:complete", result);
+
       return result;
-      
     } catch (error) {
-      this.error('Test template generation failed', error);
-      this.emit('generation:failed', { error, type: options.type, name: options.name });
+      this.error("Test template generation failed", error);
+      this.emit("generation:failed", {
+        error,
+        type: options.type,
+        name: options.name,
+      });
       throw error;
     }
   }
@@ -67,20 +65,22 @@ class GenerateCommand extends TestCommand {
    */
   validateGenerationOptions(options) {
     if (!options.type) {
-      throw new Error('Test type is required. Use --rpc or --rls');
+      throw new Error("Test type is required. Use --rpc or --rls");
     }
-    
+
     if (!options.name) {
-      throw new Error('Function or table name is required');
+      throw new Error("Function or table name is required");
     }
-    
-    if (!['rpc', 'rls'].includes(options.type)) {
+
+    if (!["rpc", "rls"].includes(options.type)) {
       throw new Error('Test type must be either "rpc" or "rls"');
     }
-    
+
     // Validate name format
     if (!/^[a-zA-Z0-9_]+$/.test(options.name)) {
-      throw new Error('Name must contain only letters, numbers, and underscores');
+      throw new Error(
+        "Name must contain only letters, numbers, and underscores",
+      );
     }
   }
 
@@ -91,26 +91,26 @@ class GenerateCommand extends TestCommand {
    */
   async generateRpcTest(functionName) {
     const testDir = await this.getTestsDir();
-    const rpcTestDir = path.join(testDir, '002_rpc_tests');
+    const rpcTestDir = path.join(testDir, "002_rpc_tests");
     const outputFile = path.join(rpcTestDir, `${functionName}.test.sql`);
-    
+
     // Ensure RPC test directory exists
     await fs.mkdir(rpcTestDir, { recursive: true });
-    
+
     // Generate template content
     const template = this.generateRpcTemplate(functionName);
-    
+
     // Write template file
-    await fs.writeFile(outputFile, template, 'utf8');
-    
+    await fs.writeFile(outputFile, template, "utf8");
+
     this.progress(`Generated RPC test template: ${outputFile}`);
-    
+
     return {
-      type: 'rpc',
+      type: "rpc",
       functionName,
       outputFile,
       directory: rpcTestDir,
-      template
+      template,
     };
   }
 
@@ -121,26 +121,26 @@ class GenerateCommand extends TestCommand {
    */
   async generateRlsTest(tableName) {
     const testDir = await this.getTestsDir();
-    const rlsTestDir = path.join(testDir, '003_rls_tests');
+    const rlsTestDir = path.join(testDir, "003_rls_tests");
     const outputFile = path.join(rlsTestDir, `${tableName}.test.sql`);
-    
+
     // Ensure RLS test directory exists
     await fs.mkdir(rlsTestDir, { recursive: true });
-    
+
     // Generate template content
     const template = this.generateRlsTemplate(tableName);
-    
+
     // Write template file
-    await fs.writeFile(outputFile, template, 'utf8');
-    
+    await fs.writeFile(outputFile, template, "utf8");
+
     this.progress(`Generated RLS test template: ${outputFile}`);
-    
+
     return {
-      type: 'rls',
+      type: "rls",
       tableName,
       outputFile,
       directory: rlsTestDir,
-      template
+      template,
     };
   }
 
@@ -151,7 +151,7 @@ class GenerateCommand extends TestCommand {
    */
   generateRpcTemplate(functionName) {
     const testFunctionName = `run_${functionName}_tests`;
-    
+
     return `-- =========================================================================
 -- RPC FUNCTION TESTS: ${functionName}
 -- =========================================================================
@@ -257,7 +257,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${functionName} RPC
    */
   generateRlsTemplate(tableName) {
     const testFunctionName = `run_${tableName}_rls_tests`;
-    
+
     return `-- =========================================================================
 -- RLS POLICY TESTS: ${tableName}
 -- =========================================================================
@@ -409,15 +409,15 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for Row Level Security 
     // This would require database access to query pg_proc
     // For now, return common functions based on existing patterns
     return [
-      'get_random_pets',
-      'get_pet_details', 
-      'search_adoptable_pets',
-      'is_admin',
-      'is_bootstrap_mode',
-      'complete_bootstrap',
-      'is_maintenance_mode',
-      'record_donation_payment',
-      'update_donation_totals'
+      "get_random_pets",
+      "get_pet_details",
+      "search_adoptable_pets",
+      "is_admin",
+      "is_bootstrap_mode",
+      "complete_bootstrap",
+      "is_maintenance_mode",
+      "record_donation_payment",
+      "update_donation_totals",
     ];
   }
 
@@ -427,13 +427,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for Row Level Security 
    */
   async listAvailableTables() {
     // Common tables from the schema
-    return [
-      'pets',
-      'applications',
-      'donations',
-      'profiles',
-      'admin_members'
-    ];
+    return ["pets", "applications", "donations", "profiles", "admin_members"];
   }
 }
 

@@ -19,33 +19,33 @@
     "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/no-misused-promises": "error",
     "@typescript-eslint/await-thenable": "error",
-    
+
     // Promise plugin rules
     "promise/catch-or-return": "error",
     "promise/no-return-wrap": "error",
     "promise/param-names": "error",
     "promise/always-return": "error",
-    
+
     // Require await in async functions
     "require-await": "error",
-    
+
     // Additional async/await rules
     "no-async-promise-executor": "error",
     "no-await-in-loop": "warn",
     "no-return-await": "error",
     "prefer-promise-reject-errors": "error",
-    
+
     // General best practices
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_" }
+    ],
     "no-console": "off",
     "semi": ["error", "always"],
     "quotes": ["error", "single", { "avoidEscape": true }]
   },
-  "plugins": [
-    "@typescript-eslint",
-    "promise"
-  ],
+  "plugins": ["@typescript-eslint", "promise"],
   "overrides": [
     {
       "files": ["*.js"],

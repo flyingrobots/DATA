@@ -1,9 +1,9 @@
-const PathResolver = require('./PathResolver');
-const path = require('path');
+const PathResolver = require("./PathResolver");
+const path = require("path");
 
 /**
  * dataOutputPaths - Manages all output/write destinations for data
- * 
+ *
  * This class handles all directories where data writes files.
  * It uses PathResolver to ensure directories exist and are writable.
  * All paths are resolved to absolute paths and cached.
@@ -22,18 +22,19 @@ class DataOutputPaths {
     buildDir = null,
     reportsDir = null,
     tempDir = null,
-    pathResolver = null
+    pathResolver = null,
   ) {
     this.pathResolver = pathResolver || new PathResolver();
-    
+
     // Store configuration
     this._config = {
-      migrationsDir: migrationsDir || process.env.data_MIGRATIONS_DIR || './migrations',
-      buildDir: buildDir || process.env.data_BUILD_DIR || './build',
-      reportsDir: reportsDir || process.env.data_REPORTS_DIR || './reports',
-      tempDir: tempDir || process.env.data_TEMP_DIR || './tmp'
+      migrationsDir:
+        migrationsDir || process.env.data_MIGRATIONS_DIR || "./migrations",
+      buildDir: buildDir || process.env.data_BUILD_DIR || "./build",
+      reportsDir: reportsDir || process.env.data_REPORTS_DIR || "./reports",
+      tempDir: tempDir || process.env.data_TEMP_DIR || "./tmp",
     };
-    
+
     // Cache for resolved paths
     this._resolvedPaths = {};
     this._resolving = {}; // Prevent duplicate resolution attempts
@@ -44,7 +45,7 @@ class DataOutputPaths {
    * @returns {Promise<string>} Absolute path to migrations directory
    */
   getMigrationsDir() {
-    return this._resolvePath('migrationsDir');
+    return this._resolvePath("migrationsDir");
   }
 
   /**
@@ -52,7 +53,7 @@ class DataOutputPaths {
    * @returns {Promise<string>} Absolute path to build directory
    */
   getBuildDir() {
-    return this._resolvePath('buildDir');
+    return this._resolvePath("buildDir");
   }
 
   /**
@@ -60,7 +61,7 @@ class DataOutputPaths {
    * @returns {Promise<string>} Absolute path to reports directory
    */
   getReportsDir() {
-    return this._resolvePath('reportsDir');
+    return this._resolvePath("reportsDir");
   }
 
   /**
@@ -68,7 +69,7 @@ class DataOutputPaths {
    * @returns {Promise<string>} Absolute path to temp directory
    */
   getTempDir() {
-    return this._resolvePath('tempDir');
+    return this._resolvePath("tempDir");
   }
 
   /**
@@ -158,15 +159,18 @@ class DataOutputPaths {
     }
 
     // Start resolution
-    this._resolving[key] = this.pathResolver.resolveDirectoryForWrite(this._config[key])
-      .then(resolved => {
+    this._resolving[key] = this.pathResolver
+      .resolveDirectoryForWrite(this._config[key])
+      .then((resolved) => {
         this._resolvedPaths[key] = resolved;
         delete this._resolving[key];
         return resolved;
       })
-      .catch(error => {
+      .catch((error) => {
         delete this._resolving[key];
-        throw new Error(`Failed to resolve output path ${key}: ${error.message}`);
+        throw new Error(
+          `Failed to resolve output path ${key}: ${error.message}`,
+        );
       });
 
     return this._resolving[key];

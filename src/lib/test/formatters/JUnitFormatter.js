@@ -23,45 +23,55 @@ class JUnitFormatter {
 
     const xml = [];
     xml.push('<?xml version="1.0" encoding="UTF-8"?>');
-    xml.push('<testsuites>');
-    
+    xml.push("<testsuites>");
+
     // Create one testsuite containing all tests
-    xml.push(`  <testsuite name="pgTAP Tests" tests="${total}" failures="${failed}" skipped="${skipped}" time="${duration.toFixed(3)}">`);
-    
+    xml.push(
+      `  <testsuite name="pgTAP Tests" tests="${total}" failures="${failed}" skipped="${skipped}" time="${duration.toFixed(3)}">`,
+    );
+
     // Add individual test cases
-    tests.forEach(test => {
+    tests.forEach((test) => {
       const testName = this._escapeXml(test.description);
       const testTime = this._calculateTestTime(test, duration, total);
-      
-      if (test.status === 'fail') {
-        xml.push(`    <testcase name="${testName}" time="${testTime.toFixed(3)}">`);
+
+      if (test.status === "fail") {
+        xml.push(
+          `    <testcase name="${testName}" time="${testTime.toFixed(3)}">`,
+        );
         xml.push(`      <failure message="Test failed"/>`);
-        xml.push('    </testcase>');
-      } else if (test.status === 'skip') {
-        xml.push(`    <testcase name="${testName}" time="${testTime.toFixed(3)}">`);
-        const reason = test.reason ? this._escapeXml(test.reason) : 'Skipped';
+        xml.push("    </testcase>");
+      } else if (test.status === "skip") {
+        xml.push(
+          `    <testcase name="${testName}" time="${testTime.toFixed(3)}">`,
+        );
+        const reason = test.reason ? this._escapeXml(test.reason) : "Skipped";
         xml.push(`      <skipped message="${reason}"/>`);
-        xml.push('    </testcase>');
+        xml.push("    </testcase>");
       } else {
-        xml.push(`    <testcase name="${testName}" time="${testTime.toFixed(3)}"/>`);
+        xml.push(
+          `    <testcase name="${testName}" time="${testTime.toFixed(3)}"/>`,
+        );
       }
     });
-    
+
     // Add system-out with function-level summary
     if (testFunctions && testFunctions.length > 0) {
-      xml.push('    <system-out><![CDATA[');
-      xml.push('Test Functions Summary:');
-      testFunctions.forEach(func => {
-        const status = func.success ? 'PASSED' : 'FAILED';
-        xml.push(`${func.name}: ${func.passed}/${func.total} passed (${status})`);
+      xml.push("    <system-out><![CDATA[");
+      xml.push("Test Functions Summary:");
+      testFunctions.forEach((func) => {
+        const status = func.success ? "PASSED" : "FAILED";
+        xml.push(
+          `${func.name}: ${func.passed}/${func.total} passed (${status})`,
+        );
       });
-      xml.push(']]></system-out>');
+      xml.push("]]></system-out>");
     }
-    
-    xml.push('  </testsuite>');
-    xml.push('</testsuites>');
-    
-    return xml.join('\n');
+
+    xml.push("  </testsuite>");
+    xml.push("</testsuites>");
+
+    return xml.join("\n");
   }
 
   /**
@@ -69,13 +79,13 @@ class JUnitFormatter {
    * @private
    */
   _escapeXml(str) {
-    if (!str) return '';
+    if (!str) return "";
     return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   /**
@@ -92,7 +102,7 @@ class JUnitFormatter {
    * @returns {string} File extension
    */
   getFileExtension() {
-    return '.xml';
+    return ".xml";
   }
 
   /**
@@ -100,7 +110,7 @@ class JUnitFormatter {
    * @returns {string} MIME type
    */
   getMimeType() {
-    return 'application/xml';
+    return "application/xml";
   }
 }
 

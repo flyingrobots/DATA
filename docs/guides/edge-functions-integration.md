@@ -76,67 +76,70 @@ your-project/
 
 ```typescript
 // functions/donations-webhook/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 serve(async (req) => {
-  const { donation_id, event_type } = await req.json()
-  
+  const { donation_id, event_type } = await req.json();
+
   const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
-  
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+
   // Process webhook based on event type
   switch (event_type) {
-    case 'donation.completed':
+    case "donation.completed":
       // Update campaign totals
-      await supabase.rpc('complete_donation', { 
-        p_donation_id: donation_id 
-      })
-      break
+      await supabase.rpc("complete_donation", {
+        p_donation_id: donation_id,
+      });
+      break;
     // ... other event types
   }
-  
+
   return new Response(JSON.stringify({ success: true }), {
     headers: { "Content-Type": "application/json" },
-  })
-})
+  });
+});
 ```
 
 ### Payment Processor
 
 ```typescript
 // functions/process-payment/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import Stripe from "https://esm.sh/stripe@12.0.0"
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@12.0.0";
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
-  apiVersion: '2023-10-16',
-})
+const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
+  apiVersion: "2023-10-16",
+});
 
 serve(async (req) => {
-  const { amount, currency, donation_id } = await req.json()
-  
+  const { amount, currency, donation_id } = await req.json();
+
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100),
       currency,
-      metadata: { donation_id }
-    })
-    
-    return new Response(JSON.stringify({ 
-      client_secret: paymentIntent.client_secret 
-    }), {
-      headers: { "Content-Type": "application/json" },
-    })
+      metadata: { donation_id },
+    });
+
+    return new Response(
+      JSON.stringify({
+        client_secret: paymentIntent.client_secret,
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
-    })
+    });
   }
-})
+});
 ```
 
 ## Deployment Workflow
@@ -146,13 +149,14 @@ serve(async (req) => {
 1. **Make database changes** in `sql/` directory
 2. **Write Edge Functions** in `functions/` directory
 3. **Compile and test locally**:
+
    ```bash
    # Compile SQL to migrations
    data db compile
-   
+
    # Test migrations
    data db migrate test
-   
+
    # Validate Edge Functions
    data functions validate
    ```
@@ -166,25 +170,28 @@ serve(async (req) => {
 ### Production Environment
 
 1. **Review changes**:
+
    ```bash
    # Check migration status
    data db migrate status
-   
+
    # Validate functions
    data functions validate
    ```
 
 2. **Deploy with confirmation**:
+
    ```bash
    # Will prompt for confirmation
    data --prod db compile --deploy-functions
    ```
 
 3. **Monitor deployment**:
+
    ```bash
    # Check function status
    data functions status
-   
+
    # View deployment logs
    supabase functions logs function-name
    ```
@@ -193,12 +200,12 @@ serve(async (req) => {
 
 The D.A.T.A. CLI emits comprehensive events during Edge Functions operations:
 
-| Event | Description | Payload |
-|-------|-------------|---------|
-| `function-validated` | Function passed validation | `{ name, path }` |
-| `function-deployed` | Function successfully deployed | `{ name, url }` |
-| `deployment-complete` | All functions deployed | `{ total, successful, failed }` |
-| `deployment-status` | Status check completed | `{ deployed: [...], local: [...] }` |
+| Event                 | Description                    | Payload                             |
+| --------------------- | ------------------------------ | ----------------------------------- |
+| `function-validated`  | Function passed validation     | `{ name, path }`                    |
+| `function-deployed`   | Function successfully deployed | `{ name, url }`                     |
+| `deployment-complete` | All functions deployed         | `{ total, successful, failed }`     |
+| `deployment-status`   | Status check completed         | `{ deployed: [...], local: [...] }` |
 
 ### Listening to Events
 
@@ -207,16 +214,16 @@ The D.A.T.A. CLI emits comprehensive events during Edge Functions operations:
 class FunctionDeployReporter {
   handleEvent(event) {
     switch (event.type) {
-      case 'function-deployed':
-        console.log(`✅ Deployed: ${event.data.name}`)
-        console.log(`   URL: ${event.data.url}`)
-        break
-      case 'deployment-complete':
-        console.log(`\n📊 Deployment Summary:`)
-        console.log(`   Total: ${event.data.total}`)
-        console.log(`   Success: ${event.data.successful}`)
-        console.log(`   Failed: ${event.data.failed}`)
-        break
+      case "function-deployed":
+        console.log(`✅ Deployed: ${event.data.name}`);
+        console.log(`   URL: ${event.data.url}`);
+        break;
+      case "deployment-complete":
+        console.log(`\n📊 Deployment Summary:`);
+        console.log(`   Total: ${event.data.total}`);
+        console.log(`   Success: ${event.data.successful}`);
+        console.log(`   Failed: ${event.data.failed}`);
+        break;
     }
   }
 }
@@ -233,23 +240,28 @@ class FunctionDeployReporter {
 ## Best Practices
 
 ### 1. Always Validate First
+
 ```bash
 data functions validate && data functions deploy
 ```
 
 ### 2. Use Selective Deployment
+
 Deploy only changed functions:
+
 ```bash
 data functions deploy donations-webhook process-payment
 ```
 
 ### 3. Test in Staging
+
 ```bash
 # Deploy to staging environment
 DATA_ENV=staging data db compile --deploy-functions
 ```
 
 ### 4. Monitor Deployments
+
 ```bash
 # Check status after deployment
 data functions status
@@ -259,6 +271,7 @@ supabase functions logs --tail
 ```
 
 ### 5. Version Control
+
 - Commit Edge Functions alongside SQL changes
 - Tag releases for production deployments
 - Document function dependencies in README
@@ -266,19 +279,23 @@ supabase functions logs --tail
 ## Troubleshooting
 
 ### Function Validation Fails
+
 - Ensure Supabase CLI is installed: `npm install -g supabase`
 - Check function TypeScript syntax
 - Verify import statements use Deno URLs
 
 ### Deployment Timeout
+
 - Increase timeout with environment variable: `DATA_DEPLOY_TIMEOUT=600`
 - Check network connectivity to Supabase
 
 ### Import Map Issues
+
 - Create `import_map.json` for production
 - Or use `--skip-import-map` flag (not recommended)
 
 ### Function Not Found
+
 - Verify function exists in `functions/` directory
 - Check function name matches directory name
 - Ensure `index.ts` exists in function directory

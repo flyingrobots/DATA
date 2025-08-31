@@ -49,20 +49,20 @@ data --prod db compile --deploy-functions
 
 ### `data functions deploy`
 
-| Option | Description |
-|--------|-------------|
-| `--no-verify-jwt` | Skip JWT verification during deployment |
-| `--debug` | Enable debug output |
-| `--skip-import-map` | Skip using import map in production |
+| Option              | Description                             |
+| ------------------- | --------------------------------------- |
+| `--no-verify-jwt`   | Skip JWT verification during deployment |
+| `--debug`           | Enable debug output                     |
+| `--skip-import-map` | Skip using import map in production     |
 
 ### `data db compile` (Enhanced)
 
-| Option | Description |
-|--------|-------------|
-| `--deploy-functions` | Deploy Edge Functions after compilation |
-| `--functions [names...]` | Specific functions to deploy |
-| `--skip-import-map` | Skip import map in function deployment |
-| `--debug-functions` | Enable debug output for function deployment |
+| Option                   | Description                                 |
+| ------------------------ | ------------------------------------------- |
+| `--deploy-functions`     | Deploy Edge Functions after compilation     |
+| `--functions [names...]` | Specific functions to deploy                |
+| `--skip-import-map`      | Skip import map in function deployment      |
+| `--debug-functions`      | Enable debug output for function deployment |
 
 ## 🛡️ Security Features
 
@@ -78,7 +78,7 @@ D.A.T.A. automatically validates:
 ### Production Safety
 
 - **Double Confirmation**: Production deployments require explicit confirmation
-- **Rollback Info**: Failed deployments provide rollback guidance  
+- **Rollback Info**: Failed deployments provide rollback guidance
 - **Audit Trail**: Complete event logging for deployment actions
 - **Graceful Failures**: Migration compilation succeeds even if function deployment fails
 
@@ -91,7 +91,7 @@ D.A.T.A. functions emit comprehensive events for monitoring:
 command.on('function-validated', ({ function, path }) => { ... });
 command.on('function-deployed', ({ function, success, result }) => { ... });
 
-// Deployment-level events  
+// Deployment-level events
 command.on('deployment-complete', ({ total, successful, failed, results }) => { ... });
 command.on('deployment-status', ({ functions }) => { ... });
 
@@ -105,18 +105,21 @@ command.on('functions-deployment-failed', ({ error }) => { ... });
 The validation system checks:
 
 ### Structure Validation
+
 - ✅ `index.ts` file presence
 - ✅ Deno.serve() or serve() handler
 - ✅ Basic import structure
 - ✅ Optional deno.json configuration
 
-### Security Validation  
+### Security Validation
+
 - 🚨 Hardcoded secrets detection
 - 🚨 Sensitive data patterns
 - ✅ Environment variable usage
 - ✅ CORS handling for public endpoints
 
 ### Best Practices
+
 - ✅ Error handling (try/catch blocks)
 - ✅ Import map usage
 - ✅ Proper permissions in deno.json
@@ -143,7 +146,7 @@ data functions deploy donations-create-checkout donations-create-subscription
 ### 3. Migration Workflow Integration
 
 ```bash
-# Traditional: Compile migration, then deploy functions separately  
+# Traditional: Compile migration, then deploy functions separately
 data db compile
 data functions deploy
 
@@ -191,23 +194,26 @@ Migration Compilation ──┐
 ### Error Handling
 
 - **Migration Failures**: Stop entire process
-- **Function Validation Failures**: Show warnings, continue deployment  
+- **Function Validation Failures**: Show warnings, continue deployment
 - **Function Deployment Failures**: Log errors, continue with remaining functions
 - **Production Safety**: Always fail-closed on confirmation timeout
 
 ## 🎯 Benefits
 
 ### For Developers
+
 - **Single Command Workflow**: Compile + deploy in one step
 - **Comprehensive Validation**: Catch issues before deployment
 - **Clear Status Reporting**: Know exactly what's deployed where
 
 ### For DevOps
+
 - **Production Safety**: Built-in confirmation and validation
-- **Event Monitoring**: Complete audit trail of deployments  
+- **Event Monitoring**: Complete audit trail of deployments
 - **Rollback Support**: Clear error messages and rollback guidance
 
 ### For Teams
+
 - **Consistent Process**: Same workflow for local and production
 - **Selective Deployment**: Deploy only changed functions
 - **Integration Ready**: Works with existing data migration patterns
@@ -222,4 +228,4 @@ Migration Compilation ──┐
 
 ---
 
-*This enhancement maintains data's event-driven architecture while adding comprehensive Edge Functions management that integrates seamlessly with the existing migration workflow.*
+_This enhancement maintains data's event-driven architecture while adding comprehensive Edge Functions management that integrates seamlessly with the existing migration workflow._

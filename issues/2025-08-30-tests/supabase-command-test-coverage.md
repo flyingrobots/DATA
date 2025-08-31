@@ -2,13 +2,13 @@
 
 ## Core Information
 
-| Field | Value |
-|-------|-------|
-| **Severity Level** | 🟠 HIGH - Platform Integration |
-| **Location** | `src/lib/SupabaseCommand.js` |
-| **Category** | Testing |
-| **Brief Description** | SupabaseCommand base class lacks test coverage |
-| **Impact** | All Supabase API operations inherit untested functionality |
+| Field                 | Value                                                      |
+| --------------------- | ---------------------------------------------------------- |
+| **Severity Level**    | 🟠 HIGH - Platform Integration                             |
+| **Location**          | `src/lib/SupabaseCommand.js`                               |
+| **Category**          | Testing                                                    |
+| **Brief Description** | SupabaseCommand base class lacks test coverage             |
+| **Impact**            | All Supabase API operations inherit untested functionality |
 
 ## Summary
 
@@ -17,6 +17,7 @@ The `SupabaseCommand` class serves as the base class for all Supabase-specific o
 ## Component Overview
 
 The SupabaseCommand class likely provides:
+
 - Supabase client initialization and configuration
 - Authentication token management (service role, anon key)
 - Environment-specific Supabase URL handling
@@ -27,6 +28,7 @@ The SupabaseCommand class likely provides:
 ## What Needs Testing
 
 ### Core Functionality
+
 - [ ] Supabase client initialization
 - [ ] Authentication token validation and management
 - [ ] Environment URL configuration (local vs production)
@@ -35,6 +37,7 @@ The SupabaseCommand class likely provides:
 - [ ] Client cleanup and resource management
 
 ### Base Class Behavior
+
 - [ ] Inheritance patterns for subclasses
 - [ ] Method overriding capabilities
 - [ ] Event emission for Supabase operations
@@ -42,6 +45,7 @@ The SupabaseCommand class likely provides:
 - [ ] Credential validation and security
 
 ### Edge Cases
+
 - [ ] Invalid Supabase URLs
 - [ ] Authentication token expiration
 - [ ] Network connectivity issues
@@ -50,6 +54,7 @@ The SupabaseCommand class likely provides:
 - [ ] Invalid service configuration
 
 ### Integration Points
+
 - [ ] Command base class integration
 - [ ] Supabase SDK integration
 - [ ] Configuration system integration
@@ -57,6 +62,7 @@ The SupabaseCommand class likely provides:
 - [ ] Error reporting mechanisms
 
 ### Error Scenarios
+
 - [ ] Supabase service unavailable
 - [ ] Invalid authentication credentials
 - [ ] Network timeout scenarios
@@ -67,49 +73,52 @@ The SupabaseCommand class likely provides:
 ## Testing Requirements
 
 ### Unit Tests
+
 ```javascript
-describe('SupabaseCommand', () => {
-  describe('client initialization', () => {
-    it('should initialize Supabase client')
-    it('should handle environment configuration')
-    it('should validate authentication tokens')
-    it('should setup correct API endpoints')
-  })
-  
-  describe('authentication handling', () => {
-    it('should manage service role authentication')
-    it('should handle anonymous key operations')
-    it('should validate token expiration')
-    it('should refresh tokens when needed')
-  })
-  
-  describe('error handling', () => {
-    it('should handle API authentication errors')
-    it('should handle network failures')
-    it('should emit appropriate error events')
-    it('should handle rate limiting')
-  })
-})
+describe("SupabaseCommand", () => {
+  describe("client initialization", () => {
+    it("should initialize Supabase client");
+    it("should handle environment configuration");
+    it("should validate authentication tokens");
+    it("should setup correct API endpoints");
+  });
+
+  describe("authentication handling", () => {
+    it("should manage service role authentication");
+    it("should handle anonymous key operations");
+    it("should validate token expiration");
+    it("should refresh tokens when needed");
+  });
+
+  describe("error handling", () => {
+    it("should handle API authentication errors");
+    it("should handle network failures");
+    it("should emit appropriate error events");
+    it("should handle rate limiting");
+  });
+});
 ```
 
 ### Integration Tests
+
 ```javascript
-describe('SupabaseCommand Integration', () => {
-  it('should connect to real Supabase instance')
-  it('should authenticate with valid credentials')
-  it('should handle API operations')
-  it('should work with subclass implementations')
-})
+describe("SupabaseCommand Integration", () => {
+  it("should connect to real Supabase instance");
+  it("should authenticate with valid credentials");
+  it("should handle API operations");
+  it("should work with subclass implementations");
+});
 ```
 
 ### Environment Tests
+
 ```javascript
-describe('SupabaseCommand Environment Handling', () => {
-  it('should handle local development environment')
-  it('should handle production environment')
-  it('should validate environment switching')
-  it('should manage credential isolation')
-})
+describe("SupabaseCommand Environment Handling", () => {
+  it("should handle local development environment");
+  it("should handle production environment");
+  it("should validate environment switching");
+  it("should manage credential isolation");
+});
 ```
 
 ## Acceptance Criteria
@@ -126,6 +135,7 @@ describe('SupabaseCommand Environment Handling', () => {
 ## Priority Justification
 
 **High Priority** because:
+
 1. **Platform Foundation**: All Supabase operations depend on this base functionality
 2. **Production API Access**: Essential for production deployment operations
 3. **Edge Function Integration**: Critical for Edge Function deployment and testing
@@ -150,12 +160,14 @@ describe('SupabaseCommand Environment Handling', () => {
 ## Impact Assessment
 
 ### Direct Impact
+
 - Edge Function deployment commands
 - Database migration commands using Supabase API
 - Production environment operations
 - Authentication and authorization systems
 
 ### Indirect Impact
+
 - Production deployment reliability
 - API operation performance
 - Error handling consistency
@@ -164,22 +176,25 @@ describe('SupabaseCommand Environment Handling', () => {
 ## Special Considerations
 
 ### Authentication Security
+
 - Must protect service role keys during testing
 - Need safe credential mocking strategies
 - Should validate token exposure prevention
 
 ### API Integration
+
 - Real API testing vs mocking balance
 - Rate limiting consideration in tests
 - Network failure simulation requirements
 
 ### Environment Management
+
 - Safe production environment isolation
 - Local development environment setup
 - Configuration validation across environments
 
 ---
 
-*"Change is the essential process of all existence."* - Spock
+_"Change is the essential process of all existence."_ - Spock
 
 SupabaseCommand adapts D.A.T.A. to the cloud platform reality. Like the Enterprise interfacing with alien technology, it must be tested thoroughly to ensure reliable communication.

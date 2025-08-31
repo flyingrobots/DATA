@@ -1,6 +1,6 @@
 # T.A.S.K.S: Tasks Are Sequenced Key Steps – LLM Execution Spec (v3)
 
-*A comprehensive planning system that transforms technical documentation into validated, executable project plans with clear boundaries, existing codebase awareness, resource management, and support for both wave-based and rolling frontier execution models.*
+_A comprehensive planning system that transforms technical documentation into validated, executable project plans with clear boundaries, existing codebase awareness, resource management, and support for both wave-based and rolling frontier execution models._
 
 ## Mission
 
@@ -19,6 +19,7 @@ Transform raw technical plans into executable project roadmaps by:
 ### Task Boundaries & Execution Guidance
 
 Every task must define:
+
 - **Expected Complexity**: Quantifiable estimate (e.g., "~35 LoC", "3-5 functions", "2 API endpoints")
 - **Definition of Done**: Clear stopping criteria to prevent scope creep
 - **Scope Boundaries**: Explicit restrictions on what code/systems to modify
@@ -28,6 +29,7 @@ Every task must define:
 ### Codebase-First Planning
 
 Before task generation:
+
 - **Inventory existing APIs**, interfaces, and components using ast-grep
 - **Identify extension points** rather than creating duplicates
 - **Document reuse opportunities** in Plan.md
@@ -37,6 +39,7 @@ Before task generation:
 ### Evidence-Based Dependencies
 
 All tasks and dependencies must:
+
 - **Cite source evidence** from the planning document
 - **Classify dependencies** as technical, sequential, infrastructure, knowledge, mutual_exclusion, or resource_limited
 - **Assign confidence scores** [0..1] with rationale
@@ -46,6 +49,7 @@ All tasks and dependencies must:
 ### Execution Models
 
 Support two execution strategies:
+
 - **Wave-Based**: Synchronous waves with barriers, good for planning and estimation
 - **Rolling Frontier**: Dynamic task scheduling with resource-aware coordination, optimal for execution
 
@@ -91,7 +95,7 @@ All outputs must use exact file fence format:
       "source_evidence": [
         {
           "quote": "OAuth2 implementation with social providers required...",
-          "loc": {"start": 123, "end": 178},
+          "loc": { "start": 123, "end": 178 },
           "section": "H2: Authentication",
           "startLine": 123,
           "endLine": 131
@@ -157,7 +161,7 @@ All outputs must use exact file fence format:
       "title": "Implement OAuth2 authentication endpoints",
       "description": "Create REST API endpoints for OAuth2 flow with JWT tokens",
       "category": "foundation|implementation|integration|optimization",
-      
+
       "boundaries": {
         "expected_complexity": {
           "value": "~120 LoC",
@@ -174,11 +178,15 @@ All outputs must use exact file fence format:
         },
         "scope": {
           "includes": ["src/api/auth/*.ts", "src/middleware/auth.ts"],
-          "excludes": ["database migrations", "frontend components", "email notifications"],
+          "excludes": [
+            "database migrations",
+            "frontend components",
+            "email notifications"
+          ],
           "restrictions": "Modify only authentication-related files; do not touch user profile logic"
         }
       },
-      
+
       "execution_guidance": {
         "logging": {
           "on_start": "Log 'Starting OAuth implementation' to logs/tasks/P1.T001.log with timestamp",
@@ -196,20 +204,24 @@ All outputs must use exact file fence format:
           "progress_reporting": "percentage_and_checkpoint",
           "resource_usage_reporting": true,
           "checkpoint_events": [
-            {"at": "25%", "name": "schema_created", "rollback_capable": true},
-            {"at": "50%", "name": "endpoints_implemented", "rollback_capable": true},
-            {"at": "75%", "name": "tests_passing", "rollback_capable": false}
+            { "at": "25%", "name": "schema_created", "rollback_capable": true },
+            {
+              "at": "50%",
+              "name": "endpoints_implemented",
+              "rollback_capable": true
+            },
+            { "at": "75%", "name": "tests_passing", "rollback_capable": false }
           ]
         }
       },
-      
+
       "resource_requirements": {
         "estimated": {
           "cpu_cores": 2,
           "memory_mb": 512,
           "disk_io_mbps": 10,
           "exclusive_resources": ["database_migrations"],
-          "shared_resources": {"test_db_pool": 1}
+          "shared_resources": { "test_db_pool": 1 }
         },
         "peak": {
           "cpu_cores": 4,
@@ -220,7 +232,7 @@ All outputs must use exact file fence format:
         },
         "worker_capabilities_required": ["backend", "database"]
       },
-      
+
       "scheduling_hints": {
         "priority": "high",
         "preemptible": false,
@@ -231,13 +243,13 @@ All outputs must use exact file fence format:
         "can_pause_resume": false,
         "checkpoint_capable": true
       },
-      
+
       "reuses_existing": {
         "extends": ["BaseController", "AbstractAuthProvider"],
         "imports": ["Logger", "ValidationService", "ErrorHandler"],
         "rationale": "Leveraging existing auth abstractions reduces code by ~40%"
       },
-      
+
       "skillsRequired": ["backend", "node", "oauth"],
       "duration": {
         "optimistic": 4,
@@ -245,10 +257,10 @@ All outputs must use exact file fence format:
         "pessimistic": 10
       },
       "durationUnits": "hours",
-      
+
       "interfaces_produced": ["AuthAPI:v2", "JWTClaims:v1"],
       "interfaces_consumed": ["UserRepository:v1", "ConfigService:v1"],
-      
+
       "acceptance_checks": [
         {
           "type": "command",
@@ -274,11 +286,11 @@ All outputs must use exact file fence format:
           }
         }
       ],
-      
+
       "source_evidence": [
         {
           "quote": "OAuth2 implementation with JWT tokens required...",
-          "loc": {"start": 234, "end": 298},
+          "loc": { "start": 234, "end": 298 },
           "section": "H2: Authentication Requirements",
           "startLine": 45,
           "endLine": 52
@@ -366,7 +378,7 @@ All outputs must use exact file fence format:
     },
     "nodes": 84,
     "edges": 141,
-    "edgeDensity": 0.020,
+    "edgeDensity": 0.02,
     "widthApprox": 18,
     "widthMethod": "kahn_layer_max",
     "longestPath": 7,
@@ -482,7 +494,7 @@ All outputs must use exact file fence format:
         "p95_hours": 82
       }
     },
-    
+
     "rolling_frontier": {
       "initial_frontier": ["P1.T001", "P1.T005", "P1.T009"],
       "config": {
@@ -564,7 +576,7 @@ All outputs must use exact file fence format:
       "Track progress and manage checkpoints",
       "Coordinate rollbacks on failure"
     ],
-    
+
     "state_management": {
       "task_states": {
         "blocked": "Dependencies not met",
@@ -578,7 +590,7 @@ All outputs must use exact file fence format:
         "failed": "Execution failed",
         "rolled_back": "Reverted after failure"
       },
-      
+
       "frontier_management": {
         "ready_queue": [],
         "resource_wait_queue": [],
@@ -587,7 +599,7 @@ All outputs must use exact file fence format:
         "checkpoint_registry": {}
       }
     },
-    
+
     "scheduling_loop": {
       "interval_ms": 1000,
       "steps": [
@@ -602,13 +614,21 @@ All outputs must use exact file fence format:
         "update_metrics()"
       ]
     },
-    
+
     "policies": {
       "backpressure": {
         "triggers": [
-          {"metric": "cpu_usage", "threshold": 80, "action": "pause_low_priority"},
-          {"metric": "memory_usage", "threshold": 85, "action": "defer_memory_intensive"},
-          {"metric": "error_rate", "threshold": 5, "action": "circuit_break"}
+          {
+            "metric": "cpu_usage",
+            "threshold": 80,
+            "action": "pause_low_priority"
+          },
+          {
+            "metric": "memory_usage",
+            "threshold": 85,
+            "action": "defer_memory_intensive"
+          },
+          { "metric": "error_rate", "threshold": 5, "action": "circuit_break" }
         ],
         "recovery": {
           "cool_down_seconds": 30,
@@ -616,7 +636,7 @@ All outputs must use exact file fence format:
           "resume_rate": 1
         }
       },
-      
+
       "resource_allocation": {
         "strategy": "bin_packing_with_headroom",
         "headroom_percent": 20,
@@ -624,13 +644,13 @@ All outputs must use exact file fence format:
         "preemption_enabled": true,
         "preemption_priorities": ["low", "medium", "high", "critical"]
       },
-      
+
       "worker_matching": {
         "strategy": "capability_and_load_balanced",
         "prefer_specialized_workers": true,
         "max_tasks_per_worker": 3
       },
-      
+
       "failure_handling": {
         "retry_policy": "exponential_backoff",
         "max_retries": 3,
@@ -639,7 +659,7 @@ All outputs must use exact file fence format:
         "checkpoint_recovery": true
       }
     },
-    
+
     "monitoring": {
       "metrics_collection_interval": 10,
       "metrics": [
@@ -658,7 +678,7 @@ All outputs must use exact file fence format:
       ]
     }
   },
-  
+
   "worker_pool": {
     "min_workers": 2,
     "max_workers": 8,
@@ -688,6 +708,7 @@ All outputs must use exact file fence format:
 ## Execution Strategy Recommendation: Rolling Frontier
 
 ### Why Rolling Frontier?
+
 - 35% faster completion than wave-based (35h vs 54h)
 - Better resource utilization (65% avg vs 40% with waves)
 - Adaptive to actual task completion times
@@ -695,6 +716,7 @@ All outputs must use exact file fence format:
 - No artificial synchronization delays
 
 ### System Resource Requirements
+
 - **Peak**: 16 CPU cores, 32GB RAM, 500 Mbps I/O
 - **Average**: 10 CPU cores, 20GB RAM, 100 Mbps I/O
 - **Worker Pool**: 2-8 adaptive workers with mixed capabilities
@@ -702,6 +724,7 @@ All outputs must use exact file fence format:
 ## Codebase Analysis Results
 
 ### Existing Components Leveraged (47% code reuse)
+
 - **AuthService**: Extended for OAuth2 support (saves ~200 LoC)
 - **Logger**: Reused for all task logging and monitoring
 - **ValidationService**: Used for input validation across all endpoints
@@ -709,43 +732,49 @@ All outputs must use exact file fence format:
 - **ErrorHandler**: Consistent error handling across all tasks
 
 ### New Interfaces Required
+
 - **PaymentGateway**: No existing implementation found
 - **ReportGenerator**: Current version inadequate for requirements
 - **WebSocketManager**: New real-time communication layer
 
 ### Architecture Patterns Identified
+
 - Repository pattern for data access (used in 18 tasks)
 - Factory pattern for service instantiation (used in 8 tasks)
 - Observer pattern for event handling (used in 6 tasks)
 
 ### Shared Resources Creating Constraints
+
 - **Database Migrations**: 6 tasks require exclusive access (adds 8h to critical path)
 - **Deployment Pipeline**: 8 tasks need deployment (serialized execution)
 - **Test Database Pool**: 15 tasks share 3 instances (managed concurrency)
 
 ## Execution Metrics
 
-| Metric | Value | Impact |
-|--------|-------|--------|
-| Total Tasks | 84 | - |
-| Total Dependencies | 141 | Including 12 mutual exclusions |
-| Edge Density | 0.020 | Well-balanced, not over-constrained |
-| Critical Path | 7 stages | Minimum completion time |
-| Max Parallelization | 18 tasks | Peak concurrent execution |
-| Verb-First Compliance | 92% | Clear, action-oriented naming |
-| Codebase Reuse | 47% | Significant efficiency gain |
-| Resource Conflicts | 26 tasks | Requires careful scheduling |
+| Metric                | Value    | Impact                              |
+| --------------------- | -------- | ----------------------------------- |
+| Total Tasks           | 84       | -                                   |
+| Total Dependencies    | 141      | Including 12 mutual exclusions      |
+| Edge Density          | 0.020    | Well-balanced, not over-constrained |
+| Critical Path         | 7 stages | Minimum completion time             |
+| Max Parallelization   | 18 tasks | Peak concurrent execution           |
+| Verb-First Compliance | 92%      | Clear, action-oriented naming       |
+| Codebase Reuse        | 47%      | Significant efficiency gain         |
+| Resource Conflicts    | 26 tasks | Requires careful scheduling         |
 
 ## Wave-Based Execution Plan
 
 ### Wave 1: Foundation (P50: 12h, P80: 16h, P95: 22h)
+
 **Tasks**: P1.T001, P1.T005, P1.T009
 **Resource Usage**:
+
 - database_migrations: 1/1 (P1.T001 exclusive)
 - test_db_pool: 2/3 (P1.T005, P1.T009)
 - CPU: 6 cores, Memory: 2GB
 
 **Quality Gates**:
+
 - ✅ All foundation APIs documented (OpenAPI spec exists)
 - ✅ Database migrations applied (schema version updated)
 - ✅ CI/CD pipeline operational (builds passing)
@@ -754,14 +783,17 @@ All outputs must use exact file fence format:
 **Note**: P1.T004 deferred to Wave 2 due to migration lock conflict
 
 ### Wave 2: Core Implementation (P50: 14h, P80: 18h, P95: 24h)
+
 **Tasks**: P1.T002, P1.T003, P1.T004, P1.T010
 **Resource Usage**:
+
 - database_migrations: 1/1 (P1.T004 exclusive)
 - test_db_pool: 3/3 (full utilization)
 - deployment_pipeline: 1/1 (P1.T010)
 - CPU: 12 cores, Memory: 6GB
 
 **Quality Gates**:
+
 - ✅ Integration tests passing (>90% coverage)
 - ✅ API endpoints responding (<200ms p95)
 - ✅ Staging deployment successful
@@ -770,6 +802,7 @@ All outputs must use exact file fence format:
 [Additional waves 3-8 with similar detail...]
 
 ### Total Wave-Based Timeline
+
 - **P50**: 54 hours (6.75 working days)
 - **P80**: 68 hours (8.5 working days)
 - **P95**: 82 hours (10.25 working days)
@@ -777,8 +810,10 @@ All outputs must use exact file fence format:
 ## Rolling Frontier Execution Plan
 
 ### Initial Frontier (Time 0h)
+
 **Ready to Execute**: P1.T001, P1.T005, P1.T009
 **Resource Allocation**:
+
 - P1.T001 → Worker-1 (backend specialist, holds database_migrations lock)
 - P1.T005 → Worker-2 (testing specialist, uses test_db_pool #1)
 - P1.T009 → Worker-3 (frontend specialist, uses test_db_pool #2)
@@ -786,21 +821,26 @@ All outputs must use exact file fence format:
 ### Execution Timeline Simulation
 
 #### Time 4h: First Completions
+
 **Completed**: P1.T009 (faster than estimated)
 **Still Running**: P1.T001, P1.T005
 **Newly Ready**: P1.T013 (dependent on P1.T009)
 **Action**: Worker-3 picks up P1.T013
 
 #### Time 6h: Migration Complete
+
 **Completed**: P1.T001 (releases database_migrations)
 **Newly Ready**: P1.T002, P1.T004
-**Action**: 
+**Action**:
+
 - Worker-1 picks up P1.T002
 - P1.T004 queued for database_migrations (next available)
 
 #### Time 8h: Resource Contention
+
 **Running**: 7 tasks (approaching CPU limit)
 **Coordinator Action**: Apply backpressure
+
 - Defer low-priority task P1.T018
 - Pause P1.T015 at checkpoint
 - Prioritize critical path tasks
@@ -808,6 +848,7 @@ All outputs must use exact file fence format:
 [Continue simulation through completion...]
 
 ### Rolling Frontier Advantages
+
 1. **Efficiency**: Complete in 35h vs 54h wave-based
 2. **Adaptability**: Handles variable task durations
 3. **Resource Optimization**: 65% average utilization vs 40%
@@ -817,33 +858,37 @@ All outputs must use exact file fence format:
 ## Risk Analysis
 
 ### High-Risk Dependencies
+
 1. **Database Migration Sequence** (Confidence: 1.0)
    - Risk: Schema conflicts if order violated
    - Mitigation: Enforced exclusive locks
-   
 2. **API Version Dependencies** (Confidence: 0.85)
    - Risk: Breaking changes in interfaces
    - Mitigation: Version pinning and contract tests
 
 ### Low-Confidence Dependencies (require validation)
+
 - P1.T012 → P1.T017 (UI/Backend sync, confidence: 0.62)
 - P1.T023 → P1.T029 (Data model assumptions, confidence: 0.65)
 
 ### Soft Dependencies (parallelizable)
+
 - P1.T010 → P1.T020 (Knowledge transfer, can proceed independently)
 - P1.T031 → P1.T035 (Optimization suggestions, non-blocking)
 
 ## Resource Bottleneck Analysis
 
 ### Database Migrations (Critical)
+
 - **Impact**: Extends critical path by 8 hours
 - **Affected Tasks**: 6 tasks require exclusive access
-- **Mitigation**: 
+- **Mitigation**:
   - Combine compatible migrations where safe
   - Schedule during low-activity periods
   - Consider migration batching tool
 
 ### Test Database Pool (Moderate)
+
 - **Impact**: May delay testing tasks by 1-2 hours
 - **Capacity**: 3 instances for 15 tasks
 - **Mitigation**:
@@ -851,23 +896,26 @@ All outputs must use exact file fence format:
   - Add dynamic pool expansion if needed
 
 ### Deployment Pipeline (Low)
+
 - **Impact**: Sequential deployments add 4 hours
 - **Mitigation**: Implement blue-green deployment
 
 ## Auto-Normalization Actions Taken
 
 ### Task Splits (Exceeded 16h limit)
+
 - P1.T045 → P1.T045a (Schema design, 8h) + P1.T045b (Implementation, 8h)
 - P1.T067 → P1.T067a (API design, 6h) + P1.T067b (Testing, 10h)
 
 ### Task Merges (Under 0.5h threshold)
+
 - P1.T099 + P1.T100 → P1.T099 (Combined config updates, 0.8h)
 - P1.T103 + P1.T104 + P1.T105 → P1.T103 (Bundled hotfixes, 1.2h)
 
 ## Success Metrics
 
 - ✅ All tasks have clear boundaries and completion criteria
-- ✅ 92% verb-first task naming compliance  
+- ✅ 92% verb-first task naming compliance
 - ✅ 47% existing code reuse documented
 - ✅ 100% tasks have machine-verifiable acceptance checks
 - ✅ Resource conflicts identified and mitigated
@@ -882,33 +930,40 @@ All outputs must use exact file fence format:
 ## Decision 1: Execution Model Selection
 
 ### Context
+
 Project requires execution strategy that balances planning clarity with execution efficiency.
 
 ### Options Considered
 
 #### Option A: Pure Wave-Based Execution
+
 - **Pros**: Simple synchronization, predictable phases, clear checkpoints
 - **Cons**: Artificial delays, poor resource utilization (40%), 54h completion
 - **Best For**: Projects requiring strict phase gates
 
 #### Option B: Pure Rolling Frontier (SELECTED)
+
 - **Pros**: 35% faster (35h), 65% resource utilization, adaptive scheduling
 - **Cons**: Complex coordination, requires robust monitoring
 - **Best For**: Projects prioritizing speed and efficiency
 
 #### Option C: Hybrid Approach
+
 - **Pros**: Critical checkpoints with dynamic execution between
 - **Cons**: Complex to implement, mixed mental model
 - **Best For**: High-risk projects needing both speed and control
 
 ### Rationale
+
 Rolling Frontier selected for:
+
 - Significant time savings (19 hours)
 - Better resource utilization
 - Checkpoint capability provides safety
 - Coordinator can enforce phase gates if needed
 
 ### Implementation Notes
+
 - Use coordinator.json configuration
 - Implement gradual backpressure
 - Monitor resource utilization continuously
@@ -919,36 +974,43 @@ Rolling Frontier selected for:
 ## Decision 2: OAuth2 Implementation Strategy
 
 ### Context
+
 Authentication system requires industry-standard security with JWT tokens.
 
 ### Options Considered
 
 #### Option A: Extend existing BasicAuth module
+
 - **Pros**: Minimal new code, familiar codebase
 - **Cons**: BasicAuth architecture incompatible with OAuth flows
 - **Estimated Effort**: 8 hours + significant refactoring
 - **Code Reuse**: 20%
 
 #### Option B: Implement from scratch
+
 - **Pros**: Clean architecture, no legacy constraints
 - **Cons**: Duplicate functionality, 200+ LoC
 - **Estimated Effort**: 12 hours
 - **Code Reuse**: 0%
 
 #### Option C: Extend BaseAuthProvider with OAuth2 strategy (SELECTED)
+
 - **Pros**: Reuses validation/logging/error handling, clean separation
 - **Cons**: Requires learning provider pattern
 - **Estimated Effort**: 6 hours
 - **Code Reuse**: 47%
 
 ### Rationale
+
 Best balance of reuse and clean architecture:
+
 - Saves 6 hours vs from-scratch
 - Maintains existing logging/monitoring
 - Follows established patterns
 - Enables future auth methods
 
 ### Implementation Notes
+
 - Extend BaseAuthProvider abstract class
 - Implement OAuth2Strategy class
 - Reuse ValidationService for input sanitization
@@ -959,35 +1021,42 @@ Best balance of reuse and clean architecture:
 ## Decision 3: Database Migration Sequencing
 
 ### Context
+
 6 tasks require database migrations with exclusive schema lock.
 
 ### Options Considered
 
 #### Option A: Combine all migrations into single task
+
 - **Pros**: Eliminates mutual exclusion delays, atomic changes
 - **Cons**: Single point of failure, difficult rollback, violates task boundaries
 - **Impact**: Saves 8 hours on critical path
 - **Risk**: High - all-or-nothing deployment
 
 #### Option B: Sequence by logical dependencies (SELECTED)
+
 - **Pros**: Granular rollback, clear ownership, safer deployment
 - **Cons**: Adds 8 hours to critical path
 - **Order**: auth → users → analytics → reporting
 - **Risk**: Low - incremental changes
 
 #### Option C: Implement migration queuing system
+
 - **Pros**: Automatic conflict resolution, reusable infrastructure
 - **Cons**: 16 hours implementation overhead
 - **Break-even**: 3+ projects
 - **Risk**: Medium - new complexity
 
 ### Rationale
+
 Safety and maintainability outweigh time cost:
+
 - Each feature team owns their migration
 - Rollback capability crucial for production
 - 8-hour delay acceptable for risk reduction
 
 ### Implementation Notes
+
 - Enforce order via mutual_exclusion dependencies
 - Each migration includes rollback script
 - Test migrations on copy of production schema
@@ -998,36 +1067,43 @@ Safety and maintainability outweigh time cost:
 ## Decision 4: Test Database Pool Management
 
 ### Context
+
 15 tasks require integration testing with 3 database instances available.
 
 ### Options Considered
 
 #### Option A: Expand pool to 5 instances
+
 - **Pros**: Better parallelization, reduced wait times
 - **Cons**: $200/month additional cost, setup complexity
 - **Impact**: Reduces execution by 3 hours
 - **ROI**: Negative for single project
 
 #### Option B: Time-share existing 3 instances (SELECTED)
+
 - **Pros**: No infrastructure changes, zero additional cost
 - **Cons**: Some task waiting, complexity in scheduling
 - **Impact**: Adds 1-2 hours average wait time
 - **Utilization**: 60% average, 100% peak
 
 #### Option C: Mock database for non-critical tests
+
 - **Pros**: Unlimited parallelization for unit tests
 - **Cons**: Less confidence, integration issues possible
 - **Impact**: Reduces database load by 40%
 - **Risk**: Medium - false positives possible
 
 ### Rationale
+
 Current capacity sufficient with smart scheduling:
+
 - 60% average utilization acceptable
 - Peak usage brief (Wave 3 only)
 - Coordinator handles scheduling complexity
 - Can revisit if pattern continues
 
 ### Implementation Notes
+
 - Group compatible tests in same wave
 - Implement test data isolation
 - Use transactions for cleanup
@@ -1038,33 +1114,40 @@ Current capacity sufficient with smart scheduling:
 ## Decision 5: Shared Resource Handling
 
 ### Context
+
 Multiple shared resources create execution constraints.
 
 ### Options Considered
 
 #### Option A: Ignore in planning, handle at runtime
+
 - **Pros**: Simpler planning phase
 - **Cons**: Runtime conflicts, unpredictable delays
 - **Risk**: High - resource deadlocks possible
 
 #### Option B: Model as mutex dependencies (SELECTED)
+
 - **Pros**: Explicit constraints, no runtime surprises
 - **Cons**: Additional edges in DAG, planning complexity
 - **Impact**: 12 mutual exclusion edges added
 
 #### Option C: Resource reservation system
+
 - **Pros**: Optimal resource allocation
 - **Cons**: Complex implementation, overhead
 - **Effort**: 20+ hours to implement
 
 ### Rationale
+
 Explicit modeling prevents runtime issues:
+
 - Mutual exclusion edges have confidence=1.0
 - Coordinator enforces constraints
 - No surprises during execution
 - Clear in planning artifacts
 
 ### Implementation Notes
+
 - Document all shared resources in meta
 - Create mutual_exclusion edges between conflicting tasks
 - Set suggested ordering based on logical flow
@@ -1075,33 +1158,40 @@ Explicit modeling prevents runtime issues:
 ## Decision 6: Checkpoint Strategy
 
 ### Context
+
 Need failure recovery without full task restart.
 
 ### Options Considered
 
 #### Option A: No checkpoints, restart on failure
+
 - **Pros**: Simple implementation
 - **Cons**: Lost work, longer recovery
 - **Impact**: Average 3h lost work per failure
 
 #### Option B: Checkpoint at 25%, 50%, 75% (SELECTED)
+
 - **Pros**: Bounded work loss, clear progress tracking
 - **Cons**: Checkpoint overhead, storage needs
 - **Impact**: Max 25% work loss, 5% overhead
 
 #### Option C: Continuous checkpointing
+
 - **Pros**: Minimal work loss
 - **Cons**: High overhead (15-20%), complexity
 - **Impact**: Near-zero work loss
 
 ### Rationale
+
 Balanced approach with acceptable overhead:
+
 - 5% overhead acceptable for recovery capability
 - Standard percentages easy to implement
 - Sufficient granularity for most tasks
 - Storage requirements modest
 
 ### Implementation Notes
+
 - Tasks declare checkpoint_capable flag
 - Checkpoints store state + artifacts
 - Coordinator tracks checkpoint registry
@@ -1112,34 +1202,41 @@ Balanced approach with acceptable overhead:
 ## Decision 7: Worker Specialization
 
 ### Context
+
 Tasks require different skill sets and tools.
 
 ### Options Considered
 
 #### Option A: Generic workers handle all tasks
+
 - **Pros**: Simple worker pool, any worker can take any task
 - **Cons**: Tool installation overhead, context switching
 - **Efficiency**: 60% due to setup time
 
 #### Option B: Specialized workers (SELECTED)
+
 - **Pros**: Pre-configured environments, faster execution
 - **Cons**: May have idle specialists
 - **Efficiency**: 85% with proper scheduling
 - **Types**: backend, frontend, database, testing
 
 #### Option C: Hybrid pool with cross-training
+
 - **Pros**: Flexibility with specialization
 - **Cons**: Complex capability matrix
 - **Efficiency**: 75% average
 
 ### Rationale
+
 Specialization worth the complexity:
+
 - 25% efficiency gain significant
 - Coordinator handles assignment complexity
 - Workers declare capabilities
 - Can add generic workers if needed
 
 ### Implementation Notes
+
 - Workers announce capabilities on registration
 - Coordinator matches tasks to workers
 - Prefer specialized when available
@@ -1163,12 +1260,13 @@ Specialization worth the complexity:
 ### Phase 1: Codebase & Resource Analysis
 
 1. **Scan existing codebase** using ast-grep patterns:
+
    ```javascript
    // Find existing APIs and interfaces
    ast-grep --pattern 'class $_ implements $_'
    ast-grep --pattern 'interface $_'
    ast-grep --pattern 'extends $_'
-   
+
    // Find shared resources
    ast-grep --pattern 'class $_ < ActiveRecord::Migration'
    ast-grep --pattern 'deploy:' --lang yaml
@@ -1186,6 +1284,7 @@ Specialization worth the complexity:
 ### Phase 2: Feature Extraction
 
 Extract 5-25 features from PLAN_DOC:
+
 - User-visible capabilities
 - Infrastructure components
 - Each with title, description, priority, and evidence
@@ -1193,6 +1292,7 @@ Extract 5-25 features from PLAN_DOC:
 ### Phase 3: Task Breakdown with Boundaries
 
 For each feature, create tasks with:
+
 - **Expected complexity** in measurable units
 - **Clear completion criteria** with "stop_when" guidance
 - **Explicit scope boundaries** (includes/excludes)
@@ -1205,6 +1305,7 @@ Auto-normalize: Split if >16h, merge if <0.5h
 ### Phase 4: Dependency Discovery
 
 Classify dependencies:
+
 1. **Technical**: Interface/artifact requirements
 2. **Sequential**: Information flow
 3. **Infrastructure**: Environment prerequisites
@@ -1231,12 +1332,14 @@ Classify dependencies:
 ### Phase 7: Dual Execution Model Generation
 
 #### Wave-Based Generation
+
 1. Use Kahn's algorithm for layering
 2. Apply MAX_WAVE_SIZE constraint
 3. Respect resource exclusions
 4. Calculate wave estimates (P50/P80/P95)
 
 #### Rolling Frontier Configuration
+
 1. Identify initial frontier (zero in-degree nodes)
 2. Simulate execution timeline
 3. Calculate resource utilization
@@ -1251,6 +1354,7 @@ Classify dependencies:
 ## Validation Rules
 
 ### Hard Fails (Auto-Reject)
+
 1. Cycles present in DAG
 2. Resource edges without mutex type
 3. Missing task boundaries (complexity, done, scope, logging)
@@ -1261,6 +1365,7 @@ Classify dependencies:
 8. Missing codebase analysis
 
 ### Quality Metrics
+
 - Edge density: 0.05-0.5 (warn outside range)
 - Verb-first naming: ≥80% compliance
 - Evidence coverage: ≥95%
@@ -1424,34 +1529,34 @@ tasks archive-plan ./tasks_output/ --tag "v1.0-release"
 
 ### `tasks plan` Arguments
 
-|Argument|Short|Example|Default|Description|
-|---|---|---|---|---|
-|`<description>`|-|`"Build TODO app"`|Required|Natural language description of what to build|
-|`--min-confidence`|`-c`|`--min-confidence 0.85`|0.7|Minimum confidence for DAG dependencies|
-|`--max-wave-size`|`-w`|`--max-wave-size 20`|30|Maximum tasks per wave|
-|`--codebase-path`|`-p`|`--codebase-path ./src`|./|Root directory for analysis|
-|`--execution-model`|`-m`|`--execution-model wave_based`|rolling_frontier|Execution strategy|
-|`--max-concurrent`|`-j`|`--max-concurrent 5`|10|Max concurrent tasks (rolling frontier)|
-|`--output-dir`|`-o`|`--output-dir ./plans/`|./tasks_output/|Output directory for artifacts|
-|`--plan-doc`|`-f`|`--plan-doc spec.md`|-|Use external spec document instead of description|
-|`--verbose`|`-v`|`--verbose`|false|Verbose output|
-|`--interactive`|`-i`|`--interactive`|false|Interactive mode with review|
+| Argument            | Short | Example                        | Default          | Description                                       |
+| ------------------- | ----- | ------------------------------ | ---------------- | ------------------------------------------------- |
+| `<description>`     | -     | `"Build TODO app"`             | Required         | Natural language description of what to build     |
+| `--min-confidence`  | `-c`  | `--min-confidence 0.85`        | 0.7              | Minimum confidence for DAG dependencies           |
+| `--max-wave-size`   | `-w`  | `--max-wave-size 20`           | 30               | Maximum tasks per wave                            |
+| `--codebase-path`   | `-p`  | `--codebase-path ./src`        | ./               | Root directory for analysis                       |
+| `--execution-model` | `-m`  | `--execution-model wave_based` | rolling_frontier | Execution strategy                                |
+| `--max-concurrent`  | `-j`  | `--max-concurrent 5`           | 10               | Max concurrent tasks (rolling frontier)           |
+| `--output-dir`      | `-o`  | `--output-dir ./plans/`        | ./tasks_output/  | Output directory for artifacts                    |
+| `--plan-doc`        | `-f`  | `--plan-doc spec.md`           | -                | Use external spec document instead of description |
+| `--verbose`         | `-v`  | `--verbose`                    | false            | Verbose output                                    |
+| `--interactive`     | `-i`  | `--interactive`                | false            | Interactive mode with review                      |
 
 ### `tasks execute` Arguments
 
-|Argument|Short|Example|Default|Description|
-|---|---|---|---|---|
-|`<plan-path>`|-|`./tasks_output/`|Required|Path to plan directory or `-` for stdin|
-|`--worker-min`|-|`--worker-min 2`|2|Minimum worker pool size|
-|`--worker-max`|-|`--worker-max 12`|8|Maximum worker pool size|
-|`--cpu-threshold`|-|`--cpu-threshold 75`|80|CPU backpressure threshold (%)|
-|`--memory-threshold`|-|`--memory-threshold 90`|85|Memory backpressure threshold (%)|
-|`--checkpoint-interval`|-|`--checkpoint-interval 20`|25|Checkpoint interval (%)|
-|`--resume-from-checkpoint`|`-r`|`--resume`|false|Resume from last checkpoint|
-|`--force-execution-model`|-|`--force-execution-model wave_based`|Use plan's model|Override execution model|
-|`--dry-run`|`-d`|`--dry-run`|false|Validate without executing|
-|`--verbose`|`-v`|`--verbose`|false|Verbose execution logs|
-|`--metrics-port`|-|`--metrics-port 9090`|-|Prometheus metrics endpoint|
+| Argument                   | Short | Example                              | Default          | Description                             |
+| -------------------------- | ----- | ------------------------------------ | ---------------- | --------------------------------------- |
+| `<plan-path>`              | -     | `./tasks_output/`                    | Required         | Path to plan directory or `-` for stdin |
+| `--worker-min`             | -     | `--worker-min 2`                     | 2                | Minimum worker pool size                |
+| `--worker-max`             | -     | `--worker-max 12`                    | 8                | Maximum worker pool size                |
+| `--cpu-threshold`          | -     | `--cpu-threshold 75`                 | 80               | CPU backpressure threshold (%)          |
+| `--memory-threshold`       | -     | `--memory-threshold 90`              | 85               | Memory backpressure threshold (%)       |
+| `--checkpoint-interval`    | -     | `--checkpoint-interval 20`           | 25               | Checkpoint interval (%)                 |
+| `--resume-from-checkpoint` | `-r`  | `--resume`                           | false            | Resume from last checkpoint             |
+| `--force-execution-model`  | -     | `--force-execution-model wave_based` | Use plan's model | Override execution model                |
+| `--dry-run`                | `-d`  | `--dry-run`                          | false            | Validate without executing              |
+| `--verbose`                | `-v`  | `--verbose`                          | false            | Verbose execution logs                  |
+| `--metrics-port`           | -     | `--metrics-port 9090`                | -                | Prometheus metrics endpoint             |
 
 ## Environment Variables
 
@@ -1488,18 +1593,18 @@ tasks_output/
 
 ## Exit Codes
 
-|Code|Meaning|Phase|
-|---|---|---|
-|0|Success|Both|
-|1|Invalid arguments|Both|
-|2|Codebase analysis failed|Plan|
-|3|Cyclic dependencies detected|Plan|
-|4|Resource conflicts unresolvable|Plan|
-|5|Plan validation failed|Execute|
-|6|Worker pool initialization failed|Execute|
-|7|Execution failed (with checkpoint)|Execute|
-|8|Execution failed (no checkpoint)|Execute|
-|9|User abort|Both|
+| Code | Meaning                            | Phase   |
+| ---- | ---------------------------------- | ------- |
+| 0    | Success                            | Both    |
+| 1    | Invalid arguments                  | Both    |
+| 2    | Codebase analysis failed           | Plan    |
+| 3    | Cyclic dependencies detected       | Plan    |
+| 4    | Resource conflicts unresolvable    | Plan    |
+| 5    | Plan validation failed             | Execute |
+| 6    | Worker pool initialization failed  | Execute |
+| 7    | Execution failed (with checkpoint) | Execute |
+| 8    | Execution failed (no checkpoint)   | Execute |
+| 9    | User abort                         | Both    |
 
 ## Examples
 

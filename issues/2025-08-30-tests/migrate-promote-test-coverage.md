@@ -2,13 +2,13 @@
 
 ## Core Information
 
-| Field | Value |
-|-------|-------|
-| **Severity Level** | 🔴 CRITICAL - Show Stopper |
-| **Location** | `src/commands/db/migrate/promote.js` |
-| **Category** | Testing |
-| **Brief Description** | Migration promotion command lacks test coverage |
-| **Impact** | Production deployment failures could cause data loss or downtime |
+| Field                 | Value                                                            |
+| --------------------- | ---------------------------------------------------------------- |
+| **Severity Level**    | 🔴 CRITICAL - Show Stopper                                       |
+| **Location**          | `src/commands/db/migrate/promote.js`                             |
+| **Category**          | Testing                                                          |
+| **Brief Description** | Migration promotion command lacks test coverage                  |
+| **Impact**            | Production deployment failures could cause data loss or downtime |
 
 ## Summary
 
@@ -17,6 +17,7 @@ The migrate-promote command is responsible for deploying tested migrations to pr
 ## Component Overview
 
 The migrate-promote command provides:
+
 - Production migration deployment
 - Pre-deployment validation and safety checks
 - Transaction-wrapped deployment for rollback safety
@@ -27,6 +28,7 @@ The migrate-promote command provides:
 ## What Needs Testing
 
 ### Core Functionality
+
 - [ ] Production environment detection and validation
 - [ ] Migration state verification before promotion
 - [ ] Transaction wrapping for safe deployment
@@ -35,6 +37,7 @@ The migrate-promote command provides:
 - [ ] Success/failure reporting
 
 ### Safety Mechanisms
+
 - [ ] `--prod` flag requirement enforcement
 - [ ] Double confirmation for destructive operations
 - [ ] Pre-deployment migration validation
@@ -43,6 +46,7 @@ The migrate-promote command provides:
 - [ ] Backup verification before promotion
 
 ### Edge Cases
+
 - [ ] Network failures during deployment
 - [ ] Partial deployment recovery
 - [ ] Invalid migration state
@@ -51,6 +55,7 @@ The migrate-promote command provides:
 - [ ] Concurrent deployment detection
 
 ### Integration Points
+
 - [ ] Migration metadata system
 - [ ] Database connection management
 - [ ] Production environment configuration
@@ -58,6 +63,7 @@ The migrate-promote command provides:
 - [ ] Logging and monitoring systems
 
 ### Error Scenarios
+
 - [ ] Database connection failures
 - [ ] Invalid production credentials
 - [ ] Migration conflicts
@@ -68,48 +74,51 @@ The migrate-promote command provides:
 ## Testing Requirements
 
 ### Unit Tests
+
 ```javascript
-describe('migrate-promote', () => {
-  describe('safety checks', () => {
-    it('should require --prod flag for production')
-    it('should validate production environment')
-    it('should verify migration readiness')
-    it('should enforce double confirmation')
-  })
-  
-  describe('deployment process', () => {
-    it('should wrap deployment in transaction')
-    it('should handle deployment success')
-    it('should handle deployment failure')
-    it('should prepare rollback triggers')
-  })
-  
-  describe('error handling', () => {
-    it('should handle connection failures gracefully')
-    it('should rollback on deployment errors')
-    it('should report failure details')
-  })
-})
+describe("migrate-promote", () => {
+  describe("safety checks", () => {
+    it("should require --prod flag for production");
+    it("should validate production environment");
+    it("should verify migration readiness");
+    it("should enforce double confirmation");
+  });
+
+  describe("deployment process", () => {
+    it("should wrap deployment in transaction");
+    it("should handle deployment success");
+    it("should handle deployment failure");
+    it("should prepare rollback triggers");
+  });
+
+  describe("error handling", () => {
+    it("should handle connection failures gracefully");
+    it("should rollback on deployment errors");
+    it("should report failure details");
+  });
+});
 ```
 
 ### Integration Tests
+
 ```javascript
-describe('migrate-promote Integration', () => {
-  it('should promote migration to production database')
-  it('should integrate with rollback mechanisms')
-  it('should handle real database transactions')
-  it('should work with production environment setup')
-})
+describe("migrate-promote Integration", () => {
+  it("should promote migration to production database");
+  it("should integrate with rollback mechanisms");
+  it("should handle real database transactions");
+  it("should work with production environment setup");
+});
 ```
 
 ### Safety Tests
+
 ```javascript
-describe('migrate-promote Safety', () => {
-  it('should prevent accidental production deployment')
-  it('should validate all safety requirements')
-  it('should handle network interruptions safely')
-  it('should maintain data integrity during failures')
-})
+describe("migrate-promote Safety", () => {
+  it("should prevent accidental production deployment");
+  it("should validate all safety requirements");
+  it("should handle network interruptions safely");
+  it("should maintain data integrity during failures");
+});
 ```
 
 ## Acceptance Criteria
@@ -126,6 +135,7 @@ describe('migrate-promote Safety', () => {
 ## Priority Justification
 
 **Critical Priority** because:
+
 1. **Production Database Risk**: Direct impact on production data and availability
 2. **No Recovery Path**: Failed promotions can cause extended downtime
 3. **Financial Impact**: Production failures have direct business cost
@@ -157,6 +167,6 @@ describe('migrate-promote Safety', () => {
 
 ---
 
-*"In critical moments, men sometimes see exactly what they wish to see."* - Spock
+_"In critical moments, men sometimes see exactly what they wish to see."_ - Spock
 
 The promote command carries the weight of production responsibility. Every line of code must be tested with the precision of a starship's warp core - failure is not an option.

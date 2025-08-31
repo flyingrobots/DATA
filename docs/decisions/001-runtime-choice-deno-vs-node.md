@@ -8,12 +8,14 @@
 ## Context and Problem Statement
 
 D.A.T.A. (Database Automation, Testing, and Alignment) is a CLI tool that manages:
+
 1. PostgreSQL/Supabase database migrations
 2. Supabase Edge Functions deployment and testing
 3. pgTAP test execution and coverage enforcement
 4. Production deployment safety
 
 Current pain points:
+
 - **Module System Chaos**: Mixed CommonJS/ESM causing test failures and import issues
 - **Runtime Mismatch**: We deploy to Deno (Edge Functions) but develop in Node.js
 - **TypeScript Gaps**: Using JSDoc instead of native TypeScript
@@ -32,18 +34,20 @@ Current pain points:
 ## Considered Options
 
 ### Option 1: Full Migration to Deno 🦕
+
 **Complete rewrite of D.A.T.A. as a Deno application**
 
 ```typescript
 // Native TypeScript, no transpilation
-import { Command } from "https://deno.land/x/cliffy@v1.0.0/command/mod.ts"
-import { DB } from "https://deno.land/x/sqlite@v3.8/mod.ts"
+import { Command } from "https://deno.land/x/cliffy@v1.0.0/command/mod.ts";
+import { DB } from "https://deno.land/x/sqlite@v3.8/mod.ts";
 
 // Direct Edge Function testing
-const edgeFunction = await import("./supabase/functions/my-function/index.ts")
+const edgeFunction = await import("./supabase/functions/my-function/index.ts");
 ```
 
 **Pros:**
+
 - ✅ **Perfect Edge Function parity**: Test functions in exact runtime
 - ✅ **TypeScript native**: No transpilation, true type safety
 - ✅ **Single executable**: `deno compile` creates standalone binary
@@ -54,6 +58,7 @@ const edgeFunction = await import("./supabase/functions/my-function/index.ts")
 - ✅ **Future-proof**: Aligns with Supabase's direction
 
 **Cons:**
+
 - ❌ **PostgreSQL drivers**: Less mature (but improving rapidly)
 - ❌ **Ecosystem gaps**: Some tools unavailable (pgTAP runners, etc.)
 - ❌ **Rewrite effort**: 40-60 hours of migration work
@@ -61,6 +66,7 @@ const edgeFunction = await import("./supabase/functions/my-function/index.ts")
 - ❌ **Early adopter risk**: Breaking changes still happening
 
 **Implementation Path:**
+
 ```bash
 # Phase 1: Core migration (Week 1)
 - Port Command base classes
@@ -79,6 +85,7 @@ const edgeFunction = await import("./supabase/functions/my-function/index.ts")
 ```
 
 ### Option 2: Stay with Node.js + Fix Module System 📦
+
 **Properly configure TypeScript and ES modules**
 
 ```json
@@ -94,6 +101,7 @@ const edgeFunction = await import("./supabase/functions/my-function/index.ts")
 ```
 
 **Pros:**
+
 - ✅ **Mature ecosystem**: All tools available
 - ✅ **Team familiarity**: Everyone knows Node
 - ✅ **Minimal migration**: Just configuration fixes
@@ -101,6 +109,7 @@ const edgeFunction = await import("./supabase/functions/my-function/index.ts")
 - ✅ **CI/CD support**: Works everywhere
 
 **Cons:**
+
 - ❌ **Runtime mismatch**: Can't accurately test Edge Functions
 - ❌ **Module complexity**: Even "fixed", still complex
 - ❌ **Bundle size**: Node_modules bloat
@@ -108,52 +117,60 @@ const edgeFunction = await import("./supabase/functions/my-function/index.ts")
 - ❌ **Two TypeScripts**: Different configs for Edge Functions vs CLI
 
 ### Option 3: Hybrid Architecture 🔀
+
 **Node.js for CLI, Deno for Edge Function testing**
 
 ```javascript
 // Node CLI orchestrates
-await exec("deno run --allow-net test-edge-function.ts")
+await exec("deno run --allow-net test-edge-function.ts");
 
 // Deno subprocess tests Edge Functions
-const result = await testInDenoRuntime(functionCode)
+const result = await testInDenoRuntime(functionCode);
 ```
 
 **Pros:**
+
 - ✅ **Best of both**: Node ecosystem + Deno accuracy
 - ✅ **Incremental migration**: Can move pieces over time
 - ✅ **Risk mitigation**: Keep working system while experimenting
 
 **Cons:**
+
 - ❌ **Complexity explosion**: Two runtimes to maintain
 - ❌ **Context switching**: Developers juggle two systems
 - ❌ **Distribution harder**: Need both runtimes installed
 - ❌ **Debugging nightmare**: Cross-runtime issues
 
 ### Option 4: Migrate to Bun 🥟
+
 **Use Bun as Node-compatible modern runtime**
 
 **Pros:**
+
 - ✅ **Node compatibility**: Most packages work
 - ✅ **Fast**: Blazing performance
 - ✅ **Modern**: TypeScript native, JSX support
 
 **Cons:**
+
 - ❌ **Not Deno**: Still doesn't match Edge Functions
 - ❌ **Newer than Deno**: Even less mature
 - ❌ **Different goals**: Optimized for different use cases
 
 ### Option 5: Build Runtime Abstraction Layer 🏗️
+
 **Create abstraction that can run on both**
 
 ```typescript
 interface Runtime {
-  fetch: GlobalFetch
-  crypto: Crypto
-  readFile: (path: string) => Promise<string>
+  fetch: GlobalFetch;
+  crypto: Crypto;
+  readFile: (path: string) => Promise<string>;
 }
 ```
 
 **Cons:**
+
 - ❌ **Lowest common denominator**: Lose runtime-specific features
 - ❌ **Abstraction overhead**: More code to maintain
 - ❌ **Still doesn't solve**: Edge Function testing accuracy
@@ -212,6 +229,7 @@ interface Runtime {
 ## Implementation Strategy
 
 ### Phase 1: Proof of Concept (Week 1)
+
 ```typescript
 // Test critical paths in Deno
 - Database connections ✓
@@ -221,6 +239,7 @@ interface Runtime {
 ```
 
 ### Phase 2: Parallel Development (Week 2-3)
+
 ```typescript
 // Build Deno version alongside Node
 - Keep Node version working
@@ -229,6 +248,7 @@ interface Runtime {
 ```
 
 ### Phase 3: Cutover (Week 4)
+
 ```typescript
 // Switch primary development to Deno
 - Deprecate Node version
@@ -239,6 +259,7 @@ interface Runtime {
 ## Consequences
 
 ### Positive
+
 - **Unified runtime**: Edge Functions and CLI use same environment
 - **Modern codebase**: No legacy module issues
 - **Better security**: Explicit permission model
@@ -246,12 +267,14 @@ interface Runtime {
 - **TypeScript native**: No build step
 
 ### Negative
+
 - **Migration effort**: 40-60 hours of work
 - **Ecosystem gaps**: May need to build some tools
 - **Learning curve**: Team needs Deno knowledge
 - **Early adopter risk**: Deno still evolving
 
 ### Neutral
+
 - **Different paradigm**: URL imports vs package.json
 - **New tooling**: Deno.test vs Vitest
 - **Permission model**: Explicit flags needed
@@ -292,10 +315,10 @@ If we decide NOT to migrate, here's the minimum fixes needed:
 
 ```javascript
 // Fix all imports
-import { describe, it } from 'vitest'  // not require()
+import { describe, it } from "vitest"; // not require()
 
 // Use import.meta.url
-const __dirname = new URL('.', import.meta.url).pathname
+const __dirname = new URL(".", import.meta.url).pathname;
 ```
 
 ```bash
@@ -308,6 +331,6 @@ But this is putting a bandaid on a broken leg when we need surgery.
 
 ---
 
-*"It is possible to commit no mistakes and still lose. That is not weakness, that is life."* - Jean-Luc Picard
+_"It is possible to commit no mistakes and still lose. That is not weakness, that is life."_ - Jean-Luc Picard
 
 In this case, staying with Node.js isn't a mistake, but it is a lost opportunity to align perfectly with our deployment target.

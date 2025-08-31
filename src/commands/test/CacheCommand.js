@@ -2,42 +2,50 @@
  * Test Cache Management Command
  */
 
-const TestCommand = require('../../lib/TestCommand');
-const TestCache = require('../../lib/test/TestCache');
-const chalk = require('chalk');
+const TestCommand = require("../../lib/TestCommand");
+const TestCache = require("../../lib/test/TestCache");
+const chalk = require("chalk");
 
 /**
  * Manage test result cache (clear, stats, invalidate)
  */
 class CacheCommand extends TestCommand {
-  constructor(databaseUrl, serviceRoleKey = null, testsDir, outputDir, logger = null, isProd = false) {
+  constructor(
+    databaseUrl,
+    serviceRoleKey = null,
+    testsDir,
+    outputDir,
+    logger = null,
+    isProd = false,
+  ) {
     super(databaseUrl, serviceRoleKey, testsDir, outputDir, logger, isProd);
-    this.testCache = new TestCache('.data-cache/test-results', logger);
+    this.testCache = new TestCache(".data-cache/test-results", logger);
   }
 
   /**
    * Execute cache management command
    */
   async performExecute(options = {}) {
-    this.emit('start', { isProd: this.isProd, options });
-    
+    this.emit("start", { isProd: this.isProd, options });
+
     try {
-      const action = options.action || 'stats';
-      
+      const action = options.action || "stats";
+
       switch (action.toLowerCase()) {
-        case 'clear':
+        case "clear":
           return await this._clearCache(options);
-        case 'stats':
+        case "stats":
           return await this._showStats(options);
-        case 'invalidate':
+        case "invalidate":
           return await this._invalidateCache(options);
         default:
-          throw new Error(`Unknown cache action: ${action}. Use 'clear', 'stats', or 'invalidate'.`);
+          throw new Error(
+            `Unknown cache action: ${action}. Use 'clear', 'stats', or 'invalidate'.`,
+          );
       }
-      
     } catch (error) {
-      this.error('Failed to execute cache command', error);
-      this.emit('failed', { error });
+      this.error("Failed to execute cache command", error);
+      this.emit("failed", { error });
       throw error;
     }
   }
@@ -47,21 +55,21 @@ class CacheCommand extends TestCommand {
    * @private
    */
   async _clearCache(options) {
-    this.progress('Clearing test result cache...');
-    
+    this.progress("Clearing test result cache...");
+
     const result = await this.testCache.clearCache();
-    
-    console.log(''); // Empty line
-    console.log(chalk.green.bold('✓ Cache cleared successfully'));
+
+    console.log(""); // Empty line
+    console.log(chalk.green.bold("✓ Cache cleared successfully"));
     console.log(chalk.green(`  ${result.filesRemoved} cache files removed`));
     console.log(chalk.green(`  Completed in ${result.duration}ms`));
-    
-    this.emit('complete', { 
-      action: 'clear',
+
+    this.emit("complete", {
+      action: "clear",
       filesRemoved: result.filesRemoved,
-      duration: result.duration
+      duration: result.duration,
     });
-    
+
     return result;
   }
 
@@ -70,86 +78,137 @@ class CacheCommand extends TestCommand {
    * @private
    */
   async _showStats(options) {
-    this.progress('Gathering cache statistics...');
-    
+    this.progress("Gathering cache statistics...");
+
     const stats = await this.testCache.getStats();
-    
-    console.log(''); // Empty line
-    console.log(chalk.cyan.bold('Test Cache Statistics'));
-    console.log(chalk.cyan('━'.repeat(50)));
-    
+
+    console.log(""); // Empty line
+    console.log(chalk.cyan.bold("Test Cache Statistics"));
+    console.log(chalk.cyan("━".repeat(50)));
+
     // File statistics
-    console.log(chalk.white.bold('Storage:'));
+    console.log(chalk.white.bold("Storage:"));
     console.log(chalk.white(`  Directory: ${stats.directory}`));
     console.log(chalk.white(`  Cache files: ${stats.files.count}`));
-    
+
     if (stats.files.count > 0) {
-      console.log(chalk.white(`  Total size: ${this._formatBytes(stats.files.totalSize)}`));
-      console.log(chalk.white(`  Average file size: ${this._formatBytes(stats.files.averageSize)}`));
-      
+      console.log(
+        chalk.white(
+          `  Total size: ${this._formatBytes(stats.files.totalSize)}`,
+        ),
+      );
+      console.log(
+        chalk.white(
+          `  Average file size: ${this._formatBytes(stats.files.averageSize)}`,
+        ),
+      );
+
       if (stats.files.oldest) {
-        console.log(chalk.white(`  Oldest entry: ${stats.files.oldest.age} minutes ago`));
+        console.log(
+          chalk.white(`  Oldest entry: ${stats.files.oldest.age} minutes ago`),
+        );
       }
       if (stats.files.newest) {
-        console.log(chalk.white(`  Newest entry: ${stats.files.newest.age} minutes ago`));
+        console.log(
+          chalk.white(`  Newest entry: ${stats.files.newest.age} minutes ago`),
+        );
       }
     }
-    
-    console.log(''); // Empty line
-    
+
+    console.log(""); // Empty line
+
     // Performance statistics
-    console.log(chalk.white.bold('Performance:'));
+    console.log(chalk.white.bold("Performance:"));
     const hitRate = parseFloat(stats.performance.hitRate);
-    const hitRateColor = hitRate > 75 ? 'green' : hitRate > 50 ? 'yellow' : 'red';
-    console.log(chalk[hitRateColor](`  Hit rate: ${stats.performance.hitRate}%`));
-    console.log(chalk.white(`  Total requests: ${stats.performance.totalRequests}`));
+    const hitRateColor =
+      hitRate > 75 ? "green" : hitRate > 50 ? "yellow" : "red";
+    console.log(
+      chalk[hitRateColor](`  Hit rate: ${stats.performance.hitRate}%`),
+    );
+    console.log(
+      chalk.white(`  Total requests: ${stats.performance.totalRequests}`),
+    );
     console.log(chalk.green(`  Cache hits: ${stats.performance.hits}`));
     console.log(chalk.red(`  Cache misses: ${stats.performance.misses}`));
-    console.log(chalk.yellow(`  Cache invalidations: ${stats.performance.invalidations}`));
-    
+    console.log(
+      chalk.yellow(`  Cache invalidations: ${stats.performance.invalidations}`),
+    );
+
     if (stats.performance.averageHashTime > 0) {
-      console.log(chalk.white(`  Average hash calculation: ${stats.performance.averageHashTime}ms`));
+      console.log(
+        chalk.white(
+          `  Average hash calculation: ${stats.performance.averageHashTime}ms`,
+        ),
+      );
     }
     if (stats.performance.averageCacheOpTime > 0) {
-      console.log(chalk.white(`  Average cache operation: ${stats.performance.averageCacheOpTime}ms`));
+      console.log(
+        chalk.white(
+          `  Average cache operation: ${stats.performance.averageCacheOpTime}ms`,
+        ),
+      );
     }
-    
+
     // Show recent activity if available
     if (stats.timings.recentCacheOps.length > 0) {
-      console.log(''); // Empty line
-      console.log(chalk.white.bold('Recent Cache Activity:'));
-      stats.timings.recentCacheOps.forEach(op => {
-        const opColor = op.operation === 'hit' ? 'green' : 'blue';
+      console.log(""); // Empty line
+      console.log(chalk.white.bold("Recent Cache Activity:"));
+      stats.timings.recentCacheOps.forEach((op) => {
+        const opColor = op.operation === "hit" ? "green" : "blue";
         const timeAgo = this._formatTimeAgo(new Date(op.timestamp));
-        console.log(chalk[opColor](`  ${op.operation}: ${op.hash}... (${op.duration}ms, ${timeAgo})`));
+        console.log(
+          chalk[opColor](
+            `  ${op.operation}: ${op.hash}... (${op.duration}ms, ${timeAgo})`,
+          ),
+        );
       });
     }
-    
+
     // Performance recommendations
-    console.log(''); // Empty line
-    console.log(chalk.white.bold('Recommendations:'));
-    
+    console.log(""); // Empty line
+    console.log(chalk.white.bold("Recommendations:"));
+
     if (hitRate < 25) {
-      console.log(chalk.yellow('  • Consider running tests multiple times to build up cache'));
+      console.log(
+        chalk.yellow(
+          "  • Consider running tests multiple times to build up cache",
+        ),
+      );
     } else if (hitRate > 90) {
-      console.log(chalk.green('  • Excellent cache performance! Tests are running efficiently.'));
+      console.log(
+        chalk.green(
+          "  • Excellent cache performance! Tests are running efficiently.",
+        ),
+      );
     } else if (hitRate > 50) {
-      console.log(chalk.green('  • Good cache performance. Cache is providing significant speedup.'));
+      console.log(
+        chalk.green(
+          "  • Good cache performance. Cache is providing significant speedup.",
+        ),
+      );
     }
-    
+
     if (stats.files.count > 1000) {
-      console.log(chalk.yellow('  • Consider clearing old cache entries to save disk space'));
+      console.log(
+        chalk.yellow(
+          "  • Consider clearing old cache entries to save disk space",
+        ),
+      );
     }
-    
+
     if (stats.performance.averageHashTime > 100) {
-      console.log(chalk.yellow('  • Hash calculations are slow. Check for large test files.'));
+      console.log(
+        chalk.yellow(
+          "  • Hash calculations are slow. Check for large test files.",
+        ),
+      );
     }
-    
-    this.emit('complete', { 
-      action: 'stats',
-      stats: stats
+
+    this.emit("complete", {
+      action: "stats",
+      stats: stats,
     });
-    
+
     return stats;
   }
 
@@ -159,29 +218,35 @@ class CacheCommand extends TestCommand {
    */
   async _invalidateCache(options) {
     const pattern = options.pattern;
-    
+
     if (!pattern) {
-      throw new Error('Pattern is required for cache invalidation. Use --pattern <pattern>');
+      throw new Error(
+        "Pattern is required for cache invalidation. Use --pattern <pattern>",
+      );
     }
-    
+
     this.progress(`Invalidating cache entries matching pattern: ${pattern}`);
-    
+
     const count = await this.testCache.invalidateByPattern(pattern);
-    
-    console.log(''); // Empty line
+
+    console.log(""); // Empty line
     if (count > 0) {
       console.log(chalk.green.bold(`✓ Invalidated ${count} cache entries`));
       console.log(chalk.green(`  Pattern: ${pattern}`));
     } else {
-      console.log(chalk.yellow.bold(`No cache entries found matching pattern: ${pattern}`));
+      console.log(
+        chalk.yellow.bold(
+          `No cache entries found matching pattern: ${pattern}`,
+        ),
+      );
     }
-    
-    this.emit('complete', { 
-      action: 'invalidate',
+
+    this.emit("complete", {
+      action: "invalidate",
       pattern: pattern,
-      invalidatedCount: count
+      invalidatedCount: count,
     });
-    
+
     return { pattern, invalidatedCount: count };
   }
 
@@ -192,13 +257,13 @@ class CacheCommand extends TestCommand {
    * @private
    */
   _formatBytes(bytes) {
-    if (bytes === 0) return '0 B';
-    
+    if (bytes === 0) return "0 B";
+
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   }
 
   /**
@@ -213,8 +278,8 @@ class CacheCommand extends TestCommand {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-    
-    if (diffMins < 1) return 'just now';
+
+    if (diffMins < 1) return "just now";
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     return `${diffDays}d ago`;

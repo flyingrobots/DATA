@@ -2,12 +2,9 @@
  * CLI Reporter for Command Events
  */
 
-const chalk = require('chalk');
-const inquirer = require('inquirer');
-const {
-  CommandEvent,
-  ErrorEvent
-} = require('../lib/events/CommandEvents');
+const chalk = require("chalk");
+const inquirer = require("inquirer");
+const { CommandEvent, ErrorEvent } = require("../lib/events/CommandEvents");
 
 /**
  * Reporter that listens to command events and displays CLI output
@@ -22,7 +19,7 @@ class CliReporter {
    */
   attach(command) {
     // Progress events
-    command.on('progress', (eventData) => {
+    command.on("progress", (eventData) => {
       if (!this.silent) {
         const message = this._extractMessage(eventData);
         if (message) {
@@ -32,31 +29,31 @@ class CliReporter {
     });
 
     // Warning events
-    command.on('warning', (eventData) => {
+    command.on("warning", (eventData) => {
       if (!this.silent) {
         const message = this._extractMessage(eventData);
         const data = this._extractData(eventData);
-        
+
         if (message) {
           console.log(chalk.yellow.bold(`\n⚠️  WARNING: ${message}\n`));
-          
+
           if (data && data.actions) {
-            console.log(chalk.yellow('This will:'));
-            data.actions.forEach(action => {
+            console.log(chalk.yellow("This will:"));
+            data.actions.forEach((action) => {
               console.log(chalk.yellow(`  • ${action}`));
             });
-            console.log(chalk.yellow('\nThis action cannot be undone!\n'));
+            console.log(chalk.yellow("\nThis action cannot be undone!\n"));
           }
         }
       }
     });
 
     // Error events
-    command.on('error', (eventData) => {
+    command.on("error", (eventData) => {
       if (!this.silent) {
         const message = this._extractMessage(eventData);
         const error = this._extractError(eventData);
-        
+
         if (message) {
           console.error(chalk.red(`✗ ${message}`));
         }
@@ -67,7 +64,7 @@ class CliReporter {
     });
 
     // Success events
-    command.on('success', (eventData) => {
+    command.on("success", (eventData) => {
       if (!this.silent) {
         const message = this._extractMessage(eventData);
         if (message) {
@@ -77,7 +74,7 @@ class CliReporter {
     });
 
     // Prompt events
-    command.on('prompt', async ({ type, options, resolve }) => {
+    command.on("prompt", async ({ type, options, resolve }) => {
       if (this.silent) {
         // In silent mode, use defaults
         resolve(options.default || false);
@@ -85,25 +82,25 @@ class CliReporter {
       }
 
       try {
-        if (type === 'confirm') {
+        if (type === "confirm") {
           const { result } = await inquirer.prompt([
             {
-              type: 'confirm',
-              name: 'result',
+              type: "confirm",
+              name: "result",
               message: options.message,
-              default: options.default || false
-            }
+              default: options.default || false,
+            },
           ]);
           resolve(result);
-        } else if (type === 'input') {
+        } else if (type === "input") {
           const { result } = await inquirer.prompt([
             {
-              type: 'input',
-              name: 'result',
+              type: "input",
+              name: "result",
               message: options.message,
               validate: options.validate,
-              default: options.default
-            }
+              default: options.default,
+            },
           ]);
           resolve(result);
         } else {
@@ -115,28 +112,30 @@ class CliReporter {
     });
 
     // Command-specific events
-    command.on('start', (eventData) => {
+    command.on("start", (eventData) => {
       if (!this.silent) {
         const isProd = this._extractIsProd(eventData);
         if (isProd) {
-          console.log(chalk.red.bold('\n🚨 PRODUCTION MODE 🚨\n'));
+          console.log(chalk.red.bold("\n🚨 PRODUCTION MODE 🚨\n"));
         }
       }
     });
 
-    command.on('cancelled', () => {
+    command.on("cancelled", () => {
       if (!this.silent) {
-        console.log(chalk.gray('\nOperation cancelled by user\n'));
+        console.log(chalk.gray("\nOperation cancelled by user\n"));
       }
     });
 
-    command.on('complete', () => {
+    command.on("complete", () => {
       if (!this.silent) {
-        console.log(chalk.green.bold('\n✨ Operation completed successfully!\n'));
+        console.log(
+          chalk.green.bold("\n✨ Operation completed successfully!\n"),
+        );
       }
     });
 
-    command.on('output', (eventData) => {
+    command.on("output", (eventData) => {
       if (!this.silent && process.env.VERBOSE) {
         const stdout = this._extractStdout(eventData);
         if (stdout) {
@@ -155,17 +154,17 @@ class CliReporter {
     if (eventData instanceof CommandEvent) {
       return eventData.message;
     }
-    
+
     // Handle legacy event objects
-    if (eventData && typeof eventData === 'object') {
+    if (eventData && typeof eventData === "object") {
       return eventData.message;
     }
-    
+
     // Handle simple string messages
-    if (typeof eventData === 'string') {
+    if (typeof eventData === "string") {
       return eventData;
     }
-    
+
     return null;
   }
 
@@ -177,15 +176,20 @@ class CliReporter {
     // Handle typed CommandEvent instances
     if (eventData instanceof CommandEvent) {
       // Return all properties except the standard ones
-      const { eventType: _eventType, timestamp: _timestamp, message: _message, ...data } = eventData;
+      const {
+        eventType: _eventType,
+        timestamp: _timestamp,
+        message: _message,
+        ...data
+      } = eventData;
       return Object.keys(data).length > 0 ? data : null;
     }
-    
+
     // Handle legacy event objects
-    if (eventData && typeof eventData === 'object') {
+    if (eventData && typeof eventData === "object") {
       return eventData.data || eventData;
     }
-    
+
     return null;
   }
 
@@ -198,12 +202,12 @@ class CliReporter {
     if (eventData instanceof ErrorEvent) {
       return eventData.error;
     }
-    
+
     // Handle legacy event objects
-    if (eventData && typeof eventData === 'object') {
+    if (eventData && typeof eventData === "object") {
       return eventData.error;
     }
-    
+
     return null;
   }
 
@@ -216,12 +220,12 @@ class CliReporter {
     if (eventData instanceof CommandEvent) {
       return eventData.isProd || false;
     }
-    
+
     // Handle legacy event objects
-    if (eventData && typeof eventData === 'object') {
+    if (eventData && typeof eventData === "object") {
       return eventData.isProd || false;
     }
-    
+
     return false;
   }
 
@@ -234,12 +238,12 @@ class CliReporter {
     if (eventData instanceof CommandEvent) {
       return eventData.stdout;
     }
-    
+
     // Handle legacy event objects
-    if (eventData && typeof eventData === 'object') {
+    if (eventData && typeof eventData === "object") {
       return eventData.stdout;
     }
-    
+
     return null;
   }
 }

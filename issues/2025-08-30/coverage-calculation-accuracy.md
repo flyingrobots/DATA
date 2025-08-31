@@ -1,6 +1,6 @@
 # GitHub Issue Format
 
-> [!success] __This issuse has been fixed__
+> [!success] **This issuse has been fixed**
 
 ## Issue Title
 
@@ -8,13 +8,13 @@ Fix coverage key generation edge cases in CoverageEnforcer
 
 ### Core Information
 
-| Field | Why It Matters |
-|-------|---------------|
-| **Severity Level** | HIGH - Could cause false positives/negatives |
-| **Location** | `src/lib/testing/CoverageEnforcer.js` lines 217-255 |
-| **Category** | Bug |
-| **Brief Description** | Coverage key generation doesn't handle edge cases properly |
-| **Impact** | False positives/negatives in coverage detection affecting deployment decisions |
+| Field                 | Why It Matters                                                                 |
+| --------------------- | ------------------------------------------------------------------------------ |
+| **Severity Level**    | HIGH - Could cause false positives/negatives                                   |
+| **Location**          | `src/lib/testing/CoverageEnforcer.js` lines 217-255                            |
+| **Category**          | Bug                                                                            |
+| **Brief Description** | Coverage key generation doesn't handle edge cases properly                     |
+| **Impact**            | False positives/negatives in coverage detection affecting deployment decisions |
 
 ## Summary
 
@@ -50,16 +50,16 @@ Problem scenarios:
 
 ```javascript
 // These should match but won't:
-item1 = { schema: null, name: 'users', type: 'table' }
-item2 = { schema: 'public', name: 'users', type: 'table' }
-key1 = 'null.users.table'
-key2 = 'public.users.table'  // Different keys!
+item1 = { schema: null, name: "users", type: "table" };
+item2 = { schema: "public", name: "users", type: "table" };
+key1 = "null.users.table";
+key2 = "public.users.table"; // Different keys!
 
 // These shouldn't match but might:
-item3 = { schema: 'public', name: 'user.posts', type: 'table' }
-item4 = { schema: 'public.user', name: 'posts', type: 'table' }
-key3 = 'public.user.posts.table'
-key4 = 'public.user.posts.table'  // Same key!
+item3 = { schema: "public", name: "user.posts", type: "table" };
+item4 = { schema: "public.user", name: "posts", type: "table" };
+key3 = "public.user.posts.table";
+key4 = "public.user.posts.table"; // Same key!
 ```
 
 ## Proposed Solution
@@ -70,19 +70,19 @@ Implement robust key normalization with proper escaping:
 generateCoverageKey(item) {
   // Normalize schema (default to 'public' per PostgreSQL convention)
   const schema = (item.schema || 'public').toLowerCase().trim();
-  
+
   // Normalize name and type
   const name = item.name.toLowerCase().trim();
   const type = item.type.toLowerCase().trim();
-  
+
   // Use separator that won't appear in identifiers
   const separator = '::';
-  
+
   // Escape any separator sequences in the components
   const escapedSchema = schema.replace(/::/g, '\\:\\:');
   const escapedName = name.replace(/::/g, '\\:\\:');
   const escapedType = type.replace(/::/g, '\\:\\:');
-  
+
   return `${escapedSchema}${separator}${escapedName}${separator}${escapedType}`;
 }
 
@@ -96,7 +96,7 @@ compareCoverage(requirements, coverage) {
     }
     coverageLookup.get(key).push(item);
   });
-  
+
   // ... rest of comparison logic
 }
 ```
@@ -113,6 +113,6 @@ compareCoverage(requirements, coverage) {
 - How do different collations affect string comparison?
 - Could Unicode characters in identifiers cause issues?
 
-___
+---
 
 _"One of the most difficult concepts to accept is the existence of randomness. The human mind seeks patterns, even where none exist." - Data, Star Trek: The Next Generation, "Peak Performance"_

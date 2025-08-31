@@ -1,18 +1,18 @@
 # Runtime Migration: Node.js to Deno
 
-> [!danger] __This is not yet started, but it is top priority__
+> [!danger] **This is not yet started, but it is top priority**
 
 ## [CRITICAL] Complete Runtime Migration from Node.js to Deno for Edge Function Parity
 
 ### Core Information
 
-| Field | Why It Matters |
-|-------|---------------|
-| **Severity Level** | 🔴 CRITICAL - Show Stopper |
-| **Location** | Entire codebase - all JavaScript files |
-| **Category** | Architecture / Technical Debt |
-| **Brief Description** | Runtime mismatch prevents accurate Edge Function testing |
-| **Impact** | Cannot test Edge Functions in their actual runtime; ES module chaos blocking development |
+| Field                 | Why It Matters                                                                           |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| **Severity Level**    | 🔴 CRITICAL - Show Stopper                                                               |
+| **Location**          | Entire codebase - all JavaScript files                                                   |
+| **Category**          | Architecture / Technical Debt                                                            |
+| **Brief Description** | Runtime mismatch prevents accurate Edge Function testing                                 |
+| **Impact**            | Cannot test Edge Functions in their actual runtime; ES module chaos blocking development |
 
 ## Summary
 
@@ -60,12 +60,12 @@ STEP 5: Risk Evaluation
 
 ```javascript
 // Current: IMPOSSIBLE in Node.js
-import edgeFunction from './supabase/functions/my-func/index.ts'
+import edgeFunction from "./supabase/functions/my-func/index.ts";
 // Error: Cannot import Deno-specific APIs
 
 // Future: PERFECT in Deno
-import edgeFunction from './supabase/functions/my-func/index.ts'
-const response = await edgeFunction.handler(request) // Works exactly as deployed
+import edgeFunction from "./supabase/functions/my-func/index.ts";
+const response = await edgeFunction.handler(request); // Works exactly as deployed
 ```
 
 ## Proposed Solution
@@ -94,12 +94,13 @@ deno init
 #### Phase 2: Core Library Migration (Hour 1-4)
 
 **Order of Operations:**
+
 1. **Base Classes First**
 
    ```typescript
    // src/lib/Command.ts
-   import { EventEmitter } from "std/node/events.ts"
-   
+   import { EventEmitter } from "std/node/events.ts";
+
    export abstract class Command extends EventEmitter {
      // Minimal changes needed - EventEmitter compatible
    }
@@ -109,14 +110,14 @@ deno init
 
    ```typescript
    // src/lib/config.ts
-   import { load } from "std/dotenv/mod.ts"
-   
+   import { load } from "std/dotenv/mod.ts";
+
    export async function loadConfig() {
-     await load() // Loads .env automatically
+     await load(); // Loads .env automatically
      return {
        supabaseUrl: Deno.env.get("SUPABASE_URL"),
-       supabaseKey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
-     }
+       supabaseKey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
+     };
    }
    ```
 
@@ -124,8 +125,8 @@ deno init
 
    ```typescript
    // src/lib/PathResolver.ts
-   import { join, resolve } from "std/path/mod.ts"
-   
+   import { join, resolve } from "std/path/mod.ts";
+
    export class PathResolver {
      // Path operations nearly identical
    }
@@ -137,29 +138,29 @@ deno init
 
 ```typescript
 // Priority 1: Test Commands (for Edge Function testing)
-src/commands/test/RunCommand.ts    // Must work first
-src/commands/test/CompileCommand.ts // Validates Edge Functions
+src / commands / test / RunCommand.ts; // Must work first
+src / commands / test / CompileCommand.ts; // Validates Edge Functions
 
-// Priority 2: Core Database Commands  
-src/commands/db/MigrateCommand.ts   // Primary workflow
-src/commands/db/CompileCommand.ts   // Migration generation
+// Priority 2: Core Database Commands
+src / commands / db / MigrateCommand.ts; // Primary workflow
+src / commands / db / CompileCommand.ts; // Migration generation
 
 // Priority 3: Function Commands
-src/commands/functions/DeployCommand.ts // Edge Function deployment
+src / commands / functions / DeployCommand.ts; // Edge Function deployment
 ```
 
 **Migration Pattern:**
 
 ```typescript
 // Before (Node.js)
-const fs = require('fs').promises
-const { exec } = require('child_process')
-const chalk = require('chalk')
+const fs = require("fs").promises;
+const { exec } = require("child_process");
+const chalk = require("chalk");
 
 // After (Deno)
-const { readFile, writeFile } = Deno
-const { Command } = new Deno.Command()
-import { colors } from "std/fmt/colors.ts"
+const { readFile, writeFile } = Deno;
+const { Command } = new Deno.Command();
+import { colors } from "std/fmt/colors.ts";
 ```
 
 #### Phase 4: Test Suite Migration (Hour 8-10)
@@ -167,16 +168,16 @@ import { colors } from "std/fmt/colors.ts"
 ```typescript
 // Test migration pattern
 // Before: Vitest
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from "vitest";
 
 // After: Deno.test
-import { assertEquals, assertThrows } from "std/assert/mod.ts"
+import { assertEquals, assertThrows } from "std/assert/mod.ts";
 
 Deno.test("MigrateCommand deploys successfully", async () => {
-  const cmd = new MigrateCommand()
-  const result = await cmd.execute()
-  assertEquals(result.success, true)
-})
+  const cmd = new MigrateCommand();
+  const result = await cmd.execute();
+  assertEquals(result.success, true);
+});
 ```
 
 #### Phase 5: Build & Distribution (Hour 10-12)
@@ -200,8 +201,9 @@ deno compile \
 
 ```markdown
 ## Core Libraries (4 hours)
+
 - [ ] src/lib/Command.js → Command.ts
-- [ ] src/lib/DatabaseCommand.js → DatabaseCommand.ts  
+- [ ] src/lib/DatabaseCommand.js → DatabaseCommand.ts
 - [ ] src/lib/SupabaseCommand.js → SupabaseCommand.ts
 - [ ] src/lib/TestCommand.js → TestCommand.ts
 - [ ] src/lib/CommandRouter.js → CommandRouter.ts
@@ -210,6 +212,7 @@ deno compile \
 - [ ] src/lib/db-utils.js → db-utils.ts
 
 ## Commands (4 hours)
+
 - [ ] src/commands/db/MigrateCommand.js → MigrateCommand.ts
 - [ ] src/commands/db/CompileCommand.js → CompileCommand.ts
 - [ ] src/commands/db/ResetCommand.js → ResetCommand.ts
@@ -219,16 +222,19 @@ deno compile \
 - [ ] src/commands/InitCommand.js → InitCommand.ts
 
 ## Test System (2 hours)
+
 - [ ] src/lib/testing/TestRequirementAnalyzer.js → TestRequirementAnalyzer.ts
 - [ ] src/lib/testing/TestCoverageOrchestrator.js → TestCoverageOrchestrator.ts
 - [ ] src/lib/testing/pgTAPTestScanner.js → pgTAPTestScanner.ts
 - [ ] src/lib/testing/CoverageEnforcer.js → CoverageEnforcer.ts
 
 ## Entry Points (1 hour)
+
 - [ ] bin/data.js → Removed (compiled binary replaces)
 - [ ] src/index.js → index.ts
 
 ## Configuration (1 hour)
+
 - [ ] package.json → deno.json
 - [ ] .eslintrc → Removed (deno lint)
 - [ ] vitest.config.js → Removed (Deno.test)
@@ -238,6 +244,7 @@ deno compile \
 ### Validation Criteria
 
 **Migration Success Metrics:**
+
 1. All existing tests pass in Deno
 2. Can import and test actual Edge Functions
 3. Binary size < 50MB
@@ -279,18 +286,18 @@ git tag v1.0.0-final-node
 // The Ultimate Test
 async function validateMigration() {
   // 1. Can we call Supabase API?
-  const migrations = await getMigrations() // ✓
-  
+  const migrations = await getMigrations(); // ✓
+
   // 2. Can we run pgTAP tests?
-  const tests = await runTests() // ✓
-  
+  const tests = await runTests(); // ✓
+
   // 3. Can we import Edge Functions?
-  const func = await import('./supabase/functions/test/index.ts') // ✓
-  
+  const func = await import("./supabase/functions/test/index.ts"); // ✓
+
   // 4. Can we compile to binary?
-  await Deno.run({ cmd: ["deno", "compile", "..."] }) // ✓
-  
-  return SUCCESS
+  await Deno.run({ cmd: ["deno", "compile", "..."] }); // ✓
+
+  return SUCCESS;
 }
 ```
 
@@ -299,7 +306,7 @@ async function validateMigration() {
 ```
 Hour 0-1:   Environment setup, Deno initialization
 Hour 1-4:   Core library migration
-Hour 4-8:   Command migration  
+Hour 4-8:   Command migration
 Hour 8-10:  Test migration
 Hour 10-12: Build and distribution
 Hour 12:    COMPLETE ✓
@@ -323,7 +330,8 @@ Hour 12:    COMPLETE ✓
 
 **Priority Override**: This issue supersedes ALL other issues.
 
-**Rationale**: 
+**Rationale**:
+
 1. Current ES module chaos blocks ALL development
 2. Edge Function testing gap risks production failures
 3. Solution is simpler than initially thought (8-12 hours)
@@ -346,7 +354,7 @@ Decision: PROCEED IMMEDIATELY
 
 ---
 
-*"Logic is the beginning of wisdom, not the end."* - Spock
+_"Logic is the beginning of wisdom, not the end."_ - Spock
 
 The logical path is clear. The ES module chaos ends today. The runtime mismatch ends today. D.A.T.A. becomes a Deno application today.
 

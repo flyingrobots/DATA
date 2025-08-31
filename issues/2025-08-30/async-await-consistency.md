@@ -8,13 +8,13 @@ Fix inconsistent async/await and promise patterns
 
 ### Core Information
 
-| Field | Why It Matters |
-|-------|---------------|
-| **Severity Level** | MEDIUM - Could cause subtle bugs |
-| **Location** | Various files mixing promises and async/await |
-| **Category** | Style/Bug |
-| **Brief Description** | Inconsistent use of promises vs async/await patterns |
-| **Impact** | Potential for unhandled promise rejections and race conditions |
+| Field                 | Why It Matters                                                 |
+| --------------------- | -------------------------------------------------------------- |
+| **Severity Level**    | MEDIUM - Could cause subtle bugs                               |
+| **Location**          | Various files mixing promises and async/await                  |
+| **Category**          | Style/Bug                                                      |
+| **Brief Description** | Inconsistent use of promises vs async/await patterns           |
+| **Impact**            | Potential for unhandled promise rejections and race conditions |
 
 ## Summary
 
@@ -112,7 +112,7 @@ async processFiles(files) {
       }
     })
   );
-  
+
   // Now we can safely use results
   this.results.push(...results.filter(r => r.success));
   return results;
@@ -121,7 +121,7 @@ async processFiles(files) {
 // ✅ Event emitter with async handling
 async emitAsync(event, data) {
   const handlers = this.listeners(event);
-  
+
   // Wait for all async handlers
   await Promise.all(
     handlers.map(async (handler) => {
@@ -159,6 +159,6 @@ async emitAsync(event, data) {
 - Are there memory leaks from unresolved promises?
 - Could async pattern changes break existing error handling?
 
-___
+---
 
 _"The complexity of temporal mechanics is such that even the smallest alteration can have profound consequences." - Data, Star Trek: The Next Generation, "Time's Arrow"_

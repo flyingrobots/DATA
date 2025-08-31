@@ -7,7 +7,7 @@ The TestCache system provides hash-based caching for data test executions, deliv
 ## Key Features
 
 - **Hash-based cache invalidation** - Detects changes in test files, database schema, and dependencies
-- **Performance optimization** - Achieves >50% speedup on cached test executions  
+- **Performance optimization** - Achieves >50% speedup on cached test executions
 - **File-based storage** - Uses JSON files in `.data-cache/test-results/` directory
 - **Cache management** - Clear, stats, and pattern-based invalidation commands
 - **Automatic invalidation** - Cache expires when files or database schema change
@@ -51,6 +51,7 @@ node test/test-cache-performance.js
 ### Hash Calculation
 
 The cache hash is calculated from:
+
 - Test function name
 - Database connection details (without credentials)
 - Test execution options
@@ -67,6 +68,7 @@ The cache hash is calculated from:
 ```
 
 Each cache file contains:
+
 ```json
 {
   "result": {
@@ -88,6 +90,7 @@ Each cache file contains:
 ### Cache Invalidation
 
 Cache entries are invalidated when:
+
 - Test file content changes
 - Database schema changes (detected via migration hash)
 - Cache entry exceeds maximum age (24 hours)
@@ -205,6 +208,7 @@ node test/test-cache-performance.js
 ```
 
 Expected output:
+
 ```
 🚀 data Test Cache Performance Validation
 ==================================================

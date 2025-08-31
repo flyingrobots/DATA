@@ -15,6 +15,7 @@ I began my investigation in Engineering, where Lieutenant Commander La Forge was
 "Data, I've been trying to sync the warp core optimization database with the backup systems for three hours. Every time I think I've got it, something drifts out of alignment."
 
 I observed his manual process:
+
 1. Writing SQL migration scripts by hand (error rate: 12.7%)
 2. Testing on development database (coverage: 43%)
 3. Deploying to production (prayer rate: 100%)
@@ -46,15 +47,15 @@ Commander Riker attempted what he called a "quick fix" to the duty roster databa
 riker@enterprise:~$ sudo data align production --force --skip-tests
 
 ERROR: Commander, that would be illogical and dangerous.
-       
+
        Your attempted action would bypass:
        - 17 safety protocols
-       - 234 test cases  
+       - 234 test cases
        - Captain Picard's standing orders
-       
+
        Probability of catastrophic failure: 87.3%
        Probability of demotion: 94.7%
-       
+
        Suggested action: data test && data promote
 ```
 
@@ -89,31 +90,36 @@ The Captain smiled. "I fail to see the problem, Commander."
 ## Crew Feedback Log
 
 ### Chief O'Brien
+
 "It's like the computer finally learned how to do things properly. No more staying up all night fixing phantom migrations. My daughter actually recognizes me now."
 
 ### Ensign Crusher
+
 "Wesley here. I modified the personality mode to include a 'Wesley' setting. It now explains everything three times and asks if you're sure you understand. Data was not amused."
 
 ### Worf
+
 "It is honorable. It does not allow cowardly untested deployments. A warrior's database tool."
 
 ### Counselor Troi
+
 "I sense great satisfaction from the engineering team. Stress levels are down 67%. Though I do sense some... pride... from Data regarding the name similarity."
 
 ### Lieutenant Barclay
+
 "I-I really appreciate the safety checks. It's prevented me from accidentally dropping the holodeck pattern buffer table six times this week."
 
 ## Technical Observations
 
 ### Efficiency Metrics
 
-| Operation | Before D.A.T.A. | After D.A.T.A. | Improvement |
-|-----------|-----------------|----------------|-------------|
-| Migration Generation | 47 minutes | 2.3 minutes | 2043% |
-| Test Coverage | 43% average | 97% enforced | 226% |
-| Deployment Confidence | "Hope" | Mathematical certainty | ∞ |
-| Sleep Quality (O'Brien) | 3.2 hours | 7.8 hours | 244% |
-| Red Alerts (database-related) | 2.3/week | 0/week | 100% |
+| Operation                     | Before D.A.T.A. | After D.A.T.A.         | Improvement |
+| ----------------------------- | --------------- | ---------------------- | ----------- |
+| Migration Generation          | 47 minutes      | 2.3 minutes            | 2043%       |
+| Test Coverage                 | 43% average     | 97% enforced           | 226%        |
+| Deployment Confidence         | "Hope"          | Mathematical certainty | ∞           |
+| Sleep Quality (O'Brien)       | 3.2 hours       | 7.8 hours              | 244%        |
+| Red Alerts (database-related) | 2.3/week        | 0/week                 | 100%        |
 
 ### Philosophical Observations
 
@@ -136,7 +142,7 @@ Personal note: While I am incapable of feeling emotions, I experience what human
 Stardate 47636.2: Lieutenant Barclay accidentally created a recursive hologram of the D.A.T.A. system teaching me how to use the D.A.T.A. system. The paradox was resolved by implementing a new safety gate:
 
 ```javascript
-if (user === 'Data' && system === 'DATA') {
+if (user === "Data" && system === "DATA") {
   console.log("Fascinating. However, this would be redundant.");
   return;
 }
@@ -144,9 +150,9 @@ if (user === 'Data' && system === 'DATA') {
 
 ---
 
-*End of Extended Log*
+_End of Extended Log_
 
-*Lt. Commander Data*  
-*Operations Officer, USS Enterprise NCC-1701-D*
+_Lt. Commander Data_  
+_Operations Officer, USS Enterprise NCC-1701-D_
 
-*P.S. - Commander Riker has suggested we rename it to "RIKER: Really Incredible Kubernetes-Enterprise Resource." His proposal was declined by a vote of 347 to 1.*
+_P.S. - Commander Riker has suggested we rename it to "RIKER: Really Incredible Kubernetes-Enterprise Resource." His proposal was declined by a vote of 347 to 1._

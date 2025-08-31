@@ -21,6 +21,7 @@ node test/manual-scripts/test-memory-management.js
 ## Status
 
 These scripts are kept for reference and debugging purposes but are NOT part of the automated test suite. They may be useful for:
+
 - Manual debugging of specific features
 - Quick verification of functionality
 - Reference for how certain features were tested during development

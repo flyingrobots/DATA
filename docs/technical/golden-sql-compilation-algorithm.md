@@ -25,7 +25,7 @@ SQL files are organized in named directories:
 /sql/
   extensions/     -- PostgreSQL extensions
   schemas/        -- Schema definitions
-  types/          -- Custom types and enums  
+  types/          -- Custom types and enums
   tables/         -- Table definitions
   functions/      -- Stored procedures
   views/          -- Views and materialized views
@@ -36,6 +36,7 @@ SQL files are organized in named directories:
 ```
 
 D.A.T.A. internally processes these in the correct order to ensure:
+
 - Extensions are created before they're used
 - Schemas exist before tables are placed in them
 - Tables exist before foreign keys reference them
@@ -65,6 +66,7 @@ The `MigrationCompiler` concatenates all SQL files into a single "compiled" migr
 The `DiffEngine` generates incremental migrations using git diffs:
 
 1. **Compare Git References**:
+
    ```bash
    git diff data/prod/last-tag...HEAD -- sql/
    ```
@@ -89,6 +91,7 @@ data/staging/2025.241.1200
 ```
 
 This enables:
+
 - **Rollback**: Deploy any previous tag's Golden SQL
 - **Audit Trail**: Git history shows exactly what was deployed when
 - **Diff Generation**: Compare any two points in time
@@ -96,21 +99,24 @@ This enables:
 ## Example Workflow
 
 1. **Initial Setup**:
+
    ```bash
    # Create Golden SQL structure
    data init
-   
+
    # Write your SQL files
    vim sql/tables/users.sql
    ```
 
 2. **First Compilation** (Full):
+
    ```bash
    data db compile
    # Output: migrations/20250831143000_compiled.sql (COMPLETE database)
    ```
 
 3. **Make Changes**:
+
    ```bash
    # Edit a table
    vim sql/004_tables/users.sql  # Add a column
@@ -118,6 +124,7 @@ This enables:
    ```
 
 4. **Generate Incremental Migration**:
+
    ```bash
    data db migrate generate
    # Uses DiffEngine to create:
@@ -141,7 +148,7 @@ This enables:
 - **File Tracking**: Records every file processed for audit
 - **Error Handling**: Fails fast on any read error
 
-### DiffEngine  
+### DiffEngine
 
 - **Git-Based**: Uses `git diff` not database introspection
 - **Intelligent Parsing**: Attempts to generate ALTER statements
@@ -151,12 +158,14 @@ This enables:
 ## Why This Matters
 
 Traditional migration tools:
+
 - Hand-write migrations (error-prone)
 - Use database introspection (state can drift)
 - Can't rollback reliably (down migrations often broken)
 - Mystery state in production
 
 Golden SQL with D.A.T.A.:
+
 - Migrations are generated (deterministic)
 - Git is truth (no drift possible)
 - Rollback to any tag (guaranteed state)
@@ -170,7 +179,7 @@ Run tests to verify the algorithm:
 # Test MigrationCompiler
 node test/test-migration-compiler.js
 
-# Test DiffEngine  
+# Test DiffEngine
 node test/test-diff-engine.js
 
 # Integration test

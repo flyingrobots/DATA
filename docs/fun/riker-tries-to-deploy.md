@@ -29,7 +29,7 @@ riker@enterprise:~$ data align production --force
 
 ⚠️  WARNING: Commander, --force flag is not recognized.
    Perhaps you meant: data align production
-   
+
    Note: There is no force. There is only logic.
 ```
 
@@ -39,12 +39,12 @@ riker@enterprise:~$ data align production --force
 🔴 RED ALERT: Nice try, Commander.
 
    This isn't the holodeck. You cannot simply override database safety.
-   
+
    Detecting:
    - Uncommitted changes in working directory
    - No tests written for new column
    - Jazz music playing in background (regulation 47.2.1)
-   
+
    Required actions:
    1. git add && git commit
    2. data test
@@ -68,7 +68,7 @@ data@enterprise:~$ git status
 
 Changes not staged for commit:
   modified: sql/tables/poker_tournament.sql
-  
+
 Untracked files:
   riker_backup.sql
   riker_backup2.sql
@@ -88,8 +88,8 @@ Untracked files:
 data@enterprise:~$ git add sql/tables/poker_tournament.sql
 data@enterprise:~$ git commit -m "feat: Add Worf bluff tracking column
 
-Per Commander Riker's request, adding column to track Worf's 
-unsuccessful bluffing attempts. Statistical analysis shows a 
+Per Commander Riker's request, adding column to track Worf's
+unsuccessful bluffing attempts. Statistical analysis shows a
 0% success rate over 47 games."
 
 data@enterprise:~$ data test
@@ -101,7 +101,7 @@ Running database tests...
    - Index for performance
    - RLS policy
    - Test coverage
-   
+
 Would you like me to generate the missing components? [Y/n]
 ```
 
@@ -179,11 +179,11 @@ data@enterprise:~$ data align production
    ✓ On main branch
    ✓ Tests passing (100%)
    ✓ No jazz music detected
-   
+
 Migration will:
    + CREATE TABLE poker_statistics
    + CREATE 2 RLS policies
-   
+
 Type 'ENGAGE' to proceed: ENGAGE
 
 🎉 Deployment successful!
@@ -197,8 +197,9 @@ Riker's ego: Slightly bruised but recovering
 **Riker**: "That seemed like a lot of work for one column."
 
 **Data**: "Commander, we have successfully prevented:
+
 - Data corruption
-- Security vulnerabilities  
+- Security vulnerabilities
 - Worf discovering you track his bluffs
 - 3.7 hours of debugging
 - One potential court martial"
@@ -253,5 +254,5 @@ Riker's ego: Slightly bruised but recovering
 
 ---
 
-*"In poker, as in database deployments, the key is knowing when to fold."*  
+_"In poker, as in database deployments, the key is knowing when to fold."_  
 — Commander William T. Riker, Stardate 47636.1

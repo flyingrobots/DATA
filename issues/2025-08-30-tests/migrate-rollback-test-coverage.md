@@ -2,13 +2,13 @@
 
 ## Core Information
 
-| Field | Value |
-|-------|-------|
-| **Severity Level** | 🔴 CRITICAL - Show Stopper |
-| **Location** | `src/commands/db/migrate/rollback.js` |
-| **Category** | Testing |
-| **Brief Description** | Migration rollback command lacks test coverage |
-| **Impact** | Failed rollbacks could trap production in broken state |
+| Field                 | Value                                                  |
+| --------------------- | ------------------------------------------------------ |
+| **Severity Level**    | 🔴 CRITICAL - Show Stopper                             |
+| **Location**          | `src/commands/db/migrate/rollback.js`                  |
+| **Category**          | Testing                                                |
+| **Brief Description** | Migration rollback command lacks test coverage         |
+| **Impact**            | Failed rollbacks could trap production in broken state |
 
 ## Summary
 
@@ -17,6 +17,7 @@ The migrate-rollback command is the emergency recovery mechanism for failed or p
 ## Component Overview
 
 The migrate-rollback command provides:
+
 - Emergency recovery from failed migrations
 - Safe reversal of database schema changes
 - Production rollback with safety confirmations
@@ -27,6 +28,7 @@ The migrate-rollback command provides:
 ## What Needs Testing
 
 ### Core Functionality
+
 - [ ] Migration state analysis and rollback planning
 - [ ] Safe schema reversal operations
 - [ ] Migration dependency resolution
@@ -35,6 +37,7 @@ The migrate-rollback command provides:
 - [ ] Rollback success validation
 
 ### Safety Mechanisms
+
 - [ ] `--prod` flag requirement for production
 - [ ] Pre-rollback state validation
 - [ ] Transaction wrapping for atomic rollback
@@ -43,6 +46,7 @@ The migrate-rollback command provides:
 - [ ] Post-rollback verification
 
 ### Edge Cases
+
 - [ ] Irreversible migrations (data loss scenarios)
 - [ ] Circular migration dependencies
 - [ ] Partial rollback failures
@@ -51,6 +55,7 @@ The migrate-rollback command provides:
 - [ ] Schema lock conflicts
 
 ### Integration Points
+
 - [ ] Migration metadata system
 - [ ] Database schema analysis
 - [ ] Production environment handling
@@ -58,6 +63,7 @@ The migrate-rollback command provides:
 - [ ] Backup system integration
 
 ### Error Scenarios
+
 - [ ] Database connection failures during rollback
 - [ ] Transaction rollback of rollback operations
 - [ ] Inconsistent migration state
@@ -68,48 +74,51 @@ The migrate-rollback command provides:
 ## Testing Requirements
 
 ### Unit Tests
+
 ```javascript
-describe('migrate-rollback', () => {
-  describe('rollback planning', () => {
-    it('should analyze migration dependencies')
-    it('should identify rollback sequence')
-    it('should detect irreversible operations')
-    it('should validate rollback safety')
-  })
-  
-  describe('rollback execution', () => {
-    it('should execute rollback in proper sequence')
-    it('should wrap operations in transactions')
-    it('should handle rollback success')
-    it('should handle rollback failure')
-  })
-  
-  describe('safety mechanisms', () => {
-    it('should require production confirmation')
-    it('should validate pre-rollback state')
-    it('should verify post-rollback consistency')
-  })
-})
+describe("migrate-rollback", () => {
+  describe("rollback planning", () => {
+    it("should analyze migration dependencies");
+    it("should identify rollback sequence");
+    it("should detect irreversible operations");
+    it("should validate rollback safety");
+  });
+
+  describe("rollback execution", () => {
+    it("should execute rollback in proper sequence");
+    it("should wrap operations in transactions");
+    it("should handle rollback success");
+    it("should handle rollback failure");
+  });
+
+  describe("safety mechanisms", () => {
+    it("should require production confirmation");
+    it("should validate pre-rollback state");
+    it("should verify post-rollback consistency");
+  });
+});
 ```
 
 ### Integration Tests
+
 ```javascript
-describe('migrate-rollback Integration', () => {
-  it('should rollback real migration changes')
-  it('should handle complex schema reversals')
-  it('should maintain data integrity during rollback')
-  it('should coordinate with migration tracking')
-})
+describe("migrate-rollback Integration", () => {
+  it("should rollback real migration changes");
+  it("should handle complex schema reversals");
+  it("should maintain data integrity during rollback");
+  it("should coordinate with migration tracking");
+});
 ```
 
 ### Emergency Scenarios
+
 ```javascript
-describe('migrate-rollback Emergency Scenarios', () => {
-  it('should handle catastrophic migration failures')
-  it('should recover from partial promotion failures')
-  it('should handle network interruptions during rollback')
-  it('should maintain system stability during recovery')
-})
+describe("migrate-rollback Emergency Scenarios", () => {
+  it("should handle catastrophic migration failures");
+  it("should recover from partial promotion failures");
+  it("should handle network interruptions during rollback");
+  it("should maintain system stability during recovery");
+});
 ```
 
 ## Acceptance Criteria
@@ -126,6 +135,7 @@ describe('migrate-rollback Emergency Scenarios', () => {
 ## Priority Justification
 
 **Critical Priority** because:
+
 1. **Emergency Recovery System**: Only path to recover from migration failures
 2. **Production Safety Net**: Last line of defense against production disasters
 3. **Data Integrity Guardian**: Prevents permanent data loss or corruption
@@ -143,16 +153,19 @@ describe('migrate-rollback Emergency Scenarios', () => {
 ## Testing Challenges
 
 ### Complex State Management
+
 - Multiple migration states to track and reverse
 - Dependency chain resolution complexity
 - State consistency across rollback operations
 
 ### Data Safety Requirements
+
 - Ensuring no data loss during rollback
 - Handling irreversible operations safely
 - Maintaining referential integrity
 
 ### Emergency Response Testing
+
 - Simulating catastrophic failure scenarios
 - Testing under extreme time pressure
 - Validating emergency procedures
@@ -174,6 +187,6 @@ describe('migrate-rollback Emergency Scenarios', () => {
 
 ---
 
-*"There are always possibilities."* - Spock
+_"There are always possibilities."_ - Spock
 
 When all else fails, rollback is our final option. It must be tested with the precision of an emergency transporter operation - lives may depend on it working perfectly the first time.

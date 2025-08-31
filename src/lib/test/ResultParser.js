@@ -15,7 +15,7 @@ class ResultParser {
       skipped: 0,
       tests: [],
       diagnostics: [],
-      plan: null
+      plan: null,
     };
   }
 
@@ -25,27 +25,28 @@ class ResultParser {
    * @returns {object} Parsed test results
    */
   parse(tapOutput) {
-    if (!tapOutput || typeof tapOutput !== 'string') {
+    if (!tapOutput || typeof tapOutput !== "string") {
       return this.results;
     }
 
-    const lines = tapOutput.split('\n');
-    
+    const lines = tapOutput.split("\n");
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
-      
-      if (line.startsWith('1..')) {
+
+      if (line.startsWith("1..")) {
         this._parsePlan(line);
-      } else if (line.startsWith('ok ') || line.startsWith('not ok ')) {
+      } else if (line.startsWith("ok ") || line.startsWith("not ok ")) {
         this._parseTest(line);
-      } else if (line.startsWith('#')) {
+      } else if (line.startsWith("#")) {
         this._parseDiagnostic(line);
       }
     }
 
     // Calculate totals
-    this.results.total = this.results.passed + this.results.failed + this.results.skipped;
-    
+    this.results.total =
+      this.results.passed + this.results.failed + this.results.skipped;
+
     return this.results;
   }
 
@@ -67,38 +68,38 @@ class ResultParser {
   _parseTest(line) {
     const okMatch = line.match(/^ok (\d+)(.*)/);
     const notOkMatch = line.match(/^not ok (\d+)(.*)/);
-    
+
     if (okMatch) {
       const testNumber = parseInt(okMatch[1], 10);
-      const description = okMatch[2].replace(/^[^\w]*/, '').trim();
-      
+      const description = okMatch[2].replace(/^[^\w]*/, "").trim();
+
       // Check for SKIP directive
-      if (description.includes('# SKIP')) {
+      if (description.includes("# SKIP")) {
         this.results.skipped++;
         this.results.tests.push({
           number: testNumber,
-          status: 'skip',
-          description: description.replace(/# SKIP.*$/, '').trim(),
-          directive: 'SKIP',
-          reason: this._extractSkipReason(description)
+          status: "skip",
+          description: description.replace(/# SKIP.*$/, "").trim(),
+          directive: "SKIP",
+          reason: this._extractSkipReason(description),
         });
       } else {
         this.results.passed++;
         this.results.tests.push({
           number: testNumber,
-          status: 'pass',
-          description: description
+          status: "pass",
+          description: description,
         });
       }
     } else if (notOkMatch) {
       const testNumber = parseInt(notOkMatch[1], 10);
-      const description = notOkMatch[2].replace(/^[^\w]*/, '').trim();
-      
+      const description = notOkMatch[2].replace(/^[^\w]*/, "").trim();
+
       this.results.failed++;
       this.results.tests.push({
         number: testNumber,
-        status: 'fail',
-        description: description
+        status: "fail",
+        description: description,
       });
     }
   }
@@ -108,7 +109,7 @@ class ResultParser {
    * @private
    */
   _parseDiagnostic(line) {
-    const diagnostic = line.replace(/^#\s*/, '');
+    const diagnostic = line.replace(/^#\s*/, "");
     this.results.diagnostics.push(diagnostic);
   }
 
@@ -118,7 +119,7 @@ class ResultParser {
    */
   _extractSkipReason(line) {
     const match = line.match(/# SKIP (.*)$/);
-    return match ? match[1].trim() : '';
+    return match ? match[1].trim() : "";
   }
 
   /**
@@ -134,37 +135,39 @@ class ResultParser {
     if (failed > 0) {
       lines.push(chalk.red(`✗ ${failed}/${total} tests failed`));
     } else if (skipped > 0) {
-      lines.push(chalk.yellow(`✓ ${passed}/${total} tests passed (${skipped} skipped)`));
+      lines.push(
+        chalk.yellow(`✓ ${passed}/${total} tests passed (${skipped} skipped)`),
+      );
     } else {
       lines.push(chalk.green(`✓ All ${passed}/${total} tests passed`));
     }
 
     // Individual test results
     if (tests.length > 0) {
-      lines.push('');
-      tests.forEach(test => {
+      lines.push("");
+      tests.forEach((test) => {
         let symbol, color;
-        
+
         switch (test.status) {
-          case 'pass':
-            symbol = '✓';
+          case "pass":
+            symbol = "✓";
             color = chalk.green;
             break;
-          case 'fail':
-            symbol = '✗';
+          case "fail":
+            symbol = "✗";
             color = chalk.red;
             break;
-          case 'skip':
-            symbol = '○';
+          case "skip":
+            symbol = "○";
             color = chalk.yellow;
             break;
           default:
-            symbol = '?';
+            symbol = "?";
             color = chalk.gray;
         }
 
         let line = color(`  ${symbol} ${test.description}`);
-        if (test.directive === 'SKIP' && test.reason) {
+        if (test.directive === "SKIP" && test.reason) {
           line += chalk.gray(` (${test.reason})`);
         }
         lines.push(line);
@@ -173,14 +176,14 @@ class ResultParser {
 
     // Diagnostics (if any)
     if (diagnostics.length > 0) {
-      lines.push('');
-      lines.push(chalk.gray('Diagnostics:'));
-      diagnostics.forEach(diagnostic => {
+      lines.push("");
+      lines.push(chalk.gray("Diagnostics:"));
+      diagnostics.forEach((diagnostic) => {
         lines.push(chalk.gray(`  ${diagnostic}`));
       });
     }
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**

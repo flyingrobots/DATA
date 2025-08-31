@@ -17,6 +17,7 @@ D.A.T.A. (Database Automation, Testing, and Alignment) is a CLI tool for managin
 ## Common Development Commands
 
 ### Running Tests
+
 ```bash
 # Run all Vitest tests
 npm test
@@ -29,6 +30,7 @@ npm run test:coverage
 ```
 
 ### Database Migration Workflow
+
 ```bash
 # 1. Generate migration from SQL changes
 npm run migrate:generate   # or: data db migrate generate --name <name>
@@ -47,6 +49,7 @@ npm run migrate:rollback   # or: data db migrate rollback --prod
 ```
 
 ### Building and Compiling
+
 ```bash
 # Compile SQL sources into migration
 data db compile
@@ -58,24 +61,28 @@ data db compile --deploy-functions
 ## Architecture
 
 ### Code Organization Rules
+
 - **One Class Per File**: Each file must contain exactly one class. The filename must match the class name.
 - **Self-Documenting Names**: Each artifact should describe its contents based on its filename.
 - **No Multi-Class Files**: If a file contains multiple classes, it must be refactored immediately.
 
 ### Command Class Hierarchy
+
 - **Command** (src/lib/Command.js): Base class with event emission and logging
 - **SupabaseCommand**: Commands using Supabase API
 - **DatabaseCommand**: Direct database access commands
 - **TestCommand**: Testing-related commands
 
 All commands follow an event-driven pattern:
+
 ```javascript
-command.emit('progress', { message: 'Processing...' });
-command.emit('success', { message: 'Complete!' });
-command.emit('error', { message: 'Failed', error });
+command.emit("progress", { message: "Processing..." });
+command.emit("success", { message: "Complete!" });
+command.emit("error", { message: "Failed", error });
 ```
 
 ### Directory Structure
+
 - **src/commands/**: Command implementations organized by domain (db/, functions/, test/)
 - **src/lib/**: Core libraries and base classes
 - **src/reporters/**: Output formatters (CliReporter)
@@ -85,13 +92,17 @@ command.emit('error', { message: 'Failed', error });
 - **functions/**: Supabase Edge Functions
 
 ### Path Configuration
+
 Paths can be configured via:
+
 1. Command-line options: `--sql-dir`, `--tests-dir`, `--migrations-dir`
 2. Environment variables: `data_SQL_DIR`, `data_TESTS_DIR`, `data_MIGRATIONS_DIR`
 3. Configuration file: `.datarc.json`
 
 ### Configuration System
+
 Configuration is loaded from `.datarc.json` with the following structure:
+
 ```json
 {
   "test": {
@@ -110,19 +121,22 @@ Configuration is loaded from `.datarc.json` with the following structure:
 ## Important Patterns
 
 ### Production Safety
+
 - All production commands require explicit `--prod` flag
 - Destructive operations require typed confirmation
 - Commands wrap operations in transactions where supported
 - Process management includes zombie prevention and cleanup
 
 ### Error Handling
+
 - Custom error types in `src/lib/dataError/`
 - Commands should emit error events before throwing
 - Process exit codes are handled by CliReporter
 
 ### Testing Strategy
-- Unit tests use Vitest (test/*.test.js)
-- Database tests use pgTAP (tests/*.sql)
+
+- Unit tests use Vitest (test/\*.test.js)
+- Database tests use pgTAP (tests/\*.sql)
 - Test commands support multiple output formats (console, JUnit, JSON)
 - Coverage enforcement configurable via .datarc.json
 
@@ -151,18 +165,21 @@ data_MIGRATIONS_DIR=./migrations
 ## Development Notes
 
 ### Adding New Commands
+
 1. Extend appropriate base class (Command, DatabaseCommand, etc.)
 2. Implement `performExecute()` method
 3. Emit appropriate events for progress tracking
 4. Register in src/index.js with commander
 
 ### Working with Migrations
+
 - Migrations include metadata.json with tracking info
 - Use MigrationMetadata class for parsing/validation
-- Test migrations run in isolated schemas (@data.tests.*)
+- Test migrations run in isolated schemas (@data.tests.\*)
 - Production migrations require double confirmation
 
 ### Edge Functions Integration
+
 - Functions can be deployed with migrations via `--deploy-functions`
 - Validation happens before deployment
 - Production deployments require import maps unless `--skip-import-map`
@@ -170,7 +187,9 @@ data_MIGRATIONS_DIR=./migrations
 ## Troubleshooting
 
 ### Compile Command Issues
+
 If `data db compile` exits with no error output:
+
 - Ensure SQL source directory exists (default: ./sql)
 - Use `--sql-dir` and `--migrations-dir` to specify custom paths
 - The compile command now properly displays errors for missing directories
@@ -192,12 +211,14 @@ npm run postinstall  # Manually re-install git hooks if needed
 ```
 
 #### Git Pre-commit Hook
+
 - Automatically runs ESLint on staged JavaScript files
 - Prevents commits with linting errors
 - Checks for floating promises and async issues
 - Bypass with `git commit --no-verify` (use sparingly!)
 
 #### ESLint Rules Enforced
+
 - `require-await`: Async functions must use await
 - `promise/catch-or-return`: Promises must be handled
 - `promise/always-return`: Promise chains must return values
@@ -206,6 +227,7 @@ npm run postinstall  # Manually re-install git hooks if needed
 For TypeScript projects, use `@typescript-eslint/no-floating-promises` to catch unawaited async calls.
 
 ### Recent Fixes
+
 - Fixed error handling in CompileCommand constructor to properly display errors
 - Added `isProd` property to start event emissions
 - Fixed MigrationCompiler config property naming (sqlDir vs rootDir)

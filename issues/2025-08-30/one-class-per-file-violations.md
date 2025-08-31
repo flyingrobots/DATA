@@ -1,17 +1,18 @@
 # One Class Per File Policy Violations
 
 ## Issue Title
+
 Audit and refactor codebase to enforce one-class-per-file policy
 
 ### Core Information
 
-| Field | Why It Matters |
-|-------|---------------|
-| **Severity Level** | MEDIUM - Code maintainability |
-| **Location** | Multiple files across codebase |
-| **Category** | Architecture/Refactoring |
+| Field                 | Why It Matters                                                              |
+| --------------------- | --------------------------------------------------------------------------- |
+| **Severity Level**    | MEDIUM - Code maintainability                                               |
+| **Location**          | Multiple files across codebase                                              |
+| **Category**          | Architecture/Refactoring                                                    |
 | **Brief Description** | Multiple classes exist in single files, violating maintainability standards |
-| **Impact** | Confusion, harder debugging, unclear module boundaries |
+| **Impact**            | Confusion, harder debugging, unclear module boundaries                      |
 
 ## Summary
 
@@ -20,11 +21,13 @@ The codebase contains violations of the one-class-per-file rule. Each file shoul
 ## Known Violations
 
 ### Confirmed Multi-Class Files
+
 1. **src/lib/testing/pgTAPTestScanner-memory-enhanced.js**
    - Contains: `MemoryMonitor`, `StreamingCoverageDatabase`, `BatchProcessor`
    - Should be: Three separate files
 
 ### Files to Audit
+
 - All files in `src/lib/`
 - All files in `src/commands/`
 - Build directory files
@@ -32,6 +35,7 @@ The codebase contains violations of the one-class-per-file rule. Each file shoul
 ## Proposed Solution
 
 1. **Audit Phase**
+
    ```bash
    # Find all files with multiple class declarations
    grep -r "^class " src/ | awk -F: '{print $1}' | uniq -c | awk '$1 > 1'
@@ -59,6 +63,7 @@ The codebase contains violations of the one-class-per-file rule. Each file shoul
 ## Example Refactoring
 
 Before:
+
 ```javascript
 // src/lib/testing/pgTAPTestScanner-memory-enhanced.js
 class MemoryMonitor { ... }
@@ -67,6 +72,7 @@ class BatchProcessor { ... }
 ```
 
 After:
+
 ```javascript
 // src/lib/testing/MemoryMonitor.js
 class MemoryMonitor { ... }
@@ -91,4 +97,4 @@ module.exports = BatchProcessor;
 
 ---
 
-*"One function, one purpose. One class, one file. Simplicity is the ultimate sophistication."* - Engineering Best Practices
+_"One function, one purpose. One class, one file. Simplicity is the ultimate sophistication."_ - Engineering Best Practices

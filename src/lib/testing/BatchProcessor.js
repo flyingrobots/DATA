@@ -1,14 +1,14 @@
 /**
  * Memory-aware batch processor for D.A.T.A. CLI
- * 
+ *
  * Processes large datasets in batches with memory monitoring
  * and cleanup to prevent OOM errors.
- * 
+ *
  * @class BatchProcessor
  * @author D.A.T.A. Engineering Team
  */
 
-import MemoryMonitor from './MemoryMonitor.js';
+import MemoryMonitor from "./MemoryMonitor.js";
 
 class BatchProcessor {
   /**
@@ -25,9 +25,9 @@ class BatchProcessor {
       batchSize: options.batchSize || 100,
       maxMemoryMB: options.maxMemoryMB || 500,
       enableGC: options.enableGC || true,
-      ...options
+      ...options,
     };
-    
+
     this.processedBatches = 0;
     this.totalItems = 0;
   }
@@ -44,28 +44,33 @@ class BatchProcessor {
 
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i];
-      
+
       // Check memory before processing batch
       const memBefore = MemoryMonitor.getMemoryUsage();
-      
-      if (MemoryMonitor.shouldTriggerCleanup(memBefore.heapUsed, this.options.maxMemoryMB)) {
+
+      if (
+        MemoryMonitor.shouldTriggerCleanup(
+          memBefore.heapUsed,
+          this.options.maxMemoryMB,
+        )
+      ) {
         await this.performCleanup();
       }
 
       // Process batch
       const batchResults = await processor(batch, i);
       results = results.concat(batchResults);
-      
+
       this.processedBatches++;
       this.totalItems += batch.length;
 
       // Emit progress
-      this.scanner.emit('progress', {
-        type: 'batch_processed',
+      this.scanner.emit("progress", {
+        type: "batch_processed",
         batch: i + 1,
         totalBatches: batches.length,
         itemsProcessed: this.totalItems,
-        memoryUsage: MemoryMonitor.getMemoryUsage()
+        memoryUsage: MemoryMonitor.getMemoryUsage(),
       });
 
       // Yield to event loop
@@ -112,16 +117,16 @@ class BatchProcessor {
       this.scanner.memoryState.currentUsageMB = usage.heapUsed;
       this.scanner.memoryState.maxUsageMB = Math.max(
         this.scanner.memoryState.maxUsageMB,
-        usage.heapUsed
+        usage.heapUsed,
       );
       this.scanner.memoryState.lastCleanup = Date.now();
     }
 
     // Emit cleanup event
-    this.scanner.emit('cleanup', {
-      type: 'memory_cleanup',
+    this.scanner.emit("cleanup", {
+      type: "memory_cleanup",
       memoryUsage: MemoryMonitor.getMemoryUsage(),
-      gcPerformed: true
+      gcPerformed: true,
     });
   }
 
@@ -130,7 +135,7 @@ class BatchProcessor {
    * @returns {Promise<void>}
    */
   async yieldToEventLoop() {
-    return new Promise(resolve => setImmediate(resolve));
+    return new Promise((resolve) => setImmediate(resolve));
   }
 
   /**
@@ -151,7 +156,7 @@ class BatchProcessor {
       totalItems: this.totalItems,
       batchSize: this.options.batchSize,
       maxMemoryMB: this.options.maxMemoryMB,
-      enableGC: this.options.enableGC
+      enableGC: this.options.enableGC,
     };
   }
 }

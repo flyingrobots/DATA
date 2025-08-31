@@ -2,13 +2,13 @@
 
 ## Core Information
 
-| Field | Value |
-|-------|-------|
-| **Severity Level** | 🔴 CRITICAL - Core Engine |
-| **Location** | `src/lib/migration/MigrationOrchestrator.js` |
-| **Category** | Testing |
-| **Brief Description** | Migration orchestration engine lacks test coverage |
-| **Impact** | Migration workflow failures could corrupt entire database evolution |
+| Field                 | Value                                                               |
+| --------------------- | ------------------------------------------------------------------- |
+| **Severity Level**    | 🔴 CRITICAL - Core Engine                                           |
+| **Location**          | `src/lib/migration/MigrationOrchestrator.js`                        |
+| **Category**          | Testing                                                             |
+| **Brief Description** | Migration orchestration engine lacks test coverage                  |
+| **Impact**            | Migration workflow failures could corrupt entire database evolution |
 
 ## Summary
 
@@ -17,6 +17,7 @@ The `MigrationOrchestrator` is the central coordination engine that manages the 
 ## Component Overview
 
 The MigrationOrchestrator likely provides:
+
 - Migration workflow coordination and sequencing
 - State management across migration phases
 - Dependency resolution between migrations
@@ -27,6 +28,7 @@ The MigrationOrchestrator likely provides:
 ## What Needs Testing
 
 ### Core Orchestration
+
 - [ ] Migration workflow state machine
 - [ ] Phase transition management (generate → test → promote)
 - [ ] Dependency graph resolution
@@ -35,6 +37,7 @@ The MigrationOrchestrator likely provides:
 - [ ] Workflow rollback and error recovery
 
 ### Integration Coordination
+
 - [ ] MigrationCompiler integration
 - [ ] Test execution coordination
 - [ ] Deployment orchestration
@@ -43,6 +46,7 @@ The MigrationOrchestrator likely provides:
 - [ ] Database transaction coordination
 
 ### Edge Cases
+
 - [ ] Interrupted workflow recovery
 - [ ] Circular dependency detection
 - [ ] Resource contention handling
@@ -51,6 +55,7 @@ The MigrationOrchestrator likely provides:
 - [ ] External dependency failures
 
 ### State Management
+
 - [ ] Migration state transitions
 - [ ] Persistent state storage
 - [ ] State corruption detection
@@ -59,6 +64,7 @@ The MigrationOrchestrator likely provides:
 - [ ] Atomic state updates
 
 ### Error Scenarios
+
 - [ ] Database connection failures during orchestration
 - [ ] External service unavailability
 - [ ] Resource exhaustion scenarios
@@ -69,48 +75,51 @@ The MigrationOrchestrator likely provides:
 ## Testing Requirements
 
 ### Unit Tests
+
 ```javascript
-describe('MigrationOrchestrator', () => {
-  describe('workflow coordination', () => {
-    it('should coordinate complete migration workflow')
-    it('should manage state transitions properly')
-    it('should handle dependency resolution')
-    it('should coordinate parallel operations')
-  })
-  
-  describe('state management', () => {
-    it('should persist workflow state')
-    it('should recover from interruptions')
-    it('should handle state corruption')
-    it('should synchronize concurrent access')
-  })
-  
-  describe('error orchestration', () => {
-    it('should coordinate rollback operations')
-    it('should handle partial failures')
-    it('should recover from external failures')
-  })
-})
+describe("MigrationOrchestrator", () => {
+  describe("workflow coordination", () => {
+    it("should coordinate complete migration workflow");
+    it("should manage state transitions properly");
+    it("should handle dependency resolution");
+    it("should coordinate parallel operations");
+  });
+
+  describe("state management", () => {
+    it("should persist workflow state");
+    it("should recover from interruptions");
+    it("should handle state corruption");
+    it("should synchronize concurrent access");
+  });
+
+  describe("error orchestration", () => {
+    it("should coordinate rollback operations");
+    it("should handle partial failures");
+    it("should recover from external failures");
+  });
+});
 ```
 
 ### Integration Tests
+
 ```javascript
-describe('MigrationOrchestrator Integration', () => {
-  it('should orchestrate full migration lifecycle')
-  it('should coordinate with database systems')
-  it('should integrate with testing systems')
-  it('should handle real workflow scenarios')
-})
+describe("MigrationOrchestrator Integration", () => {
+  it("should orchestrate full migration lifecycle");
+  it("should coordinate with database systems");
+  it("should integrate with testing systems");
+  it("should handle real workflow scenarios");
+});
 ```
 
 ### Workflow Tests
+
 ```javascript
-describe('MigrationOrchestrator Workflows', () => {
-  it('should handle complex multi-migration workflows')
-  it('should coordinate emergency rollback workflows')
-  it('should manage production deployment workflows')
-  it('should handle development cycle workflows')
-})
+describe("MigrationOrchestrator Workflows", () => {
+  it("should handle complex multi-migration workflows");
+  it("should coordinate emergency rollback workflows");
+  it("should manage production deployment workflows");
+  it("should handle development cycle workflows");
+});
 ```
 
 ## Acceptance Criteria
@@ -127,6 +136,7 @@ describe('MigrationOrchestrator Workflows', () => {
 ## Priority Justification
 
 **Critical Priority** because:
+
 1. **Central Coordination Engine**: Orchestrates all migration operations
 2. **State Management Authority**: Controls migration state consistency
 3. **Failure Recovery System**: Manages error recovery across all phases
@@ -144,16 +154,19 @@ describe('MigrationOrchestrator Workflows', () => {
 ## Testing Challenges
 
 ### Complex State Management
+
 - Multiple workflow states to coordinate
 - Persistent state across process boundaries
 - State corruption detection and recovery
 
 ### Concurrency Control
+
 - Parallel migration handling
 - Resource contention management
 - Deadlock prevention and detection
 
 ### Error Recovery Complexity
+
 - Multi-phase error recovery
 - Partial state recovery scenarios
 - External dependency failure handling
@@ -168,22 +181,25 @@ describe('MigrationOrchestrator Workflows', () => {
 ## Special Considerations
 
 ### State Persistence
+
 - Must handle process interruption gracefully
 - State recovery across system restarts
 - Atomic state update requirements
 
 ### Concurrency Management
+
 - Thread-safe operation requirements
 - Resource locking and coordination
 - Deadlock prevention strategies
 
 ### Error Recovery
+
 - Complex multi-phase rollback scenarios
 - External service failure handling
 - Graceful degradation under stress
 
 ---
 
-*"The first duty of every Starfleet officer is to the truth."* - Picard
+_"The first duty of every Starfleet officer is to the truth."_ - Picard
 
 The MigrationOrchestrator must orchestrate truth across the entire migration workflow. Like Data coordinating multiple bridge systems simultaneously, every interaction must be precise and reliable.

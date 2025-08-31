@@ -10,12 +10,12 @@ I was overcomplicating this. D.A.T.A. doesn't directly connect to PostgreSQL - i
 
 ```typescript
 // What I was worried about (NOT WHAT WE DO):
-import { Client } from "pg"  // Direct PostgreSQL connection
+import { Client } from "pg"; // Direct PostgreSQL connection
 
 // What we ACTUALLY do:
 fetch(`${SUPABASE_URL}/rest/v1/`, {
-  headers: { 'apikey': SUPABASE_SERVICE_ROLE_KEY }
-})
+  headers: { apikey: SUPABASE_SERVICE_ROLE_KEY },
+});
 ```
 
 ## This Changes EVERYTHING
@@ -28,17 +28,17 @@ Why? Because Supabase API calls are identical in Node.js and Deno:
 // Node.js (current)
 const response = await fetch(`${supabaseUrl}/rest/v1/migrations`, {
   headers: {
-    'apikey': serviceRoleKey,
-    'Authorization': `Bearer ${serviceRoleKey}`
-  }
+    apikey: serviceRoleKey,
+    Authorization: `Bearer ${serviceRoleKey}`,
+  },
 });
 
 // Deno (future)
 const response = await fetch(`${supabaseUrl}/rest/v1/migrations`, {
   headers: {
-    'apikey': serviceRoleKey,
-    'Authorization': `Bearer ${serviceRoleKey}`
-  }
+    apikey: serviceRoleKey,
+    Authorization: `Bearer ${serviceRoleKey}`,
+  },
 });
 ```
 
@@ -49,48 +49,53 @@ const response = await fetch(`${supabaseUrl}/rest/v1/migrations`, {
 ### What Actually Needs Changing
 
 1. **Imports** (2 hours)
+
    ```typescript
    // Before
-   const { Command } = require('commander')
-   
+   const { Command } = require("commander");
+
    // After
-   import { Command } from "https://deno.land/x/cliffy/command/mod.ts"
+   import { Command } from "https://deno.land/x/cliffy/command/mod.ts";
    ```
 
 2. **File System** (1 hour)
+
    ```typescript
    // Before
-   const fs = require('fs').promises
-   
+   const fs = require("fs").promises;
+
    // After
-   const { readFile, writeFile } = Deno
+   const { readFile, writeFile } = Deno;
    ```
 
 3. **Process/Child Process** (2 hours)
+
    ```typescript
    // Before
-   const { exec } = require('child_process')
-   
+   const { exec } = require("child_process");
+
    // After
-   const command = new Deno.Command("pgTAP", { args: ["test.sql"] })
+   const command = new Deno.Command("pgTAP", { args: ["test.sql"] });
    ```
 
 4. **Test Framework** (3 hours)
+
    ```typescript
    // Before
-   import { describe, it, expect } from 'vitest'
-   
+   import { describe, it, expect } from "vitest";
+
    // After
    Deno.test("should work", () => {
-     assertEquals(actual, expected)
-   })
+     assertEquals(actual, expected);
+   });
    ```
 
 5. **Build/Distribution** (2 hours)
+
    ```bash
    # Before: Complex npm packaging
    npm run build && npm pack
-   
+
    # After: Single command
    deno compile --output data src/index.ts
    ```
@@ -118,31 +123,31 @@ Since we're using Supabase API, not direct PostgreSQL:
 
 ```typescript
 // test-deno-supabase.ts
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!
-const SUPABASE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 // Test 1: Can we call Supabase API?
 const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
   headers: {
-    'apikey': SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`
-  }
-})
-console.log("API Status:", response.status)  // ✅ Works
+    apikey: SUPABASE_KEY,
+    Authorization: `Bearer ${SUPABASE_KEY}`,
+  },
+});
+console.log("API Status:", response.status); // ✅ Works
 
 // Test 2: Can we run pgTAP?
 const command = new Deno.Command("psql", {
   args: [DATABASE_URL, "-f", "test.sql"],
-  stdout: "piped"
-})
-const { code, stdout } = await command.output()
-console.log("pgTAP Result:", new TextDecoder().decode(stdout))  // ✅ Works
+  stdout: "piped",
+});
+const { code, stdout } = await command.output();
+console.log("pgTAP Result:", new TextDecoder().decode(stdout)); // ✅ Works
 
 // Test 3: Can we import Edge Functions?
-const edgeFunc = await import("./supabase/functions/my-func/index.ts")
-const req = new Request("https://example.com")
-const res = await edgeFunc.handler(req)
-console.log("Edge Function:", res.status)  // ✅ Works
+const edgeFunc = await import("./supabase/functions/my-func/index.ts");
+const req = new Request("https://example.com");
+const res = await edgeFunc.handler(req);
+console.log("Edge Function:", res.status); // ✅ Works
 
 // ALL CRITICAL PATHS WORK!
 ```
@@ -150,22 +155,26 @@ console.log("Edge Function:", res.status)  // ✅ Works
 ## Migration Plan: THE REAL ONE
 
 ### Day 1: Morning (4 hours)
+
 - Fork repo to `deno-migration` branch
 - Convert imports to Deno
 - Fix file system calls
 - Get basic CLI running
 
 ### Day 1: Afternoon (4 hours)
+
 - Port all commands
 - Update child process calls
 - Test core workflows
 
 ### Day 2: Morning (4 hours)
+
 - Convert test suite
 - Add Edge Function tests
 - Create distribution binary
 
 ### Day 2: Afternoon
+
 - Documentation
 - Release 🚀
 
@@ -174,6 +183,7 @@ console.log("Edge Function:", res.status)  // ✅ Works
 We're not migrating from a PostgreSQL driver to another PostgreSQL driver.
 
 We're migrating from:
+
 - **Fetch API → Fetch API** (identical!)
 - **JSON → JSON** (identical!)
 - **Environment vars → Environment vars** (identical!)
@@ -188,19 +198,19 @@ class MigrateCommand extends Command {
   async performExecute() {
     // This doesn't change AT ALL
     const response = await fetch(`${this.supabaseUrl}/rest/v1/migrations`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'apikey': this.serviceRoleKey,
-        'Content-Type': 'application/json'
+        apikey: this.serviceRoleKey,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(migrationData)
-    })
-    
+      body: JSON.stringify(migrationData),
+    });
+
     if (!response.ok) {
-      throw new Error(`Migration failed: ${response.statusText}`)
+      throw new Error(`Migration failed: ${response.statusText}`);
     }
-    
-    return response.json()
+
+    return response.json();
   }
 }
 ```
@@ -215,8 +225,8 @@ DO IT. DO IT NOW.
 
 ---
 
-*"Sometimes the solution is so simple, you miss it because you're looking for something complex."* - Scotty
+_"Sometimes the solution is so simple, you miss it because you're looking for something complex."_ - Scotty
 
-We don't need PostgreSQL drivers. We have the Supabase API. 
+We don't need PostgreSQL drivers. We have the Supabase API.
 
 Game. Set. Match. 🎾

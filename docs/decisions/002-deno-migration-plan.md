@@ -3,7 +3,7 @@
 **Created:** 2025-08-30  
 **Status:** DRAFT  
 **Estimated Effort:** 40-60 hours  
-**Risk Level:** Medium  
+**Risk Level:** Medium
 
 ## Executive Summary
 
@@ -12,7 +12,7 @@ Migrate D.A.T.A. from Node.js to Deno to achieve perfect Supabase Edge Function 
 ## Why Deno? The 30-Second Pitch
 
 ```
-Current: Node.js CLI → Deploys to → Deno Edge Functions 
+Current: Node.js CLI → Deploys to → Deno Edge Functions
          (MISMATCH! 🔴)
 
 Future:  Deno CLI → Deploys to → Deno Edge Functions
@@ -22,6 +22,7 @@ Future:  Deno CLI → Deploys to → Deno Edge Functions
 ## Migration Phases
 
 ### 🏗️ Phase 0: Foundation (Day 1-2)
+
 **Goal:** Prove Deno can handle our core needs
 
 ```bash
@@ -35,18 +36,20 @@ deno run --allow-run test-pgtap-execution.ts
 ```
 
 **Checklist:**
+
 - [ ] PostgreSQL connection working
-- [ ] Edge Function imports working  
+- [ ] Edge Function imports working
 - [ ] pgTAP test execution working
 - [ ] File system operations working
 - [ ] Environment variables working
 
 ### 🔄 Phase 1: Core Library Migration (Day 3-7)
+
 **Goal:** Port foundation classes
 
 ```typescript
 // Old (Node.js)
-const { EventEmitter } = require('events');
+const { EventEmitter } = require("events");
 class Command extends EventEmitter {
   // ...
 }
@@ -59,10 +62,11 @@ class Command extends EventEmitter {
 ```
 
 **Files to Migrate:**
+
 ```
 src/lib/
 ├── Command.ts                 (4 hours)
-├── DatabaseCommand.ts          (2 hours)  
+├── DatabaseCommand.ts          (2 hours)
 ├── SupabaseCommand.ts          (2 hours)
 ├── TestCommand.ts              (2 hours)
 ├── CommandRouter.ts            (3 hours)
@@ -72,10 +76,13 @@ src/lib/
 ```
 
 ### 🚀 Phase 2: Command Migration (Day 8-14)
+
 **Goal:** Port all commands to Deno
 
 **Priority Order:**
+
 1. **Test commands** (Most complex, highest value)
+
    ```typescript
    // Focus: Edge Function testing accuracy
    src/commands/test/
@@ -85,6 +92,7 @@ src/lib/
    ```
 
 2. **Database commands** (Core functionality)
+
    ```typescript
    src/commands/db/
    ├── MigrateCommand.ts  (4 hours)
@@ -99,14 +107,18 @@ src/lib/
    ```
 
 ### 🧪 Phase 3: Test Suite Migration (Day 15-18)
+
 **Goal:** All tests running in Deno
 
 ```typescript
 // Old (Vitest)
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
 // New (Deno)
-import { assertEquals, assertThrows } from "https://deno.land/std@0.208.0/assert/mod.ts";
+import {
+  assertEquals,
+  assertThrows,
+} from "https://deno.land/std@0.208.0/assert/mod.ts";
 
 Deno.test("Command emits events correctly", async () => {
   // Test implementation
@@ -115,11 +127,13 @@ Deno.test("Command emits events correctly", async () => {
 ```
 
 **Test Migration Strategy:**
+
 1. Start with unit tests (simpler)
 2. Move to integration tests
 3. Add Deno-specific tests for Edge Functions
 
 ### 📦 Phase 4: Distribution (Day 19-20)
+
 **Goal:** Single binary distribution
 
 ```bash
@@ -139,12 +153,14 @@ deno compile \
 ```
 
 **Distribution Targets:**
+
 - macOS ARM64 (Apple Silicon)
 - macOS x64 (Intel)
 - Linux x64
 - Windows x64
 
 ### 🎯 Phase 5: Cutover (Day 21)
+
 **Goal:** Switch to Deno as primary
 
 1. **Documentation Update**
@@ -153,6 +169,7 @@ deno compile \
    - Migration guide for users
 
 2. **CI/CD Update**
+
    ```yaml
    # .github/workflows/test.yml
    - uses: denoland/setup-deno@v1
@@ -166,33 +183,39 @@ deno compile \
 
 ## Dependency Mapping
 
-| Node.js Package | Deno Replacement | Notes |
-|----------------|------------------|-------|
-| commander | cliffy | Better TypeScript support |
-| pg | deno-postgres | Native Deno driver |
-| chalk | std/fmt/colors | Built-in formatting |
-| dotenv | std/dotenv | Standard library |
-| fs-extra | std/fs | Built-in |
-| glob | std/fs/walk | Built-in |
-| eslint | deno lint | Built-in |
-| vitest | Deno.test | Built-in |
+| Node.js Package | Deno Replacement | Notes                     |
+| --------------- | ---------------- | ------------------------- |
+| commander       | cliffy           | Better TypeScript support |
+| pg              | deno-postgres    | Native Deno driver        |
+| chalk           | std/fmt/colors   | Built-in formatting       |
+| dotenv          | std/dotenv       | Standard library          |
+| fs-extra        | std/fs           | Built-in                  |
+| glob            | std/fs/walk      | Built-in                  |
+| eslint          | deno lint        | Built-in                  |
+| vitest          | Deno.test        | Built-in                  |
 
 ## Risk Mitigation
 
 ### Risk 1: PostgreSQL Driver Limitations
-**Mitigation:** 
+
+**Mitigation:**
+
 - Test extensively in Phase 0
 - Keep Node.js fallback for complex queries
 - Contribute to deno-postgres if needed
 
 ### Risk 2: Missing npm Packages
+
 **Mitigation:**
+
 - Use CDN imports: `https://esm.sh/package-name`
 - Write native Deno replacements
 - Use subprocess for Node-only tools
 
 ### Risk 3: Team Learning Curve
+
 **Mitigation:**
+
 - Pair programming during migration
 - Create Deno cheat sheet
 - Start with familiar patterns
@@ -200,6 +223,7 @@ deno compile \
 ## Success Metrics
 
 ### Technical Metrics
+
 - [ ] 100% test coverage maintained
 - [ ] Edge Function test accuracy: 100% (up from ~70%)
 - [ ] Binary size < 50MB
@@ -207,6 +231,7 @@ deno compile \
 - [ ] No node_modules directory
 
 ### Developer Experience Metrics
+
 - [ ] Installation: Single command
 - [ ] No npm install required
 - [ ] TypeScript errors caught at runtime
@@ -224,12 +249,13 @@ If Deno migration fails:
 ## Code Examples
 
 ### Before (Node.js)
+
 ```javascript
 // Complex module resolution
-const { Command } = require('commander');
-const chalk = require('chalk');
-const { config } = require('dotenv');
-const pg = require('pg');
+const { Command } = require("commander");
+const chalk = require("chalk");
+const { config } = require("dotenv");
+const pg = require("pg");
 
 // Confusing async handling
 async function connectDB() {
@@ -244,6 +270,7 @@ const conf = loadConfig();
 ```
 
 ### After (Deno)
+
 ```typescript
 // Clean URL imports
 import { Command } from "https://deno.land/x/cliffy@v1.0.0/command/mod.ts";
@@ -271,16 +298,16 @@ const conf: Config = await loadConfig();
 async function testEdgeFunction(functionPath: string) {
   // Import actual Edge Function
   const mod = await import(functionPath);
-  
+
   // Test with Deno-native Request/Response
   const request = new Request("https://example.com", {
     method: "POST",
-    body: JSON.stringify({ test: true })
+    body: JSON.stringify({ test: true }),
   });
-  
+
   // This runs EXACTLY like in production
   const response = await mod.handler(request);
-  
+
   // Validate using Web Standards
   assertEquals(response.status, 200);
   const body = await response.json();
@@ -292,7 +319,7 @@ async function testEdgeFunction(functionPath: string) {
 
 ```
 Week 1: Foundation + Core Libraries
-Week 2: Commands + Tests  
+Week 2: Commands + Tests
 Week 3: Distribution + Documentation
 Week 4: Cutover + Monitoring
 ```
@@ -314,6 +341,6 @@ If MAYBE → Run Phase 0 as experiment (2 days)
 
 ---
 
-*"Change is the essential process of all existence."* - Spock
+_"Change is the essential process of all existence."_ - Spock
 
 The module system chaos is unsustainable. Whether we choose Deno or fix Node.js, we must act.

@@ -2,13 +2,13 @@
 
 ## Core Information
 
-| Field | Value |
-|-------|-------|
-| **Severity Level** | 🔴 CRITICAL - Show Stopper |
-| **Location** | `src/commands/db/migrate/generate.js` |
-| **Category** | Testing |
-| **Brief Description** | Migration generation command lacks test coverage |
-| **Impact** | Migration generation failures could corrupt database workflow |
+| Field                 | Value                                                         |
+| --------------------- | ------------------------------------------------------------- |
+| **Severity Level**    | 🔴 CRITICAL - Show Stopper                                    |
+| **Location**          | `src/commands/db/migrate/generate.js`                         |
+| **Category**          | Testing                                                       |
+| **Brief Description** | Migration generation command lacks test coverage              |
+| **Impact**            | Migration generation failures could corrupt database workflow |
 
 ## Summary
 
@@ -17,6 +17,7 @@ The migrate-generate command is responsible for creating new migration files fro
 ## Component Overview
 
 The migrate-generate command provides:
+
 - Automatic migration file generation from SQL changes
 - Timestamp-based migration naming
 - Integration with existing migration tracking
@@ -26,6 +27,7 @@ The migrate-generate command provides:
 ## What Needs Testing
 
 ### Core Functionality
+
 - [ ] Migration file creation with proper timestamps
 - [ ] SQL change detection and processing
 - [ ] Migration naming conventions
@@ -33,6 +35,7 @@ The migrate-generate command provides:
 - [ ] Integration with migration directory structure
 
 ### Edge Cases
+
 - [ ] Empty SQL changes (no-op migrations)
 - [ ] Invalid SQL syntax handling
 - [ ] Duplicate migration names
@@ -41,6 +44,7 @@ The migrate-generate command provides:
 - [ ] Permission issues with migration directory
 
 ### Integration Points
+
 - [ ] SQL source file parsing
 - [ ] Migration metadata system integration
 - [ ] File system operations
@@ -48,6 +52,7 @@ The migrate-generate command provides:
 - [ ] Validation pipeline integration
 
 ### Error Scenarios
+
 - [ ] SQL syntax errors
 - [ ] File system permission errors
 - [ ] Missing dependencies
@@ -57,46 +62,49 @@ The migrate-generate command provides:
 ## Testing Requirements
 
 ### Unit Tests
+
 ```javascript
-describe('migrate-generate', () => {
-  describe('migration creation', () => {
-    it('should generate migration with proper timestamp')
-    it('should create valid migration file structure')
-    it('should handle custom migration names')
-    it('should validate SQL syntax before generation')
-  })
-  
-  describe('metadata handling', () => {
-    it('should generate correct migration metadata')
-    it('should track migration dependencies')
-    it('should validate metadata schema')
-  })
-  
-  describe('error handling', () => {
-    it('should reject invalid SQL syntax')
-    it('should handle file system errors gracefully')
-    it('should prevent duplicate migration names')
-  })
-})
+describe("migrate-generate", () => {
+  describe("migration creation", () => {
+    it("should generate migration with proper timestamp");
+    it("should create valid migration file structure");
+    it("should handle custom migration names");
+    it("should validate SQL syntax before generation");
+  });
+
+  describe("metadata handling", () => {
+    it("should generate correct migration metadata");
+    it("should track migration dependencies");
+    it("should validate metadata schema");
+  });
+
+  describe("error handling", () => {
+    it("should reject invalid SQL syntax");
+    it("should handle file system errors gracefully");
+    it("should prevent duplicate migration names");
+  });
+});
 ```
 
 ### Integration Tests
+
 ```javascript
-describe('migrate-generate Integration', () => {
-  it('should generate migration from real SQL files')
-  it('should integrate with existing migration sequence')
-  it('should handle complex SQL operations')
-  it('should maintain migration directory structure')
-})
+describe("migrate-generate Integration", () => {
+  it("should generate migration from real SQL files");
+  it("should integrate with existing migration sequence");
+  it("should handle complex SQL operations");
+  it("should maintain migration directory structure");
+});
 ```
 
 ### Workflow Tests
+
 ```javascript
-describe('migrate-generate Workflow', () => {
-  it('should support complete generate->test->promote workflow')
-  it('should handle incremental migrations')
-  it('should validate against existing schema')
-})
+describe("migrate-generate Workflow", () => {
+  it("should support complete generate->test->promote workflow");
+  it("should handle incremental migrations");
+  it("should validate against existing schema");
+});
 ```
 
 ## Acceptance Criteria
@@ -113,6 +121,7 @@ describe('migrate-generate Workflow', () => {
 ## Priority Justification
 
 **Critical Priority** because:
+
 1. **Foundation of Migration System**: Migration generation is the starting point for all database changes
 2. **Data Integrity Risk**: Broken migration generation can corrupt the entire migration chain
 3. **Zero Fallback**: No alternative path if generation fails
@@ -135,6 +144,6 @@ describe('migrate-generate Workflow', () => {
 
 ---
 
-*"Logic is the beginning of wisdom, not the end."* - Spock
+_"Logic is the beginning of wisdom, not the end."_ - Spock
 
 Migration generation is where database evolution begins. Without rigorous testing, we risk logical inconsistencies that compound over time.

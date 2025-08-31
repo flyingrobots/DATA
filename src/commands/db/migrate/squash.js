@@ -49,9 +49,8 @@ class MigrateSquashCommand extends Command {
       this.progress(`Found ${migrationsToSquash.length} migrations to squash`);
 
       // Generate squashed migration content
-      const squashedContent = await this.generateSquashedMigration(
-        migrationsToSquash
-      );
+      const squashedContent =
+        await this.generateSquashedMigration(migrationsToSquash);
 
       // Create output filename
       const outputFilename =
@@ -61,7 +60,7 @@ class MigrateSquashCommand extends Command {
         this.displayDryRunResults(
           migrationsToSquash,
           outputFilename,
-          squashedContent
+          squashedContent,
         );
         this.emit("complete", {
           dryRun: true,
@@ -73,7 +72,7 @@ class MigrateSquashCommand extends Command {
       // Confirm squash operation
       const confirmed = await this.confirmSquashOperation(
         migrationsToSquash,
-        outputFilename
+        outputFilename,
       );
       if (!confirmed) {
         this.success("Squash operation cancelled");
@@ -85,11 +84,11 @@ class MigrateSquashCommand extends Command {
       await this.performSquash(
         migrationsToSquash,
         outputFilename,
-        squashedContent
+        squashedContent,
       );
 
       this.success(
-        `Successfully squashed ${migrationsToSquash.length} migrations into ${outputFilename}`
+        `Successfully squashed ${migrationsToSquash.length} migrations into ${outputFilename}`,
       );
       this.emit("complete", {
         squashed: migrationsToSquash.length,
@@ -305,7 +304,7 @@ class MigrateSquashCommand extends Command {
         // Move to archive
         await fs.rename(sourcePath, archivePath);
         this.progress(`Archived: ${migration}`);
-      })
+      }),
     );
 
     // Update migration history

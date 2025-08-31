@@ -53,6 +53,7 @@ example/
 This example implements a **complete donation platform** with:
 
 ### Database Layer (`sql/`)
+
 - **Multi-schema architecture**: Separate schemas for app, billing, analytics, and audit
 - **Custom types**: Enums for user roles, donation status, payment methods
 - **Core tables**: Organizations, campaigns, and donations
@@ -63,6 +64,7 @@ This example implements a **complete donation platform** with:
 - **Reporting**: Pre-built dashboard views for common queries
 
 ### Edge Functions Layer (`functions/`)
+
 - **Webhook processing**: Handle payment provider webhooks
 - **Payment integration**: Stripe payment intent creation
 - **Email automation**: Send receipts and confirmations
@@ -100,6 +102,7 @@ While this structure is recommended, you can customize paths in `.datarc.json`:
 ```
 
 Or via environment variables:
+
 ```bash
 export DATA_SQL_DIR=./custom/sql
 export DATA_MIGRATIONS_DIR=./custom/migrations
@@ -109,17 +112,20 @@ export DATA_FUNCTIONS_DIR=./custom/functions
 ## Usage Examples
 
 ### 1. Compile SQL into a Migration
+
 ```bash
 # From project root (parent of example/)
 data db compile --sql-dir example/sql
 ```
 
 ### 2. Test the Migration
+
 ```bash
 data db migrate test
 ```
 
 ### 3. Deploy with Edge Functions
+
 ```bash
 # Development
 data db compile --deploy-functions
@@ -129,6 +135,7 @@ data --prod db compile --deploy-functions
 ```
 
 ### 4. Check Function Status
+
 ```bash
 data functions status
 ```

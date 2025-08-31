@@ -3,17 +3,18 @@
 > [!warning]- _Not Started_
 
 ## Issue Title
+
 Add coverage enforcement configuration to datarc.schema.json
 
 ### Core Information
 
-| Field | Why It Matters |
-|-------|---------------|
-| **Severity Level** | HIGH - Runtime configuration errors possible |
-| **Location** | `datarc.schema.json` |
-| **Category** | Architecture/Configuration |
-| **Brief Description** | Missing coverage-specific configuration properties in schema |
-| **Impact** | Runtime errors and invalid configurations not caught at startup |
+| Field                 | Why It Matters                                                  |
+| --------------------- | --------------------------------------------------------------- |
+| **Severity Level**    | HIGH - Runtime configuration errors possible                    |
+| **Location**          | `datarc.schema.json`                                            |
+| **Category**          | Architecture/Configuration                                      |
+| **Brief Description** | Missing coverage-specific configuration properties in schema    |
+| **Impact**            | Runtime errors and invalid configurations not caught at startup |
 
 ## Summary
 
@@ -28,6 +29,7 @@ When the test coverage enforcement system was added, the configuration schema wa
 ### Example
 
 Current `.datarc.json` might contain:
+
 ```json
 {
   "test": {
@@ -43,14 +45,15 @@ Current `.datarc.json` might contain:
 ```
 
 But the schema doesn't validate these properties, allowing invalid values like:
+
 ```json
 {
   "test": {
     "coverage": {
-      "enforcement_level": "super-strict",  // Invalid enum value!
+      "enforcement_level": "super-strict", // Invalid enum value!
       "thresholds": {
-        "tables": "ninety",  // Should be number!
-        "functions": 150     // Should be 0-100!
+        "tables": "ninety", // Should be number!
+        "functions": 150 // Should be 0-100!
       }
     }
   }
@@ -171,6 +174,6 @@ Extend the schema with comprehensive coverage configuration:
 - Are there legacy configurations that need migration?
 - Could schema validation performance be impacted?
 
-___
+---
 
 _"The complexity of the humanoid brain is not easily replicated. The positronic matrix of my neural net is quite intricate." - Data, Star Trek: The Next Generation, "The Measure of a Man"_

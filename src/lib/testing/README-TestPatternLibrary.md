@@ -30,9 +30,9 @@ TestTemplateGenerator
 ```javascript
 const generator = new TestTemplateGenerator();
 const requirement = {
-  type: 'table',
-  name: 'users',
-  schema: 'public'
+  type: "table",
+  name: "users",
+  schema: "public",
 };
 const template = generator.generateTemplate(requirement);
 ```
@@ -42,24 +42,26 @@ const template = generator.generateTemplate(requirement);
 ```javascript
 const generator = new TestTemplateGenerator();
 const requirement = {
-  type: 'rls',
-  name: 'users',
-  schema: 'public',
+  type: "rls",
+  name: "users",
+  schema: "public",
   metadata: {
     policies: [
-      { name: 'users_select_own', commands: ['SELECT'] },
-      { name: 'users_update_own', commands: ['UPDATE'] }
-    ]
-  }
+      { name: "users_select_own", commands: ["SELECT"] },
+      { name: "users_update_own", commands: ["UPDATE"] },
+    ],
+  },
 };
 
 // Generate enhanced template with additional patterns
 const enhancedTemplate = generator.generateEnhancedTemplate(
-  requirement, 
-  ['privilege_escalation_test'] // Additional patterns beyond recommended ones
+  requirement,
+  ["privilege_escalation_test"], // Additional patterns beyond recommended ones
 );
 
-console.log(`Enhanced template uses ${enhancedTemplate.metadata.patternsUsed.length} patterns`);
+console.log(
+  `Enhanced template uses ${enhancedTemplate.metadata.patternsUsed.length} patterns`,
+);
 ```
 
 ### Direct Pattern Access
@@ -68,15 +70,15 @@ console.log(`Enhanced template uses ${enhancedTemplate.metadata.patternsUsed.len
 const generator = new TestTemplateGenerator();
 
 // Get recommended patterns for a test type
-const rlsPatterns = generator.getRecommendedPatterns('rls');
+const rlsPatterns = generator.getRecommendedPatterns("rls");
 console.log(`RLS tests use ${rlsPatterns.length} patterns`);
 
 // Get patterns by category
-const securityPatterns = generator.getPatternsByCategory('security_testing');
+const securityPatterns = generator.getPatternsByCategory("security_testing");
 
 // Render a specific pattern with custom variables
-const variables = { schema: 'public', tableName: 'posts' };
-const rendered = generator.renderPattern('table_exists_basic', variables);
+const variables = { schema: "public", tableName: "posts" };
+const rendered = generator.renderPattern("table_exists_basic", variables);
 ```
 
 ### Documentation Generation
@@ -85,7 +87,7 @@ const rendered = generator.renderPattern('table_exists_basic', variables);
 const generator = new TestTemplateGenerator();
 
 // Generate best practices for a test type
-const bestPractices = generator.generateBestPracticesDoc('rls');
+const bestPractices = generator.generateBestPracticesDoc("rls");
 
 // Generate complete pattern library documentation
 const libraryDoc = generator.generatePatternLibraryDoc();
@@ -97,26 +99,31 @@ const examples = generator.generateUsageExamples();
 ## Available Patterns
 
 ### Data Validation Patterns
+
 - **table_exists_basic** - Basic table existence validation
 - **column_structure_validation** - Comprehensive column structure validation
 - **foreign_key_relationship** - Foreign key relationship validation with referential integrity
 - **constraint_validation** - CHECK constraint validation with boundary testing
 
 ### Security Testing Patterns
+
 - **rls_enablement_check** - Row Level Security enablement validation
 - **policy_existence_check** - RLS policy existence and configuration validation
 - **multi_user_access_test** - Multi-user access pattern testing data isolation
 - **privilege_escalation_test** - Test that privilege escalation is properly prevented
 
 ### Performance Testing Patterns
+
 - **index_usage_verification** - Verify that indexes are used by query plans
 - **function_performance_test** - Function execution time and resource usage validation
 
 ### Error Handling Patterns
+
 - **constraint_violation_handling** - Test proper constraint violation error handling
 - **function_exception_handling** - Test function exception handling and error recovery
 
 ### Multi-User Scenario Patterns
+
 - **concurrent_modification_test** - Test concurrent data modification scenarios
 - **data_isolation_verification** - Verify data isolation between different user contexts
 
@@ -124,20 +131,21 @@ const examples = generator.generateUsageExamples();
 
 ### Test Types and Recommended Patterns
 
-| Test Type   | Recommended Patterns |
-|-------------|---------------------|
-| **RPC**     | 5 patterns including multi-user access and privilege escalation tests |
-| **RLS**     | 5 patterns focusing on security and data isolation |
-| **Trigger** | 4 patterns including error handling and concurrent modification |
-| **Constraint** | 3 patterns focusing on validation and error handling |
-| **Function** | 3 patterns including performance and exception handling |
-| **Table**   | 5 patterns covering structure, constraints, and indexes |
-| **Column**  | 3 patterns focusing on structure validation |
-| **Index**   | 2 patterns covering usage verification and performance |
+| Test Type      | Recommended Patterns                                                  |
+| -------------- | --------------------------------------------------------------------- |
+| **RPC**        | 5 patterns including multi-user access and privilege escalation tests |
+| **RLS**        | 5 patterns focusing on security and data isolation                    |
+| **Trigger**    | 4 patterns including error handling and concurrent modification       |
+| **Constraint** | 3 patterns focusing on validation and error handling                  |
+| **Function**   | 3 patterns including performance and exception handling               |
+| **Table**      | 5 patterns covering structure, constraints, and indexes               |
+| **Column**     | 3 patterns focusing on structure validation                           |
+| **Index**      | 2 patterns covering usage verification and performance                |
 
 ## Pattern Structure
 
 Each pattern includes:
+
 - **Name** - Unique identifier
 - **Category** - One of the 5 main categories
 - **Description** - Human-readable description
@@ -152,17 +160,20 @@ Each pattern includes:
 ## Best Practices
 
 ### When to Use Enhanced Templates
+
 - **Complex Requirements**: Use `generateEnhancedTemplate()` for requirements with rich metadata
 - **Security-Critical Tests**: Always use enhanced templates for RLS and security tests
 - **Performance Tests**: Use enhanced templates for function and index tests
 - **Multi-User Scenarios**: Use enhanced templates when testing user isolation
 
 ### When to Use Basic Templates
+
 - **Simple Existence Tests**: Use `generateTemplate()` for basic table/column existence
 - **Quick Prototyping**: Use basic templates for initial test scaffolding
 - **Legacy Compatibility**: Use basic templates to maintain existing test structure
 
 ### Pattern Selection Guidelines
+
 1. **Start with Recommended Patterns**: Use `getRecommendedPatterns(testType)` first
 2. **Add Category-Specific Patterns**: Use `getPatternsByCategory()` for specialized needs
 3. **Consider Difficulty Level**: Match pattern difficulty to your test complexity needs
@@ -179,12 +190,14 @@ The TestPatternLibrary is designed to be fully backward compatible:
 ## Extension and Customization
 
 ### Adding New Patterns
+
 1. Add pattern definition in `TestPatternLibrary.initializePatterns()`
 2. Update category assignments
 3. Add to test type mappings in `initializeTestTypeMapping()`
 4. Update documentation and examples
 
 ### Creating Custom Categories
+
 1. Add category in `initializePatternCategories()`
 2. Define category metadata and best practices
 3. Assign patterns to the new category
@@ -200,6 +213,7 @@ The TestPatternLibrary is designed to be fully backward compatible:
 ## Future Enhancements
 
 Planned improvements include:
+
 - **Dynamic Pattern Loading**: Load patterns from external configuration
 - **Pattern Composition**: Combine multiple patterns into composite templates
 - **AI-Assisted Pattern Generation**: Generate patterns based on schema analysis
@@ -209,11 +223,13 @@ Planned improvements include:
 ## Debugging and Troubleshooting
 
 ### Common Issues
+
 - **Missing Variables**: Ensure all pattern placeholders have corresponding variables
 - **Pattern Conflicts**: Check for overlapping patterns in enhanced generation
 - **Template Formatting**: Verify pgTAP structure formatting is correct
 
 ### Debug Methods
+
 ```javascript
 const generator = new TestTemplateGenerator();
 
@@ -222,19 +238,20 @@ console.log(generator.getAvailablePatterns());
 
 // Verify pattern rendering
 try {
-  const rendered = generator.renderPattern('pattern_name', variables);
+  const rendered = generator.renderPattern("pattern_name", variables);
 } catch (error) {
-  console.log('Pattern rendering failed:', error.message);
+  console.log("Pattern rendering failed:", error.message);
 }
 
 // Inspect enhanced template metadata
 const template = generator.generateEnhancedTemplate(requirement);
-console.log('Patterns used:', template.metadata.patternsUsed);
+console.log("Patterns used:", template.metadata.patternsUsed);
 ```
 
 ## Contributing
 
 When contributing new patterns:
+
 1. Follow existing pattern structure and naming conventions
 2. Include comprehensive documentation and examples
 3. Test pattern rendering with various variable combinations

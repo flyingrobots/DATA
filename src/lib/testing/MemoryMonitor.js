@@ -1,9 +1,9 @@
 /**
  * Memory monitoring utilities for D.A.T.A. CLI
- * 
+ *
  * Provides static methods for monitoring and managing memory usage
  * to prevent OOM errors when processing large datasets.
- * 
+ *
  * @class MemoryMonitor
  * @author D.A.T.A. Engineering Team
  */
@@ -45,7 +45,7 @@ class MemoryMonitor {
    * @static
    */
   static shouldTriggerCleanup(currentMB, maxMB) {
-    return currentMB > (maxMB * 0.8); // Trigger at 80% of max
+    return currentMB > maxMB * 0.8; // Trigger at 80% of max
   }
 
   /**
@@ -54,9 +54,11 @@ class MemoryMonitor {
    * @param {Object} logger - Logger instance (optional)
    * @static
    */
-  static logMemoryStats(label = 'Memory', logger = console) {
+  static logMemoryStats(label = "Memory", logger = console) {
     const stats = MemoryMonitor.getMemoryUsage();
-    logger.log(`[${label}] Heap: ${stats.heapUsed}/${stats.heapTotal} MB, RSS: ${stats.rss} MB`);
+    logger.log(
+      `[${label}] Heap: ${stats.heapUsed}/${stats.heapTotal} MB, RSS: ${stats.rss} MB`,
+    );
   }
 
   /**

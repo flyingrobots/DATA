@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+const { Client } = require("pg");
 
 /**
  * Database utility functions for temp database management
@@ -6,11 +6,11 @@ const { Client } = require('pg');
 class DatabaseUtils {
   constructor(baseConfig = {}) {
     this.baseConfig = {
-      host: 'localhost',
+      host: "localhost",
       port: 54332,
-      user: 'postgres',
-      password: 'postgres',
-      ...baseConfig
+      user: "postgres",
+      password: "postgres",
+      ...baseConfig,
     };
   }
 
@@ -21,7 +21,7 @@ class DatabaseUtils {
   createAdminClient() {
     return new Client({
       ...this.baseConfig,
-      database: 'postgres' // Connect to default postgres database
+      database: "postgres", // Connect to default postgres database
     });
   }
 
@@ -33,7 +33,7 @@ class DatabaseUtils {
   createDatabaseClient(databaseName) {
     return new Client({
       ...this.baseConfig,
-      database: databaseName
+      database: databaseName,
     });
   }
 
@@ -42,9 +42,9 @@ class DatabaseUtils {
    * @param {string} suffix - Optional suffix for the database name
    * @returns {string} Unique database name
    */
-  generateTempDatabaseName(suffix = 'default') {
+  generateTempDatabaseName(suffix = "default") {
     const timestamp = Date.now();
-    const cleanSuffix = suffix.replace(/[^a-zA-Z0-9_]/g, '_');
+    const cleanSuffix = suffix.replace(/[^a-zA-Z0-9_]/g, "_");
     return `temp_migra_${timestamp}_${cleanSuffix}`;
   }
 
@@ -55,15 +55,15 @@ class DatabaseUtils {
    */
   async databaseExists(databaseName) {
     const client = this.createAdminClient();
-    
+
     try {
       await client.connect();
-      
+
       const result = await client.query(
-        'SELECT 1 FROM pg_database WHERE datname = $1',
-        [databaseName]
+        "SELECT 1 FROM pg_database WHERE datname = $1",
+        [databaseName],
       );
-      
+
       return result.rows.length > 0;
     } finally {
       await client.end();
@@ -91,16 +91,16 @@ class DatabaseUtils {
     const results = [];
 
     const queryPromises = statements
-      .filter(statement => statement.trim())
-      .map(statement => client.query(statement));
-    
+      .filter((statement) => statement.trim())
+      .map((statement) => client.query(statement));
+
     const queryResults = await Promise.all(queryPromises);
     results.push(...queryResults);
 
     return {
       success: true,
       results,
-      statementCount: queryResults.length
+      statementCount: queryResults.length,
     };
   }
 
@@ -115,9 +115,9 @@ class DatabaseUtils {
     // More sophisticated parsing could be added if needed
     return sql
       .split(/;\s*\n/)
-      .map(stmt => stmt.trim())
-      .filter(stmt => stmt.length > 0)
-      .map(stmt => stmt.endsWith(';') ? stmt : stmt + ';');
+      .map((stmt) => stmt.trim())
+      .filter((stmt) => stmt.length > 0)
+      .map((stmt) => (stmt.endsWith(";") ? stmt : stmt + ";"));
   }
 }
 

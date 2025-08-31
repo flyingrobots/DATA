@@ -1,9 +1,9 @@
-const PathResolver = require('./PathResolver');
-const path = require('path');
+const PathResolver = require("./PathResolver");
+const path = require("path");
 
 /**
  * dataInputPaths - Manages all input/read sources for data
- * 
+ *
  * This class handles all directories where data reads files from.
  * It uses PathResolver to ensure directories exist and are readable.
  * All paths are resolved to absolute paths and cached.
@@ -24,23 +24,24 @@ class DataInputPaths {
     functionsDir = null,
     schemasDir = null,
     configDir = null,
-    pathResolver = null
+    pathResolver = null,
   ) {
     this.pathResolver = pathResolver || new PathResolver();
-    
+
     // Store configuration with defaults
     this._config = {
-      sqlDir: sqlDir || process.env.data_SQL_DIR || './sql',
-      testsDir: testsDir || process.env.data_TESTS_DIR || './tests',
-      functionsDir: functionsDir || process.env.data_FUNCTIONS_DIR || './functions',
-      schemasDir: schemasDir || process.env.data_SCHEMAS_DIR || './schemas',
-      configDir: configDir || process.env.data_CONFIG_DIR || '.'
+      sqlDir: sqlDir || process.env.data_SQL_DIR || "./sql",
+      testsDir: testsDir || process.env.data_TESTS_DIR || "./tests",
+      functionsDir:
+        functionsDir || process.env.data_FUNCTIONS_DIR || "./functions",
+      schemasDir: schemasDir || process.env.data_SCHEMAS_DIR || "./schemas",
+      configDir: configDir || process.env.data_CONFIG_DIR || ".",
     };
-    
+
     // Cache for resolved paths
     this._resolvedPaths = {};
     this._resolving = {}; // Prevent duplicate resolution attempts
-    
+
     // Cache for file listings
     this._fileCache = {};
   }
@@ -51,7 +52,7 @@ class DataInputPaths {
    * @throws {Error} If directory doesn't exist or isn't readable
    */
   getSqlDir() {
-    return this._resolvePath('sqlDir');
+    return this._resolvePath("sqlDir");
   }
 
   /**
@@ -60,7 +61,7 @@ class DataInputPaths {
    * @throws {Error} If directory doesn't exist or isn't readable
    */
   getTestsDir() {
-    return this._resolvePath('testsDir');
+    return this._resolvePath("testsDir");
   }
 
   /**
@@ -69,7 +70,7 @@ class DataInputPaths {
    * @throws {Error} If directory doesn't exist or isn't readable
    */
   getFunctionsDir() {
-    return this._resolvePath('functionsDir');
+    return this._resolvePath("functionsDir");
   }
 
   /**
@@ -78,7 +79,7 @@ class DataInputPaths {
    * @throws {Error} If directory doesn't exist or isn't readable
    */
   getSchemasDir() {
-    return this._resolvePath('schemasDir');
+    return this._resolvePath("schemasDir");
   }
 
   /**
@@ -87,7 +88,7 @@ class DataInputPaths {
    * @throws {Error} If directory doesn't exist or isn't readable
    */
   getConfigDir() {
-    return this._resolvePath('configDir');
+    return this._resolvePath("configDir");
   }
 
   /**
@@ -143,7 +144,7 @@ class DataInputPaths {
     if (!Object.prototype.hasOwnProperty.call(this._config, key)) {
       throw new Error(`Unknown path configuration: ${key}`);
     }
-    
+
     try {
       await this.pathResolver.resolveDirectoryForRead(this._config[key]);
       return true;
@@ -159,15 +160,15 @@ class DataInputPaths {
    * @returns {Promise<string|null>} First existing path or null
    */
   async findDirectory(key, candidates) {
-    const checkPromises = candidates.map(async candidate => {
+    const checkPromises = candidates.map(async (candidate) => {
       this._config[key] = candidate;
       const exists = await this.hasDirectory(key);
       return exists ? { candidate, exists } : null;
     });
-    
+
     const results = await Promise.allSettled(checkPromises);
     for (const result of results) {
-      if (result.status === 'fulfilled' && result.value) {
+      if (result.status === "fulfilled" && result.value) {
         this._config[key] = result.value.candidate;
         return this._resolvePath(key);
       }
@@ -224,15 +225,18 @@ class DataInputPaths {
     }
 
     // Start resolution
-    this._resolving[key] = this.pathResolver.resolveDirectoryForRead(this._config[key])
-      .then(resolved => {
+    this._resolving[key] = this.pathResolver
+      .resolveDirectoryForRead(this._config[key])
+      .then((resolved) => {
         this._resolvedPaths[key] = resolved;
         delete this._resolving[key];
         return resolved;
       })
-      .catch(error => {
+      .catch((error) => {
         delete this._resolving[key];
-        throw new Error(`Failed to resolve input path ${key}: ${error.message}`);
+        throw new Error(
+          `Failed to resolve input path ${key}: ${error.message}`,
+        );
       });
 
     return this._resolving[key];
