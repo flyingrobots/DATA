@@ -2,13 +2,13 @@
 
 ## Core Information
 
-| Field | Value |
-|-------|-------|
-| **Severity Level** | 🔴 CRITICAL - Core Engine |
-| **Location** | `src/lib/migration/ASTMigrationEngine.js` |
-| **Category** | Testing |
-| **Brief Description** | AST-based migration engine lacks test coverage |
-| **Impact** | SQL parsing errors could generate corrupted migrations |
+| Field                 | Value                                                  |
+| --------------------- | ------------------------------------------------------ |
+| **Severity Level**    | 🔴 CRITICAL - Core Engine                              |
+| **Location**          | `src/lib/migration/ASTMigrationEngine.js`              |
+| **Category**          | Testing                                                |
+| **Brief Description** | AST-based migration engine lacks test coverage         |
+| **Impact**            | SQL parsing errors could generate corrupted migrations |
 
 ## Summary
 

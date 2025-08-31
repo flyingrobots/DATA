@@ -1,13 +1,19 @@
 # DATA — Database Automation, Testing, and Alignment 🖖
 
+> [!info] **Work In Progress**
+> 🚧 This project is heavily under construction! Use at your own risk until the first release drops.
+> It ain't ready yet, folks!
+
 **Stop writing migrations by hand. Maintain golden SQL in git → get bulletproof database deployments.**
+
+<p align="center">
+<img src="https://repository-images.githubusercontent.com/1047551118/e88e7fab-040e-4684-80e2-98aa580d71fa" width="500" />
+</p>
 
 DATA generates deterministic migrations from your SQL source files and blocks unsafe deployments with non-negotiable safety gates. Zero drift, zero surprises, zero 3 AM outages.
 
 ```bash
-npm i -g @starfleet/data
-data automate && data test && data promote
-data align production  # 🔴 BLOCKED unless tests pass and repo is clean
+# TODO add demo instructions for installing and using once it's been released
 ```
 
 > [!warning]- **Work in Progress**  
@@ -52,13 +58,14 @@ $ data align production
 
 ```bash
 # 1. Install
-npm i -g @starfleet/data
+# TODO add instructions when it's published
 
 # 2. Organize your SQL in named directories
 /sql/
   extensions/    # PostgreSQL extensions
   tables/        # Table definitions  
   policies/      # RLS policies
+  # etc.
   
 # 3. The DATA workflow
 data automate      # Generate migration plan
@@ -150,9 +157,13 @@ $ data align production
    Deployment successful. "Make it so" achieved.
 ```
 
-## SQL Directory Structure
+## Recommended Directory Structure
 
-Your `/sql/` directory uses standard directory names:
+Your repository should organize supabase-related files in the following prescribed way (although you can override and configure however you'd like via `datarc.json`)
+
+### `/sql/` Directory
+
+The `/sql/` directory is where your "golden sql" files should live. You must sort your source sql files into the following directory structure. You may nest directories within each of these however you'd like. The reason this is required is because sql statements must be arranged in the proper order, and, really, this is just to help the sql compiler do less work. When the compiler handles each of these directories, it'll find all sql files within each one, recursively, then sort all the paths lexicographically. Then it appends the files in the order specified to the compiled sql file.
 
 ```
 /sql/
