@@ -63,20 +63,26 @@ class MigrateCleanCommand extends Command {
       // --- NEW & IMPROVED ERROR HANDLING ---
       this.error("Migration cleanup failed", error);
       this.emit("failed", { error });
-      
-      console.error('\n❌ Failed to clean migration files.');
+
+      console.error("\n❌ Failed to clean migration files.");
       console.error(`📌 Reason: ${error.message}`);
-      
+
       // Provide actionable advice based on common error types for file operations
-      if (error.code === 'EACCES') {
-        console.error('💡 Tip: Permission denied. You may need to run this command with sudo/administrator privileges to delete files.');
-      } else if (error.code === 'EBUSY') {
-        console.error('💡 Tip: A file is in use by another process. Close any programs that might be using the migration files.');
-      } else if (error.code === 'EPERM') {
-        console.error('💡 Tip: Operation not permitted. This could be a permissions issue or the file might be read-only.');
+      if (error.code === "EACCES") {
+        console.error(
+          "💡 Tip: Permission denied. You may need to run this command with sudo/administrator privileges to delete files.",
+        );
+      } else if (error.code === "EBUSY") {
+        console.error(
+          "💡 Tip: A file is in use by another process. Close any programs that might be using the migration files.",
+        );
+      } else if (error.code === "EPERM") {
+        console.error(
+          "💡 Tip: Operation not permitted. This could be a permissions issue or the file might be read-only.",
+        );
       }
-      
-      console.error(''); // Add a blank line for readability
+
+      console.error(""); // Add a blank line for readability
       process.exit(1);
     }
   }

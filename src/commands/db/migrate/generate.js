@@ -71,24 +71,37 @@ class MigrateGenerateCommand extends Command {
         operation: "generate",
         args: args,
       });
-      
-      console.error('\n❌ Failed to generate migration.');
+
+      console.error("\n❌ Failed to generate migration.");
       console.error(`📌 Reason: ${error.message}`);
-      
+
       // Provide actionable advice based on error type
-      if (error.message.includes('--name requires a value')) {
-        console.error('💡 Tip: Provide a migration name: --name "your_migration_name"');
-      } else if (error.message.includes('Unknown option')) {
-        console.error('💡 Tip: Check your command syntax. Use --help for available options.');
-      } else if (error.code === 'ENOENT') {
-        console.error('💡 Tip: Required directory does not exist. Run `data init` first.');
-      } else if (error.code === 'EACCES') {
-        console.error('💡 Tip: Permission denied. Check write access to the migrations directory.');
-      } else if (error.message.includes('connection') || error.message.includes('database')) {
-        console.error('💡 Tip: Check your database connection. Is your local Supabase instance running?');
+      if (error.message.includes("--name requires a value")) {
+        console.error(
+          '💡 Tip: Provide a migration name: --name "your_migration_name"',
+        );
+      } else if (error.message.includes("Unknown option")) {
+        console.error(
+          "💡 Tip: Check your command syntax. Use --help for available options.",
+        );
+      } else if (error.code === "ENOENT") {
+        console.error(
+          "💡 Tip: Required directory does not exist. Run `data init` first.",
+        );
+      } else if (error.code === "EACCES") {
+        console.error(
+          "💡 Tip: Permission denied. Check write access to the migrations directory.",
+        );
+      } else if (
+        error.message.includes("connection") ||
+        error.message.includes("database")
+      ) {
+        console.error(
+          "💡 Tip: Check your database connection. Is your local Supabase instance running?",
+        );
       }
-      
-      console.error(''); // Add a blank line for readability
+
+      console.error(""); // Add a blank line for readability
       process.exit(1);
     }
   }
