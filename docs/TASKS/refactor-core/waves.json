@@ -1,0 +1,314 @@
+{
+  "planId": "PLAN-DATA-JS-ESM-2025",
+  "generated": {
+    "by": "T.A.S.K.S v3",
+    "timestamp": "2025-08-31T00:00:00Z",
+    "contentHash": "js-waves-8a9b0c1d2e3f4567"
+  },
+  "execution_models": {
+    "wave_based": {
+      "config": {
+        "maxWaveSize": 4,
+        "barrier": {
+          "kind": "quorum",
+          "quorum": 0.95
+        }
+      },
+      "waves": [
+        {
+          "waveNumber": 1,
+          "tasks": ["P1.T001"],
+          "estimates": {
+            "units": "hours",
+            "p50Hours": 1.5,
+            "p80Hours": 2,
+            "p95Hours": 2.5
+          },
+          "resource_usage": {
+            "package_json": 1,
+            "estimated_cpu_cores": 1,
+            "estimated_memory_gb": 0.25
+          },
+          "barrier": {
+            "kind": "complete",
+            "quorum": 1.0,
+            "timeoutMinutes": 150,
+            "fallback": "abort",
+            "gateId": "W1→W2-foundation"
+          },
+          "rationale": "ESM configuration must complete before packages"
+        },
+        {
+          "waveNumber": 2,
+          "tasks": ["P1.T002", "P1.T003", "P1.T008"],
+          "estimates": {
+            "units": "hours",
+            "p50Hours": 3,
+            "p80Hours": 3.5,
+            "p95Hours": 4
+          },
+          "resource_usage": {
+            "estimated_cpu_cores": 3,
+            "estimated_memory_gb": 1
+          },
+          "barrier": {
+            "kind": "quorum",
+            "quorum": 0.95,
+            "timeoutMinutes": 240,
+            "fallback": "deferOptional",
+            "gateId": "W2→W3-packages"
+          },
+          "rationale": "Core JavaScript packages and JSDoc pipeline in parallel"
+        },
+        {
+          "waveNumber": 3,
+          "tasks": ["P1.T004", "P1.T006", "P1.T007"],
+          "estimates": {
+            "units": "hours",
+            "p50Hours": 4,
+            "p80Hours": 4.5,
+            "p95Hours": 5
+          },
+          "resource_usage": {
+            "estimated_cpu_cores": 4,
+            "estimated_memory_gb": 1.5
+          },
+          "barrier": {
+            "kind": "quorum",
+            "quorum": 0.95,
+            "timeoutMinutes": 300,
+            "fallback": "deferOptional",
+            "gateId": "W3→W4-systems"
+          },
+          "rationale": "Event system, Edge templates, and DI system"
+        },
+        {
+          "waveNumber": 4,
+          "tasks": ["P1.T005"],
+          "estimates": {
+            "units": "hours",
+            "p50Hours": 4,
+            "p80Hours": 5,
+            "p95Hours": 6
+          },
+          "resource_usage": {
+            "estimated_cpu_cores": 2,
+            "estimated_memory_gb": 0.5
+          },
+          "barrier": {
+            "kind": "complete",
+            "quorum": 1.0,
+            "timeoutMinutes": 360,
+            "fallback": "checkpoint",
+            "gateId": "W4→W5-commands"
+          },
+          "rationale": "Command migration to ESM JavaScript"
+        },
+        {
+          "waveNumber": 5,
+          "tasks": ["P1.T009", "P1.T010"],
+          "estimates": {
+            "units": "hours",
+            "p50Hours": 3.5,
+            "p80Hours": 4,
+            "p95Hours": 5
+          },
+          "resource_usage": {
+            "estimated_cpu_cores": 3,
+            "estimated_memory_gb": 1
+          },
+          "barrier": {
+            "kind": "quorum",
+            "quorum": 0.95,
+            "timeoutMinutes": 300,
+            "fallback": "continue",
+            "gateId": "W5→W6-documentation"
+          },
+          "rationale": "JSDoc annotations and safety gates"
+        },
+        {
+          "waveNumber": 6,
+          "tasks": ["P1.T011"],
+          "estimates": {
+            "units": "hours",
+            "p50Hours": 3.5,
+            "p80Hours": 4,
+            "p95Hours": 5
+          },
+          "resource_usage": {
+            "test_suite": 1,
+            "estimated_cpu_cores": 2,
+            "estimated_memory_gb": 1
+          },
+          "barrier": {
+            "kind": "complete",
+            "quorum": 1.0,
+            "timeoutMinutes": 300,
+            "fallback": "continue",
+            "gateId": "W6→W7-testing"
+          },
+          "rationale": "Comprehensive test suite"
+        },
+        {
+          "waveNumber": 7,
+          "tasks": ["P1.T012"],
+          "estimates": {
+            "units": "hours",
+            "p50Hours": 1,
+            "p80Hours": 1.5,
+            "p95Hours": 2
+          },
+          "resource_usage": {
+            "estimated_cpu_cores": 1,
+            "estimated_memory_gb": 0.25
+          },
+          "barrier": {
+            "kind": "complete",
+            "quorum": 1.0,
+            "timeoutMinutes": 120,
+            "fallback": "continue",
+            "gateId": "W7-validation"
+          },
+          "rationale": "Validate zero build step architecture"
+        }
+      ],
+      "total_waves": 7,
+      "estimated_completion": {
+        "p50_hours": 21,
+        "p80_hours": 26,
+        "p95_hours": 31.5
+      }
+    },
+    "rolling_frontier": {
+      "initial_frontier": ["P1.T001"],
+      "config": {
+        "max_concurrent_tasks": 4,
+        "scheduling_algorithm": "resource_aware_greedy",
+        "frontier_update_policy": "immediate",
+        "coordinator_config_ref": "coordinator.json"
+      },
+      "estimated_completion_time": {
+        "optimal_hours": 16,
+        "p50_hours": 19,
+        "p95_hours": 24
+      },
+      "resource_utilization_forecast": {
+        "average_cpu_percent": 75,
+        "peak_cpu_percent": 85,
+        "average_memory_percent": 50,
+        "peak_memory_percent": 65,
+        "average_concurrency": 2.8,
+        "max_concurrency": 4
+      },
+      "critical_resource_contentions": [
+        {
+          "resource": "package.json",
+          "contention_points": 2,
+          "estimated_wait_time_hours": 0.5,
+          "mitigation": "Early sequential execution"
+        }
+      ],
+      "execution_simulation": {
+        "time_0h": {
+          "running": ["P1.T001"],
+          "ready": [],
+          "blocked": ["P1.T002", "P1.T003", "P1.T004", "P1.T005", "P1.T006", "P1.T007", "P1.T008", "P1.T009", "P1.T010", "P1.T011", "P1.T012"],
+          "resource_usage": {
+            "cpu_cores": 1,
+            "memory_gb": 0.25,
+            "package_json": 1
+          }
+        },
+        "time_2h": {
+          "running": ["P1.T002", "P1.T003", "P1.T008"],
+          "ready": [],
+          "blocked": ["P1.T004", "P1.T005", "P1.T006", "P1.T007", "P1.T009", "P1.T010", "P1.T011", "P1.T012"],
+          "completed": ["P1.T001"],
+          "resource_usage": {
+            "cpu_cores": 3,
+            "memory_gb": 1
+          }
+        },
+        "time_5h": {
+          "running": ["P1.T004", "P1.T006", "P1.T007"],
+          "ready": [],
+          "blocked": ["P1.T005", "P1.T009", "P1.T010", "P1.T011", "P1.T012"],
+          "completed": ["P1.T001", "P1.T002", "P1.T003", "P1.T008"],
+          "resource_usage": {
+            "cpu_cores": 4,
+            "memory_gb": 1.5
+          }
+        },
+        "time_8h": {
+          "running": ["P1.T005"],
+          "ready": [],
+          "blocked": ["P1.T009", "P1.T010", "P1.T011", "P1.T012"],
+          "completed": ["P1.T001", "P1.T002", "P1.T003", "P1.T004", "P1.T006", "P1.T007", "P1.T008"],
+          "resource_usage": {
+            "cpu_cores": 2,
+            "memory_gb": 0.5
+          }
+        },
+        "time_12h": {
+          "running": ["P1.T009", "P1.T010"],
+          "ready": [],
+          "blocked": ["P1.T011", "P1.T012"],
+          "completed": ["P1.T001", "P1.T002", "P1.T003", "P1.T004", "P1.T005", "P1.T006", "P1.T007", "P1.T008"],
+          "resource_usage": {
+            "cpu_cores": 3,
+            "memory_gb": 1
+          }
+        },
+        "time_15h": {
+          "running": ["P1.T011"],
+          "ready": [],
+          "blocked": ["P1.T012"],
+          "completed": ["P1.T001", "P1.T002", "P1.T003", "P1.T004", "P1.T005", "P1.T006", "P1.T007", "P1.T008", "P1.T009", "P1.T010"],
+          "resource_usage": {
+            "cpu_cores": 2,
+            "memory_gb": 1,
+            "test_suite": 1
+          }
+        },
+        "time_19h": {
+          "running": ["P1.T012"],
+          "ready": [],
+          "blocked": [],
+          "completed": ["P1.T001", "P1.T002", "P1.T003", "P1.T004", "P1.T005", "P1.T006", "P1.T007", "P1.T008", "P1.T009", "P1.T010", "P1.T011"],
+          "resource_usage": {
+            "cpu_cores": 1,
+            "memory_gb": 0.25
+          }
+        }
+      },
+      "advantages_over_wave_based": [
+        "10% faster completion (19h vs 21h p50)",
+        "Better resource utilization (75% vs 60%)",
+        "No artificial wait barriers",
+        "Dynamic adaptation to actual task durations",
+        "Immediate task dispatch when dependencies met"
+      ]
+    }
+  },
+  "execution_recommendation": {
+    "preferred_model": "rolling_frontier",
+    "rationale": [
+      "Faster completion time (2 hours saved)",
+      "Better resource utilization",
+      "More responsive to actual progress",
+      "Simpler JavaScript-only workflow benefits from continuous execution"
+    ],
+    "fallback_conditions": [
+      {
+        "condition": "Team coordination required",
+        "use_model": "wave_based",
+        "reason": "Clear synchronization points for team alignment"
+      },
+      {
+        "condition": "Quality gates needed",
+        "use_model": "wave_based",
+        "reason": "Enforced checkpoints between phases"
+      }
+    ]
+  }
+}

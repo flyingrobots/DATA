@@ -1,0 +1,178 @@
+{
+  "generated": {
+    "by": "T.A.S.K.S v3",
+    "timestamp": "2025-08-31T00:00:00Z",
+    "contentHash": "js-first-1a2b3c4d5e6f7890"
+  },
+  "features": [
+    {
+      "id": "F001",
+      "title": "Core Package - Pure JavaScript Logic Layer",
+      "description": "Stateless SQL graph, diffing, and plan compilation in pure JavaScript with zero I/O dependencies, accepting injected ports for all external operations",
+      "priority": "critical",
+      "source_evidence": [
+        {
+          "quote": "Core: no fs, no child_process, no process.env. Accept injected ports: readFile(path), globby(patterns), hash(bytes), spawn(cmd,args), env.get(key), clock.now()",
+          "loc": {"start": 23, "end": 25},
+          "section": "Boundaries that keep you portable",
+          "startLine": 23,
+          "endLine": 25
+        },
+        {
+          "quote": "JavaScript classes provide instanceof checks that actually execute at runtime, catching type errors where they matter - in production",
+          "loc": {"start": 21, "end": 21},
+          "section": "Architecture Decision",
+          "startLine": 21,
+          "endLine": 21
+        }
+      ]
+    },
+    {
+      "id": "F002",
+      "title": "Host Adapter Layer - Node.js JavaScript Implementation",
+      "description": "Node.js-specific JavaScript implementations for filesystem, process spawning, git operations, and environment access wrapping the core",
+      "priority": "critical",
+      "source_evidence": [
+        {
+          "quote": "Host-Node: real implementations (fs/promises, child_process, process.env)",
+          "loc": {"start": 26, "end": 26},
+          "section": "Boundaries that keep you portable",
+          "startLine": 26,
+          "endLine": 26
+        }
+      ]
+    },
+    {
+      "id": "F003",
+      "title": "ESM Module System Migration",
+      "description": "Convert entire codebase from CommonJS to ES Modules in pure JavaScript, supporting Node 20+ and Bun 1.x with zero build step",
+      "priority": "critical",
+      "source_evidence": [
+        {
+          "quote": "Build DATA as an ESM CLI on Node 20+ (Bun optional)",
+          "loc": {"start": 2, "end": 2},
+          "section": "TL;DR",
+          "startLine": 2,
+          "endLine": 2
+        },
+        {
+          "quote": "CJS: don't ship it. ESM only. Faster, fewer polyfills, works great in Node 20/Bun",
+          "loc": {"start": 162, "end": 162},
+          "section": "Gotchas I'd preempt",
+          "startLine": 162,
+          "endLine": 162
+        }
+      ]
+    },
+    {
+      "id": "F004",
+      "title": "Comprehensive JSDoc Type Annotations",
+      "description": "Full JSDoc type documentation for all classes, methods, and interfaces with AI-assisted generation on commit",
+      "priority": "high",
+      "source_evidence": [
+        {
+          "quote": "We will use native JavaScript classes with comprehensive JSDoc annotations rather than TypeScript",
+          "loc": {"start": 17, "end": 17},
+          "section": "Architecture Decision",
+          "startLine": 17,
+          "endLine": 17
+        },
+        {
+          "quote": "Brother, it's 2025. AI can generate perfect JSDoc on every commit",
+          "loc": {"start": 370, "end": 370},
+          "section": "JSDoc + AI Revolution",
+          "startLine": 370,
+          "endLine": 370
+        }
+      ]
+    },
+    {
+      "id": "F005",
+      "title": "JavaScript Event Classes with Runtime Validation",
+      "description": "Event-driven architecture using JavaScript classes with instanceof runtime checks for type safety in production",
+      "priority": "high",
+      "source_evidence": [
+        {
+          "quote": "JavaScript classes provide instanceof checks that actually execute at runtime, catching type errors where they matter - in production",
+          "loc": {"start": 21, "end": 21},
+          "section": "Rationale",
+          "startLine": 21,
+          "endLine": 21
+        },
+        {
+          "quote": "The D.A.T.A. system requires robust type safety for its event-driven architecture, particularly for the 179+ event emissions across 34 subsystem files",
+          "loc": {"start": 13, "end": 13},
+          "section": "Context",
+          "startLine": 13,
+          "endLine": 13
+        }
+      ]
+    },
+    {
+      "id": "F006",
+      "title": "Deno Edge Function Scaffolding",
+      "description": "Generate Deno-compatible Edge Function templates with Web API-only patterns, no Node built-ins, proper Supabase integration",
+      "priority": "high",
+      "source_evidence": [
+        {
+          "quote": "Generate Deno-based Edge Function scaffolds, but don't run on Deno yourself",
+          "loc": {"start": 3, "end": 3},
+          "section": "TL;DR",
+          "startLine": 3,
+          "endLine": 3
+        },
+        {
+          "quote": "Edge Functions (Deno) scaffolded under supabase/functions/<name>/: index.ts (runtime-safe: Web fetch, no Node built-ins)",
+          "loc": {"start": 31, "end": 33},
+          "section": "Supabase specifics",
+          "startLine": 31,
+          "endLine": 33
+        }
+      ]
+    },
+    {
+      "id": "F007",
+      "title": "Zero Build Step Architecture",
+      "description": "Pure JavaScript execution with no transpilation, compilation, or build steps - the code that runs is the code you write",
+      "priority": "critical",
+      "source_evidence": [
+        {
+          "quote": "Zero Build Step: No transpilation required. The code that runs is the code we write",
+          "loc": {"start": 23, "end": 27},
+          "section": "Rationale",
+          "startLine": 23,
+          "endLine": 27
+        },
+        {
+          "quote": "Simplified Debugging: Stack traces point to actual source files, not transpiled output",
+          "loc": {"start": 35, "end": 35},
+          "section": "Rationale",
+          "startLine": 35,
+          "endLine": 35
+        }
+      ]
+    },
+    {
+      "id": "F008",
+      "title": "AI-Powered JSDoc Generation Pipeline",
+      "description": "Automated JSDoc generation using AI on pre-commit hooks, providing comprehensive type documentation without manual effort",
+      "priority": "medium",
+      "source_evidence": [
+        {
+          "quote": "AI can generate perfect JSDoc on every commit",
+          "loc": {"start": 370, "end": 370},
+          "section": "The Solution You Already Have",
+          "startLine": 370,
+          "endLine": 370
+        },
+        {
+          "quote": "git diff --cached --name-only | grep '\\.js$' | xargs -I {} claude -p 'Add JSDoc' {}",
+          "loc": {"start": 456, "end": 456},
+          "section": "Your Escape Plan",
+          "startLine": 456,
+          "endLine": 456
+        }
+      ]
+    }
+  ]
+}

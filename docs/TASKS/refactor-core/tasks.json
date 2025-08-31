@@ -1,0 +1,1638 @@
+{
+  "meta": {
+    "execution_model": "rolling_frontier",
+    "min_confidence": 0.8,
+    "resource_limits": {
+      "max_concurrent_tasks": 8,
+      "max_memory_gb": 16,
+      "max_cpu_cores": 8,
+      "max_disk_io_mbps": 200
+    },
+    "codebase_analysis": {
+      "existing_apis": ["Command", "DatabaseCommand", "SupabaseCommand", "TestCommand", "MigrationMetadata", "DiffEngine"],
+      "reused_components": ["CommandRouter", "CliReporter", "PathResolver", "OutputConfig", "EventEmitter"],
+      "extension_points": ["Command base class", "Event-driven pattern"],
+      "shared_resources": {
+        "package_json": {
+          "type": "exclusive",
+          "location": "package.json",
+          "constraint": "sequential_only",
+          "reason": "Package.json modifications must be atomic"
+        },
+        "eslintrc": {
+          "type": "exclusive",
+          "location": ".eslintrc.js",
+          "constraint": "one_at_a_time",
+          "reason": "ESLint config must be consistent"
+        },
+        "test_suite": {
+          "type": "shared_limited",
+          "capacity": 4,
+          "location": "test/",
+          "reason": "Test runner can handle parallel tests"
+        }
+      }
+    },
+    "autonormalization": {
+      "split": [],
+      "merged": []
+    }
+  },
+  "generated": {
+    "by": "T.A.S.K.S v3",
+    "timestamp": "2025-08-31T00:00:00Z",
+    "contentHash": "js-esm-2b3c4d5e6f7a8901"
+  },
+  "tasks": [
+    {
+      "id": "P1.T001",
+      "feature_id": "F003",
+      "title": "Setup ESM configuration and Node 20+ requirements",
+      "description": "Configure package.json for ES modules, update Node engine requirements, setup import map",
+      "category": "foundation",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~50 LoC",
+          "breakdown": "Package.json updates (20 LoC), import map (15 LoC), scripts (15 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "Package.json has type: 'module'",
+            "Node engine set to >=20.0.0",
+            "Import extensions configured",
+            "No build scripts needed"
+          ],
+          "stop_when": "Do NOT add any TypeScript or build tooling"
+        },
+        "scope": {
+          "includes": ["package.json", ".nvmrc", "jsconfig.json"],
+          "excludes": ["src/**/*.js", "test/**/*.js"],
+          "restrictions": "Only configuration files, no source code"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Configuring ESM and Node 20+ requirements'",
+          "on_progress": "Log each configuration file update",
+          "on_completion": "Log 'ESM configuration complete'",
+          "log_format": "JSON with fields: {task_id, timestamp, event, details}"
+        },
+        "checkpoints": [
+          "After package.json: Verify ESM imports work",
+          "After jsconfig: Check IDE support",
+          "Before completion: Test import resolution"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "33%", "name": "package_configured", "rollback_capable": true},
+            {"at": "66%", "name": "engine_requirements_set", "rollback_capable": true},
+            {"at": "100%", "name": "esm_ready", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 1,
+          "memory_mb": 256,
+          "disk_io_mbps": 5,
+          "exclusive_resources": ["package_json"],
+          "shared_resources": {}
+        },
+        "peak": {
+          "cpu_cores": 1,
+          "memory_mb": 512,
+          "disk_io_mbps": 10,
+          "duration_seconds": 5,
+          "during": "Testing import resolution"
+        },
+        "worker_capabilities_required": ["node", "esm"]
+      },
+      "scheduling_hints": {
+        "priority": "critical",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 3,
+        "preferred_time_window": "business_hours",
+        "avoid_concurrent_with": [],
+        "can_pause_resume": false,
+        "checkpoint_capable": true
+      },
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "Foundation task - configuring for ESM"
+      },
+      "skillsRequired": ["javascript", "node", "esm"],
+      "duration": {
+        "optimistic": 0.5,
+        "mostLikely": 1,
+        "pessimistic": 2
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["ESMConfig:v1"],
+      "interfaces_consumed": [],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "node --version | grep -E 'v(2[0-9]|[3-9][0-9])'",
+          "expect": {
+            "exitCode": 0
+          }
+        },
+        {
+          "type": "artifact",
+          "path": "package.json",
+          "expect": {
+            "exists": true,
+            "contains": ["\"type\": \"module\""]
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "Build DATA as an ESM CLI on Node 20+ (Bun optional)",
+          "loc": {"start": 2, "end": 2},
+          "section": "TL;DR",
+          "startLine": 2,
+          "endLine": 2
+        }
+      ],
+      "contentHash": "esm-config-abc123"
+    },
+    {
+      "id": "P1.T002",
+      "feature_id": "F001",
+      "title": "Create data-core package with pure JavaScript",
+      "description": "Initialize data-core package with port interfaces in JavaScript using JSDoc for type documentation",
+      "category": "foundation",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~200 LoC",
+          "breakdown": "Port interfaces (100 LoC), JSDoc types (50 LoC), package setup (50 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "packages/data-core directory created",
+            "Port interfaces defined with JSDoc",
+            "No filesystem or I/O operations",
+            "Full JSDoc documentation"
+          ],
+          "stop_when": "Do NOT implement logic yet - only interfaces"
+        },
+        "scope": {
+          "includes": ["packages/data-core/**"],
+          "excludes": ["packages/data-host-node/**", "packages/data-cli/**"],
+          "restrictions": "Only data-core package structure"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Creating data-core package with JavaScript'",
+          "on_progress": "Log each interface creation",
+          "on_completion": "Log package structure complete",
+          "log_format": "JSON with fields: {task_id, timestamp, event, details}"
+        },
+        "checkpoints": [
+          "After package creation: Validate structure",
+          "After interfaces: Check JSDoc completeness",
+          "Before completion: Verify no I/O operations"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "25%", "name": "package_created", "rollback_capable": true},
+            {"at": "50%", "name": "interfaces_defined", "rollback_capable": true},
+            {"at": "75%", "name": "jsdoc_complete", "rollback_capable": true}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 10,
+          "exclusive_resources": [],
+          "shared_resources": {"test_suite": 1}
+        },
+        "peak": {
+          "cpu_cores": 2,
+          "memory_mb": 1024,
+          "disk_io_mbps": 20,
+          "duration_seconds": 10,
+          "during": "Package initialization"
+        },
+        "worker_capabilities_required": ["javascript", "jsdoc"]
+      },
+      "scheduling_hints": {
+        "priority": "critical",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "business_hours",
+        "avoid_concurrent_with": ["P1.T003", "P1.T004"],
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "New package with pure JavaScript architecture"
+      },
+      "skillsRequired": ["javascript", "architecture", "jsdoc"],
+      "duration": {
+        "optimistic": 2,
+        "mostLikely": 3,
+        "pessimistic": 4
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["CorePorts:v1", "CoreInterfaces:v1"],
+      "interfaces_consumed": ["ESMConfig:v1"],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "cd packages/data-core && npm test",
+          "expect": {
+            "exitCode": 0
+          }
+        },
+        {
+          "type": "artifact",
+          "path": "packages/data-core/index.js",
+          "expect": {
+            "exists": true,
+            "contains": ["@typedef", "@param", "@returns"]
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "Core: no fs, no child_process, no process.env. Accept injected ports",
+          "loc": {"start": 23, "end": 23},
+          "section": "Boundaries",
+          "startLine": 23,
+          "endLine": 23
+        }
+      ],
+      "contentHash": "core-pkg-def456"
+    },
+    {
+      "id": "P1.T003",
+      "feature_id": "F002",
+      "title": "Create data-host-node JavaScript adapters",
+      "description": "Implement Node.js host adapters in JavaScript with real fs, spawn, env implementations",
+      "category": "foundation",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~250 LoC",
+          "breakdown": "Adapters (150 LoC), JSDoc (50 LoC), tests (50 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "packages/data-host-node created",
+            "All port implementations working",
+            "Full JSDoc documentation",
+            "Unit tests passing"
+          ],
+          "stop_when": "Do NOT integrate with core yet"
+        },
+        "scope": {
+          "includes": ["packages/data-host-node/**"],
+          "excludes": ["packages/data-core/**", "packages/data-cli/**"],
+          "restrictions": "Only host adapter implementations"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Creating Node.js host adapters in JavaScript'",
+          "on_progress": "Log each adapter implementation",
+          "on_completion": "Log all adapters tested",
+          "log_format": "JSON with fields: {task_id, timestamp, event, details}"
+        },
+        "checkpoints": [
+          "After fs adapter: Test file operations",
+          "After spawn adapter: Test process execution",
+          "Before completion: Integration test adapters"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "33%", "name": "fs_adapter_complete", "rollback_capable": true},
+            {"at": "66%", "name": "spawn_adapter_complete", "rollback_capable": true},
+            {"at": "100%", "name": "all_adapters_tested", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 15,
+          "exclusive_resources": [],
+          "shared_resources": {"test_suite": 1}
+        },
+        "peak": {
+          "cpu_cores": 3,
+          "memory_mb": 1024,
+          "disk_io_mbps": 30,
+          "duration_seconds": 15,
+          "during": "Integration tests"
+        },
+        "worker_capabilities_required": ["node", "javascript", "testing"]
+      },
+      "scheduling_hints": {
+        "priority": "critical",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "business_hours",
+        "avoid_concurrent_with": ["P1.T002", "P1.T004"],
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      "reuses_existing": {
+        "extends": [],
+        "imports": ["fs", "child_process", "process"],
+        "rationale": "Wrapping Node.js built-ins for dependency injection"
+      },
+      "skillsRequired": ["node", "javascript", "testing"],
+      "duration": {
+        "optimistic": 2,
+        "mostLikely": 3,
+        "pessimistic": 5
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["NodeAdapters:v1"],
+      "interfaces_consumed": ["CorePorts:v1"],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "cd packages/data-host-node && npm test",
+          "expect": {
+            "passRateGte": 1.0,
+            "coverageGte": 0.90
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "Host-Node: real implementations (fs/promises, child_process, process.env)",
+          "loc": {"start": 26, "end": 26},
+          "section": "Boundaries",
+          "startLine": 26,
+          "endLine": 26
+        }
+      ],
+      "contentHash": "host-node-ghi789"
+    },
+    {
+      "id": "P1.T004",
+      "feature_id": "F005",
+      "title": "Create JavaScript Event Classes with Runtime Validation",
+      "description": "Implement event-driven architecture using JavaScript classes with instanceof checks for runtime type safety",
+      "category": "implementation",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~400 LoC",
+          "breakdown": "Event classes (200 LoC), JSDoc (100 LoC), validation (100 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "All event classes created",
+            "instanceof validation working",
+            "Full JSDoc documentation",
+            "Runtime type checking implemented"
+          ],
+          "stop_when": "Do NOT migrate all 179 emissions yet"
+        },
+        "scope": {
+          "includes": ["packages/data-core/src/events/**"],
+          "excludes": ["src/commands/**"],
+          "restrictions": "Only event class definitions"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Creating JavaScript Event Classes'",
+          "on_progress": "Log each event class creation",
+          "on_completion": "Log runtime validation test results",
+          "log_format": "JSON with fields: {task_id, timestamp, event, details}"
+        },
+        "checkpoints": [
+          "After base class: Test instanceof checks",
+          "After event types: Validate runtime safety",
+          "Before completion: Test all event types"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "33%", "name": "base_event_complete", "rollback_capable": true},
+            {"at": "66%", "name": "all_events_defined", "rollback_capable": true},
+            {"at": "100%", "name": "validation_tested", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 10,
+          "exclusive_resources": [],
+          "shared_resources": {"test_suite": 1}
+        },
+        "peak": {
+          "cpu_cores": 2,
+          "memory_mb": 1024,
+          "disk_io_mbps": 15,
+          "duration_seconds": 15,
+          "during": "Runtime validation tests"
+        },
+        "worker_capabilities_required": ["javascript", "testing"]
+      },
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "business_hours",
+        "avoid_concurrent_with": ["P1.T005"],
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      "reuses_existing": {
+        "extends": ["EventEmitter"],
+        "imports": ["Command"],
+        "rationale": "Building on existing event-driven architecture"
+      },
+      "skillsRequired": ["javascript", "events", "testing"],
+      "duration": {
+        "optimistic": 3,
+        "mostLikely": 4,
+        "pessimistic": 6
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["EventClasses:v1", "RuntimeValidation:v1"],
+      "interfaces_consumed": ["CorePorts:v1"],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "npm test -- events",
+          "expect": {
+            "passRateGte": 1.0
+          }
+        },
+        {
+          "type": "command",
+          "cmd": "node -e \"const {ProgressEvent} = require('./packages/data-core/src/events'); console.log(new ProgressEvent('test') instanceof ProgressEvent)\"",
+          "expect": {
+            "output": "true"
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "JavaScript classes provide instanceof checks that actually execute at runtime",
+          "loc": {"start": 21, "end": 21},
+          "section": "Rationale",
+          "startLine": 21,
+          "endLine": 21
+        }
+      ],
+      "contentHash": "events-jkl012"
+    },
+    {
+      "id": "P1.T005",
+      "feature_id": "F001",
+      "title": "Implement SQL graph and diffing in JavaScript",
+      "description": "Create pure JavaScript SQL graph builder and diff engine without filesystem dependencies",
+      "category": "implementation",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~500 LoC",
+          "breakdown": "Graph builder (200 LoC), Diff engine (200 LoC), JSDoc (100 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "SQL graph builder working",
+            "Diff engine producing plans",
+            "Full JSDoc documentation",
+            "Zero I/O operations"
+          ],
+          "stop_when": "Do NOT implement file reading - use injected data"
+        },
+        "scope": {
+          "includes": ["packages/data-core/src/sql/**", "packages/data-core/src/diff/**"],
+          "excludes": ["packages/data-host-node/**"],
+          "restrictions": "Pure logic only - no I/O"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Implementing SQL graph and diff in JavaScript'",
+          "on_progress": "Log graph construction progress",
+          "on_completion": "Log diff algorithm metrics",
+          "log_format": "JSON with fields: {task_id, timestamp, event, metrics}"
+        },
+        "checkpoints": [
+          "After graph builder: Validate dependencies",
+          "After diff engine: Test migration generation",
+          "Before completion: Performance benchmarks"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "33%", "name": "graph_builder_complete", "rollback_capable": true},
+            {"at": "66%", "name": "diff_engine_complete", "rollback_capable": true},
+            {"at": "100%", "name": "benchmarks_complete", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 3,
+          "memory_mb": 1024,
+          "disk_io_mbps": 5,
+          "exclusive_resources": [],
+          "shared_resources": {"test_suite": 1}
+        },
+        "peak": {
+          "cpu_cores": 4,
+          "memory_mb": 2048,
+          "disk_io_mbps": 10,
+          "duration_seconds": 20,
+          "during": "Large graph diffing"
+        },
+        "worker_capabilities_required": ["javascript", "algorithms", "testing"]
+      },
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "business_hours",
+        "avoid_concurrent_with": ["P1.T004"],
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      "reuses_existing": {
+        "extends": [],
+        "imports": ["DiffEngine"],
+        "rationale": "Reimplementing DiffEngine as pure JavaScript without I/O"
+      },
+      "skillsRequired": ["javascript", "algorithms", "sql"],
+      "duration": {
+        "optimistic": 4,
+        "mostLikely": 6,
+        "pessimistic": 8
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["SQLGraph:v1", "DiffEngine:v1"],
+      "interfaces_consumed": ["CorePorts:v1"],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "cd packages/data-core && npm test -- sql diff",
+          "expect": {
+            "passRateGte": 0.95,
+            "coverageGte": 0.90
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "Pure logic: SQL graph, diffing, plan compiler (no fs/spawn)",
+          "loc": {"start": 18, "end": 18},
+          "section": "Package layout",
+          "startLine": 18,
+          "endLine": 18
+        }
+      ],
+      "contentHash": "sql-diff-mno345"
+    },
+    {
+      "id": "P1.T006",
+      "feature_id": "F006",
+      "title": "Create Deno Edge Function template system",
+      "description": "Build template generator for Deno-compatible Edge Functions with Web API patterns",
+      "category": "implementation",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~400 LoC",
+          "breakdown": "Template engine (150 LoC), Templates (150 LoC), Generator (100 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "Template system generating Deno functions",
+            "Web API-only patterns enforced",
+            "Supabase integration templates",
+            "Documentation included"
+          ],
+          "stop_when": "Do NOT create runtime - only generators"
+        },
+        "scope": {
+          "includes": ["packages/data-templates/edge-functions/**"],
+          "excludes": ["packages/data-cli/**"],
+          "restrictions": "Only template generation"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Creating Edge Function templates'",
+          "on_progress": "Log each template creation",
+          "on_completion": "Log template validation results",
+          "log_format": "JSON with fields: {task_id, timestamp, event, template_name}"
+        },
+        "checkpoints": [
+          "After engine: Validate substitution",
+          "After templates: Test Deno compatibility",
+          "Before completion: Generate sample"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "33%", "name": "engine_complete", "rollback_capable": true},
+            {"at": "66%", "name": "templates_created", "rollback_capable": true},
+            {"at": "100%", "name": "validation_complete", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 10,
+          "exclusive_resources": [],
+          "shared_resources": {"test_suite": 1}
+        },
+        "peak": {
+          "cpu_cores": 2,
+          "memory_mb": 1024,
+          "disk_io_mbps": 20,
+          "duration_seconds": 10,
+          "during": "Template generation"
+        },
+        "worker_capabilities_required": ["javascript", "deno", "templates"]
+      },
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": true,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "business_hours",
+        "avoid_concurrent_with": [],
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "New functionality for Edge Function generation"
+      },
+      "skillsRequired": ["javascript", "deno", "edge-functions"],
+      "duration": {
+        "optimistic": 3,
+        "mostLikely": 5,
+        "pessimistic": 7
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["EdgeTemplate:v1", "TemplateEngine:v1"],
+      "interfaces_consumed": [],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno check packages/data-templates/edge-functions/health/index.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "Edge Functions (Deno) scaffolded under supabase/functions/<name>/",
+          "loc": {"start": 31, "end": 31},
+          "section": "Supabase specifics",
+          "startLine": 31,
+          "endLine": 31
+        }
+      ],
+      "contentHash": "edge-tmpl-pqr678"
+    },
+    {
+      "id": "P1.T007",
+      "feature_id": "F003",
+      "title": "Migrate CLI entry point to ESM",
+      "description": "Convert bin/data.js and src/index.js to ES modules with proper import syntax",
+      "category": "implementation",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~150 LoC",
+          "breakdown": "CLI entry (50 LoC), Index refactor (50 LoC), Import updates (50 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "bin/data.js using ESM imports",
+            "src/index.js converted to ESM",
+            "All imports have extensions",
+            "Commander.js working"
+          ],
+          "stop_when": "Do NOT migrate individual commands yet"
+        },
+        "scope": {
+          "includes": ["bin/data.js", "src/index.js"],
+          "excludes": ["src/commands/**"],
+          "restrictions": "Only entry point files"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Migrating CLI to ESM'",
+          "on_progress": "Log each file conversion",
+          "on_completion": "Log CLI test results",
+          "log_format": "JSON with fields: {task_id, timestamp, event, file}"
+        },
+        "checkpoints": [
+          "After bin: Test CLI invocation",
+          "After index: Verify command loading",
+          "Before completion: E2E CLI test"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "33%", "name": "bin_converted", "rollback_capable": true},
+            {"at": "66%", "name": "index_migrated", "rollback_capable": true},
+            {"at": "100%", "name": "cli_tested", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 5,
+          "exclusive_resources": [],
+          "shared_resources": {"test_suite": 1}
+        },
+        "peak": {
+          "cpu_cores": 2,
+          "memory_mb": 1024,
+          "disk_io_mbps": 10,
+          "duration_seconds": 10,
+          "during": "CLI tests"
+        },
+        "worker_capabilities_required": ["node", "esm", "cli"]
+      },
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "business_hours",
+        "avoid_concurrent_with": ["P1.T008"],
+        "can_pause_resume": false,
+        "checkpoint_capable": true
+      },
+      "reuses_existing": {
+        "extends": [],
+        "imports": ["commander", "CommandRouter"],
+        "rationale": "Converting existing CLI to ESM"
+      },
+      "skillsRequired": ["node", "esm", "cli"],
+      "duration": {
+        "optimistic": 2,
+        "mostLikely": 3,
+        "pessimistic": 4
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["CLI:v1"],
+      "interfaces_consumed": ["EventClasses:v1"],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "node bin/data.js --version",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "ESM only. Faster, fewer polyfills",
+          "loc": {"start": 162, "end": 162},
+          "section": "Gotchas",
+          "startLine": 162,
+          "endLine": 162
+        }
+      ],
+      "contentHash": "cli-esm-stu901"
+    },
+    {
+      "id": "P1.T008",
+      "feature_id": "F008",
+      "title": "Setup AI-powered JSDoc generation pipeline",
+      "description": "Configure pre-commit hooks for automated JSDoc generation using AI",
+      "category": "implementation",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~100 LoC",
+          "breakdown": "Hook scripts (50 LoC), Configuration (25 LoC), Documentation (25 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "Pre-commit hook installed",
+            "AI JSDoc generation working",
+            "Git integration complete",
+            "Documentation written"
+          ],
+          "stop_when": "Do NOT manually write JSDoc everywhere"
+        },
+        "scope": {
+          "includes": [".husky/**", "scripts/jsdoc-ai.js", "package.json"],
+          "excludes": ["src/**/*.js"],
+          "restrictions": "Only automation setup"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Setting up AI JSDoc pipeline'",
+          "on_progress": "Log hook configuration",
+          "on_completion": "Log test generation results",
+          "log_format": "JSON with fields: {task_id, timestamp, event, config}"
+        },
+        "checkpoints": [
+          "After hook: Test pre-commit trigger",
+          "After script: Validate JSDoc generation",
+          "Before completion: Full pipeline test"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "50%", "name": "hook_configured", "rollback_capable": true},
+            {"at": "100%", "name": "pipeline_tested", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 1,
+          "memory_mb": 256,
+          "disk_io_mbps": 5,
+          "exclusive_resources": [],
+          "shared_resources": {}
+        },
+        "peak": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 10,
+          "duration_seconds": 10,
+          "during": "AI generation test"
+        },
+        "worker_capabilities_required": ["git", "ai", "automation"]
+      },
+      "scheduling_hints": {
+        "priority": "medium",
+        "preemptible": true,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "anytime",
+        "avoid_concurrent_with": [],
+        "can_pause_resume": true,
+        "checkpoint_capable": false
+      },
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "New AI-powered documentation system"
+      },
+      "skillsRequired": ["git", "automation", "ai"],
+      "duration": {
+        "optimistic": 1,
+        "mostLikely": 2,
+        "pessimistic": 3
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["JSDocPipeline:v1"],
+      "interfaces_consumed": [],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "git commit --dry-run && cat .git/hooks/pre-commit | grep jsdoc",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "AI can generate perfect JSDoc on every commit",
+          "loc": {"start": 370, "end": 370},
+          "section": "JSDoc + AI Revolution",
+          "startLine": 370,
+          "endLine": 370
+        }
+      ],
+      "contentHash": "ai-jsdoc-vwx234"
+    },
+    {
+      "id": "P1.T009",
+      "feature_id": "F001",
+      "title": "Wire up core with host adapters",
+      "description": "Integrate data-core with data-host-node through dependency injection in JavaScript",
+      "category": "integration",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~150 LoC",
+          "breakdown": "Wiring (75 LoC), Factory (50 LoC), Tests (25 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "Core consuming host adapters",
+            "Dependency injection working",
+            "All ports connected",
+            "Integration tests passing"
+          ],
+          "stop_when": "Do NOT refactor commands yet"
+        },
+        "scope": {
+          "includes": ["packages/data-cli/src/bootstrap.js"],
+          "excludes": ["src/commands/**"],
+          "restrictions": "Only integration layer"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Wiring core with adapters'",
+          "on_progress": "Log each connection",
+          "on_completion": "Log integration test results",
+          "log_format": "JSON with fields: {task_id, timestamp, event, adapter}"
+        },
+        "checkpoints": [
+          "After wiring: Test port connections",
+          "After factory: Validate DI",
+          "Before completion: E2E test"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "50%", "name": "wiring_complete", "rollback_capable": true},
+            {"at": "100%", "name": "integration_tested", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 5,
+          "exclusive_resources": [],
+          "shared_resources": {"test_suite": 1}
+        },
+        "peak": {
+          "cpu_cores": 2,
+          "memory_mb": 1024,
+          "disk_io_mbps": 10,
+          "duration_seconds": 10,
+          "during": "Integration tests"
+        },
+        "worker_capabilities_required": ["javascript", "dependency-injection", "testing"]
+      },
+      "scheduling_hints": {
+        "priority": "critical",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "business_hours",
+        "avoid_concurrent_with": ["P1.T010"],
+        "can_pause_resume": false,
+        "checkpoint_capable": true
+      },
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "New integration layer for modular architecture"
+      },
+      "skillsRequired": ["javascript", "dependency-injection", "architecture"],
+      "duration": {
+        "optimistic": 2,
+        "mostLikely": 3,
+        "pessimistic": 4
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["Bootstrap:v1"],
+      "interfaces_consumed": ["CorePorts:v1", "NodeAdapters:v1"],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "npm test -- integration",
+          "expect": {
+            "passRateGte": 1.0
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "CLI: argument parsing, pretty TTY, exit codes",
+          "loc": {"start": 27, "end": 27},
+          "section": "Boundaries",
+          "startLine": 27,
+          "endLine": 27
+        }
+      ],
+      "contentHash": "wire-yza567"
+    },
+    {
+      "id": "P1.T010",
+      "feature_id": "F003",
+      "title": "Migrate all commands to ESM JavaScript",
+      "description": "Convert all 30+ command files from CommonJS to ES modules with JSDoc",
+      "category": "implementation",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~750 LoC",
+          "breakdown": "30 commands × 25 LoC average conversion"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "All commands converted to ESM",
+            "JSDoc added to all commands",
+            "All tests passing",
+            "No require() statements"
+          ],
+          "stop_when": "Complete when all migrated"
+        },
+        "scope": {
+          "includes": ["src/commands/**/*.js"],
+          "excludes": [],
+          "restrictions": "Maintain functionality"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Starting command migration to ESM'",
+          "on_progress": "Log each command converted",
+          "on_completion": "Log migration statistics",
+          "log_format": "JSON with fields: {task_id, timestamp, event, file, stats}"
+        },
+        "checkpoints": [
+          "After 25%: Test db commands",
+          "After 50%: Test function commands",
+          "After 75%: Test remaining",
+          "Before completion: Full regression"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "25%", "name": "db_commands_migrated", "rollback_capable": true},
+            {"at": "50%", "name": "function_commands_migrated", "rollback_capable": true},
+            {"at": "75%", "name": "test_commands_migrated", "rollback_capable": true},
+            {"at": "100%", "name": "all_migrated", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 3,
+          "memory_mb": 1024,
+          "disk_io_mbps": 15,
+          "exclusive_resources": [],
+          "shared_resources": {"test_suite": 2}
+        },
+        "peak": {
+          "cpu_cores": 4,
+          "memory_mb": 2048,
+          "disk_io_mbps": 25,
+          "duration_seconds": 30,
+          "during": "Full test suite"
+        },
+        "worker_capabilities_required": ["javascript", "esm", "migration"]
+      },
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "business_hours",
+        "avoid_concurrent_with": ["P1.T009"],
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      "reuses_existing": {
+        "extends": ["Command"],
+        "imports": ["All command logic"],
+        "rationale": "Preserving functionality while converting to ESM"
+      },
+      "skillsRequired": ["javascript", "esm", "migration"],
+      "duration": {
+        "optimistic": 6,
+        "mostLikely": 8,
+        "pessimistic": 12
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["CommandSet:v2"],
+      "interfaces_consumed": ["CLI:v1", "Bootstrap:v1"],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "npm test",
+          "expect": {
+            "passRateGte": 1.0,
+            "coverageGte": 0.85
+          }
+        },
+        {
+          "type": "command",
+          "cmd": "grep -r \"require(\" src/ | wc -l",
+          "expect": {
+            "output": "0"
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "30+ command files identified",
+          "loc": {"start": 1, "end": 30},
+          "section": "Codebase analysis",
+          "startLine": 1,
+          "endLine": 30
+        }
+      ],
+      "contentHash": "cmd-esm-abc123"
+    },
+    {
+      "id": "P1.T011",
+      "feature_id": "F004",
+      "title": "Add comprehensive JSDoc to all modules",
+      "description": "Ensure complete JSDoc documentation across all JavaScript modules with AI assistance",
+      "category": "optimization",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~400 LoC",
+          "breakdown": "JSDoc annotations across all files"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "All public APIs documented",
+            "All parameters typed",
+            "All returns documented",
+            "IDE IntelliSense working"
+          ],
+          "stop_when": "100% JSDoc coverage"
+        },
+        "scope": {
+          "includes": ["packages/**/*.js", "src/**/*.js"],
+          "excludes": ["node_modules/**"],
+          "restrictions": "Documentation only"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Adding comprehensive JSDoc'",
+          "on_progress": "Log documentation coverage",
+          "on_completion": "Log final coverage report",
+          "log_format": "JSON with fields: {task_id, timestamp, event, coverage}"
+        },
+        "checkpoints": [
+          "After core: Validate JSDoc",
+          "After commands: Check IntelliSense",
+          "Before completion: Coverage analysis"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": true,
+          "checkpoint_events": [
+            {"at": "50%", "name": "core_documented", "rollback_capable": true},
+            {"at": "100%", "name": "all_documented", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 1024,
+          "disk_io_mbps": 5,
+          "exclusive_resources": [],
+          "shared_resources": {}
+        },
+        "peak": {
+          "cpu_cores": 3,
+          "memory_mb": 2048,
+          "disk_io_mbps": 10,
+          "duration_seconds": 20,
+          "during": "AI generation"
+        },
+        "worker_capabilities_required": ["javascript", "jsdoc", "ai"]
+      },
+      "scheduling_hints": {
+        "priority": "medium",
+        "preemptible": true,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "anytime",
+        "avoid_concurrent_with": [],
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "Adding documentation to existing code"
+      },
+      "skillsRequired": ["javascript", "jsdoc", "documentation"],
+      "duration": {
+        "optimistic": 3,
+        "mostLikely": 5,
+        "pessimistic": 7
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["Documentation:v1"],
+      "interfaces_consumed": ["JSDocPipeline:v1"],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "npx jsdoc-coverage-reporter",
+          "expect": {
+            "coverageGte": 0.95
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "We will use native JavaScript classes with comprehensive JSDoc annotations",
+          "loc": {"start": 17, "end": 17},
+          "section": "Decision",
+          "startLine": 17,
+          "endLine": 17
+        }
+      ],
+      "contentHash": "jsdoc-def456"
+    },
+    {
+      "id": "P1.T012",
+      "feature_id": "F007",
+      "title": "Validate zero build step architecture",
+      "description": "Ensure entire codebase runs without any build, transpilation, or compilation steps",
+      "category": "optimization",
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~50 LoC",
+          "breakdown": "Validation scripts and cleanup"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "No build scripts in package.json",
+            "No TypeScript files",
+            "Direct execution working",
+            "Stack traces point to source"
+          ],
+          "stop_when": "Zero build step confirmed"
+        },
+        "scope": {
+          "includes": ["package.json", "scripts/**"],
+          "excludes": [],
+          "restrictions": "Remove all build tooling"
+        }
+      },
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Validating zero build architecture'",
+          "on_progress": "Log validation checks",
+          "on_completion": "Log validation results",
+          "log_format": "JSON with fields: {task_id, timestamp, event, check}"
+        },
+        "checkpoints": [
+          "After cleanup: No build scripts",
+          "After validation: Direct execution",
+          "Before completion: Debug test"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "resource_usage_reporting": false,
+          "checkpoint_events": [
+            {"at": "50%", "name": "build_removed", "rollback_capable": false},
+            {"at": "100%", "name": "zero_build_confirmed", "rollback_capable": false}
+          ]
+        }
+      },
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 1,
+          "memory_mb": 256,
+          "disk_io_mbps": 5,
+          "exclusive_resources": ["package_json"],
+          "shared_resources": {}
+        },
+        "peak": {
+          "cpu_cores": 1,
+          "memory_mb": 512,
+          "disk_io_mbps": 10,
+          "duration_seconds": 5,
+          "during": "Validation"
+        },
+        "worker_capabilities_required": ["javascript", "validation"]
+      },
+      "scheduling_hints": {
+        "priority": "low",
+        "preemptible": true,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "preferred_time_window": "anytime",
+        "avoid_concurrent_with": [],
+        "can_pause_resume": true,
+        "checkpoint_capable": false
+      },
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "Validation and cleanup task"
+      },
+      "skillsRequired": ["javascript", "architecture"],
+      "duration": {
+        "optimistic": 0.5,
+        "mostLikely": 1,
+        "pessimistic": 2
+      },
+      "durationUnits": "hours",
+      "interfaces_produced": ["ZeroBuild:v1"],
+      "interfaces_consumed": [],
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "grep -E \"build|compile|transpile\" package.json | grep -v test | wc -l",
+          "expect": {
+            "output": "0"
+          }
+        },
+        {
+          "type": "command",
+          "cmd": "node bin/data.js --help",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "quote": "Zero Build Step: No transpilation required",
+          "loc": {"start": 23, "end": 23},
+          "section": "Rationale",
+          "startLine": 23,
+          "endLine": 23
+        }
+      ],
+      "contentHash": "zero-ghi789"
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "P1.T001",
+      "to": "P1.T002",
+      "type": "infrastructure",
+      "reason": "Core package needs ESM configuration",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "ESM setup required before packages",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T001",
+      "to": "P1.T003",
+      "type": "infrastructure",
+      "reason": "Host package needs ESM configuration",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "ESM setup required before packages",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T002",
+      "to": "P1.T003",
+      "type": "technical",
+      "reason": "Host adapters need core interfaces",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Adapters implement core ports",
+          "confidence": 0.95
+        }
+      ],
+      "confidence": 0.95,
+      "isHard": true
+    },
+    {
+      "from": "P1.T002",
+      "to": "P1.T004",
+      "type": "technical",
+      "reason": "Event classes need core interfaces",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Events are part of core",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "isHard": true
+    },
+    {
+      "from": "P1.T002",
+      "to": "P1.T005",
+      "type": "technical",
+      "reason": "SQL graph needs core interfaces",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "SQL graph uses injected ports",
+          "confidence": 0.95
+        }
+      ],
+      "confidence": 0.95,
+      "isHard": true
+    },
+    {
+      "from": "P1.T004",
+      "to": "P1.T007",
+      "type": "technical",
+      "reason": "CLI needs event classes",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "CLI imports event system",
+          "confidence": 0.85
+        }
+      ],
+      "confidence": 0.85,
+      "isHard": true
+    },
+    {
+      "from": "P1.T002",
+      "to": "P1.T009",
+      "type": "technical",
+      "reason": "Wiring needs core package",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Integration requires core",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T003",
+      "to": "P1.T009",
+      "type": "technical",
+      "reason": "Wiring needs host adapters",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Integration requires adapters",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T009",
+      "to": "P1.T010",
+      "type": "technical",
+      "reason": "Commands need integrated system",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Command migration requires DI",
+          "confidence": 0.95
+        }
+      ],
+      "confidence": 0.95,
+      "isHard": true
+    },
+    {
+      "from": "P1.T007",
+      "to": "P1.T010",
+      "type": "technical",
+      "reason": "Commands need ESM CLI",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Command loading requires ESM",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "isHard": true
+    },
+    {
+      "from": "P1.T008",
+      "to": "P1.T011",
+      "type": "technical",
+      "reason": "JSDoc generation uses AI pipeline",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Documentation uses AI system",
+          "confidence": 0.85
+        }
+      ],
+      "confidence": 0.85,
+      "isHard": false
+    },
+    {
+      "from": "P1.T010",
+      "to": "P1.T011",
+      "type": "sequential",
+      "reason": "Document after migration",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Can't document until migrated",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "isHard": true
+    },
+    {
+      "from": "P1.T011",
+      "to": "P1.T012",
+      "type": "sequential",
+      "reason": "Validate after documentation",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Final validation step",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.8,
+      "isHard": false
+    },
+    {
+      "from": "P1.T001",
+      "to": "P1.T012",
+      "type": "mutual_exclusion",
+      "reason": "Both modify package.json",
+      "shared_resource": "package_json",
+      "evidence": [
+        {
+          "type": "infrastructure",
+          "reason": "Package.json modifications must be atomic",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    }
+  ],
+  "resource_conflicts": {
+    "package_json": {
+      "tasks": ["P1.T001", "P1.T012"],
+      "resolution": "sequential_ordering",
+      "suggested_order": ["P1.T001", "P1.T012"],
+      "rationale": "Foundation setup first, validation last"
+    },
+    "eslintrc": {
+      "tasks": ["P1.T008"],
+      "resolution": "exclusive_access",
+      "rationale": "ESLint config for JSDoc"
+    },
+    "test_suite": {
+      "tasks": ["P1.T002", "P1.T003", "P1.T004", "P1.T005", "P1.T007", "P1.T009", "P1.T010"],
+      "resolution": "shared_limited",
+      "capacity": 4,
+      "rationale": "Test runner supports parallel"
+    }
+  }
+}

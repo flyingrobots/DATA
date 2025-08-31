@@ -1,0 +1,274 @@
+{
+  "generated": {
+    "by": "T.A.S.K.S v3",
+    "timestamp": "2025-08-31T00:00:00Z",
+    "contentHash": "js-esm-7f8a9b0c1d2e3f45"
+  },
+  "metrics": {
+    "minConfidenceApplied": 0.85,
+    "keptByType": {
+      "technical": 8,
+      "sequential": 4,
+      "infrastructure": 2,
+      "knowledge": 0,
+      "mutual_exclusion": 1,
+      "resource_limited": 0
+    },
+    "droppedByType": {
+      "technical": 0,
+      "sequential": 0,
+      "infrastructure": 0,
+      "knowledge": 0
+    },
+    "nodes": 12,
+    "edges": 15,
+    "edgeDensity": 0.114,
+    "widthApprox": 4,
+    "widthMethod": "kahn_layer_max",
+    "longestPath": 5,
+    "isolatedTasks": 0,
+    "lowConfidenceEdgesExcluded": 0,
+    "verbFirstPct": 1.0,
+    "meceOverlapSuspects": 0,
+    "mutualExclusionEdges": 1,
+    "resourceConstrainedTasks": 8,
+    "resourceUtilization": {
+      "package_json": {
+        "total_tasks": 2,
+        "waves_required": 1,
+        "serialization_impact": "minimal - early tasks"
+      },
+      "test_suite": {
+        "total_tasks": 3,
+        "capacity": 4,
+        "waves_required": 1,
+        "utilization": "75% peak"
+      }
+    }
+  },
+  "topo_order": [
+    "P1.T001",
+    "P1.T002",
+    "P1.T003",
+    "P1.T004",
+    "P1.T005",
+    "P1.T006",
+    "P1.T007",
+    "P1.T008",
+    "P1.T009",
+    "P1.T010",
+    "P1.T011",
+    "P1.T012"
+  ],
+  "tasks": {
+    "P1.T001": {
+      "id": "P1.T001",
+      "title": "Setup ESM configuration and project structure",
+      "duration_hours": 1.5,
+      "dependencies": [],
+      "resources": ["package.json", ".eslintrc.json"],
+      "confidence": 0.99,
+      "can_rollback": true,
+      "checkpoint_eligible": false
+    },
+    "P1.T002": {
+      "id": "P1.T002",
+      "title": "Create data-core pure JavaScript package",
+      "duration_hours": 2.5,
+      "dependencies": ["P1.T001"],
+      "resources": ["packages/data-core"],
+      "confidence": 0.97,
+      "can_rollback": true,
+      "checkpoint_eligible": true
+    },
+    "P1.T003": {
+      "id": "P1.T003",
+      "title": "Create data-host-node JavaScript adapters",
+      "duration_hours": 2,
+      "dependencies": ["P1.T001"],
+      "resources": ["packages/data-host-node"],
+      "confidence": 0.97,
+      "can_rollback": true,
+      "checkpoint_eligible": true
+    },
+    "P1.T004": {
+      "id": "P1.T004",
+      "title": "Create JavaScript Event Classes with runtime validation",
+      "duration_hours": 2.5,
+      "dependencies": ["P1.T002"],
+      "resources": ["src/lib/events"],
+      "confidence": 0.96,
+      "can_rollback": true,
+      "checkpoint_eligible": false
+    },
+    "P1.T005": {
+      "id": "P1.T005",
+      "title": "Migrate commands to ESM JavaScript",
+      "duration_hours": 4,
+      "dependencies": ["P1.T004"],
+      "resources": ["src/commands"],
+      "confidence": 0.94,
+      "can_rollback": true,
+      "checkpoint_eligible": true
+    },
+    "P1.T006": {
+      "id": "P1.T006",
+      "title": "Create Deno Edge Function scaffolding",
+      "duration_hours": 3,
+      "dependencies": ["P1.T002"],
+      "resources": ["packages/data-templates"],
+      "confidence": 0.95,
+      "can_rollback": true,
+      "checkpoint_eligible": true
+    },
+    "P1.T007": {
+      "id": "P1.T007",
+      "title": "Implement dependency injection system",
+      "duration_hours": 2.5,
+      "dependencies": ["P1.T002", "P1.T003"],
+      "resources": ["packages/data-core/ports"],
+      "confidence": 0.95,
+      "can_rollback": true,
+      "checkpoint_eligible": false
+    },
+    "P1.T008": {
+      "id": "P1.T008",
+      "title": "Setup AI-powered JSDoc generation pipeline",
+      "duration_hours": 1.5,
+      "dependencies": ["P1.T001"],
+      "resources": [".husky/pre-commit", "package.json"],
+      "confidence": 0.98,
+      "can_rollback": true,
+      "checkpoint_eligible": false
+    },
+    "P1.T009": {
+      "id": "P1.T009",
+      "title": "Add comprehensive JSDoc annotations",
+      "duration_hours": 3,
+      "dependencies": ["P1.T008", "P1.T005"],
+      "resources": ["src/**/*.js"],
+      "confidence": 0.96,
+      "can_rollback": false,
+      "checkpoint_eligible": true
+    },
+    "P1.T010": {
+      "id": "P1.T010",
+      "title": "Implement production safety gates",
+      "duration_hours": 2,
+      "dependencies": ["P1.T005"],
+      "resources": ["src/lib/SafetyGates.js"],
+      "confidence": 0.97,
+      "can_rollback": true,
+      "checkpoint_eligible": false
+    },
+    "P1.T011": {
+      "id": "P1.T011",
+      "title": "Create comprehensive test suite",
+      "duration_hours": 3.5,
+      "dependencies": ["P1.T007", "P1.T009"],
+      "resources": ["test/**/*.test.js", "test_suite"],
+      "confidence": 0.93,
+      "can_rollback": false,
+      "checkpoint_eligible": true
+    },
+    "P1.T012": {
+      "id": "P1.T012",
+      "title": "Validate zero build step architecture",
+      "duration_hours": 1,
+      "dependencies": ["P1.T011"],
+      "resources": ["package.json", "bin/data.js"],
+      "confidence": 0.99,
+      "can_rollback": false,
+      "checkpoint_eligible": false
+    }
+  },
+  "reduced_edges_sample": [
+    ["P1.T001", "P1.T002"],
+    ["P1.T001", "P1.T003"],
+    ["P1.T001", "P1.T008"],
+    ["P1.T002", "P1.T004"],
+    ["P1.T002", "P1.T006"],
+    ["P1.T002", "P1.T007"],
+    ["P1.T003", "P1.T007"],
+    ["P1.T004", "P1.T005"],
+    ["P1.T005", "P1.T009"],
+    ["P1.T005", "P1.T010"],
+    ["P1.T007", "P1.T011"],
+    ["P1.T008", "P1.T009"],
+    ["P1.T009", "P1.T011"],
+    ["P1.T011", "P1.T012"]
+  ],
+  "resource_bottlenecks": [
+    {
+      "resource": "package.json",
+      "impact": "minimal",
+      "affected_tasks": ["P1.T001", "P1.T008"],
+      "mitigation": "Both tasks occur early with minimal overlap"
+    },
+    {
+      "resource": "test_suite",
+      "impact": "low",
+      "affected_tasks": ["P1.T011"],
+      "mitigation": "Only one task uses test suite heavily"
+    }
+  ],
+  "softDeps": [
+    {
+      "from": "P1.T011",
+      "to": "P1.T012",
+      "type": "sequential",
+      "reason": "Validation follows comprehensive testing",
+      "confidence": 0.9,
+      "isHard": true
+    }
+  ],
+  "lowConfidenceDeps": [],
+  "cycle_break_suggestions": [],
+  "critical_path": [
+    "P1.T001",
+    "P1.T002",
+    "P1.T004",
+    "P1.T005",
+    "P1.T009",
+    "P1.T011",
+    "P1.T012"
+  ],
+  "parallelization_opportunities": [
+    {
+      "wave": 2,
+      "parallel_tasks": ["P1.T002", "P1.T003", "P1.T008"],
+      "rationale": "Independent foundation packages can be built in parallel"
+    },
+    {
+      "wave": 3,
+      "parallel_tasks": ["P1.T004", "P1.T006"],
+      "rationale": "Event system and Edge templates are independent"
+    },
+    {
+      "wave": 5,
+      "parallel_tasks": ["P1.T009", "P1.T010"],
+      "rationale": "JSDoc and safety gates can be implemented concurrently"
+    }
+  ],
+  "risk_analysis": {
+    "high_risk_dependencies": [
+      {
+        "edge": "P1.T007 → P1.T011",
+        "risk": "Test suite depends on dependency injection working correctly",
+        "mitigation": "Incremental testing during DI implementation"
+      }
+    ],
+    "single_points_of_failure": [
+      {
+        "task": "P1.T001",
+        "impact": "All subsequent tasks blocked",
+        "mitigation": "Simple configuration task with high confidence"
+      },
+      {
+        "task": "P1.T002",
+        "impact": "Core functionality blocked",
+        "mitigation": "Pure JavaScript with no dependencies reduces risk"
+      }
+    ]
+  }
+}
