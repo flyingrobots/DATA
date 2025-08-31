@@ -55,8 +55,5 @@ for file in $STAGED_FILES; do
   fi
 done
 
-echo "Keeping JSDoc up-to-date..."
-git diff --cached --name-only | grep '\\.js$' | xargs -I {} claude -p 'Add/Update JSDoc, summarize what ya did' {}
-
 echo " Pre-commit checks complete!"
 exit 0
