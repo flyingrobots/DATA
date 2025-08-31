@@ -38,10 +38,26 @@ class CompileCommand extends BuildCommand {
         throw new Error('CompileCommand requires input and output directories. Use --sql-dir and --migrations-dir options.');
       }
       
-      // TODO: Implement native migration compilation
-      // The legacy build system has been removed. This command needs to be reimplemented
-      // using the native MigrationCompiler from src/lib/MigrationCompiler.js
-      throw new Error('Migration compilation not yet implemented. Legacy build system has been removed.');
+      // Load the native migration compiler
+      const MigrationCompiler = require('../../lib/migration/MigrationCompiler');
+      
+      // Create compiler instance
+      const compiler = new MigrationCompiler({
+        sqlDir: this.inputDir,
+        outputDir: this.outputDir,
+        verbose: true,
+        timestamp: new Date()
+      });
+      
+      // Attach event listeners
+      this.attachCompilerEvents(compiler);
+      
+      // Run compilation
+      this.progress('Starting migration compilation...');
+      const result = await compiler.compile();
+      
+      this.success(`Migration compiled successfully: ${result.outputFile}`);
+      this.emit('complete', { result });
 
       // Deploy functions if requested
       if (options.deployFunctions) {
@@ -108,10 +124,37 @@ class CompileCommand extends BuildCommand {
 
   /**
    * Attach event listeners to the compiler
-   * TODO: Re-implement when native compiler is added
    */
   attachCompilerEvents(compiler) {
-    // Placeholder for future implementation
+    compiler.on('start', ({ timestamp }) => {
+      this.logger.debug({ timestamp }, 'Compilation started');
+    });
+    
+    compiler.on('directory:start', ({ directory }) => {
+      this.progress(`Processing directory: ${directory}`);
+    });
+    
+    compiler.on('file:process', ({ file }) => {
+      this.logger.debug({ file }, 'Processing file');
+      this.emit('file:process', { file });
+    });
+    
+    compiler.on('file:complete', ({ file, lineCount }) => {
+      this.emit('file:complete', { file, lineCount });
+    });
+    
+    compiler.on('complete', ({ result }) => {
+      this.logger.info({ stats: result.stats }, 'Compilation complete');
+      this.emit('stats', { stats: result.stats });
+    });
+    
+    compiler.on('error', ({ error }) => {
+      this.error('Compiler error', error);
+    });
+    
+    compiler.on('warning', ({ message }) => {
+      this.warn(message);
+    });
   }
 }
 
