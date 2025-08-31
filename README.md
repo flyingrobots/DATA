@@ -185,7 +185,20 @@ $ data align production
 | **Rollback story** | ✅ Tag-based | ⚠️ Down scripts | ⚠️ Rollback tags | ❌ Manual |
 | **TUI preview** | ✅ LCARS mode | ❌ | ❌ | ❌ |
 
-## 9. CI/CD Integration
+## 9. File Structure
+
+D.A.T.A. creates a `.data/` directory for operational files:
+```
+.data/
+  cache/    -- Cached data for performance
+  temp/     -- Temporary files during operations
+  build/    -- Build artifacts
+  *.log     -- Operation logs
+```
+
+This directory is automatically created and should be gitignored (already configured).
+
+## 10. CI/CD Integration
 
 ```yaml
 # .github/workflows/database.yml

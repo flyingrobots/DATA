@@ -133,6 +133,7 @@ supabase/.temp/
 # Project specific
 datarc.local.json
 .datarc.local.json
+.data/
 *.backup
 *.bak
 reports/
