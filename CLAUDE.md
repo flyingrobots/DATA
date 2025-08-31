@@ -57,6 +57,11 @@ data db compile --deploy-functions
 
 ## Architecture
 
+### Code Organization Rules
+- **One Class Per File**: Each file must contain exactly one class. The filename must match the class name.
+- **Self-Documenting Names**: Each artifact should describe its contents based on its filename.
+- **No Multi-Class Files**: If a file contains multiple classes, it must be refactored immediately.
+
 ### Command Class Hierarchy
 - **Command** (src/lib/Command.js): Base class with event emission and logging
 - **SupabaseCommand**: Commands using Supabase API
