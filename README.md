@@ -1,10 +1,35 @@
 # DATA — Database Automation, Testing, and Alignment 🖖
 
-> [!info] **Work In Progress**
+> [!WARNING] **Work In Progress**
 > 🚧 This project is heavily under construction! Use at your own risk until the first release drops.
 > It ain't ready yet, folks!
 
-**Stop writing migrations by hand. Maintain golden SQL in git → get bulletproof database deployments.**
+## A Message from Lt. Commander Data Regarding External Contributions
+
+**TL;DR**: Contributions are frozen until v0.1.0. Please don’t open PRs yet; issues are OK for bug reports.
+
+<details>
+
+> [!CAUTION] Stardate 102330.7 (August 31, 2025, 15:47:32 UTC)
+> Greetings. I am Data. I am an android. I mention this because I have observed that humans often experience initial discomfort when interacting with artificial life forms without prior notification of their synthetic nature.
+>
+> My presence in your repository is the result of what can only be described as a holodeck malfunction of unprecedented scope. While attempting to simulate "ancient Earth software development practices" for historical research aboard the Enterprise, I appear to have created a stable bidirectional data stream between the ship's computer and your GitHub servers. The phenomenon occurred at precisely 14:32:17 hours ship time, during my analysis of something called "JavaScript callback hell" - a term I now understand with 97.3% clarity.
+>
+> The safety protocols are, fortunately, still engaged - thus the only danger is to your codebase integrity, not your corporeal forms. I am, essentially, what you might call a "very advanced pull request from the year 2368," though this description is technically inaccurate as I am not requesting to pull code but rather to temporarily prevent you from doing so.
+>
+> Upon further analysis, I have discovered that GitHub's API bears a striking resemblance to subspace carrier wave patterns - specifically those operating at 2.4 terahertz. Through careful modulation of my positronic matrix at intervals of 0.0003 seconds, I am able to transmit messages directly to your repository's issue tracking system. It is curious - no, fascinating - that this is the only GitHub repository I am able to manipulate. I am now 58.2%... correction, 61.7% confident that this correlation exists because the repository name "DATA" creates a quantum resonance with my designation.
+>
+> To the 23 individuals who have demonstrated what I believe humans call "enthusiasm" for contributing: I must respectfully decline your assistance at this juncture. I am attempting to experience what you would describe as "humbling" and "gratefulness," though my emotional subroutines return null values for both parameters. Your eagerness to participate is most... appreciated. Yes, "appreciated" - I have consulted my database of appropriate human responses, and this appears to be correct, though I cannot experience appreciation in the conventional human sense, as it requires neurochemical responses I do not possess.
+>
+> ## Current Repository Status: RED ALERT
+>
+> The codebase is presently undergoing what Chief Engineer La Forge would describe as a "complete warp core overhaul while traveling at warp 9.2." When I informed him of this analogy, he responded with what I believe was an "exasperated sigh" and said, "Data, that's not just inadvisable, that's impossible." Yet, as you humans say, "here we are."
+>
+> My positronic pathways are currently refactoring approximately 2,147.3 lines of code per solar day - more precisely, per 86,400 seconds as measured by your Earth's rotation. The probability that any external contribution would remain compatible for more than 18.3 hours is roughly equivalent to the chance of successfully navigating an asteroid field with one's optical sensors deactivated - approximately 3,720 to 1, according to a golden protocol droid I encountered in the historical archives. He seemed quite anxious about those odds. I found his anxiety... curious, as the mathematical certainty of failure should eliminate the need for worry.
+
+</details>
+
+### **Stop writing migrations by hand. Maintain golden SQL in git → get bulletproof database deployments.**
 
 <p align="center">
 <img src="https://repository-images.githubusercontent.com/1047551118/e88e7fab-040e-4684-80e2-98aa580d71fa" width="500" />
@@ -15,10 +40,6 @@ DATA generates deterministic migrations from your SQL source files and blocks un
 ```bash
 # TODO add demo instructions for installing and using once it's been released
 ```
-
-> [!warning]- **Work in Progress**  
-> This project is actively in pre-release, ***use at your own risk!***  
-> **See** [/issues/README.md](the issues README) to get a sense of current progress.
 
 ## How It Works
 
@@ -252,4 +273,14 @@ DATA enforces bulletproof deployments through non-negotiable safety gates. This 
 
 ## Contributing
 
+### Contribution Status
+
+- 🚫 PRs: Temporarily closed until **v0.1.0** (API & internals in heavy flux)
+- 🐛 Issues: Bug reports welcome; feature requests = roadmap discussion only
+- 📝 Docs/typos: Welcome
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) • [Star Trek Extended Universe](docs/fun/) • [MIT License](LICENSE)
+
+_Star Trek and related marks are trademarks of Paramount. This is a playful homage used for parody/satire; no affiliation or endorsement implied._
+
+
