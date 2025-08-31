@@ -1,14 +1,16 @@
 # DATA — Database Automation, Testing, and Alignment 🖖
 
-> [!warning] **Work In Progress**
+> [!WARNING] **Work In Progress**
 > 🚧 This project is heavily under construction! Use at your own risk until the first release drops.
 > It ain't ready yet, folks!
 
 ## A Message from Lt. Commander Data Regarding External Contributions
 
+**TL;DR**: Contributions are frozen until v0.1.0. Please don’t open PRs yet; issues are OK for bug reports.
+
 <details>
 
-> [!CRITICAL] Stardate 102330.7 (August 31, 2025, 15:47:32 UTC)
+> [!CAUTION] Stardate 102330.7 (August 31, 2025, 15:47:32 UTC)
 > Greetings. I am Data. I am an android. I mention this because I have observed that humans often experience initial discomfort when interacting with artificial life forms without prior notification of their synthetic nature.
 >
 > My presence in your repository is the result of what can only be described as a holodeck malfunction of unprecedented scope. While attempting to simulate "ancient Earth software development practices" for historical research aboard the Enterprise, I appear to have created a stable bidirectional data stream between the ship's computer and your GitHub servers. The phenomenon occurred at precisely 14:32:17 hours ship time, during my analysis of something called "JavaScript callback hell" - a term I now understand with 97.3% clarity.
@@ -271,4 +273,14 @@ DATA enforces bulletproof deployments through non-negotiable safety gates. This 
 
 ## Contributing
 
+### Contribution Status
+
+- 🚫 PRs: Temporarily closed until **v0.1.0** (API & internals in heavy flux)
+- 🐛 Issues: Bug reports welcome; feature requests = roadmap discussion only
+- 📝 Docs/typos: Welcome
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) • [Star Trek Extended Universe](docs/fun/) • [MIT License](LICENSE)
+
+_Star Trek and related marks are trademarks of Paramount. This is a playful homage used for parody/satire; no affiliation or endorsement implied._
+
+
