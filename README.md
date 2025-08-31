@@ -1,5 +1,10 @@
 # DATA — Database Automation, Testing, and Alignment 🖖
 
+> [!warning] **Work in Progress**
+> This project is actively in pre-release, ***use at your own risk!***
+> **See** [/issues/README.md](the issues README) to get a sense of current progress.
+> **Recommended:** Await a public release before using.
+
 **Golden SQL in git → deterministic migrations → tested → safe to deploy. Zero drift.**
 
 ```bash

@@ -1,0 +1,2144 @@
+{
+  "meta": {
+    "execution_model": "rolling_frontier",
+    "min_confidence": 0.85,
+    "resource_limits": {
+      "max_concurrent_tasks": 6,
+      "max_memory_gb": 16,
+      "max_cpu_cores": 8,
+      "max_disk_io_mbps": 200
+    },
+    "codebase_analysis": {
+      "existing_apis": ["Command", "SupabaseCommand", "DatabaseCommand", "TestCommand"],
+      "reused_components": ["EventEmitter pattern", "Command architecture", "Supabase API client"],
+      "extension_points": ["Command base class", "Test formatters", "Error handlers"],
+      "shared_resources": {
+        "git_repository": {
+          "type": "exclusive",
+          "location": ".git",
+          "constraint": "sequential_only",
+          "reason": "Git operations require clean working directory"
+        },
+        "test_suite": {
+          "type": "exclusive",
+          "location": "tests/",
+          "constraint": "one_at_a_time",
+          "reason": "Test execution conflicts with file modifications"
+        },
+        "deno_cache": {
+          "type": "shared_limited",
+          "capacity": 3,
+          "location": "~/.deno",
+          "reason": "Deno module cache shared across tasks"
+        }
+      }
+    },
+    "autonormalization": {
+      "split": [],
+      "merged": ["T010,T011 (<0.5h combined for import map updates)"]
+    }
+  },
+  "generated": {
+    "by": "T.A.S.K.S v3 - Lt. Commander Data",
+    "timestamp": "2025-08-30T12:00:00Z",
+    "contentHash": "8d4e7f2a9b1c3d5e6f7a8b9c1d2e3f4a5b6c7d8e"
+  },
+  "tasks": [
+    {
+      "id": "P1.T001",
+      "feature_id": "F001",
+      "title": "Initialize Deno project structure",
+      "description": "Create Deno configuration, import maps, and project structure",
+      "category": "foundation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~50 LoC",
+          "breakdown": "deno.json (20 LoC), import_map.json (20 LoC), .gitignore updates (10 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "deno.json exists with TypeScript configuration",
+            "import_map.json contains all necessary package mappings",
+            "Deno can resolve @supabase/ imports",
+            "Git ignores Deno cache directories"
+          ],
+          "stop_when": "Do NOT migrate any source files yet - only configuration"
+        },
+        "scope": {
+          "includes": ["deno.json", "import_map.json", ".gitignore"],
+          "excludes": ["src/", "tests/", "package.json"],
+          "restrictions": "Only create configuration files, do not modify existing code"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Initializing Deno project structure' to logs/tasks/P1.T001.log",
+          "on_progress": "Log each configuration file created with path",
+          "on_completion": "Log summary of import mappings created",
+          "log_format": "JSON with fields: {task_id, timestamp, event, files_created}"
+        },
+        "checkpoints": [
+          "After deno.json: Verify with 'deno --version'",
+          "After import_map: Test resolution with 'deno info'"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "33%", "name": "deno_json_created", "rollback_capable": true},
+            {"at": "66%", "name": "import_map_created", "rollback_capable": true},
+            {"at": "100%", "name": "configuration_complete", "rollback_capable": false}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 1,
+          "memory_mb": 256,
+          "disk_io_mbps": 10,
+          "exclusive_resources": ["git_repository"],
+          "shared_resources": {}
+        },
+        "peak": {
+          "cpu_cores": 1,
+          "memory_mb": 512,
+          "disk_io_mbps": 20,
+          "duration_seconds": 10,
+          "during": "Writing configuration files"
+        },
+        "worker_capabilities_required": ["deno", "filesystem"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "critical",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "can_pause_resume": false,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "Foundation task - no existing Deno configuration to reuse"
+      },
+      
+      "skillsRequired": ["deno", "typescript", "configuration"],
+      "duration": {
+        "optimistic": 0.5,
+        "mostLikely": 1,
+        "pessimistic": 2
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["DenoConfig:v1", "ImportMap:v1"],
+      "interfaces_consumed": [],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno --version",
+          "expect": {
+            "exitCode": 0
+          }
+        },
+        {
+          "type": "artifact",
+          "path": "deno.json",
+          "expect": {
+            "exists": true,
+            "validJSON": true
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Initialize Deno project... deno init",
+          "loc": {"start": 78, "end": 80},
+          "section": "Phase 1: Environment Setup",
+          "startLine": 78,
+          "endLine": 80
+        }
+      ],
+      "contentHash": "a1b2c3d4e5f6789a"
+    },
+    {
+      "id": "P1.T002",
+      "feature_id": "F002",
+      "title": "Migrate Command base class to Deno",
+      "description": "Port src/lib/Command.js to TypeScript with Deno EventEmitter",
+      "category": "foundation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~150 LoC",
+          "breakdown": "Command.ts (100 LoC), type definitions (30 LoC), tests (20 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "Command.ts exists with full TypeScript typing",
+            "EventEmitter functionality preserved",
+            "All event emission methods work",
+            "Basic test coverage for events"
+          ],
+          "stop_when": "Do NOT migrate child classes yet - only Command base"
+        },
+        "scope": {
+          "includes": ["src/lib/Command.ts", "src/lib/Command.test.ts"],
+          "excludes": ["src/lib/DatabaseCommand.js", "src/lib/SupabaseCommand.js"],
+          "restrictions": "Only migrate Command base class, preserve API"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Migrating Command base class' with timestamp",
+          "on_progress": "Log method migration progress",
+          "on_completion": "Log API compatibility check results",
+          "log_format": "JSON with migration metrics"
+        },
+        "checkpoints": [
+          "After class structure: Run type checking",
+          "After event methods: Test event emission",
+          "Before completion: Verify backward compatibility"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "25%", "name": "class_structure", "rollback_capable": true},
+            {"at": "50%", "name": "event_methods", "rollback_capable": true},
+            {"at": "75%", "name": "type_definitions", "rollback_capable": true}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 20,
+          "exclusive_resources": [],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 2,
+          "memory_mb": 1024,
+          "disk_io_mbps": 30,
+          "duration_seconds": 60,
+          "during": "TypeScript compilation"
+        },
+        "worker_capabilities_required": ["deno", "typescript", "backend"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "critical",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 3,
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": [],
+        "imports": ["EventEmitter from std/node/events.ts"],
+        "rationale": "Using Deno's Node compatibility layer for EventEmitter"
+      },
+      
+      "skillsRequired": ["typescript", "deno", "node-migration"],
+      "duration": {
+        "optimistic": 1,
+        "mostLikely": 2,
+        "pessimistic": 3
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["Command:v2", "CommandEvents:v1"],
+      "interfaces_consumed": ["DenoConfig:v1", "ImportMap:v1"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno check src/lib/Command.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        },
+        {
+          "type": "command",
+          "cmd": "deno test src/lib/Command.test.ts",
+          "expect": {
+            "passRateGte": 1.0
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Base Classes First... EventEmitter compatible",
+          "loc": {"start": 98, "end": 106},
+          "section": "Order of Operations",
+          "startLine": 98,
+          "endLine": 106
+        }
+      ],
+      "contentHash": "b2c3d4e5f6789ab1"
+    },
+    {
+      "id": "P1.T003",
+      "feature_id": "F002",
+      "title": "Migrate configuration system",
+      "description": "Port config.js to Deno with std/dotenv for environment variables",
+      "category": "foundation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~80 LoC",
+          "breakdown": "config.ts (60 LoC), type definitions (20 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "Config loads from .env and Deno.env",
+            "All environment variables accessible",
+            "Type-safe configuration object",
+            "Backward compatible API"
+          ],
+          "stop_when": "Do NOT modify consumers of config yet"
+        },
+        "scope": {
+          "includes": ["src/lib/config.ts"],
+          "excludes": ["src/commands/", ".env"],
+          "restrictions": "Only migrate config module, preserve existing interface"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Migrating configuration system'",
+          "on_progress": "Log each config property migrated",
+          "on_completion": "Log config validation results",
+          "log_format": "JSON with config keys migrated"
+        },
+        "checkpoints": [
+          "After dotenv setup: Test .env loading",
+          "After type definitions: Run type checking"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "50%", "name": "env_loading", "rollback_capable": true},
+            {"at": "100%", "name": "config_complete", "rollback_capable": false}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 1,
+          "memory_mb": 256,
+          "disk_io_mbps": 10,
+          "exclusive_resources": [],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 20,
+          "duration_seconds": 30,
+          "during": "Loading environment"
+        },
+        "worker_capabilities_required": ["deno", "typescript"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "critical",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "can_pause_resume": false,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": [],
+        "imports": ["load from std/dotenv/mod.ts"],
+        "rationale": "Using Deno standard library for dotenv"
+      },
+      
+      "skillsRequired": ["deno", "typescript", "configuration"],
+      "duration": {
+        "optimistic": 0.5,
+        "mostLikely": 1,
+        "pessimistic": 2
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["Config:v2", "ConfigLoader:v1"],
+      "interfaces_consumed": ["DenoConfig:v1"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno check src/lib/config.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Configuration System... Loads .env automatically",
+          "loc": {"start": 108, "end": 121},
+          "section": "Configuration System",
+          "startLine": 108,
+          "endLine": 121
+        }
+      ],
+      "contentHash": "c3d4e5f6789ab1c2"
+    },
+    {
+      "id": "P1.T004",
+      "feature_id": "F002",
+      "title": "Migrate PathResolver to Deno",
+      "description": "Port PathResolver.js to use Deno's std/path module",
+      "category": "foundation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~60 LoC",
+          "breakdown": "PathResolver.ts (50 LoC), tests (10 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "PathResolver uses std/path",
+            "All path operations work correctly",
+            "Cross-platform compatibility maintained"
+          ],
+          "stop_when": "Do NOT update path consumers yet"
+        },
+        "scope": {
+          "includes": ["src/lib/PathResolver.ts"],
+          "excludes": ["src/commands/"],
+          "restrictions": "Only path resolution logic"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Migrating PathResolver'",
+          "on_progress": "Log each method migration",
+          "on_completion": "Log compatibility status",
+          "log_format": "JSON with methods migrated"
+        },
+        "checkpoints": [
+          "After join method: Test path joining",
+          "After resolve method: Test path resolution"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "50%", "name": "methods_migrated", "rollback_capable": true},
+            {"at": "100%", "name": "tests_passing", "rollback_capable": false}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 1,
+          "memory_mb": 256,
+          "disk_io_mbps": 10,
+          "exclusive_resources": [],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 1,
+          "memory_mb": 512,
+          "disk_io_mbps": 15,
+          "duration_seconds": 20,
+          "during": "Running tests"
+        },
+        "worker_capabilities_required": ["deno", "typescript"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": true,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": [],
+        "imports": ["join, resolve from std/path/mod.ts"],
+        "rationale": "Direct replacement with Deno std library"
+      },
+      
+      "skillsRequired": ["deno", "typescript", "filesystem"],
+      "duration": {
+        "optimistic": 0.5,
+        "mostLikely": 1,
+        "pessimistic": 1.5
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["PathResolver:v2"],
+      "interfaces_consumed": ["DenoConfig:v1"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno check src/lib/PathResolver.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Path Resolution... Path operations nearly identical",
+          "loc": {"start": 123, "end": 132},
+          "section": "Path Resolution",
+          "startLine": 123,
+          "endLine": 132
+        }
+      ],
+      "contentHash": "d4e5f6789ab1c2d3"
+    },
+    {
+      "id": "P1.T005",
+      "feature_id": "F002",
+      "title": "Migrate DatabaseCommand to Deno",
+      "description": "Port DatabaseCommand.js extending the migrated Command base",
+      "category": "implementation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~200 LoC",
+          "breakdown": "DatabaseCommand.ts (150 LoC), types (30 LoC), tests (20 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "DatabaseCommand extends Command.ts",
+            "Database operations use Supabase client",
+            "Event emission preserved",
+            "Type safety for database operations"
+          ],
+          "stop_when": "Do NOT migrate specific database commands yet"
+        },
+        "scope": {
+          "includes": ["src/lib/DatabaseCommand.ts"],
+          "excludes": ["src/commands/db/"],
+          "restrictions": "Only base DatabaseCommand class"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Migrating DatabaseCommand class'",
+          "on_progress": "Log database method migrations",
+          "on_completion": "Log inheritance validation",
+          "log_format": "JSON with class hierarchy"
+        },
+        "checkpoints": [
+          "After extending Command: Verify inheritance",
+          "After database methods: Test Supabase connection"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "33%", "name": "inheritance_setup", "rollback_capable": true},
+            {"at": "66%", "name": "database_methods", "rollback_capable": true},
+            {"at": "100%", "name": "tests_complete", "rollback_capable": false}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 20,
+          "exclusive_resources": [],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 3,
+          "memory_mb": 1024,
+          "disk_io_mbps": 40,
+          "duration_seconds": 60,
+          "during": "Testing database operations"
+        },
+        "worker_capabilities_required": ["deno", "typescript", "database"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 3,
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": ["Command:v2"],
+        "imports": ["@supabase/supabase-js"],
+        "rationale": "Building on migrated Command base"
+      },
+      
+      "skillsRequired": ["deno", "typescript", "database", "supabase"],
+      "duration": {
+        "optimistic": 1.5,
+        "mostLikely": 2.5,
+        "pessimistic": 4
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["DatabaseCommand:v2"],
+      "interfaces_consumed": ["Command:v2", "Config:v2"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno check src/lib/DatabaseCommand.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        },
+        {
+          "type": "command",
+          "cmd": "deno test src/lib/DatabaseCommand.test.ts",
+          "expect": {
+            "passRateGte": 0.95
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "src/lib/DatabaseCommand.js → DatabaseCommand.ts",
+          "loc": {"start": 203, "end": 203},
+          "section": "Core Libraries",
+          "startLine": 203,
+          "endLine": 203
+        }
+      ],
+      "contentHash": "e5f6789ab1c2d3e4"
+    },
+    {
+      "id": "P1.T006",
+      "feature_id": "F002",
+      "title": "Migrate SupabaseCommand to Deno",
+      "description": "Port SupabaseCommand.js with Supabase client integration",
+      "category": "implementation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~180 LoC",
+          "breakdown": "SupabaseCommand.ts (140 LoC), types (25 LoC), tests (15 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "SupabaseCommand extends Command.ts",
+            "Supabase client properly initialized",
+            "API calls work with Deno fetch",
+            "Error handling preserved"
+          ],
+          "stop_when": "Do NOT migrate specific Supabase commands"
+        },
+        "scope": {
+          "includes": ["src/lib/SupabaseCommand.ts"],
+          "excludes": ["src/commands/functions/"],
+          "restrictions": "Only base SupabaseCommand class"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Migrating SupabaseCommand'",
+          "on_progress": "Log Supabase client setup progress",
+          "on_completion": "Log API compatibility check",
+          "log_format": "JSON with API methods"
+        },
+        "checkpoints": [
+          "After client setup: Test Supabase connection",
+          "After API methods: Verify fetch compatibility"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "33%", "name": "client_setup", "rollback_capable": true},
+            {"at": "66%", "name": "api_methods", "rollback_capable": true},
+            {"at": "100%", "name": "integration_tested", "rollback_capable": false}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 20,
+          "exclusive_resources": [],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 3,
+          "memory_mb": 1024,
+          "disk_io_mbps": 50,
+          "duration_seconds": 45,
+          "during": "API integration testing"
+        },
+        "worker_capabilities_required": ["deno", "typescript", "api"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 3,
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": ["Command:v2"],
+        "imports": ["@supabase/supabase-js"],
+        "rationale": "Supabase SDK works identically in Deno"
+      },
+      
+      "skillsRequired": ["deno", "typescript", "supabase", "api"],
+      "duration": {
+        "optimistic": 1,
+        "mostLikely": 2,
+        "pessimistic": 3
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["SupabaseCommand:v2"],
+      "interfaces_consumed": ["Command:v2", "Config:v2"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno check src/lib/SupabaseCommand.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "src/lib/SupabaseCommand.js → SupabaseCommand.ts",
+          "loc": {"start": 204, "end": 204},
+          "section": "Core Libraries",
+          "startLine": 204,
+          "endLine": 204
+        }
+      ],
+      "contentHash": "f6789ab1c2d3e4e5"
+    },
+    {
+      "id": "P1.T007",
+      "feature_id": "F003",
+      "title": "Migrate test/RunCommand to Deno",
+      "description": "Port test execution command for Edge Function testing capability",
+      "category": "implementation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~250 LoC",
+          "breakdown": "RunCommand.ts (180 LoC), subprocess handling (50 LoC), tests (20 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "RunCommand uses Deno.Command for subprocesses",
+            "pgTAP execution works",
+            "Can import and test Edge Functions",
+            "Test output properly captured"
+          ],
+          "stop_when": "Do NOT migrate other test commands yet"
+        },
+        "scope": {
+          "includes": ["src/commands/test/RunCommand.ts"],
+          "excludes": ["src/commands/test/CompileCommand.js"],
+          "restrictions": "Focus on test execution, not compilation"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Migrating test RunCommand'",
+          "on_progress": "Log subprocess conversion progress",
+          "on_completion": "Log Edge Function import success",
+          "log_format": "JSON with test execution metrics"
+        },
+        "checkpoints": [
+          "After subprocess setup: Test pgTAP execution",
+          "After Edge Function import: Verify import works"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "25%", "name": "subprocess_setup", "rollback_capable": true},
+            {"at": "50%", "name": "pgtap_working", "rollback_capable": true},
+            {"at": "75%", "name": "edge_import_working", "rollback_capable": true}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 768,
+          "disk_io_mbps": 30,
+          "exclusive_resources": ["test_suite"],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 4,
+          "memory_mb": 1536,
+          "disk_io_mbps": 60,
+          "duration_seconds": 90,
+          "during": "Running test suite"
+        },
+        "worker_capabilities_required": ["deno", "typescript", "testing", "edge-functions"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "critical",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 3,
+        "can_pause_resume": false,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": ["TestCommand:v2"],
+        "imports": ["Deno.Command"],
+        "rationale": "Critical for Edge Function testing goal"
+      },
+      
+      "skillsRequired": ["deno", "typescript", "testing", "subprocess"],
+      "duration": {
+        "optimistic": 2,
+        "mostLikely": 3,
+        "pessimistic": 5
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["TestRunner:v2", "EdgeFunctionTester:v1"],
+      "interfaces_consumed": ["TestCommand:v2"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno run --allow-all src/commands/test/RunCommand.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        },
+        {
+          "type": "artifact",
+          "path": "test-results.json",
+          "expect": {
+            "exists": true
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Priority 1: Test Commands (for Edge Function testing)",
+          "loc": {"start": 139, "end": 141},
+          "section": "Critical Path Commands",
+          "startLine": 139,
+          "endLine": 141
+        }
+      ],
+      "contentHash": "789ab1c2d3e4e5f6"
+    },
+    {
+      "id": "P1.T008",
+      "feature_id": "F003",
+      "title": "Migrate db/MigrateCommand to Deno",
+      "description": "Port database migration command to TypeScript",
+      "category": "implementation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~300 LoC",
+          "breakdown": "MigrateCommand.ts (220 LoC), migration logic (60 LoC), tests (20 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "MigrateCommand fully typed",
+            "Migration execution works",
+            "Transaction support maintained",
+            "Rollback capability preserved"
+          ],
+          "stop_when": "Do NOT modify migration files themselves"
+        },
+        "scope": {
+          "includes": ["src/commands/db/MigrateCommand.ts"],
+          "excludes": ["migrations/", "sql/"],
+          "restrictions": "Only command logic, not migration content"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Migrating MigrateCommand'",
+          "on_progress": "Log migration method conversion",
+          "on_completion": "Log transaction support status",
+          "log_format": "JSON with migration capabilities"
+        },
+        "checkpoints": [
+          "After transaction setup: Test rollback",
+          "After migration logic: Test dry-run"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "25%", "name": "command_structure", "rollback_capable": true},
+            {"at": "50%", "name": "migration_logic", "rollback_capable": true},
+            {"at": "75%", "name": "transaction_support", "rollback_capable": true}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 768,
+          "disk_io_mbps": 40,
+          "exclusive_resources": [],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 3,
+          "memory_mb": 1536,
+          "disk_io_mbps": 80,
+          "duration_seconds": 120,
+          "during": "Testing migrations"
+        },
+        "worker_capabilities_required": ["deno", "typescript", "database"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "critical",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "can_pause_resume": false,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": ["DatabaseCommand:v2"],
+        "imports": ["MigrationMetadata"],
+        "rationale": "Core workflow command"
+      },
+      
+      "skillsRequired": ["deno", "typescript", "database", "migrations"],
+      "duration": {
+        "optimistic": 2,
+        "mostLikely": 3.5,
+        "pessimistic": 5
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["MigrationRunner:v2"],
+      "interfaces_consumed": ["DatabaseCommand:v2"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno run --allow-all src/commands/db/MigrateCommand.ts --dry-run",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Priority 2: Core Database Commands",
+          "loc": {"start": 143, "end": 145},
+          "section": "Critical Path Commands",
+          "startLine": 143,
+          "endLine": 145
+        }
+      ],
+      "contentHash": "89ab1c2d3e4e5f67"
+    },
+    {
+      "id": "P1.T009",
+      "feature_id": "F004",
+      "title": "Convert Vitest tests to Deno.test",
+      "description": "Migrate test suite from Vitest to Deno's native test framework",
+      "category": "implementation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~400 LoC",
+          "breakdown": "Test conversions (300 LoC), assertions (50 LoC), test utilities (50 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "All Vitest tests converted to Deno.test",
+            "Assertions use std/assert",
+            "Coverage reporting works",
+            "Test runner configured"
+          ],
+          "stop_when": "Do NOT add new tests, only convert existing"
+        },
+        "scope": {
+          "includes": ["tests/", "**/*.test.ts"],
+          "excludes": ["vitest.config.js"],
+          "restrictions": "Convert tests, maintain same coverage"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Converting test suite to Deno'",
+          "on_progress": "Log each test file converted",
+          "on_completion": "Log coverage comparison",
+          "log_format": "JSON with test conversion metrics"
+        },
+        "checkpoints": [
+          "After 25% conversion: Run partial suite",
+          "After 50% conversion: Check coverage",
+          "After 100% conversion: Full test run"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "25%", "name": "quarter_converted", "rollback_capable": true},
+            {"at": "50%", "name": "half_converted", "rollback_capable": true},
+            {"at": "75%", "name": "majority_converted", "rollback_capable": true}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 1024,
+          "disk_io_mbps": 30,
+          "exclusive_resources": ["test_suite"],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 4,
+          "memory_mb": 2048,
+          "disk_io_mbps": 60,
+          "duration_seconds": 180,
+          "during": "Running full test suite"
+        },
+        "worker_capabilities_required": ["deno", "typescript", "testing"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": true,
+        "retry_on_failure": true,
+        "max_retries": 3,
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": [],
+        "imports": ["assertEquals, assertThrows from std/assert"],
+        "rationale": "Direct conversion maintaining test logic"
+      },
+      
+      "skillsRequired": ["deno", "typescript", "testing"],
+      "duration": {
+        "optimistic": 3,
+        "mostLikely": 4,
+        "pessimistic": 6
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["TestSuite:v2"],
+      "interfaces_consumed": [],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno test",
+          "expect": {
+            "passRateGte": 0.95,
+            "coverageGte": 0.80
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Test migration pattern... Deno.test",
+          "loc": {"start": 168, "end": 179},
+          "section": "Test Suite Migration",
+          "startLine": 168,
+          "endLine": 179
+        }
+      ],
+      "contentHash": "9ab1c2d3e4e5f678"
+    },
+    {
+      "id": "P1.T010",
+      "feature_id": "F005",
+      "title": "Implement Edge Function import capability",
+      "description": "Enable direct import and testing of Supabase Edge Functions",
+      "category": "implementation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~100 LoC",
+          "breakdown": "Import logic (60 LoC), test harness (30 LoC), validation (10 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "Can import Edge Function index.ts files",
+            "Deno runtime APIs available",
+            "Test harness can invoke handlers",
+            "Response objects properly handled"
+          ],
+          "stop_when": "Do NOT modify Edge Functions themselves"
+        },
+        "scope": {
+          "includes": ["src/lib/edge-function-tester.ts"],
+          "excludes": ["supabase/functions/"],
+          "restrictions": "Only testing infrastructure"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Setting up Edge Function testing'",
+          "on_progress": "Log import success for each function",
+          "on_completion": "Log test execution results",
+          "log_format": "JSON with function test results"
+        },
+        "checkpoints": [
+          "After import setup: Test basic import",
+          "After handler invocation: Test request/response"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "50%", "name": "import_working", "rollback_capable": false},
+            {"at": "100%", "name": "testing_complete", "rollback_capable": false}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 20,
+          "exclusive_resources": [],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 3,
+          "memory_mb": 1024,
+          "disk_io_mbps": 40,
+          "duration_seconds": 60,
+          "during": "Testing Edge Functions"
+        },
+        "worker_capabilities_required": ["deno", "typescript", "edge-functions"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "critical",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 3,
+        "can_pause_resume": false,
+        "checkpoint_capable": false
+      },
+      
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "Core migration goal - Edge Function testing"
+      },
+      
+      "skillsRequired": ["deno", "typescript", "edge-functions"],
+      "duration": {
+        "optimistic": 1,
+        "mostLikely": 1.5,
+        "pessimistic": 2.5
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["EdgeFunctionTester:v1"],
+      "interfaces_consumed": ["TestRunner:v2"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno run --allow-all tests/edge-function-import.test.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Can import and test actual Edge Functions",
+          "loc": {"start": 241, "end": 242},
+          "section": "Migration Success Metrics",
+          "startLine": 241,
+          "endLine": 242
+        }
+      ],
+      "contentHash": "ab1c2d3e4e5f6789"
+    },
+    {
+      "id": "P1.T011",
+      "feature_id": "F006",
+      "title": "Implement binary compilation",
+      "description": "Set up Deno compile for single executable distribution",
+      "category": "implementation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~80 LoC",
+          "breakdown": "Build script (50 LoC), permissions config (20 LoC), CI integration (10 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "Binary compiles successfully",
+            "All permissions properly set",
+            "Binary size under 50MB",
+            "Cross-platform builds work"
+          ],
+          "stop_when": "Do NOT set up distribution yet"
+        },
+        "scope": {
+          "includes": ["build/compile.ts", ".github/workflows/build.yml"],
+          "excludes": ["release/", "distribution/"],
+          "restrictions": "Only compilation setup"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Setting up binary compilation'",
+          "on_progress": "Log compilation progress and size",
+          "on_completion": "Log binary details and size",
+          "log_format": "JSON with binary metrics"
+        },
+        "checkpoints": [
+          "After compile script: Test compilation",
+          "After binary creation: Verify size and permissions"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "50%", "name": "compile_script_ready", "rollback_capable": true},
+            {"at": "100%", "name": "binary_created", "rollback_capable": false}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 4,
+          "memory_mb": 2048,
+          "disk_io_mbps": 100,
+          "exclusive_resources": [],
+          "shared_resources": {}
+        },
+        "peak": {
+          "cpu_cores": 8,
+          "memory_mb": 4096,
+          "disk_io_mbps": 200,
+          "duration_seconds": 180,
+          "during": "Binary compilation"
+        },
+        "worker_capabilities_required": ["deno", "build", "compilation"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "can_pause_resume": false,
+        "checkpoint_capable": false
+      },
+      
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "New capability for Deno deployment"
+      },
+      
+      "skillsRequired": ["deno", "build-systems", "compilation"],
+      "duration": {
+        "optimistic": 0.5,
+        "mostLikely": 1,
+        "pessimistic": 2
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["BinaryBuilder:v1"],
+      "interfaces_consumed": [],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno compile --allow-all --output data src/index.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        },
+        {
+          "type": "artifact",
+          "path": "data",
+          "expect": {
+            "exists": true,
+            "executable": true,
+            "maxSizeMB": 50
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Single binary compilation... Single 30-50MB executable",
+          "loc": {"start": 184, "end": 196},
+          "section": "Build & Distribution",
+          "startLine": 184,
+          "endLine": 196
+        }
+      ],
+      "contentHash": "b1c2d3e4e5f67890"
+    },
+    {
+      "id": "P1.T012",
+      "feature_id": "F007",
+      "title": "Update dependency mappings",
+      "description": "Create comprehensive import maps for all npm dependencies",
+      "category": "implementation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~120 LoC",
+          "breakdown": "Import mappings (100 LoC), validation (20 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "All npm packages mapped to esm.sh",
+            "Commander.js alternative found",
+            "UI libraries properly mapped",
+            "All imports resolve correctly"
+          ],
+          "stop_when": "Do NOT refactor import statements yet"
+        },
+        "scope": {
+          "includes": ["import_map.json"],
+          "excludes": ["src/"],
+          "restrictions": "Only dependency mapping"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Mapping npm dependencies'",
+          "on_progress": "Log each package mapping",
+          "on_completion": "Log resolution success rate",
+          "log_format": "JSON with package mappings"
+        },
+        "checkpoints": [
+          "After core deps: Test Supabase imports",
+          "After UI deps: Test CLI library imports"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "50%", "name": "core_deps_mapped", "rollback_capable": true},
+            {"at": "100%", "name": "all_deps_mapped", "rollback_capable": false}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 1,
+          "memory_mb": 512,
+          "disk_io_mbps": 50,
+          "exclusive_resources": [],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 2,
+          "memory_mb": 1024,
+          "disk_io_mbps": 100,
+          "duration_seconds": 120,
+          "during": "Dependency resolution"
+        },
+        "worker_capabilities_required": ["deno", "dependency-management"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": true,
+        "retry_on_failure": true,
+        "max_retries": 3,
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "Dependency resolution required for all modules"
+      },
+      
+      "skillsRequired": ["deno", "dependency-management", "esm"],
+      "duration": {
+        "optimistic": 1,
+        "mostLikely": 2,
+        "pessimistic": 3
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["ImportMap:v2"],
+      "interfaces_consumed": ["ImportMap:v1"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "deno cache --import-map=import_map.json src/index.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Replace npm packages with Deno-compatible alternatives",
+          "loc": {"start": 85, "end": 90},
+          "section": "Create import map",
+          "startLine": 85,
+          "endLine": 90
+        }
+      ],
+      "contentHash": "c2d3e4e5f67890ab"
+    },
+    {
+      "id": "P1.T013",
+      "feature_id": "F008",
+      "title": "Update CI/CD pipeline for Deno",
+      "description": "Modify GitHub Actions to use Deno toolchain",
+      "category": "integration",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~60 LoC",
+          "breakdown": "Workflow updates (40 LoC), build scripts (20 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "GitHub Actions uses denoland/setup-deno",
+            "Tests run in CI with Deno",
+            "Binary compilation in CI",
+            "Artifacts properly generated"
+          ],
+          "stop_when": "Do NOT set up deployment yet"
+        },
+        "scope": {
+          "includes": [".github/workflows/"],
+          "excludes": ["deployment/", "release/"],
+          "restrictions": "Only CI configuration"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Updating CI/CD for Deno'",
+          "on_progress": "Log workflow modifications",
+          "on_completion": "Log CI test results",
+          "log_format": "JSON with CI configuration"
+        },
+        "checkpoints": [
+          "After workflow update: Trigger test run",
+          "After successful run: Verify artifacts"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "50%", "name": "workflow_updated", "rollback_capable": true},
+            {"at": "100%", "name": "ci_passing", "rollback_capable": false}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 1,
+          "memory_mb": 256,
+          "disk_io_mbps": 10,
+          "exclusive_resources": ["git_repository"],
+          "shared_resources": {}
+        },
+        "peak": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 20,
+          "duration_seconds": 300,
+          "during": "CI pipeline execution"
+        },
+        "worker_capabilities_required": ["ci-cd", "github-actions", "deno"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "medium",
+        "preemptible": true,
+        "retry_on_failure": true,
+        "max_retries": 3,
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "Adapting existing CI to Deno"
+      },
+      
+      "skillsRequired": ["ci-cd", "github-actions", "deno"],
+      "duration": {
+        "optimistic": 0.5,
+        "mostLikely": 1,
+        "pessimistic": 2
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["CI-Pipeline:v2"],
+      "interfaces_consumed": ["BinaryBuilder:v1"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "gh workflow run test.yml",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "CI/CD compatibility: Will GitHub Actions support Deno smoothly?",
+          "loc": {"start": 264, "end": 265},
+          "section": "Known Unknowns",
+          "startLine": 264,
+          "endLine": 265
+        }
+      ],
+      "contentHash": "d3e4e5f67890abc1"
+    },
+    {
+      "id": "P1.T014",
+      "feature_id": "F003",
+      "title": "Migrate remaining commands",
+      "description": "Port all remaining command files to TypeScript",
+      "category": "implementation",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~800 LoC",
+          "breakdown": "50+ command files × ~15 LoC changes each"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "All commands migrated to TypeScript",
+            "Type safety throughout",
+            "All commands executable",
+            "Event emission preserved"
+          ],
+          "stop_when": "Complete when all JS files converted"
+        },
+        "scope": {
+          "includes": ["src/commands/**/*.js"],
+          "excludes": [],
+          "restrictions": "Convert all remaining command files"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Migrating remaining commands'",
+          "on_progress": "Log each command file migrated",
+          "on_completion": "Log total files migrated",
+          "log_format": "JSON with migration count"
+        },
+        "checkpoints": [
+          "Every 10 files: Run type checking",
+          "Every 20 files: Test execution"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "25%", "name": "quarter_migrated", "rollback_capable": true},
+            {"at": "50%", "name": "half_migrated", "rollback_capable": true},
+            {"at": "75%", "name": "majority_migrated", "rollback_capable": true}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 1024,
+          "disk_io_mbps": 40,
+          "exclusive_resources": [],
+          "shared_resources": {"deno_cache": 1}
+        },
+        "peak": {
+          "cpu_cores": 4,
+          "memory_mb": 2048,
+          "disk_io_mbps": 80,
+          "duration_seconds": 300,
+          "during": "Type checking all files"
+        },
+        "worker_capabilities_required": ["deno", "typescript", "migration"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "medium",
+        "preemptible": true,
+        "retry_on_failure": true,
+        "max_retries": 3,
+        "can_pause_resume": true,
+        "checkpoint_capable": true
+      },
+      
+      "reuses_existing": {
+        "extends": ["Command:v2", "DatabaseCommand:v2", "SupabaseCommand:v2"],
+        "imports": [],
+        "rationale": "Building on migrated base classes"
+      },
+      
+      "skillsRequired": ["deno", "typescript", "migration"],
+      "duration": {
+        "optimistic": 4,
+        "mostLikely": 6,
+        "pessimistic": 10
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["Commands:v2"],
+      "interfaces_consumed": ["Command:v2", "DatabaseCommand:v2", "SupabaseCommand:v2"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "find src/commands -name '*.js' | wc -l",
+          "expect": {
+            "output": "0"
+          }
+        },
+        {
+          "type": "command",
+          "cmd": "deno check src/commands/**/*.ts",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Commands (4 hours)",
+          "loc": {"start": 212, "end": 220},
+          "section": "File-by-File Migration Checklist",
+          "startLine": 212,
+          "endLine": 220
+        }
+      ],
+      "contentHash": "e4e5f67890abc1d"
+    },
+    {
+      "id": "P1.T015",
+      "feature_id": "F001",
+      "title": "Final cleanup and validation",
+      "description": "Remove Node.js artifacts and validate complete migration",
+      "category": "optimization",
+      
+      "boundaries": {
+        "expected_complexity": {
+          "value": "~50 LoC",
+          "breakdown": "Cleanup scripts (30 LoC), validation (20 LoC)"
+        },
+        "definition_of_done": {
+          "criteria": [
+            "No node_modules directory",
+            "No package.json needed",
+            "All tests passing in Deno",
+            "Binary compilation successful",
+            "Edge Functions testable"
+          ],
+          "stop_when": "Migration fully complete and validated"
+        },
+        "scope": {
+          "includes": ["./", "scripts/"],
+          "excludes": ["legacy-node/"],
+          "restrictions": "Final validation only"
+        }
+      },
+      
+      "execution_guidance": {
+        "logging": {
+          "on_start": "Log 'Starting final validation'",
+          "on_progress": "Log validation checks",
+          "on_completion": "Log migration success metrics",
+          "log_format": "JSON with validation results"
+        },
+        "checkpoints": [
+          "After cleanup: Verify no Node artifacts",
+          "After validation: Full system test"
+        ],
+        "monitoring": {
+          "heartbeat_interval_seconds": 30,
+          "progress_reporting": "percentage_and_checkpoint",
+          "checkpoint_events": [
+            {"at": "50%", "name": "cleanup_complete", "rollback_capable": false},
+            {"at": "100%", "name": "migration_validated", "rollback_capable": false}
+          ]
+        }
+      },
+      
+      "resource_requirements": {
+        "estimated": {
+          "cpu_cores": 2,
+          "memory_mb": 512,
+          "disk_io_mbps": 30,
+          "exclusive_resources": ["git_repository", "test_suite"],
+          "shared_resources": {}
+        },
+        "peak": {
+          "cpu_cores": 4,
+          "memory_mb": 2048,
+          "disk_io_mbps": 100,
+          "duration_seconds": 300,
+          "during": "Full validation suite"
+        },
+        "worker_capabilities_required": ["deno", "testing", "validation"]
+      },
+      
+      "scheduling_hints": {
+        "priority": "high",
+        "preemptible": false,
+        "retry_on_failure": true,
+        "max_retries": 2,
+        "can_pause_resume": false,
+        "checkpoint_capable": false
+      },
+      
+      "reuses_existing": {
+        "extends": [],
+        "imports": [],
+        "rationale": "Final validation step"
+      },
+      
+      "skillsRequired": ["deno", "testing", "validation"],
+      "duration": {
+        "optimistic": 0.5,
+        "mostLikely": 1,
+        "pessimistic": 2
+      },
+      "durationUnits": "hours",
+      
+      "interfaces_produced": ["MigrationComplete:v1"],
+      "interfaces_consumed": ["All:v2"],
+      
+      "acceptance_checks": [
+        {
+          "type": "command",
+          "cmd": "test -d node_modules",
+          "expect": {
+            "exitCode": 1
+          }
+        },
+        {
+          "type": "command",
+          "cmd": "deno test",
+          "expect": {
+            "passRateGte": 0.95
+          }
+        },
+        {
+          "type": "command",
+          "cmd": "./data --version",
+          "expect": {
+            "exitCode": 0
+          }
+        }
+      ],
+      
+      "source_evidence": [
+        {
+          "quote": "Migration Success Metrics",
+          "loc": {"start": 240, "end": 245},
+          "section": "Validation Criteria",
+          "startLine": 240,
+          "endLine": 245
+        }
+      ],
+      "contentHash": "f5f67890abc1de4"
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "P1.T002",
+      "to": "P1.T001",
+      "type": "technical",
+      "reason": "Command.ts requires Deno configuration and import maps",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Must have Deno environment before migrating code",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T003",
+      "to": "P1.T001",
+      "type": "technical",
+      "reason": "Config system requires import maps for std/dotenv",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Dotenv import requires import map",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T004",
+      "to": "P1.T001",
+      "type": "technical",
+      "reason": "PathResolver requires Deno std/path in import map",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Path module requires import configuration",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T005",
+      "to": "P1.T002",
+      "type": "technical",
+      "reason": "DatabaseCommand extends Command base class",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Inheritance dependency",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T006",
+      "to": "P1.T002",
+      "type": "technical",
+      "reason": "SupabaseCommand extends Command base class",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Inheritance dependency",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T005",
+      "to": "P1.T003",
+      "type": "technical",
+      "reason": "DatabaseCommand uses Config module",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Requires configuration for database connection",
+          "confidence": 0.95
+        }
+      ],
+      "confidence": 0.95,
+      "isHard": true
+    },
+    {
+      "from": "P1.T006",
+      "to": "P1.T003",
+      "type": "technical",
+      "reason": "SupabaseCommand uses Config module",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Requires configuration for Supabase client",
+          "confidence": 0.95
+        }
+      ],
+      "confidence": 0.95,
+      "isHard": true
+    },
+    {
+      "from": "P1.T007",
+      "to": "P1.T002",
+      "type": "technical",
+      "reason": "RunCommand likely extends TestCommand which extends Command",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Command hierarchy dependency",
+          "confidence": 0.90
+        }
+      ],
+      "confidence": 0.90,
+      "isHard": true
+    },
+    {
+      "from": "P1.T008",
+      "to": "P1.T005",
+      "type": "technical",
+      "reason": "MigrateCommand extends DatabaseCommand",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Database command inheritance",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T009",
+      "to": "P1.T007",
+      "type": "sequential",
+      "reason": "Test conversion should happen after test runner is ready",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Need working test infrastructure",
+          "confidence": 0.85
+        }
+      ],
+      "confidence": 0.85,
+      "isHard": false
+    },
+    {
+      "from": "P1.T010",
+      "to": "P1.T007",
+      "type": "technical",
+      "reason": "Edge Function testing requires test runner",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Test infrastructure dependency",
+          "confidence": 0.95
+        }
+      ],
+      "confidence": 0.95,
+      "isHard": true
+    },
+    {
+      "from": "P1.T011",
+      "to": "P1.T014",
+      "type": "sequential",
+      "reason": "Binary compilation after all code migrated",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Need complete TypeScript codebase",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T012",
+      "to": "P1.T001",
+      "type": "technical",
+      "reason": "Import map updates build on initial import map",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Extending initial configuration",
+          "confidence": 0.90
+        }
+      ],
+      "confidence": 0.90,
+      "isHard": false
+    },
+    {
+      "from": "P1.T013",
+      "to": "P1.T011",
+      "type": "sequential",
+      "reason": "CI/CD needs binary compilation setup",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "CI builds binaries",
+          "confidence": 0.95
+        }
+      ],
+      "confidence": 0.95,
+      "isHard": true
+    },
+    {
+      "from": "P1.T014",
+      "to": "P1.T005",
+      "type": "technical",
+      "reason": "Commands depend on DatabaseCommand base",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Many commands extend DatabaseCommand",
+          "confidence": 0.95
+        }
+      ],
+      "confidence": 0.95,
+      "isHard": true
+    },
+    {
+      "from": "P1.T014",
+      "to": "P1.T006",
+      "type": "technical",
+      "reason": "Commands depend on SupabaseCommand base",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Function commands extend SupabaseCommand",
+          "confidence": 0.95
+        }
+      ],
+      "confidence": 0.95,
+      "isHard": true
+    },
+    {
+      "from": "P1.T015",
+      "to": "P1.T011",
+      "type": "sequential",
+      "reason": "Final validation after binary compilation",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Validate complete system including binary",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T015",
+      "to": "P1.T013",
+      "type": "sequential",
+      "reason": "Final validation includes CI/CD",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "CI must be working for validation",
+          "confidence": 0.90
+        }
+      ],
+      "confidence": 0.90,
+      "isHard": false
+    },
+    {
+      "from": "P1.T015",
+      "to": "P1.T010",
+      "type": "technical",
+      "reason": "Final validation includes Edge Function testing",
+      "evidence": [
+        {
+          "type": "doc",
+          "reason": "Core migration goal validation",
+          "confidence": 1.0
+        }
+      ],
+      "confidence": 1.0,
+      "isHard": true
+    },
+    {
+      "from": "P1.T009",
+      "to": "P1.T002",
+      "type": "mutual_exclusion",
+      "reason": "Both modify test files, could cause conflicts",
+      "shared_resource": "test_suite",
+      "evidence": [
+        {
+          "type": "infrastructure",
+          "reason": "Test file modifications conflict",
+          "confidence": 0.85
+        }
+      ],
+      "confidence": 0.85,
+      "isHard": false
+    }
+  ],
+  "resource_conflicts": {
+    "git_repository": {
+      "tasks": ["P1.T001", "P1.T013", "P1.T015"],
+      "resolution": "sequential_ordering",
+      "suggested_order": ["P1.T001", "P1.T013", "P1.T015"],
+      "rationale": "Git operations require clean working directory"
+    },
+    "test_suite": {
+      "tasks": ["P1.T007", "P1.T009", "P1.T015"],
+      "resolution": "wave_separation",
+      "rationale": "Test modifications and executions should not overlap"
+    }
+  }
+}

@@ -1,9 +1,11 @@
 # Runtime Migration: Node.js to Deno
 
-## Issue Title
-[CRITICAL] Complete Runtime Migration from Node.js to Deno for Edge Function Parity
+> [!danger] __This is not yet started, but it is top priority__
+
+## [CRITICAL] Complete Runtime Migration from Node.js to Deno for Edge Function Parity
 
 ### Core Information
+
 | Field | Why It Matters |
 |-------|---------------|
 | **Severity Level** | 🔴 CRITICAL - Show Stopper |
@@ -71,6 +73,7 @@ const response = await edgeFunction.handler(request) // Works exactly as deploye
 ### Migration Blueprint
 
 #### Phase 1: Environment Setup (Hour 0-1)
+
 ```bash
 # 1. Create migration branch
 git checkout -b deno-migration
@@ -92,6 +95,7 @@ deno init
 
 **Order of Operations:**
 1. **Base Classes First**
+
    ```typescript
    // src/lib/Command.ts
    import { EventEmitter } from "std/node/events.ts"
@@ -102,6 +106,7 @@ deno init
    ```
 
 2. **Configuration System**
+
    ```typescript
    // src/lib/config.ts
    import { load } from "std/dotenv/mod.ts"
@@ -116,6 +121,7 @@ deno init
    ```
 
 3. **Path Resolution**
+
    ```typescript
    // src/lib/PathResolver.ts
    import { join, resolve } from "std/path/mod.ts"
@@ -128,6 +134,7 @@ deno init
 #### Phase 3: Command Migration (Hour 4-8)
 
 **Critical Path Commands:**
+
 ```typescript
 // Priority 1: Test Commands (for Edge Function testing)
 src/commands/test/RunCommand.ts    // Must work first
@@ -142,6 +149,7 @@ src/commands/functions/DeployCommand.ts // Edge Function deployment
 ```
 
 **Migration Pattern:**
+
 ```typescript
 // Before (Node.js)
 const fs = require('fs').promises
@@ -342,7 +350,7 @@ Decision: PROCEED IMMEDIATELY
 
 The logical path is clear. The ES module chaos ends today. The runtime mismatch ends today. D.A.T.A. becomes a Deno application today.
 
-**Status**: Ready to Execute
-**Blocking**: ALL other issues
-**Assignment**: Immediate
+**Status**: Ready to Execute  
+**Blocking**: ALL other issues  
+**Assignment**: Immediate  
 **Completion**: Before undocking from Supa Base 12
