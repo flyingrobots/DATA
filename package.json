@@ -2,6 +2,7 @@
   "name": "@purrfect-firs/data",
   "version": "1.0.0",
   "description": "🖖 D.A.T.A. - Database Automation, Testing, and Alignment for PostgreSQL/Supabase",
+  "type": "module",
   "main": "src/index.js",
   "bin": {
     "data": "./bin/data.js"
@@ -67,6 +68,10 @@
     "vitest": "^2.0.0"
   },
   "engines": {
-    "node": ">=18.0.0"
-  }
+    "node": ">=20.0.0",
+    "bun": ">=1.0.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }
