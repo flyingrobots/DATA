@@ -2,11 +2,11 @@
  * Functions Commands Index
  */
 
-const DeployCommand = require('./DeployCommand');
-const ValidateCommand = require('./ValidateCommand');
-const StatusCommand = require('./StatusCommand');
+import DeployCommand from './DeployCommand.js';
+import ValidateCommand from './ValidateCommand.js';
+import StatusCommand from './StatusCommand.js';
 
-module.exports = {
+export {
   DeployCommand,
   ValidateCommand,
   StatusCommand

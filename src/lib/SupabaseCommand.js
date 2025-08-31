@@ -1,12 +1,12 @@
 /**
  * SupabaseCommand - Base class for commands that use Supabase API
- * 
+ *
  * Replaces raw PostgreSQL connections with Supabase client
  * Provides automatic connection management and cleanup
  */
 
-const Command = require('./Command');
-const { createClient } = require('@supabase/supabase-js');
+import Command from './Command.js';
+import { createClient } from '@supabase/supabase-js';
 
 class SupabaseCommand extends Command {
   /**
@@ -25,24 +25,24 @@ class SupabaseCommand extends Command {
     requiresConfirmation = true
   ) {
     super(null, logger, isProd, null);
-    
+
     // Get Supabase credentials from params or environment
     this.supabaseUrl = supabaseUrl || process.env.SUPABASE_URL || 'http://localhost:54321';
     this.serviceRoleKey = serviceRoleKey || process.env.SUPABASE_SERVICE_ROLE_KEY;
     this.anonKey = process.env.SUPABASE_ANON_KEY;
-    
+
     // Validate we have necessary credentials
     if (!this.serviceRoleKey && !this.anonKey) {
       throw new Error('Either SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY is required');
     }
-    
+
     // Set confirmation requirement
     this.requiresProductionConfirmation = isProd && requiresConfirmation;
-    
+
     // Supabase client will be created on demand
     this.supabase = null;
   }
-  
+
   /**
    * Get Supabase client (lazy initialization)
    * @param {boolean} useServiceRole - Use service role key (default: true)
@@ -51,11 +51,11 @@ class SupabaseCommand extends Command {
   getSupabase(useServiceRole = true) {
     if (!this.supabase) {
       const key = useServiceRole ? this.serviceRoleKey : this.anonKey;
-      
+
       if (!key) {
         throw new Error(`${useServiceRole ? 'Service role' : 'Anon'} key not configured`);
       }
-      
+
       this.supabase = createClient(this.supabaseUrl, key, {
         auth: {
           persistSession: false,
@@ -65,16 +65,16 @@ class SupabaseCommand extends Command {
           schema: 'public'
         }
       });
-      
+
       this.progress('Supabase client initialized');
     }
     return this.supabase;
   }
-  
+
   /**
    * Execute arbitrary SQL using Supabase RPC
    * Requires an exec_sql function in your database:
-   * 
+   *
    * CREATE OR REPLACE FUNCTION exec_sql(sql text)
    * RETURNS json
    * LANGUAGE plpgsql
@@ -94,20 +94,20 @@ class SupabaseCommand extends Command {
    */
   async executeSql(sql) {
     const supabase = this.getSupabase(true); // Need service role for DDL
-    
+
     const { data, error } = await supabase.rpc('exec_sql', { sql });
-    
+
     if (error) {
       throw new Error(`SQL execution failed: ${error.message}`);
     }
-    
+
     if (data && !data.success) {
       throw new Error(`SQL error: ${data.error}`);
     }
-    
+
     return data;
   }
-  
+
   /**
    * Call an RPC function
    * @param {string} functionName - Name of the RPC function
@@ -117,16 +117,16 @@ class SupabaseCommand extends Command {
    */
   async rpc(functionName, params = {}, useServiceRole = false) {
     const supabase = this.getSupabase(useServiceRole);
-    
+
     const { data, error } = await supabase.rpc(functionName, params);
-    
+
     if (error) {
       throw new Error(`RPC ${functionName} failed: ${error.message}`);
     }
-    
+
     return data;
   }
-  
+
   /**
    * Query a table using Supabase client
    * @param {string} table - Table name
@@ -136,7 +136,7 @@ class SupabaseCommand extends Command {
     const supabase = this.getSupabase();
     return supabase.from(table);
   }
-  
+
   /**
    * Clean up Supabase connection
    */
@@ -145,19 +145,19 @@ class SupabaseCommand extends Command {
       try {
         // Sign out if authenticated
         await this.supabase.auth.signOut();
-        
+
         // Remove all realtime channels
         this.supabase.removeAllChannels();
-        
+
         this.progress('Supabase client cleaned up');
       } catch (error) {
         this.warn(`Cleanup warning: ${error.message}`);
       }
-      
+
       this.supabase = null;
     }
   }
-  
+
   /**
    * Override execute to ensure cleanup
    */
@@ -168,7 +168,7 @@ class SupabaseCommand extends Command {
       await this.cleanup();
     }
   }
-  
+
   /**
    * Helper to create a temporary schema for testing
    * @param {string} schemaName - Name for the schema (optional)
@@ -176,13 +176,13 @@ class SupabaseCommand extends Command {
    */
   async createTempSchema(schemaName = null) {
     const name = schemaName || `"@data.temp.${Math.floor(Date.now() / 1000)}"`;
-    
+
     await this.executeSql(`CREATE SCHEMA IF NOT EXISTS ${name}`);
     this.success(`Created temporary schema: ${name}`);
-    
+
     return name;
   }
-  
+
   /**
    * Helper to drop a schema
    * @param {string} schemaName - Name of schema to drop
@@ -190,11 +190,11 @@ class SupabaseCommand extends Command {
    */
   async dropSchema(schemaName, cascade = true) {
     const cascadeClause = cascade ? 'CASCADE' : '';
-    
+
     await this.executeSql(`DROP SCHEMA IF EXISTS ${schemaName} ${cascadeClause}`);
     this.success(`Dropped schema: ${schemaName}`);
   }
-  
+
   /**
    * Check if we have exec_sql function available
    * @returns {Promise<boolean>} True if exec_sql exists
@@ -202,16 +202,16 @@ class SupabaseCommand extends Command {
   async hasExecSqlFunction() {
     try {
       const supabase = this.getSupabase(true);
-      const { error } = await supabase.rpc('exec_sql', { 
-        sql: 'SELECT 1' 
+      const { error } = await supabase.rpc('exec_sql', {
+        sql: 'SELECT 1'
       });
-      
+
       return !error;
     } catch {
       return false;
     }
   }
-  
+
   /**
    * Install exec_sql function if needed
    * This allows arbitrary SQL execution via RPC
@@ -220,7 +220,7 @@ class SupabaseCommand extends Command {
     if (await this.hasExecSqlFunction()) {
       return;
     }
-    
+
     this.warn('exec_sql function not found. You need to add it to your migrations:');
     this.warn(`
 CREATE OR REPLACE FUNCTION exec_sql(sql text)
@@ -239,9 +239,10 @@ EXCEPTION
 END;
 $$;
     `);
-    
+
     throw new Error('exec_sql function required for DDL operations');
   }
 }
 
-module.exports = SupabaseCommand;
+export { SupabaseCommand };
+export default SupabaseCommand;

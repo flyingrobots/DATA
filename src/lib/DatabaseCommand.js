@@ -1,8 +1,8 @@
-const Command = require('./Command');
+import Command from './Command.js';
 
 /**
  * DatabaseCommand - Base class for commands that interact with the database
- * 
+ *
  * This class provides database connection handling for commands that need
  * to execute SQL queries or manage database state.
  */
@@ -26,31 +26,31 @@ class DatabaseCommand extends Command {
   ) {
     // Call parent with minimal config
     super(null, logger, isProd, null);
-    
+
     // Store database credentials
     this.databaseUrl = databaseUrl;
     this.serviceRoleKey = serviceRoleKey;
     this.anonKey = anonKey;
-    
+
     // Set confirmation requirement based on params
     this.requiresProductionConfirmation = isProd && requiresConfirmation;
-    
+
     // Database connection will be created on demand
     this.db = null;
   }
-  
+
   /**
    * Get database connection (lazy initialization)
    * @returns {Object} Database connection
    */
   async getDatabase() {
     if (!this.db) {
-      const DatabaseUtils = require('./db-utils');
+      const { default: DatabaseUtils } = await import('./db-utils.js');
       this.db = await DatabaseUtils.createConnection(this.databaseUrl);
     }
     return this.db;
   }
-  
+
   /**
    * Execute a SQL query
    * @param {string} sql - The SQL query to execute
@@ -61,18 +61,18 @@ class DatabaseCommand extends Command {
     const db = await this.getDatabase();
     return db.query(sql, params);
   }
-  
+
   /**
    * Execute a SQL file
    * @param {string} filePath - Path to the SQL file
    * @returns {Promise<Object>} Query result
    */
   async executeFile(filePath) {
-    const fs = require('fs').promises;
+    const { promises: fs } = await import('fs');
     const sql = await fs.readFile(filePath, 'utf8');
     return this.query(sql);
   }
-  
+
   /**
    * Clean up database connection
    */
@@ -82,7 +82,7 @@ class DatabaseCommand extends Command {
       this.db = null;
     }
   }
-  
+
   /**
    * Override execute to ensure cleanup
    */
@@ -95,4 +95,5 @@ class DatabaseCommand extends Command {
   }
 }
 
-module.exports = DatabaseCommand;
+export { DatabaseCommand };
+export default DatabaseCommand;

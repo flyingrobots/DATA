@@ -1,9 +1,9 @@
-const DatabaseCommand = require('./DatabaseCommand');
-const PathResolver = require('./PathResolver');
+import DatabaseCommand from './DatabaseCommand.js';
+import PathResolver from './PathResolver.js';
 
 /**
  * TestCommand - Base class for test operations
- * 
+ *
  * Commands that compile and run tests need both database access
  * and file system operations.
  */
@@ -29,18 +29,18 @@ class TestCommand extends DatabaseCommand {
   ) {
     // Call parent with database config
     super(databaseUrl, serviceRoleKey, null, logger, isProd);
-    
+
     // Store test paths
     this.testsDir = testsDir;
     this.outputDir = outputDir;
-    
+
     // Path resolver for ensuring directories exist
     this.pathResolver = pathResolver || new PathResolver();
-    
+
     // Test operations typically don't need production confirmation
     this.requiresProductionConfirmation = false;
   }
-  
+
   /**
    * Ensure tests directory exists and is readable
    * @returns {Promise<string>} Resolved tests directory path
@@ -48,7 +48,7 @@ class TestCommand extends DatabaseCommand {
   async getTestsDir() {
     return await this.pathResolver.resolveDirectoryForRead(this.testsDir);
   }
-  
+
   /**
    * Ensure output directory exists and is writable
    * @returns {Promise<string>} Resolved output directory path
@@ -56,39 +56,39 @@ class TestCommand extends DatabaseCommand {
   async getOutputDir() {
     return await this.pathResolver.resolveDirectoryForWrite(this.outputDir);
   }
-  
+
   /**
    * Get a specific test file path
    * @param {string} filename - The filename relative to tests dir
    * @returns {Promise<string>} Resolved file path
    */
   async getTestFile(filename) {
-    const path = require('path');
+    const { join } = await import('path');
     const dir = await this.getTestsDir();
-    return await this.pathResolver.resolveFileForRead(path.join(dir, filename));
+    return await this.pathResolver.resolveFileForRead(join(dir, filename));
   }
-  
+
   /**
    * Get a specific output file path
    * @param {string} filename - The filename relative to output dir
    * @returns {Promise<string>} Resolved file path
    */
   async getOutputFile(filename) {
-    const path = require('path');
+    const { join } = await import('path');
     const dir = await this.getOutputDir();
-    return await this.pathResolver.resolveFileForWrite(path.join(dir, filename));
+    return await this.pathResolver.resolveFileForWrite(join(dir, filename));
   }
-  
+
   /**
    * List test files
    * @param {string} pattern - Glob pattern (optional)
    * @returns {Promise<string[]>} List of test file paths
    */
   async listTestFiles(pattern = '*.sql') {
-    const fs = require('fs').promises;
-    const path = require('path');
+    const { promises: fs } = await import('fs');
+    const { join } = await import('path');
     const dir = await this.getTestsDir();
-    
+
     try {
       const files = await fs.readdir(dir);
       return files
@@ -103,30 +103,30 @@ class TestCommand extends DatabaseCommand {
           }
           return file.includes(pattern);
         })
-        .map(file => path.join(dir, file));
+        .map(file => join(dir, file));
     } catch (error) {
       throw new Error(`Failed to list test files in ${dir}: ${error.message}`);
     }
   }
-  
+
   /**
    * Compile test files into a single migration
    * @returns {Promise<string>} Compiled SQL content
    */
   async compileTests() {
-    const fs = require('fs').promises;
+    const { promises: fs } = await import('fs');
     const testFiles = await this.listTestFiles();
-    
+
     const readPromises = testFiles.map(async (file) => {
       const content = await fs.readFile(file, 'utf8');
       return `-- Test file: ${file}\n${content}`;
     });
-    
+
     const contents = await Promise.all(readPromises);
-    
+
     return contents.join('\n\n');
   }
-  
+
   /**
    * Run a test query and parse results
    * @param {string} sql - The test SQL to execute
@@ -136,7 +136,7 @@ class TestCommand extends DatabaseCommand {
     const result = await this.query(sql);
     return this.parseTestResults(result);
   }
-  
+
   /**
    * Parse pgTAP test results
    * @param {Object} queryResult - Raw query result
@@ -151,7 +151,7 @@ class TestCommand extends DatabaseCommand {
       skipped: 0,
       tests: []
     };
-    
+
     if (queryResult.rows) {
       queryResult.rows.forEach(row => {
         // Parse TAP output format
@@ -170,10 +170,10 @@ class TestCommand extends DatabaseCommand {
         }
       });
     }
-    
+
     return results;
   }
-  
+
   /**
    * Write test results to file
    * @param {Object} results - Test results
@@ -182,9 +182,9 @@ class TestCommand extends DatabaseCommand {
    * @returns {Promise<void>}
    */
   async writeResults(results, filename, format = 'json') {
-    const fs = require('fs').promises;
+    const { promises: fs } = await import('fs');
     const filePath = await this.getOutputFile(filename);
-    
+
     let content;
     if (format === 'json') {
       content = JSON.stringify(results, null, 2);
@@ -193,10 +193,10 @@ class TestCommand extends DatabaseCommand {
     } else {
       content = JSON.stringify(results);
     }
-    
+
     await fs.writeFile(filePath, content, 'utf8');
   }
-  
+
   /**
    * Format results as JUnit XML
    * @param {Object} results - Test results
@@ -206,7 +206,7 @@ class TestCommand extends DatabaseCommand {
     const xml = [];
     xml.push('<?xml version="1.0" encoding="UTF-8"?>');
     xml.push(`<testsuite tests="${results.total}" failures="${results.failed}" skipped="${results.skipped}">`);
-    
+
     results.tests.forEach((test, i) => {
       xml.push(`  <testcase name="Test ${i + 1}" classname="pgTAP">`);
       if (test.status === 'failed') {
@@ -214,11 +214,11 @@ class TestCommand extends DatabaseCommand {
       }
       xml.push('  </testcase>');
     });
-    
+
     xml.push('</testsuite>');
     return xml.join('\n');
   }
-  
+
   /**
    * Emit test progress events
    */
@@ -230,7 +230,7 @@ class TestCommand extends DatabaseCommand {
       ...details
     });
   }
-  
+
   /**
    * Emit test results
    */
@@ -242,4 +242,5 @@ class TestCommand extends DatabaseCommand {
   }
 }
 
-module.exports = TestCommand;
+export { TestCommand };
+export default TestCommand;

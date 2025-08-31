@@ -2,22 +2,22 @@
  * Test Commands for data CLI
  */
 
-const CompileCommand = require('./CompileCommand');
-const RunCommand = require('./RunCommand');
-const DevCycleCommand = require('./DevCycleCommand');
-const CoverageCommand = require('./CoverageCommand');
-const WatchCommand = require('./WatchCommand');
-const ValidateCommand = require('./ValidateCommand');
-const GenerateCommand = require('./GenerateCommand');
-const GenerateTemplateCommand = require('./GenerateTemplateCommand');
-const CacheCommand = require('./CacheCommand');
+import CompileCommand from './CompileCommand.js';
+import RunCommand from './RunCommand.js';
+import DevCycleCommand from './DevCycleCommand.js';
+import CoverageCommand from './CoverageCommand.js';
+import WatchCommand from './WatchCommand.js';
+import ValidateCommand from './ValidateCommand.js';
+import GenerateCommand from './GenerateCommand.js';
+import GenerateTemplateCommand from './GenerateTemplateCommand.js';
+import CacheCommand from './CacheCommand.js';
 
 // CI Commands for automated testing
-const CIValidateCommand = require('./ci/CIValidateCommand');
-const CIRunCommand = require('./ci/CIRunCommand');
-const CICoverageCommand = require('./ci/CICoverageCommand');
+import CIValidateCommand from './ci/CIValidateCommand.js';
+import CIRunCommand from './ci/CIRunCommand.js';
+import CICoverageCommand from './ci/CICoverageCommand.js';
 
-module.exports = {
+export {
   CompileCommand,
   RunCommand,
   DevCycleCommand,

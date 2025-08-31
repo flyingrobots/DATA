@@ -2,12 +2,12 @@
  * Database Commands for data CLI
  */
 
-const ResetCommand = require('./ResetCommand');
-const QueryCommand = require('./QueryCommand');
-const CompileCommand = require('./CompileCommand');
-const MigrateCommand = require('./MigrateCommand');
+import ResetCommand from './ResetCommand.js';
+import QueryCommand from './QueryCommand.js';
+import CompileCommand from './CompileCommand.js';
+import MigrateCommand from './MigrateCommand.js';
 
-module.exports = {
+export {
   ResetCommand,
   QueryCommand,
   CompileCommand,

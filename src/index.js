@@ -2,9 +2,15 @@
  * data CLI Main Entry Point
  */
 
-const { Command } = require('commander');
-const { displayLogo } = require('./ui/logo');
-const { version } = require('../package.json');
+import { Command } from 'commander';
+import { displayLogo } from './ui/logo.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const { version } = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
 
 // Note: Commands are loaded dynamically in their respective action handlers
 
@@ -32,7 +38,7 @@ async function cli(argv) {
   let anonKey = null;
   let outputConfig = null;
   
-  program.hook('preAction', (thisCommand) => {
+  program.hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
     
     // Collect path options
@@ -53,7 +59,7 @@ async function cli(argv) {
     anonKey = process.env.data_ANON_KEY;
     
     // Initialize OutputConfig
-    const OutputConfig = require('./lib/OutputConfig');
+    const { default: OutputConfig } = await import('./lib/OutputConfig.js');
     outputConfig = new OutputConfig(
       opts.config,
       null, // cliSupabaseDir
@@ -104,8 +110,8 @@ async function cli(argv) {
     .description('Initialize a new D.A.T.A. project structure')
     .option('--path <path>', 'Path to initialize project (default: current directory)')
     .action(async (options) => {
-      const InitCommand = require('./commands/InitCommand');
-      const CliReporter = require('./reporters/CliReporter');
+      const { default: InitCommand } = await import('./commands/InitCommand.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new InitCommand({
         path: options.path || process.cwd()
@@ -131,8 +137,8 @@ async function cli(argv) {
     .description('Reset the local database')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const ResetCommand = require('./commands/db/ResetCommand');
-      const CliReporter = require('./reporters/CliReporter');
+      const { default: ResetCommand } = await import('./commands/db/ResetCommand.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new ResetCommand(
         databaseUrl,
@@ -160,8 +166,8 @@ async function cli(argv) {
     .option('-f, --file', 'Treat input as file path instead of SQL')
     .action(async (sql, options) => {
       const parentOpts = program.opts();
-      const { QueryCommand } = require('./commands/db');
-      const CliReporter = require('./reporters/CliReporter');
+      const { QueryCommand } = await import('./commands/db/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new QueryCommand(
         databaseUrl,
@@ -190,8 +196,8 @@ async function cli(argv) {
     .option('--debug-functions', 'Enable debug output for function deployment')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { CompileCommand } = require('./commands/db');
-      const CliReporter = require('./reporters/CliReporter');
+      const { CompileCommand } = await import('./commands/db/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new CompileCommand(
         paths.sqlDir,
@@ -233,8 +239,8 @@ async function cli(argv) {
     .option('--desired-db <url>', 'Desired database URL (defaults to compiled SQL)')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const MigrateGenerateCommand = require('./commands/db/migrate/generate');
-      const CliReporter = require('./reporters/CliReporter');
+      const { default: MigrateGenerateCommand } = await import('./commands/db/migrate/generate.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new MigrateGenerateCommand(
         null, // config will use default
@@ -277,8 +283,8 @@ async function cli(argv) {
     .option('--no-git', 'Skip Git staging')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const MigratePromoteCommand = require('./commands/db/migrate/promote');
-      const CliReporter = require('./reporters/CliReporter');
+      const { default: MigratePromoteCommand } = await import('./commands/db/migrate/promote.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new MigratePromoteCommand(
         null, // config will use default
@@ -309,8 +315,8 @@ async function cli(argv) {
     .option('--skip-import-map', 'Skip using import map in production')
     .action(async (functionNames, options) => {
       const parentOpts = program.opts();
-      const { DeployCommand } = require('./commands/functions');
-      const CliReporter = require('./reporters/CliReporter');
+      const { DeployCommand } = await import('./commands/functions/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new DeployCommand(paths.functionsDir, null, parentOpts.prod);
       const reporter = new CliReporter(parentOpts.json);
@@ -329,8 +335,8 @@ async function cli(argv) {
     .description('Validate Edge Functions without deploying')
     .action(async (functionNames, options) => {
       const parentOpts = program.opts();
-      const { ValidateCommand } = require('./commands/functions');
-      const CliReporter = require('./reporters/CliReporter');
+      const { ValidateCommand } = await import('./commands/functions/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new ValidateCommand(
         paths.testsDir,
@@ -354,8 +360,8 @@ async function cli(argv) {
     .description('Show Edge Functions deployment status')
     .action(async (functionNames, options) => {
       const parentOpts = program.opts();
-      const { StatusCommand } = require('./commands/functions');
-      const CliReporter = require('./reporters/CliReporter');
+      const { StatusCommand } = await import('./commands/functions/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new StatusCommand(paths.functionsDir, null, parentOpts.prod);
       const reporter = new CliReporter(parentOpts.json);
@@ -379,8 +385,8 @@ async function cli(argv) {
     .description('Compile tests for execution')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { CompileCommand } = require('./commands/test');
-      const CliReporter = require('./reporters/CliReporter');
+      const { CompileCommand } = await import('./commands/test/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new CompileCommand(
         paths.testsDir,
@@ -411,8 +417,8 @@ async function cli(argv) {
     .option('--output <file>', 'Output file for junit/json formats')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { RunCommand } = require('./commands/test');
-      const CliReporter = require('./reporters/CliReporter');
+      const { RunCommand } = await import('./commands/test/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new RunCommand(
         databaseUrl,
@@ -451,8 +457,8 @@ async function cli(argv) {
     .option('--output <file>', 'Output file for junit/json formats')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const DevCycleCommand = require('./commands/test/DevCycleCommand');
-      const CliReporter = require('./reporters/CliReporter');
+      const { default: DevCycleCommand } = await import('./commands/test/DevCycleCommand.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new DevCycleCommand(
         databaseUrl,
@@ -492,8 +498,8 @@ async function cli(argv) {
     .option('--min-rls-coverage <percent>', 'Minimum RLS policy coverage percentage', '70')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { CoverageCommand } = require('./commands/test');
-      const CliReporter = require('./reporters/CliReporter');
+      const { CoverageCommand } = await import('./commands/test/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new CoverageCommand(
         databaseUrl,
@@ -521,8 +527,8 @@ async function cli(argv) {
     .option('--ignore <pattern>', 'Pattern to ignore files')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { WatchCommand } = require('./commands/test');
-      const CliReporter = require('./reporters/CliReporter');
+      const { WatchCommand } = await import('./commands/test/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new WatchCommand(
         databaseUrl,
@@ -549,8 +555,8 @@ async function cli(argv) {
     .option('--fix', 'Attempt to fix validation issues')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { ValidateCommand } = require('./commands/test');
-      const CliReporter = require('./reporters/CliReporter');
+      const { ValidateCommand } = await import('./commands/test/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new ValidateCommand(
         databaseUrl,
@@ -578,8 +584,8 @@ async function cli(argv) {
     .option('--rls <name>', 'Generate RLS policy test template')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { GenerateCommand } = require('./commands/test');
-      const CliReporter = require('./reporters/CliReporter');
+      const { GenerateCommand } = await import('./commands/test/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       // Determine test type and name from options
       let testType, testName;
@@ -624,8 +630,8 @@ async function cli(argv) {
     .option('--description <desc>', 'Description for the test')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { GenerateTemplateCommand } = require('./commands/test');
-      const CliReporter = require('./reporters/CliReporter');
+      const { GenerateTemplateCommand } = await import('./commands/test/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new GenerateTemplateCommand(
         paths.testsDir,
@@ -651,8 +657,8 @@ async function cli(argv) {
     .option('--output <file>', 'Output file for validation results (JSON format)')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { CIValidateCommand } = require('./commands/test');
-      const CliReporter = require('./reporters/CliReporter');
+      const { CIValidateCommand } = await import('./commands/test/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new CIValidateCommand(
         databaseUrl,
@@ -682,8 +688,8 @@ async function cli(argv) {
     .option('--detailed', 'Include detailed results in JSON output', true)
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { CIRunCommand } = require('./commands/test');
-      const CliReporter = require('./reporters/CliReporter');
+      const { CIRunCommand } = await import('./commands/test/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new CIRunCommand(
         databaseUrl,
@@ -717,8 +723,8 @@ async function cli(argv) {
     .option('--output <file>', 'Output file prefix for coverage reports')
     .action(async (options) => {
       const parentOpts = program.opts();
-      const { CICoverageCommand } = require('./commands/test');
-      const CliReporter = require('./reporters/CliReporter');
+      const { CICoverageCommand } = await import('./commands/test/index.js');
+      const { default: CliReporter } = await import('./reporters/CliReporter.js');
       
       const command = new CICoverageCommand(
         null, // config - uses default
@@ -760,4 +766,10 @@ async function cli(argv) {
   }
 }
 
-module.exports = { cli };
+export { cli };
+export default cli;
+
+// Auto-run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  cli(process.argv).catch(console.error);
+}

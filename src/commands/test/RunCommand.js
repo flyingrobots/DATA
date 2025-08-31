@@ -2,15 +2,15 @@
  * Test Run Command
  */
 
-const { Client } = require('pg');
-const chalk = require('chalk').default || require('chalk');
-const fs = require('fs').promises;
-const path = require('path');
-const TestCommand = require('../../lib/TestCommand');
-const ResultParser = require('../../lib/test/ResultParser');
-const { JUnitFormatter, JSONFormatter } = require('../../lib/test/formatters');
-const TestCache = require('../../lib/test/TestCache');
-const Config = require('../../lib/config');
+import { Client } from 'pg';
+import chalk from 'chalk';
+import { promises as fs } from 'fs';
+import { extname, dirname, join } from 'path';
+import TestCommand from '../../lib/TestCommand.js';
+import ResultParser from '../../lib/test/ResultParser.js';
+import { JUnitFormatter, JSONFormatter } from '../../lib/test/formatters/index.js';
+import TestCache from '../../lib/test/TestCache.js';
+import Config from '../../lib/config.js';
 
 /**
  * Run compiled tests using pgTAP
@@ -527,12 +527,12 @@ class RunCommand extends TestCommand {
     let fullPath = filePath;
     
     // Add default extension if not present
-    if (!path.extname(filePath)) {
+    if (!extname(filePath)) {
       fullPath = filePath + defaultExtension;
     }
     
     // Ensure directory exists
-    const dir = path.dirname(fullPath);
+    const dir = dirname(fullPath);
     await fs.mkdir(dir, { recursive: true });
     
     // Write file
@@ -663,4 +663,5 @@ class RunCommand extends TestCommand {
   }
 }
 
-module.exports = RunCommand;
+export { RunCommand };
+export default RunCommand;

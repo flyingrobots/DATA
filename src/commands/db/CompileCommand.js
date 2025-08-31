@@ -2,8 +2,8 @@
  * Database Migration Compile Command
  */
 
-const path = require('path');
-const BuildCommand = require('../../lib/BuildCommand');
+import { join } from 'path';
+import BuildCommand from '../../lib/BuildCommand.js';
 
 /**
  * Compile SQL sources into migration file
@@ -39,7 +39,7 @@ class CompileCommand extends BuildCommand {
       }
       
       // Load the native migration compiler
-      const MigrationCompiler = require('../../lib/migration/MigrationCompiler');
+      const { default: MigrationCompiler } = await import('../../lib/migration/MigrationCompiler.js');
       
       // Create compiler instance
       const compiler = new MigrationCompiler({
@@ -80,12 +80,12 @@ class CompileCommand extends BuildCommand {
 
     try {
       // Import the DeployCommand
-      const { DeployCommand } = require('../functions');
+      const { DeployCommand } = await import('../functions/index.js');
       
       // Create a functions deployment command
       // Note: This will need to be refactored when functions are separated
       const deployCommand = new DeployCommand(
-        path.join(this.inputDir, '../functions'),
+        join(this.inputDir, '../functions'),
         this.logger,
         this.isProd
       );
@@ -158,4 +158,5 @@ class CompileCommand extends BuildCommand {
   }
 }
 
-module.exports = CompileCommand;
+export { CompileCommand };
+export default CompileCommand;

@@ -2,12 +2,12 @@
  * CLI Reporter for Command Events
  */
 
-const chalk = require('chalk');
-const inquirer = require('inquirer');
-const {
+import chalk from 'chalk';
+import inquirer from 'inquirer';
+import {
   CommandEvent,
   ErrorEvent
-} = require('../lib/events/CommandEvents');
+} from '../lib/events/CommandEvents.cjs';
 
 /**
  * Reporter that listens to command events and displays CLI output
@@ -36,10 +36,10 @@ class CliReporter {
       if (!this.silent) {
         const message = this._extractMessage(eventData);
         const data = this._extractData(eventData);
-        
+
         if (message) {
           console.log(chalk.yellow.bold(`\n⚠️  WARNING: ${message}\n`));
-          
+
           if (data && data.actions) {
             console.log(chalk.yellow('This will:'));
             data.actions.forEach(action => {
@@ -56,7 +56,7 @@ class CliReporter {
       if (!this.silent) {
         const message = this._extractMessage(eventData);
         const error = this._extractError(eventData);
-        
+
         if (message) {
           console.error(chalk.red(`✗ ${message}`));
         }
@@ -155,17 +155,17 @@ class CliReporter {
     if (eventData instanceof CommandEvent) {
       return eventData.message;
     }
-    
+
     // Handle legacy event objects
     if (eventData && typeof eventData === 'object') {
       return eventData.message;
     }
-    
+
     // Handle simple string messages
     if (typeof eventData === 'string') {
       return eventData;
     }
-    
+
     return null;
   }
 
@@ -180,12 +180,12 @@ class CliReporter {
       const { eventType: _eventType, timestamp: _timestamp, message: _message, ...data } = eventData;
       return Object.keys(data).length > 0 ? data : null;
     }
-    
+
     // Handle legacy event objects
     if (eventData && typeof eventData === 'object') {
       return eventData.data || eventData;
     }
-    
+
     return null;
   }
 
@@ -198,12 +198,12 @@ class CliReporter {
     if (eventData instanceof ErrorEvent) {
       return eventData.error;
     }
-    
+
     // Handle legacy event objects
     if (eventData && typeof eventData === 'object') {
       return eventData.error;
     }
-    
+
     return null;
   }
 
@@ -216,12 +216,12 @@ class CliReporter {
     if (eventData instanceof CommandEvent) {
       return eventData.isProd || false;
     }
-    
+
     // Handle legacy event objects
     if (eventData && typeof eventData === 'object') {
       return eventData.isProd || false;
     }
-    
+
     return false;
   }
 
@@ -234,14 +234,15 @@ class CliReporter {
     if (eventData instanceof CommandEvent) {
       return eventData.stdout;
     }
-    
+
     // Handle legacy event objects
     if (eventData && typeof eventData === 'object') {
       return eventData.stdout;
     }
-    
+
     return null;
   }
 }
 
-module.exports = CliReporter;
+export { CliReporter };
+export default CliReporter;

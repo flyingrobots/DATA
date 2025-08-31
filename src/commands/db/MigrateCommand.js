@@ -2,9 +2,9 @@
  * Database Migration Management Command
  */
 
-const Command = require('../../lib/Command');
-const CommandRouter = require('../../lib/CommandRouter');
-const { z } = require('zod');
+import Command from '../../lib/Command.js';
+import CommandRouter from '../../lib/CommandRouter.js';
+import { z } from 'zod';
 
 /**
  * Migration command that uses router pattern for subcommands
@@ -56,7 +56,10 @@ class MigrateCommand extends Command {
         'data db migrate generate --name add-users-table',
         'data db migrate generate --dry-run'
       )
-      .handler(require('./migrate/generate'));
+      .handler(async (...args) => {
+        const { default: handler } = await import('./migrate/generate.js');
+        return handler(...args);
+      });
     
     // Register test command  
     router
@@ -74,7 +77,10 @@ class MigrateCommand extends Command {
         'data db migrate test --migration latest',
         'data db migrate test --migration 20250829_001 --coverage'
       )
-      .handler(require('./migrate/test-v2'));
+      .handler(async (...args) => {
+        const { default: handler } = await import('./migrate/test-v2.js');
+        return handler(...args);
+      });
     
     // Register promote command
     router
@@ -91,7 +97,10 @@ class MigrateCommand extends Command {
         'data db migrate promote --migration 20250829_001',
         'data db migrate promote --prod --force'
       )
-      .handler(require('./migrate/promote'));
+      .handler(async (...args) => {
+        const { default: handler } = await import('./migrate/promote.js');
+        return handler(...args);
+      });
     
     // Register status command
     router
@@ -108,7 +117,10 @@ class MigrateCommand extends Command {
         'data db migrate status --detailed',
         'data db migrate status --prod --format json'
       )
-      .handler(require('./migrate/status'));
+      .handler(async (...args) => {
+        const { default: handler } = await import('./migrate/status.js');
+        return handler(...args);
+      });
     
     // Register rollback command
     router
@@ -127,7 +139,10 @@ class MigrateCommand extends Command {
         'data db migrate rollback --to 20250828_003',
         'data db migrate rollback --prod --force'
       )
-      .handler(require('./migrate/rollback'));
+      .handler(async (...args) => {
+        const { default: handler } = await import('./migrate/rollback.js');
+        return handler(...args);
+      });
     
     // Register clean command
     router
@@ -145,7 +160,10 @@ class MigrateCommand extends Command {
         'data db migrate clean --all',
         'data db migrate clean --older 30 --dry-run'
       )
-      .handler(require('./migrate/clean'));
+      .handler(async (...args) => {
+        const { default: handler } = await import('./migrate/clean.js');
+        return handler(...args);
+      });
     
     // Register history command
     router
@@ -164,7 +182,10 @@ class MigrateCommand extends Command {
         'data db migrate history --limit 20',
         'data db migrate history --from 2025-01-01 --format timeline'
       )
-      .handler(require('./migrate/history'));
+      .handler(async (...args) => {
+        const { default: handler } = await import('./migrate/history.js');
+        return handler(...args);
+      });
     
     // Register verify command
     router
@@ -182,7 +203,10 @@ class MigrateCommand extends Command {
         'data db migrate verify --migration 20250829_001',
         'data db migrate verify --all --prod'
       )
-      .handler(require('./migrate/verify'));
+      .handler(async (...args) => {
+        const { default: handler } = await import('./migrate/verify.js');
+        return handler(...args);
+      });
     
     // Register squash command
     router
@@ -201,7 +225,10 @@ class MigrateCommand extends Command {
         'data db migrate squash --name initial-schema',
         'data db migrate squash --dry-run'
       )
-      .handler(require('./migrate/squash'));
+      .handler(async (...args) => {
+        const { default: handler } = await import('./migrate/squash.js');
+        return handler(...args);
+      });
     
     return router;
   }
@@ -295,4 +322,5 @@ class MigrateCommand extends Command {
   }
 }
 
-module.exports = MigrateCommand;
+export { MigrateCommand };
+export default MigrateCommand;

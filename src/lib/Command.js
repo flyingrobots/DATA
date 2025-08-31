@@ -2,9 +2,9 @@
  * Base Command Class for Event-Driven Architecture
  */
 
-const { EventEmitter } = require('events');
-const pino = require('pino');
-const {
+import { EventEmitter } from 'events';
+import pino from 'pino';
+import {
   ProgressEvent,
   WarningEvent,
   ErrorEvent,
@@ -13,7 +13,7 @@ const {
   CompleteEvent,
   CancelledEvent,
   validateCommandEvent
-} = require('./events/CommandEvents.js');
+} from './events/CommandEvents.cjs';
 
 /**
  * Base command class that all commands extend from
@@ -28,14 +28,14 @@ class Command extends EventEmitter {
     super();
     // Store the Config instance (this is fine - it's a proper class)
     this.config = legacyConfig;
-    
+
     // Logging and environment
     this.isProd = isProd;
     this.logger = logger || this.createLogger();
-    
+
     // Path configuration via dependency injection
     this.outputConfig = outputConfig;
-    
+
     // Command behavior flags
     this.requiresProductionConfirmation = true; // Can be overridden by subclasses
   }
@@ -45,7 +45,7 @@ class Command extends EventEmitter {
    */
   createLogger() {
     const isDev = process.env.NODE_ENV !== 'production';
-    
+
     return pino({
       level: this.config?.get ? this.config.get('logging.level') : 'info',
       transport: isDev ? {
@@ -72,7 +72,7 @@ class Command extends EventEmitter {
       type: startEvent.type,
       isProd: this.isProd
     });
-    
+
     try {
       // Check for production confirmation if needed
       if (this.isProd && this.requiresProductionConfirmation) {
@@ -89,10 +89,10 @@ class Command extends EventEmitter {
           return;
         }
       }
-      
+
       // Call the actual implementation
       const result = await this.performExecute(...args);
-      
+
       // Emit completion event
       const completeEvent = new CompleteEvent(`${this.constructor.name} completed successfully`, result);
       this.emit('complete', {
@@ -102,7 +102,7 @@ class Command extends EventEmitter {
         timestamp: completeEvent.timestamp,
         type: completeEvent.type
       });
-      
+
       return result;
     } catch (error) {
       this.error(`${this.constructor.name} failed`, error);
@@ -126,7 +126,7 @@ class Command extends EventEmitter {
       environment: 'PRODUCTION',
       command: this.constructor.name
     });
-    
+
     return await this.confirm(
       'Are you sure you want to perform this operation in PRODUCTION?'
     );
@@ -221,7 +221,7 @@ class Command extends EventEmitter {
 
   /**
    * Validate an event against expected class type
-   * @param {Object} event - The event object to validate  
+   * @param {Object} event - The event object to validate
    * @param {Function} expectedClass - Expected event class constructor
    * @returns {Object} Validation result with success/error properties
    */
@@ -254,7 +254,7 @@ class Command extends EventEmitter {
       this.logger.warn({ validationError: validation.error }, `Invalid event data for ${eventName}`);
       // Still emit the event for backward compatibility, but log the validation issue
     }
-    
+
     // If eventData is a CommandEvent instance, convert it to the expected format
     if (eventData && typeof eventData.toJSON === 'function') {
       const jsonData = eventData.toJSON();
@@ -270,4 +270,5 @@ class Command extends EventEmitter {
   }
 }
 
-module.exports = Command;
+export { Command };
+export default Command;
