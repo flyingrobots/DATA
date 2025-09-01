@@ -2,13 +2,16 @@
  * Migration Verify Command
  */
 
-const Command = require('../../../lib/Command');
-const fs = require('fs').promises;
-const path = require('path');
-const crypto = require('crypto');
+import Command from '../../../lib/Command.js';
+import { promises as fs } from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 
 /**
  * Verify migration integrity including file hashes and metadata validation
+ */
+/**
+ * @class
  */
 class MigrateVerifyCommand extends Command {
   static description = 'Verify migration integrity';
@@ -460,4 +463,17 @@ class MigrateVerifyCommand extends Command {
   }
 }
 
-module.exports = MigrateVerifyCommand;
+/**
+ * Migration verify handler
+ * @param {Object} args - Command arguments
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ * @param {boolean} isProd - Production flag
+ * @returns {Promise<Object>} Verify result
+ */
+export default async function verifyHandler(args, config, logger, isProd) {
+  const command = new MigrateVerifyCommand(config, logger, isProd);
+  return await command.performExecute(args);
+}
+
+export { MigrateVerifyCommand };

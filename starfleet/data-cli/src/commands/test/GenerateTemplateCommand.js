@@ -5,11 +5,11 @@
  * Supports generating from migration files, specific test types, and custom requirements.
  */
 
-const fs = require('fs').promises;
-const path = require('path');
-const TestCommand = require('../../lib/TestCommand');
-const TestTemplateGenerator = require('../../lib/testing/TestTemplateGenerator');
-const { TestRequirementAnalyzer } = require('../../lib/testing/TestRequirementAnalyzer');
+import { promises as fs } from 'fs';
+import path from 'path';
+import TestCommand from '../../lib/TestCommand.js';
+import TestTemplateGenerator from '../../lib/testing/TestTemplateGenerator.js';
+import { TestRequirementAnalyzer } from '../../lib/testing/TestRequirementAnalyzer.js';
 
 /**
  * Generate pgTAP test templates with advanced analysis capabilities
@@ -385,4 +385,4 @@ class GenerateTemplateCommand extends TestCommand {
   }
 }
 
-module.exports = GenerateTemplateCommand;
+export default GenerateTemplateCommand;

@@ -2,15 +2,18 @@
  * Migration Test Command with pgTAP Validation
  */
 
-const { Command } = require('../../../lib/Command');
-const MigrationMetadata = require('../../../lib/MigrationMetadata');
-const ChildProcessWrapper = require('../../../lib/ChildProcessWrapper');
-const fs = require('fs');
-const path = require('path');
+import Command from '../../../lib/Command.js';
+import MigrationMetadata from '../../../lib/MigrationMetadata.js';
+import ChildProcessWrapper from '../../../lib/ChildProcessWrapper.js';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Test migration command that creates isolated test database,
  * applies staged migration, and runs pgTAP validation
+ */
+/**
+ * @class
  */
 class MigrateTestCommand extends Command {
   static description = 'Test migration with pgTAP validation';
@@ -403,4 +406,17 @@ class MigrateTestCommand extends Command {
   }
 }
 
-module.exports = MigrateTestCommand;
+/**
+ * Migration test handler (legacy version)
+ * @param {Object} args - Command arguments
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ * @param {boolean} isProd - Production flag
+ * @returns {Promise<Object>} Test result
+ */
+export default async function testHandler(args, config, logger, isProd) {
+  const command = new MigrateTestCommand(config, logger, isProd);
+  return await command.performExecute(args);
+}
+
+export { MigrateTestCommand };

@@ -1,14 +1,21 @@
 /**
- * SupabaseTestCommand - Base class for test operations using Supabase API
+ * @fileoverview SupabaseTestCommand - Base class for test operations using Supabase API
  *
- * Replaces TestCommand's raw PostgreSQL with Supabase client
+ * Replaces TestCommand's raw PostgreSQL with Supabase client for better
+ * integration with modern PostgreSQL/Supabase ecosystems. Provides test
+ * compilation, execution, and TAP output parsing capabilities.
+ *
+ * @module SupabaseTestCommand
+ * @requires SupabaseCommand
+ * @requires PathResolver
+ * @since 1.0.0
  */
 
-const SupabaseCommand = require('./SupabaseCommand');
-const PathResolver = require('./PathResolver');
-const fs = require('fs').promises;
-const path = require('path');
-const { glob } = require('glob');
+import SupabaseCommand from './SupabaseCommand.js';
+import PathResolver from './PathResolver.js';
+import fs from 'fs/promises';
+import path from 'path';
+import { glob } from 'glob';
 
 class SupabaseTestCommand extends SupabaseCommand {
   /**
@@ -238,4 +245,5 @@ class SupabaseTestCommand extends SupabaseCommand {
   }
 }
 
-module.exports = SupabaseTestCommand;
+export { SupabaseTestCommand };
+export default SupabaseTestCommand;

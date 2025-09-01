@@ -5,10 +5,10 @@
  * Provides deployment validation, environment checking, and rollback capabilities
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const Command = require('../../lib/Command');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import Command from '../../lib/Command.js';
 
 class DeployCommand extends Command {
   constructor(functionsPath, logger = null, isProd = false) {
@@ -338,4 +338,4 @@ class DeployCommand extends Command {
   }
 }
 
-module.exports = DeployCommand;
+export default DeployCommand;

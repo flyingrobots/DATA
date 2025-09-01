@@ -1,11 +1,24 @@
-const Command = require('./Command');
-const PathResolver = require('./PathResolver');
-const {
+/**
+ * @fileoverview BuildCommand - Base class for compilation/build operations
+ *
+ * Commands that transform or compile files without database interaction.
+ * Provides path resolution and file handling utilities with event-driven
+ * progress tracking for build operations.
+ *
+ * @module BuildCommand
+ * @requires Command
+ * @requires PathResolver
+ * @since 1.0.0
+ */
+
+import Command from './Command.js';
+import PathResolver from './PathResolver.js';
+import {
   BuildProgressEvent,
   BuildStartEvent,
   BuildCompleteEvent,
   BuildFailedEvent
-} = require('./events/CommandEvents');
+} from './events/CommandEvents.js';
 
 /**
  * BuildCommand - Base class for compilation/build operations
@@ -65,9 +78,9 @@ class BuildCommand extends Command {
    * @returns {Promise<string>} Resolved file path
    */
   async getInputFile(filename) {
-    const path = require('path');
+    const { join } = await import('path');
     const dir = await this.getInputDir();
-    return this.pathResolver.resolveFileForRead(path.join(dir, filename));
+    return this.pathResolver.resolveFileForRead(join(dir, filename));
   }
 
   /**
@@ -76,9 +89,9 @@ class BuildCommand extends Command {
    * @returns {Promise<string>} Resolved file path
    */
   async getOutputFile(filename) {
-    const path = require('path');
+    const { join } = await import('path');
     const dir = await this.getOutputDir();
-    return this.pathResolver.resolveFileForWrite(path.join(dir, filename));
+    return this.pathResolver.resolveFileForWrite(join(dir, filename));
   }
 
   /**
@@ -87,16 +100,12 @@ class BuildCommand extends Command {
    * @returns {Promise<string[]>} List of file paths
    */
   async listInputFiles(pattern = '*') {
-    const glob = require('glob');
-    const path = require('path');
+    const { glob } = await import('glob');
+    const { join } = await import('path');
     const dir = await this.getInputDir();
 
-    return new Promise((resolve, reject) => {
-      glob(path.join(dir, pattern), (err, files) => {
-        if (err) reject(err);
-        else resolve(files);
-      });
-    });
+    const files = await glob(join(dir, pattern));
+    return files;
   }
 
   /**
@@ -105,7 +114,7 @@ class BuildCommand extends Command {
    * @returns {Promise<string>} File contents
    */
   async readInputFile(filename) {
-    const fs = require('fs').promises;
+    const fs = await import('fs/promises');
     const filePath = await this.getInputFile(filename);
     return fs.readFile(filePath, 'utf8');
   }
@@ -117,7 +126,7 @@ class BuildCommand extends Command {
    * @returns {Promise<void>}
    */
   async writeOutputFile(filename, content) {
-    const fs = require('fs').promises;
+    const fs = await import('fs/promises');
     const filePath = await this.getOutputFile(filename);
     await fs.writeFile(filePath, content, 'utf8');
   }
@@ -163,4 +172,5 @@ class BuildCommand extends Command {
   }
 }
 
-module.exports = BuildCommand;
+export { BuildCommand };
+export default BuildCommand;

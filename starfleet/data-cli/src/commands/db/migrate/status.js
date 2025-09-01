@@ -2,12 +2,13 @@
  * Migration Status Command
  */
 
-const Command = require('../../../lib/Command');
-const fs = require('fs').promises;
-const path = require('path');
+import Command from '../../../lib/Command.js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 /**
  * Show current migration status including staging state and pending migrations
+ * @class
  */
 class MigrateStatusCommand extends Command {
   static description = 'Show current migration status';
@@ -165,4 +166,17 @@ class MigrateStatusCommand extends Command {
   }
 }
 
-module.exports = MigrateStatusCommand;
+/**
+ * Migration status command handler
+ * @param {Object} args - Command arguments
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ * @param {boolean} isProd - Production flag
+ * @returns {Promise<Object>} Status result
+ */
+export default async function statusHandler(args, config, logger, isProd) {
+  const command = new MigrateStatusCommand(config, logger, isProd);
+  return await command.performExecute(args);
+}
+
+export { MigrateStatusCommand };

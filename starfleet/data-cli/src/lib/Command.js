@@ -22,7 +22,7 @@ import {
   CompleteEvent,
   CancelledEvent,
   validateCommandEvent
-} from './events/CommandEvents.cjs';
+} from './events/CommandEvents.js';
 
 /**
  * Base command class that all commands extend from.

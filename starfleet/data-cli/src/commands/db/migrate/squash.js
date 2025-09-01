@@ -2,12 +2,15 @@
  * Migration Squash Command
  */
 
-const Command = require('../../../lib/Command');
-const fs = require('fs').promises;
-const path = require('path');
+import Command from '../../../lib/Command.js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 /**
  * Squash multiple migrations into a single migration file
+ */
+/**
+ * @class
  */
 class MigrateSquashCommand extends Command {
   static description = 'Squash multiple migrations';
@@ -348,4 +351,17 @@ class MigrateSquashCommand extends Command {
   }
 }
 
-module.exports = MigrateSquashCommand;
+/**
+ * Migration squash handler
+ * @param {Object} args - Command arguments
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ * @param {boolean} isProd - Production flag
+ * @returns {Promise<Object>} Squash result
+ */
+export default async function squashHandler(args, config, logger, isProd) {
+  const command = new MigrateSquashCommand(config, logger, isProd);
+  return await command.performExecute(args);
+}
+
+export { MigrateSquashCommand };

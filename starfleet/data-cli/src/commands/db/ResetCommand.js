@@ -2,14 +2,15 @@
  * Database Reset Command
  */
 
-const { exec } = require('child_process');
-const { promisify } = require('util');
-const DatabaseCommand = require('../../lib/DatabaseCommand');
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import DatabaseCommand from '../../lib/DatabaseCommand.js';
 
 const execAsync = promisify(exec);
 
 /**
  * Reset database command
+ * @class
  */
 class ResetCommand extends DatabaseCommand {
   constructor(databaseUrl, serviceRoleKey = null, anonKey = null, logger = null, isProd = false) {
@@ -93,4 +94,5 @@ class ResetCommand extends DatabaseCommand {
   }
 }
 
-module.exports = ResetCommand;
+export { ResetCommand };
+export default ResetCommand;

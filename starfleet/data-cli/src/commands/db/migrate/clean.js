@@ -2,12 +2,15 @@
  * Migration Clean Command
  */
 
-const Command = require('../../../lib/Command');
-const fs = require('fs').promises;
-const path = require('path');
+import Command from '../../../lib/Command.js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 /**
  * Clean up temporary migration files and staging directories
+ */
+/**
+ * @class
  */
 class MigrateCleanCommand extends Command {
   static description = 'Clean up temporary migration files';
@@ -283,4 +286,17 @@ class MigrateCleanCommand extends Command {
   }
 }
 
-module.exports = MigrateCleanCommand;
+/**
+ * Migration clean handler
+ * @param {Object} args - Command arguments
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ * @param {boolean} isProd - Production flag
+ * @returns {Promise<Object>} Clean result
+ */
+export default async function cleanHandler(args, config, logger, isProd) {
+  const command = new MigrateCleanCommand(config, logger, isProd);
+  return await command.performExecute(args);
+}
+
+export { MigrateCleanCommand };

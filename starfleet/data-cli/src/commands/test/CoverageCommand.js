@@ -2,11 +2,11 @@
  * Test Coverage Command
  */
 
-const TestCommand = require('../../lib/TestCommand');
-const DatabaseUtils = require('../../lib/db-utils');
-const CoverageAnalyzer = require('../../lib/test/CoverageAnalyzer');
-const chalk = require('chalk');
-const Config = require('../../lib/config');
+import TestCommand from '../../lib/TestCommand.js';
+import DatabaseUtils from '../../lib/db-utils.js';
+import CoverageAnalyzer from '../../lib/test/CoverageAnalyzer.js';
+import chalk from 'chalk';
+import Config from '../../lib/config.js';
 
 /**
  * Generate test coverage reports
@@ -235,4 +235,4 @@ class CoverageCommand extends TestCommand {
   }
 }
 
-module.exports = CoverageCommand;
+export default CoverageCommand;

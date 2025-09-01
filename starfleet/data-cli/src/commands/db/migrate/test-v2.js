@@ -2,14 +2,15 @@
  * Migration Test Command with pgTAP Validation - V2 using Supabase API
  */
 
-const Command = require('../../../lib/Command');
-const MigrationMetadata = require('../../../lib/MigrationMetadata');
-const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs').promises;
-const path = require('path');
+import Command from '../../../lib/Command.js';
+import MigrationMetadata from '../../../lib/MigrationMetadata.js';
+import { createClient } from '@supabase/supabase-js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 /**
  * Test migration in isolated schema using Supabase API
+ * @class
  */
 class MigrateTestCommand extends Command {
   static description = 'Test migration with pgTAP validation';
@@ -453,4 +454,17 @@ class MigrateTestCommand extends Command {
   }
 }
 
-module.exports = MigrateTestCommand;
+/**
+ * Test migration handler with pgTAP validation
+ * @param {Object} args - Command arguments
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ * @param {boolean} isProd - Production flag
+ * @returns {Promise<Object>} Test results
+ */
+export default async function testHandler(args, config, logger, isProd) {
+  const command = new MigrateTestCommand(config, logger, isProd);
+  return await command.performExecute(args);
+}
+
+export { MigrateTestCommand };

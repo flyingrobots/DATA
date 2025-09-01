@@ -4,10 +4,10 @@
  * Shows deployment status, health, and metrics for Edge Functions
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const Command = require('../../lib/Command');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import Command from '../../lib/Command.js';
 
 class StatusCommand extends Command {
   constructor(config, logger = null, isProd = false) {
@@ -239,4 +239,4 @@ class StatusCommand extends Command {
   }
 }
 
-module.exports = StatusCommand;
+export default StatusCommand;

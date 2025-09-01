@@ -2,12 +2,15 @@
  * Migration History Command
  */
 
-const Command = require('../../../lib/Command');
-const fs = require('fs').promises;
-const path = require('path');
+import Command from '../../../lib/Command.js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 /**
  * Show migration history and timeline
+ */
+/**
+ * @class
  */
 class MigrateHistoryCommand extends Command {
   static description = 'Show migration history';
@@ -219,4 +222,17 @@ class MigrateHistoryCommand extends Command {
   }
 }
 
-module.exports = MigrateHistoryCommand;
+/**
+ * Migration history handler
+ * @param {Object} args - Command arguments
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ * @param {boolean} isProd - Production flag
+ * @returns {Promise<Object>} History result
+ */
+export default async function historyHandler(args, config, logger, isProd) {
+  const command = new MigrateHistoryCommand(config, logger, isProd);
+  return await command.performExecute(args);
+}
+
+export { MigrateHistoryCommand };

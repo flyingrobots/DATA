@@ -1,7 +1,7 @@
-const Command = require('../../../lib/Command');
-const MigrationMetadata = require('../../../lib/MigrationMetadata');
-const fs = require('fs').promises;
-const path = require('path');
+import Command from '../../../lib/Command.js';
+import MigrationMetadata from '../../../lib/MigrationMetadata.js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 /**
  * MigrateGenerateCommand - Generate migration from schema diff
@@ -15,6 +15,7 @@ const path = require('path');
  * --dry-run             Show diff without saving migration
  * --current-db <url>    Current database URL (defaults to local)
  * --desired-db <url>    Desired database URL (defaults to compiled SQL)
+ * @class
  */
 class MigrateGenerateCommand extends Command {
   static description = 'Generate migration from schema diff';
@@ -359,4 +360,17 @@ INSERT INTO example_table (name) VALUES ('test_data');
   }
 }
 
-module.exports = MigrateGenerateCommand;
+/**
+ * Generate migration from schema diff handler
+ * @param {Object} args - Command arguments
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ * @param {boolean} isProd - Production flag
+ * @returns {Promise<Object>} Migration generation result
+ */
+export default async function generateHandler(args, config, logger, isProd) {
+  const command = new MigrateGenerateCommand(config, logger, isProd);
+  return await command.performExecute(args);
+}
+
+export { MigrateGenerateCommand };

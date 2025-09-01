@@ -3,13 +3,15 @@
  * Promotes tested migrations from staging to production with safety checks
  */
 
-const Command = require('../../../lib/Command');
-const MigrationMetadata = require('../../../lib/MigrationMetadata');
-const fs = require('fs').promises;
-const path = require('path');
+import Command from '../../../lib/Command.js';
+import MigrationMetadata from '../../../lib/MigrationMetadata.js';
+import { promises as fs, statSync } from 'fs';
+import path from 'path';
+import { spawn } from 'child_process';
 
 /**
  * Command to promote a tested migration to production
+ * @class
  */
 class MigratePromoteCommand extends Command {
   static description = 'Promote tested migration to production';
@@ -245,8 +247,6 @@ class MigratePromoteCommand extends Command {
   async stageInGit(productionPath) {
     this.progress('Staging migration in Git...');
 
-    const { spawn } = require('child_process');
-
     return new Promise((resolve, reject) => {
       const git = spawn('git', ['add', productionPath], {
         stdio: ['ignore', 'pipe', 'pipe']
@@ -285,7 +285,7 @@ class MigratePromoteCommand extends Command {
     while (currentDir !== path.dirname(currentDir)) {
       const supabasePath = path.join(currentDir, 'supabase');
       try {
-        require('fs').statSync(supabasePath);
+        statSync(supabasePath);
         return supabasePath;
       } catch {
         currentDir = path.dirname(currentDir);
@@ -320,4 +320,17 @@ class MigratePromoteCommand extends Command {
   }
 }
 
-module.exports = MigratePromoteCommand;
+/**
+ * Promote tested migration to production handler
+ * @param {Object} args - Command arguments
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ * @param {boolean} isProd - Production flag
+ * @returns {Promise<Object>} Promotion result
+ */
+export default async function promoteHandler(args, config, logger, isProd) {
+  const command = new MigratePromoteCommand(config, logger, isProd);
+  return await command.performExecute(args);
+}
+
+export { MigratePromoteCommand };

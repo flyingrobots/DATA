@@ -5,11 +5,11 @@
  * Provides rapid feedback for database test development workflow
  */
 
-const TestCommand = require('../../lib/TestCommand');
-const CompileCommand = require('./CompileCommand');
-const RunCommand = require('./RunCommand');
-const ResetCommand = require('../db/ResetCommand');
-const Config = require('../../lib/config');
+import TestCommand from '../../lib/TestCommand.js';
+import CompileCommand from './CompileCommand.js';
+import RunCommand from './RunCommand.js';
+import ResetCommand from '../db/ResetCommand.js';
+import Config from '../../lib/config.js';
 
 /**
  * Development cycle command that orchestrates compile → reset → test workflow
@@ -159,7 +159,7 @@ class DevCycleCommand extends TestCommand {
 
       // The ResetCommand needs access to outputConfig for supabase directory
       // We'll create a simple OutputConfig for this purpose
-      const OutputConfig = require('../../lib/OutputConfig');
+      const { default: OutputConfig } = await import('../../lib/OutputConfig.js');
       resetCommand.outputConfig = new OutputConfig();
 
       // Attach progress listeners
@@ -344,4 +344,4 @@ class DevCycleCommand extends TestCommand {
   }
 }
 
-module.exports = DevCycleCommand;
+export default DevCycleCommand;

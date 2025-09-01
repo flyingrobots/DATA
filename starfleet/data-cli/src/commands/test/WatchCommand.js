@@ -8,13 +8,13 @@
  * 4. Clears console between runs
  */
 
-const chokidar = require('chokidar');
-const path = require('path');
-const chalk = require('chalk').default || require('chalk');
-const TestCommand = require('../../lib/TestCommand');
-const CompileCommand = require('./CompileCommand');
-const RunCommand = require('./RunCommand');
-const Config = require('../../lib/config');
+import chokidar from 'chokidar';
+import path from 'path';
+import chalk from 'chalk';
+import TestCommand from '../../lib/TestCommand.js';
+import CompileCommand from './CompileCommand.js';
+import RunCommand from './RunCommand.js';
+import Config from '../../lib/config.js';
 
 /**
  * Watch for test file changes and auto-run tests
@@ -413,4 +413,4 @@ class WatchCommand extends TestCommand {
   }
 }
 
-module.exports = WatchCommand;
+export default WatchCommand;

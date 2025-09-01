@@ -1,28 +1,41 @@
 /**
- * CommandRouter - Fluent routing system with Zod schema validation
+ * @fileoverview CommandRouter - Fluent routing system with Zod schema validation
  *
- * Example usage:
- *   const router = new CommandRouter();
- *   const { z } = require('zod');
+ * Provides a type-safe, fluent API for command routing with automatic
+ * argument validation, help generation, and middleware support. Integrates
+ * with Zod schemas for runtime type safety and error reporting.
  *
- *   router
- *     .command("migrate")
- *     .subcommand("generate")
- *     .schema(z.object({
- *       name: z.string().describe("Migration name"),
- *       type: z.enum(["up", "down", "both"]).default("up").describe("Migration type"),
- *       batchSize: z.number().min(1).max(1000).optional().describe("Records per batch"),
- *       verbose: z.boolean().default(false).describe("Enable verbose output"),
- *       outputDir: z.string().describe("Output directory")
- *     }))
- *     .handler(async (args) => {
- *       // args is fully typed and validated
- *       return new GenerateCommand().execute(args);
- *     });
+ * @module CommandRouter
+ * @requires EventEmitter
+ * @requires zod
+ * @since 1.0.0
+ *
+ * @example
+ * ```javascript
+ * import CommandRouter from './CommandRouter.js';
+ * import { z } from 'zod';
+ *
+ * const router = new CommandRouter();
+ *
+ * router
+ *   .command("migrate")
+ *   .subcommand("generate")
+ *   .schema(z.object({
+ *     name: z.string().describe("Migration name"),
+ *     type: z.enum(["up", "down", "both"]).default("up").describe("Migration type"),
+ *     batchSize: z.number().min(1).max(1000).optional().describe("Records per batch"),
+ *     verbose: z.boolean().default(false).describe("Enable verbose output"),
+ *     outputDir: z.string().describe("Output directory")
+ *   }))
+ *   .handler(async (args) => {
+ *     // args is fully typed and validated
+ *     return new GenerateCommand().execute(args);
+ *   });
+ * ```
  */
 
-const EventEmitter = require('events');
-const { z } = require('zod');
+import { EventEmitter } from 'events';
+import { z } from 'zod';
 
 class CommandRouter extends EventEmitter {
   constructor() {
@@ -489,10 +502,10 @@ CommandRouter.schemas = {
   path: z.string(),
 
   existingPath: z.string().refine(
-    (val) => {
-      const fs = require('fs');
+    async (val) => {
       try {
-        fs.accessSync(val);
+        const fs = await import('fs/promises');
+        await fs.access(val);
         return true;
       } catch {
         return false;
@@ -502,10 +515,10 @@ CommandRouter.schemas = {
   ),
 
   directory: z.string().refine(
-    (val) => {
-      const fs = require('fs');
+    async (val) => {
       try {
-        const stats = fs.statSync(val);
+        const fs = await import('fs/promises');
+        const stats = await fs.stat(val);
         return stats.isDirectory();
       } catch {
         return false;
@@ -515,10 +528,10 @@ CommandRouter.schemas = {
   ),
 
   file: z.string().refine(
-    (val) => {
-      const fs = require('fs');
+    async (val) => {
       try {
-        const stats = fs.statSync(val);
+        const fs = await import('fs/promises');
+        const stats = await fs.stat(val);
         return stats.isFile();
       } catch {
         return false;
@@ -539,4 +552,5 @@ CommandRouter.schemas = {
   prod: z.boolean().default(false).describe('Target production environment')
 };
 
-module.exports = CommandRouter;
+export { CommandRouter, CommandBuilder };
+export default CommandRouter;

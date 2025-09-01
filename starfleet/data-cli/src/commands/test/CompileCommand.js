@@ -2,9 +2,9 @@
  * Test Compile Command
  */
 
-const path = require('path');
-const fs = require('fs').promises;
-const BuildCommand = require('../../lib/BuildCommand');
+import path from 'path';
+import { promises as fs } from 'fs';
+import BuildCommand from '../../lib/BuildCommand.js';
 
 /**
  * Compile tests for execution
@@ -74,7 +74,7 @@ class CompileCommand extends BuildCommand {
       }
 
       // Use glob to recursively find SQL files
-      const { glob } = require('glob');
+      const { glob } = await import('glob');
       const pattern = path.join(testDir, '**/*.sql');
       const sqlFiles = await glob(pattern);
 
@@ -398,4 +398,4 @@ ${content}
   }
 }
 
-module.exports = CompileCommand;
+export default CompileCommand;

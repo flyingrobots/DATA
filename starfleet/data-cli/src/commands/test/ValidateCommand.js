@@ -2,10 +2,10 @@
  * Test Validate Command - SQL syntax validation for pgTAP tests
  */
 
-const TestCommand = require('../../lib/TestCommand');
-const fs = require('fs').promises;
-const path = require('path');
-const crypto = require('crypto');
+import TestCommand from '../../lib/TestCommand.js';
+import { promises as fs } from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 
 /**
  * Validate SQL syntax and pgTAP function usage in test files
@@ -444,4 +444,4 @@ class ValidateCommand extends TestCommand {
   }
 }
 
-module.exports = ValidateCommand;
+export default ValidateCommand;

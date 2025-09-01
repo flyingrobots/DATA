@@ -1,6 +1,6 @@
-const fs = require('fs/promises');
-const path = require('path');
-const Command = require('../lib/Command.js');
+import fs from 'fs/promises';
+import path from 'path';
+import Command from '../lib/Command.js';
 
 class InitCommand extends Command {
   constructor(options = {}) {
@@ -133,4 +133,4 @@ CREATE POLICY "Allow public read" ON public.maintenance_mode
   }
 }
 
-module.exports = InitCommand;
+export default InitCommand;

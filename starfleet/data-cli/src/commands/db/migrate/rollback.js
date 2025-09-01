@@ -2,12 +2,15 @@
  * Migration Rollback Command
  */
 
-const DatabaseCommand = require('../../../lib/DatabaseCommand');
-const fs = require('fs').promises;
-const path = require('path');
+import DatabaseCommand from '../../../lib/DatabaseCommand.js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 /**
  * Rollback migration to previous state with confirmation
+ */
+/**
+ * @class
  */
 class MigrateRollbackCommand extends DatabaseCommand {
   static description = 'Rollback migration to previous state';
@@ -182,4 +185,17 @@ class MigrateRollbackCommand extends DatabaseCommand {
   }
 }
 
-module.exports = MigrateRollbackCommand;
+/**
+ * Migration rollback handler
+ * @param {Object} args - Command arguments
+ * @param {Object} config - Configuration object
+ * @param {Object} logger - Logger instance
+ * @param {boolean} isProd - Production flag
+ * @returns {Promise<Object>} Rollback result
+ */
+export default async function rollbackHandler(args, config, logger, isProd) {
+  const command = new MigrateRollbackCommand(config, logger, isProd);
+  return await command.performExecute(args);
+}
+
+export { MigrateRollbackCommand };

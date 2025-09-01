@@ -5,9 +5,9 @@
  * Creates properly structured test files in the correct directories.
  */
 
-const fs = require('fs').promises;
-const path = require('path');
-const TestCommand = require('../../lib/TestCommand');
+import { promises as fs } from 'fs';
+import path from 'path';
+import TestCommand from '../../lib/TestCommand.js';
 
 /**
  * Generate pgTAP test templates for RPC functions and RLS policies
@@ -437,4 +437,4 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for Row Level Security 
   }
 }
 
-module.exports = GenerateCommand;
+export default GenerateCommand;

@@ -2,12 +2,13 @@
  * Database Query Command
  */
 
-const fs = require('fs').promises;
-const { Client } = require('pg');
-const DatabaseCommand = require('../../lib/DatabaseCommand');
+import { promises as fs } from 'fs';
+import { Client } from 'pg';
+import DatabaseCommand from '../../lib/DatabaseCommand.js';
 
 /**
  * Execute SQL queries against the database
+ * @class
  */
 class QueryCommand extends DatabaseCommand {
   constructor(databaseUrl, serviceRoleKey = null, anonKey = null, logger = null, isProd = false) {
@@ -125,4 +126,5 @@ class QueryCommand extends DatabaseCommand {
   }
 }
 
-module.exports = QueryCommand;
+export { QueryCommand };
+export default QueryCommand;

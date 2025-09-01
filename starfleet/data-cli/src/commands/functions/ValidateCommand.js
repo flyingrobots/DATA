@@ -5,10 +5,10 @@
  * without deploying them
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const Command = require('../../lib/Command');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import Command from '../../lib/Command.js';
 
 class ValidateCommand extends Command {
   constructor(config, logger = null, isProd = false) {
@@ -266,4 +266,4 @@ class ValidateCommand extends Command {
   }
 }
 
-module.exports = ValidateCommand;
+export default ValidateCommand;
