@@ -49,7 +49,6 @@ class StatusCommand extends Command {
       this.displayStatusSummary(statusMap);
 
       return statusMap;
-
     } catch (error) {
       this.error('Failed to retrieve functions status', error);
       throw error;
@@ -68,13 +67,13 @@ class StatusCommand extends Command {
 
     const entries = fs.readdirSync(functionsPath, { withFileTypes: true });
     let functions = entries
-      .filter(entry => entry.isDirectory())
-      .map(entry => entry.name)
-      .filter(name => !name.startsWith('.'));
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((name) => !name.startsWith('.'));
 
     // Filter by specified function names if provided
     if (functionNames && functionNames.length > 0) {
-      functions = functions.filter(name => functionNames.includes(name));
+      functions = functions.filter((name) => functionNames.includes(name));
     }
 
     const localFunctions = [];
@@ -96,7 +95,6 @@ class StatusCommand extends Command {
 
         const denoJsonPath = path.join(functionPath, 'deno.json');
         hasConfig = fs.existsSync(denoJsonPath);
-
       } catch (error) {
         this.warn(`Could not read stats for function: ${functionName}`);
       }
@@ -128,7 +126,7 @@ class StatusCommand extends Command {
 
       const deployedFunctions = JSON.parse(result);
 
-      return deployedFunctions.map(func => ({
+      return deployedFunctions.map((func) => ({
         name: func.name,
         id: func.id,
         status: func.status || 'unknown',
@@ -136,7 +134,6 @@ class StatusCommand extends Command {
         updatedAt: func.updated_at,
         version: func.version
       }));
-
     } catch (error) {
       this.warn('Could not retrieve deployed functions list', {
         error: error.message
@@ -185,9 +182,9 @@ class StatusCommand extends Command {
    * Display status summary
    */
   displayStatusSummary(statusMap) {
-    const localOnly = statusMap.filter(f => f.status === 'local-only');
-    const deployed = statusMap.filter(f => f.status === 'deployed');
-    const deployedOnly = statusMap.filter(f => f.status === 'deployed-only');
+    const localOnly = statusMap.filter((f) => f.status === 'local-only');
+    const deployed = statusMap.filter((f) => f.status === 'deployed');
+    const deployedOnly = statusMap.filter((f) => f.status === 'deployed-only');
 
     this.success('📈 Functions Status Summary', {
       total: statusMap.length,
@@ -227,13 +224,13 @@ class StatusCommand extends Command {
     // Warn about potential issues
     if (localOnly.length > 0) {
       this.warn(`${localOnly.length} function(s) exist locally but are not deployed`, {
-        functions: localOnly.map(f => f.name)
+        functions: localOnly.map((f) => f.name)
       });
     }
 
     if (deployedOnly.length > 0) {
       this.warn(`${deployedOnly.length} function(s) are deployed but not found locally`, {
-        functions: deployedOnly.map(f => f.name)
+        functions: deployedOnly.map((f) => f.name)
       });
     }
   }

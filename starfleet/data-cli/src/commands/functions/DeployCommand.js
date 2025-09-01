@@ -73,8 +73,8 @@ class DeployCommand extends Command {
       }
 
       // Emit deployment summary
-      const successful = results.filter(r => r.success);
-      const failed = results.filter(r => !r.success);
+      const successful = results.filter((r) => r.success);
+      const failed = results.filter((r) => !r.success);
 
       this.emit('deployment-complete', {
         total: results.length,
@@ -85,14 +85,13 @@ class DeployCommand extends Command {
 
       if (failed.length > 0) {
         this.warn(`Deployment completed with ${failed.length} failure(s)`, {
-          failed: failed.map(f => f.function)
+          failed: failed.map((f) => f.function)
         });
       } else {
         this.success(`✅ Successfully deployed ${successful.length} function(s)`, {
-          deployed: successful.map(s => s.function)
+          deployed: successful.map((s) => s.function)
         });
       }
-
     } catch (error) {
       this.error('Functions deployment failed', error);
       throw error;
@@ -151,7 +150,7 @@ class DeployCommand extends Command {
         const result = execSync('supabase secrets list --json', { stdio: 'pipe' });
         const secrets = JSON.parse(result.toString());
 
-        if (!secrets.find(s => s.name === secret)) {
+        if (!secrets.find((s) => s.name === secret)) {
           missingSecrets.push(secret);
         }
       } catch (error) {
@@ -190,9 +189,9 @@ class DeployCommand extends Command {
     // Get all functions in directory
     const entries = fs.readdirSync(this.functionsPath, { withFileTypes: true });
     return entries
-      .filter(entry => entry.isDirectory())
-      .map(entry => entry.name)
-      .filter(name => !name.startsWith('.'));
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((name) => !name.startsWith('.'));
   }
 
   /**
@@ -222,7 +221,6 @@ class DeployCommand extends Command {
       if (!content.includes('import') && !content.includes('require(')) {
         this.warn(`Function ${functionName} has no imports - may be incomplete`);
       }
-
     } catch (error) {
       this.warn(`Could not validate ${functionName} syntax: ${error.message}`);
     }
@@ -278,7 +276,6 @@ class DeployCommand extends Command {
         deployTime,
         output: result
       };
-
     } catch (error) {
       this.error(`Failed to deploy ${functionName}`, error);
 
@@ -309,7 +306,6 @@ class DeployCommand extends Command {
       this.emit('deployment-status', { functions });
 
       return functions;
-
     } catch (error) {
       this.warn('Could not retrieve function status', { error: error.message });
       return [];

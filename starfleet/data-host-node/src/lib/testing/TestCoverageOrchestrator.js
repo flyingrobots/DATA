@@ -8,13 +8,13 @@
  * @module TestCoverageOrchestrator
  */
 
-const { EventEmitter } = require('events');
-const TestRequirementAnalyzer = require('./TestRequirementAnalyzer');
-const pgTAPTestScanner = require('./pgTAPTestScanner');
-const CoverageEnforcer = require('./CoverageEnforcer');
-const TestTemplateGenerator = require('./TestTemplateGenerator');
-const path = require('path');
-const fs = require('fs').promises;
+import { EventEmitter } from 'events';
+import TestRequirementAnalyzer from './TestRequirementAnalyzer';
+import pgTAPTestScanner from './pgTAPTestScanner';
+import CoverageEnforcer from './CoverageEnforcer';
+import TestTemplateGenerator from './TestTemplateGenerator';
+import path from 'path';
+import fs from 'fs'.promises;
 
 /**
  * @typedef {Object} CoverageCheckResult
@@ -331,4 +331,4 @@ class TestCoverageOrchestrator extends EventEmitter {
   }
 }
 
-module.exports = TestCoverageOrchestrator;
+export default TestCoverageOrchestrator;

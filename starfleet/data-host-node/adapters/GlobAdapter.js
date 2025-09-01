@@ -5,13 +5,13 @@ import minimatch from 'minimatch';
 /**
  * Node.js implementation of the Glob port.
  * Provides file pattern matching and globbing functionality.
- * 
+ *
  * @class GlobAdapter
  */
 export class GlobAdapter {
   /**
    * Create a new GlobAdapter instance.
-   * 
+   *
    * @param {Object} options - Configuration options
    * @param {string} [options.cwd] - Default working directory
    * @param {boolean} [options.absolute=false] - Return absolute paths by default
@@ -29,7 +29,7 @@ export class GlobAdapter {
 
   /**
    * Find files matching a glob pattern.
-   * 
+   *
    * @param {string} pattern - Glob pattern to match
    * @param {Object} [options] - Globbing options
    * @param {string} [options.cwd] - Working directory override
@@ -44,17 +44,17 @@ export class GlobAdapter {
   async find(pattern, options = {}) {
     try {
       const globOptions = this._buildGlobOptions(options);
-      
+
       const matches = await glob(pattern, globOptions);
-      
+
       // Apply post-processing filters
       let results = matches;
-      
+
       if (options.onlyDirectories) {
         const { FileSystemAdapter } = await import('./FileSystemAdapter.js');
         const fs = new FileSystemAdapter();
         const filtered = [];
-        
+
         for (const match of matches) {
           const stats = await fs.stat(match).catch(() => null);
           if (stats && stats.isDirectory) {
@@ -63,10 +63,10 @@ export class GlobAdapter {
         }
         results = filtered;
       }
-      
+
       // Sort results for consistency
       results.sort();
-      
+
       return results;
     } catch (error) {
       throw this._normalizeError(error, 'find', pattern);
@@ -75,7 +75,7 @@ export class GlobAdapter {
 
   /**
    * Find files matching multiple glob patterns.
-   * 
+   *
    * @param {Array<string>} patterns - Array of glob patterns
    * @param {Object} [options] - Globbing options (same as find)
    * @returns {Promise<Array<string>>} Array of unique matching file paths
@@ -83,14 +83,12 @@ export class GlobAdapter {
    */
   async findMultiple(patterns, options = {}) {
     try {
-      const allMatches = await Promise.all(
-        patterns.map(pattern => this.find(pattern, options))
-      );
-      
+      const allMatches = await Promise.all(patterns.map((pattern) => this.find(pattern, options)));
+
       // Flatten and deduplicate results
       const uniqueMatches = [...new Set(allMatches.flat())];
       uniqueMatches.sort();
-      
+
       return uniqueMatches;
     } catch (error) {
       throw this._normalizeError(error, 'findMultiple', patterns.join(', '));
@@ -99,7 +97,7 @@ export class GlobAdapter {
 
   /**
    * Test if a file path matches a glob pattern.
-   * 
+   *
    * @param {string} filePath - File path to test
    * @param {string} pattern - Glob pattern
    * @param {Object} [options] - Matching options
@@ -110,25 +108,25 @@ export class GlobAdapter {
   matches(filePath, pattern, options = {}) {
     try {
       const cwd = options.cwd || this.defaultCwd;
-      const caseSensitive = options.caseSensitive !== undefined ? 
-        options.caseSensitive : this.caseSensitive;
-      
+      const caseSensitive =
+        options.caseSensitive !== undefined ? options.caseSensitive : this.caseSensitive;
+
       // Normalize path relative to cwd if not absolute
       let normalizedPath = filePath;
       if (!isAbsolute(filePath)) {
         normalizedPath = resolve(cwd, filePath);
       }
-      
+
       // Convert to relative path for matching if pattern is relative
       if (!isAbsolute(pattern)) {
         normalizedPath = relative(cwd, normalizedPath);
       }
-      
+
       const minimatchOptions = {
         dot: true,
         nocase: caseSensitive === false
       };
-      
+
       return minimatch(normalizedPath, pattern, minimatchOptions);
     } catch (error) {
       return false;
@@ -137,19 +135,19 @@ export class GlobAdapter {
 
   /**
    * Test if a file path matches any of the provided patterns.
-   * 
+   *
    * @param {string} filePath - File path to test
    * @param {Array<string>} patterns - Array of glob patterns
    * @param {Object} [options] - Matching options (same as matches)
    * @returns {boolean} True if path matches any pattern
    */
   matchesAny(filePath, patterns, options = {}) {
-    return patterns.some(pattern => this.matches(filePath, pattern, options));
+    return patterns.some((pattern) => this.matches(filePath, pattern, options));
   }
 
   /**
    * Filter an array of file paths by glob patterns.
-   * 
+   *
    * @param {Array<string>} filePaths - Array of file paths
    * @param {Array<string>} includePatterns - Patterns to include
    * @param {Array<string>} [excludePatterns=[]] - Patterns to exclude
@@ -158,33 +156,33 @@ export class GlobAdapter {
    * @returns {Array<string>} Filtered file paths
    */
   filter(filePaths, includePatterns, excludePatterns = [], options = {}) {
-    return filePaths.filter(filePath => {
+    return filePaths.filter((filePath) => {
       // Must match at least one include pattern
-      const included = includePatterns.length === 0 || 
-        this.matchesAny(filePath, includePatterns, options);
-      
+      const included =
+        includePatterns.length === 0 || this.matchesAny(filePath, includePatterns, options);
+
       // Must not match any exclude pattern
-      const excluded = excludePatterns.length > 0 && 
-        this.matchesAny(filePath, excludePatterns, options);
-      
+      const excluded =
+        excludePatterns.length > 0 && this.matchesAny(filePath, excludePatterns, options);
+
       return included && !excluded;
     });
   }
 
   /**
    * Expand a glob pattern to see what files it would match (dry run).
-   * 
+   *
    * @param {string} pattern - Glob pattern to expand
    * @param {Object} [options] - Expansion options (same as find)
    * @returns {Promise<GlobExpansion>} Expansion result with stats
    */
   async expand(pattern, options = {}) {
     const startTime = Date.now();
-    
+
     try {
       const matches = await this.find(pattern, options);
       const endTime = Date.now();
-      
+
       return {
         pattern,
         matches,
@@ -199,7 +197,7 @@ export class GlobAdapter {
 
   /**
    * Watch for file changes matching glob patterns.
-   * 
+   *
    * @param {string|Array<string>} patterns - Glob pattern(s) to watch
    * @param {Object} [options] - Watch options
    * @param {string} [options.cwd] - Working directory
@@ -212,7 +210,7 @@ export class GlobAdapter {
   async watch(patterns, options = {}) {
     try {
       const { watch: chokidarWatch } = await import('chokidar');
-      
+
       const watchPatterns = Array.isArray(patterns) ? patterns : [patterns];
       const watchOptions = {
         cwd: options.cwd || this.defaultCwd,
@@ -223,9 +221,9 @@ export class GlobAdapter {
         interval: options.interval || 100,
         binaryInterval: options.binaryInterval || 300
       };
-      
+
       const watcher = chokidarWatch(watchPatterns, watchOptions);
-      
+
       return {
         watcher,
         close: () => watcher.close(),
@@ -234,13 +232,17 @@ export class GlobAdapter {
         getWatched: () => watcher.getWatched()
       };
     } catch (error) {
-      throw this._normalizeError(error, 'watch', Array.isArray(patterns) ? patterns.join(', ') : patterns);
+      throw this._normalizeError(
+        error,
+        'watch',
+        Array.isArray(patterns) ? patterns.join(', ') : patterns
+      );
     }
   }
 
   /**
    * Build glob options from input parameters.
-   * 
+   *
    * @private
    * @param {Object} options - Input options
    * @returns {Object} Glob library compatible options
@@ -248,7 +250,7 @@ export class GlobAdapter {
   _buildGlobOptions(options = {}) {
     const cwd = options.cwd || this.defaultCwd;
     const absolute = options.absolute !== undefined ? options.absolute : this.defaultAbsolute;
-    
+
     return {
       cwd: resolve(cwd),
       absolute,
@@ -265,7 +267,7 @@ export class GlobAdapter {
 
   /**
    * Normalize glob errors into consistent format.
-   * 
+   *
    * @private
    * @param {Error} error - Original error
    * @param {string} operation - Operation that failed
@@ -280,7 +282,7 @@ export class GlobAdapter {
     normalizedError.operation = operation;
     normalizedError.pattern = pattern;
     normalizedError.originalError = error;
-    
+
     return normalizedError;
   }
 }

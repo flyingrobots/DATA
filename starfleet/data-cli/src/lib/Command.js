@@ -52,10 +52,10 @@ class Command extends EventEmitter {
    * @param {Object|null} outputConfig - Output configuration for paths (OutputConfig class instance)
    */
   constructor(
-    legacyConfig = null,  // Config class instance is OK - it's a typed class
+    legacyConfig = null, // Config class instance is OK - it's a typed class
     logger = null,
     isProd = false,
-    outputConfig = null   // OutputConfig class instance for paths
+    outputConfig = null // OutputConfig class instance for paths
   ) {
     super();
     // Store the Config instance (this is fine - it's a proper class)
@@ -83,14 +83,16 @@ class Command extends EventEmitter {
 
     return pino({
       level: this.config?.get ? this.config.get('logging.level') : 'info',
-      transport: isDev ? {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'HH:MM:ss',
-          ignore: 'pid,hostname'
+      transport: isDev
+        ? {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'HH:MM:ss',
+            ignore: 'pid,hostname'
+          }
         }
-      } : undefined
+        : undefined
     });
   }
 
@@ -144,7 +146,10 @@ class Command extends EventEmitter {
       const result = await this.performExecute(...args);
 
       // Emit completion event
-      const completeEvent = new CompleteEvent(`${this.constructor.name} completed successfully`, result);
+      const completeEvent = new CompleteEvent(
+        `${this.constructor.name} completed successfully`,
+        result
+      );
       this.emit('complete', {
         message: completeEvent.message,
         result: completeEvent.result,
@@ -191,9 +196,7 @@ class Command extends EventEmitter {
       command: this.constructor.name
     });
 
-    return await this.confirm(
-      'Are you sure you want to perform this operation in PRODUCTION?'
-    );
+    return this.confirm('Are you sure you want to perform this operation in PRODUCTION?');
   }
 
   /**
@@ -317,7 +320,7 @@ class Command extends EventEmitter {
    * @returns {Promise<boolean>} True if confirmed, false otherwise
    */
   async confirm(message, defaultValue = false) {
-    return await this.prompt('confirm', { message, default: defaultValue });
+    return this.prompt('confirm', { message, default: defaultValue });
   }
 
   /**
@@ -331,7 +334,7 @@ class Command extends EventEmitter {
    * @returns {Promise<string>} User input string
    */
   async input(message, options = {}) {
-    return await this.prompt('input', { message, ...options });
+    return this.prompt('input', { message, ...options });
   }
 
   /**
@@ -356,7 +359,8 @@ class Command extends EventEmitter {
       // If no specific class expected, just check if it has the basic event structure
       return {
         success: !!(event && event.type && event.message && event.timestamp),
-        error: event && event.type && event.message && event.timestamp ? null : 'Invalid event structure'
+        error:
+          event && event.type && event.message && event.timestamp ? null : 'Invalid event structure'
       };
     }
 
@@ -386,7 +390,10 @@ class Command extends EventEmitter {
   emitTypedEvent(eventName, eventData, expectedClass = null) {
     const validation = this.validateEvent(eventData, expectedClass);
     if (!validation.success) {
-      this.logger.warn({ validationError: validation.error }, `Invalid event data for ${eventName}`);
+      this.logger.warn(
+        { validationError: validation.error },
+        `Invalid event data for ${eventName}`
+      );
       // Still emit the event for backward compatibility, but log the validation issue
     }
 

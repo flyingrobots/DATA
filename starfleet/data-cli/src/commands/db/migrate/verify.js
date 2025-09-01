@@ -80,7 +80,6 @@ class MigrateVerifyCommand extends Command {
         failedChecks,
         issues: issues.length
       });
-
     } catch (error) {
       this.error('Migration verification failed', error);
       this.emit('failed', { error });
@@ -102,7 +101,10 @@ class MigrateVerifyCommand extends Command {
       const checksumFile = path.resolve('supabase/.migration_checksums.json');
 
       // Check if migrations directory exists
-      const migrationsExists = await fs.access(migrationsDir).then(() => true).catch(() => false);
+      const migrationsExists = await fs
+        .access(migrationsDir)
+        .then(() => true)
+        .catch(() => false);
       if (!migrationsExists) {
         issues.push({ type: 'missing_directory', path: migrationsDir });
         return { total, passed, failed, issues };
@@ -110,7 +112,10 @@ class MigrateVerifyCommand extends Command {
 
       // Load stored checksums
       let storedChecksums = {};
-      const checksumExists = await fs.access(checksumFile).then(() => true).catch(() => false);
+      const checksumExists = await fs
+        .access(checksumFile)
+        .then(() => true)
+        .catch(() => false);
       if (checksumExists) {
         const checksumContent = await fs.readFile(checksumFile, 'utf8');
         storedChecksums = JSON.parse(checksumContent);
@@ -118,7 +123,7 @@ class MigrateVerifyCommand extends Command {
 
       // Get all migration files
       const files = await fs.readdir(migrationsDir);
-      const migrationFiles = files.filter(f => f.endsWith('.sql'));
+      const migrationFiles = files.filter((f) => f.endsWith('.sql'));
 
       for (const file of migrationFiles) {
         total++;
@@ -153,7 +158,6 @@ class MigrateVerifyCommand extends Command {
           if (verbose) this.progress(`Hash verified: ${file}`);
         }
       }
-
     } catch (error) {
       issues.push({ type: 'hash_verification_error', error: error.message });
     }
@@ -172,7 +176,10 @@ class MigrateVerifyCommand extends Command {
 
     try {
       const historyFile = path.resolve('supabase/.migration_history.json');
-      const historyExists = await fs.access(historyFile).then(() => true).catch(() => false);
+      const historyExists = await fs
+        .access(historyFile)
+        .then(() => true)
+        .catch(() => false);
 
       if (!historyExists) {
         issues.push({ type: 'missing_history_file', path: historyFile });
@@ -199,7 +206,7 @@ class MigrateVerifyCommand extends Command {
         total++;
 
         const requiredFields = ['action', 'timestamp'];
-        const missingFields = requiredFields.filter(field => !entry[field]);
+        const missingFields = requiredFields.filter((field) => !entry[field]);
 
         if (missingFields.length > 0) {
           issues.push({
@@ -223,7 +230,6 @@ class MigrateVerifyCommand extends Command {
           }
         }
       }
-
     } catch (error) {
       issues.push({ type: 'metadata_validation_error', error: error.message });
     }
@@ -242,14 +248,17 @@ class MigrateVerifyCommand extends Command {
 
     try {
       const migrationsDir = path.resolve('supabase/migrations');
-      const migrationsExists = await fs.access(migrationsDir).then(() => true).catch(() => false);
+      const migrationsExists = await fs
+        .access(migrationsDir)
+        .then(() => true)
+        .catch(() => false);
 
       if (!migrationsExists) {
         return { total, passed, failed, issues };
       }
 
       const files = await fs.readdir(migrationsDir);
-      const migrationFiles = files.filter(f => f.endsWith('.sql')).sort();
+      const migrationFiles = files.filter((f) => f.endsWith('.sql')).sort();
 
       for (let i = 0; i < migrationFiles.length; i++) {
         total++;
@@ -291,7 +300,6 @@ class MigrateVerifyCommand extends Command {
           passed++;
         }
       }
-
     } catch (error) {
       issues.push({ type: 'dependency_check_error', error: error.message });
     }
@@ -310,14 +318,17 @@ class MigrateVerifyCommand extends Command {
 
     try {
       const migrationsDir = path.resolve('supabase/migrations');
-      const migrationsExists = await fs.access(migrationsDir).then(() => true).catch(() => false);
+      const migrationsExists = await fs
+        .access(migrationsDir)
+        .then(() => true)
+        .catch(() => false);
 
       if (!migrationsExists) {
         return { total, passed, failed, issues };
       }
 
       const files = await fs.readdir(migrationsDir);
-      const migrationFiles = files.filter(f => f.endsWith('.sql'));
+      const migrationFiles = files.filter((f) => f.endsWith('.sql'));
 
       for (const file of migrationFiles) {
         total++;
@@ -336,7 +347,6 @@ class MigrateVerifyCommand extends Command {
           if (verbose) this.progress(`SQL syntax OK: ${file}`);
         }
       }
-
     } catch (error) {
       issues.push({ type: 'sql_syntax_error', error: error.message });
     }
@@ -357,10 +367,12 @@ class MigrateVerifyCommand extends Command {
       const lineNum = index + 1;
 
       // Check for unterminated statements (basic check)
-      if (line.trim().length > 0 &&
-          !line.trim().startsWith('--') &&
-          !line.includes(';') &&
-          lineNum === lines.length) {
+      if (
+        line.trim().length > 0 &&
+        !line.trim().startsWith('--') &&
+        !line.includes(';') &&
+        lineNum === lines.length
+      ) {
         issues.push({
           type: 'unterminated_statement',
           file: filename,
@@ -373,8 +385,12 @@ class MigrateVerifyCommand extends Command {
       const dangerousOps = ['DROP TABLE', 'TRUNCATE', 'DELETE FROM'];
       const upperLine = line.toUpperCase();
 
-      dangerousOps.forEach(op => {
-        if (upperLine.includes(op) && !content.toUpperCase().includes('BEGIN') && !content.toUpperCase().includes('TRANSACTION')) {
+      dangerousOps.forEach((op) => {
+        if (
+          upperLine.includes(op) &&
+          !content.toUpperCase().includes('BEGIN') &&
+          !content.toUpperCase().includes('TRANSACTION')
+        ) {
           issues.push({
             type: 'dangerous_operation_without_transaction',
             file: filename,
@@ -401,7 +417,9 @@ class MigrateVerifyCommand extends Command {
           await this.fixMissingChecksum(issue);
           break;
         case 'checksum_mismatch':
-          this.warn(`Cannot auto-fix checksum mismatch for ${issue.file} - manual review required`);
+          this.warn(
+            `Cannot auto-fix checksum mismatch for ${issue.file} - manual review required`
+          );
           break;
         default:
           this.warn(`Cannot auto-fix issue type: ${issue.type}`);
@@ -419,7 +437,10 @@ class MigrateVerifyCommand extends Command {
     const checksumFile = path.resolve('supabase/.migration_checksums.json');
 
     let checksums = {};
-    const checksumExists = await fs.access(checksumFile).then(() => true).catch(() => false);
+    const checksumExists = await fs
+      .access(checksumFile)
+      .then(() => true)
+      .catch(() => false);
     if (checksumExists) {
       const content = await fs.readFile(checksumFile, 'utf8');
       checksums = JSON.parse(content);
@@ -473,7 +494,7 @@ class MigrateVerifyCommand extends Command {
  */
 export default async function verifyHandler(args, config, logger, isProd) {
   const command = new MigrateVerifyCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateVerifyCommand };

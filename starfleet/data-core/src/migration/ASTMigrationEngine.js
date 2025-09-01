@@ -1,14 +1,5 @@
-/**
- * AST-based Migration Engine for D.A.T.A.
- *
- * Pure JavaScript PostgreSQL migration generator using AST parsing
- * No Python dependencies, no temporary databases
- *
- * @module ASTMigrationEngine
- */
-
-const { parse } = require('pgsql-parser');
-const { EventEmitter } = require('events');
+import { parse } from 'pgsql-parser';
+import { EventEmitter } from 'events';
 
 /**
  * Represents a single migration operation
@@ -85,26 +76,26 @@ class ASTMigrationEngine extends EventEmitter {
       const migrations = [];
 
       // Tables (most complex - includes columns, constraints)
-      migrations.push(...await this.diffTables(fromSchema.tables, toSchema.tables));
+      migrations.push(...(await this.diffTables(fromSchema.tables, toSchema.tables)));
 
       // Functions and Triggers
-      migrations.push(...await this.diffFunctions(fromSchema.functions, toSchema.functions));
-      migrations.push(...await this.diffTriggers(fromSchema.triggers, toSchema.triggers));
+      migrations.push(...(await this.diffFunctions(fromSchema.functions, toSchema.functions)));
+      migrations.push(...(await this.diffTriggers(fromSchema.triggers, toSchema.triggers)));
 
       // RLS Policies (Supabase critical)
-      migrations.push(...await this.diffPolicies(fromSchema.policies, toSchema.policies));
+      migrations.push(...(await this.diffPolicies(fromSchema.policies, toSchema.policies)));
 
       // Enums and Custom Types
-      migrations.push(...await this.diffEnums(fromSchema.enums, toSchema.enums));
+      migrations.push(...(await this.diffEnums(fromSchema.enums, toSchema.enums)));
 
       // Indexes
-      migrations.push(...await this.diffIndexes(fromSchema.indexes, toSchema.indexes));
+      migrations.push(...(await this.diffIndexes(fromSchema.indexes, toSchema.indexes)));
 
       // Views
-      migrations.push(...await this.diffViews(fromSchema.views, toSchema.views));
+      migrations.push(...(await this.diffViews(fromSchema.views, toSchema.views)));
 
       // Detect destructive operations
-      const destructive = migrations.filter(m => m.type === 'DESTRUCTIVE');
+      const destructive = migrations.filter((m) => m.type === 'DESTRUCTIVE');
       if (destructive.length > 0) {
         this.emit('warning', {
           message: `${destructive.length} destructive operations detected`,
@@ -153,15 +144,25 @@ class ASTMigrationEngine extends EventEmitter {
         const stmt = statement.RawStmt?.stmt;
         if (!stmt) continue;
 
-        switch (stmt.CreateStmt ? 'CreateStmt' :
-          stmt.AlterTableStmt ? 'AlterTableStmt' :
-            stmt.CreateFunctionStmt ? 'CreateFunctionStmt' :
-              stmt.CreateTrigStmt ? 'CreateTrigStmt' :
-                stmt.CreatePolicyStmt ? 'CreatePolicyStmt' :
-                  stmt.CreateEnumStmt ? 'CreateEnumStmt' :
-                    stmt.IndexStmt ? 'IndexStmt' :
-                      stmt.ViewStmt ? 'ViewStmt' : null) {
-
+        switch (
+          stmt.CreateStmt
+            ? 'CreateStmt'
+            : stmt.AlterTableStmt
+              ? 'AlterTableStmt'
+              : stmt.CreateFunctionStmt
+                ? 'CreateFunctionStmt'
+                : stmt.CreateTrigStmt
+                  ? 'CreateTrigStmt'
+                  : stmt.CreatePolicyStmt
+                    ? 'CreatePolicyStmt'
+                    : stmt.CreateEnumStmt
+                      ? 'CreateEnumStmt'
+                      : stmt.IndexStmt
+                        ? 'IndexStmt'
+                        : stmt.ViewStmt
+                          ? 'ViewStmt'
+                          : null
+        ) {
         case 'CreateStmt':
           this.parseTable(stmt.CreateStmt, schema.tables);
           break;
@@ -248,8 +249,8 @@ class ASTMigrationEngine extends EventEmitter {
    */
   diffTableColumns(tableName, fromTable, toTable) {
     const migrations = [];
-    const fromColumns = new Map(fromTable.columns?.map(c => [c.name, c]) || []);
-    const toColumns = new Map(toTable.columns?.map(c => [c.name, c]) || []);
+    const fromColumns = new Map(fromTable.columns?.map((c) => [c.name, c]) || []);
+    const toColumns = new Map(toTable.columns?.map((c) => [c.name, c]) || []);
 
     // Added columns (SAFE)
     for (const [colName, col] of toColumns) {
@@ -432,7 +433,7 @@ class ASTMigrationEngine extends EventEmitter {
   }
 
   reconstructCreateTable(table) {
-    const columns = table.columns.map(c => this.reconstructColumn(c));
+    const columns = table.columns.map((c) => this.reconstructColumn(c));
     return `CREATE TABLE ${table.name} (\n  ${columns.join(',\n  ')}\n)`;
   }
 
@@ -466,10 +467,12 @@ class ASTMigrationEngine extends EventEmitter {
   }
 
   policiesDiffer(pol1, pol2) {
-    return pol1.using !== pol2.using ||
-           pol1.check !== pol2.check ||
-           pol1.command !== pol2.command ||
-           pol1.role !== pol2.role;
+    return (
+      pol1.using !== pol2.using ||
+      pol1.check !== pol2.check ||
+      pol1.command !== pol2.command ||
+      pol1.role !== pol2.role
+    );
   }
 
   countObjects(schema) {
@@ -492,17 +495,20 @@ class ASTMigrationEngine extends EventEmitter {
     const tableName = stmt.relation?.relname;
     if (!tableName) return;
 
-    const columns = stmt.tableElts?.map(elt => {
-      if (elt.ColumnDef) {
-        return {
-          name: elt.ColumnDef.colname,
-          type: this.extractType(elt.ColumnDef.typeName),
-          nullable: !elt.ColumnDef.is_not_null,
-          default: elt.ColumnDef.raw_default,
-          constraints: elt.ColumnDef.constraints
-        };
-      }
-    }).filter(Boolean) || [];
+    const columns =
+      stmt.tableElts
+        ?.map((elt) => {
+          if (elt.ColumnDef) {
+            return {
+              name: elt.ColumnDef.colname,
+              type: this.extractType(elt.ColumnDef.typeName),
+              nullable: !elt.ColumnDef.is_not_null,
+              default: elt.ColumnDef.raw_default,
+              constraints: elt.ColumnDef.constraints
+            };
+          }
+        })
+        .filter(Boolean) || [];
 
     tables.set(tableName, {
       name: tableName,
@@ -516,7 +522,7 @@ class ASTMigrationEngine extends EventEmitter {
     if (!funcName) return;
 
     // Build signature
-    const args = stmt.parameters?.map(p => `${p.name} ${p.type}`).join(', ') || '';
+    const args = stmt.parameters?.map((p) => `${p.name} ${p.type}`).join(', ') || '';
     const signature = `${funcName}(${args})`;
 
     functions.set(signature, {
@@ -552,7 +558,7 @@ class ASTMigrationEngine extends EventEmitter {
     const typeName = stmt.typeName?.[0]?.String?.str;
     if (!typeName) return;
 
-    const values = stmt.vals?.map(v => v.String?.str).filter(Boolean) || [];
+    const values = stmt.vals?.map((v) => v.String?.str).filter(Boolean) || [];
 
     enums.set(typeName, {
       name: typeName,
@@ -604,7 +610,7 @@ class ASTMigrationEngine extends EventEmitter {
   extractType(typeName) {
     if (!typeName) return 'unknown';
     if (typeName.String) return typeName.String.str;
-    if (typeName.names) return typeName.names.map(n => n.String?.str).join('.');
+    if (typeName.names) return typeName.names.map((n) => n.String?.str).join('.');
     return 'unknown';
   }
 
@@ -620,7 +626,7 @@ class ASTMigrationEngine extends EventEmitter {
       if (!fromEnums.has(name)) {
         migrations.push({
           type: 'SAFE',
-          sql: `CREATE TYPE ${name} AS ENUM (${enumDef.values.map(v => `'${v}'`).join(', ')})`,
+          sql: `CREATE TYPE ${name} AS ENUM (${enumDef.values.map((v) => `'${v}'`).join(', ')})`,
           description: `Create enum type: ${name}`
         });
       }
@@ -630,7 +636,7 @@ class ASTMigrationEngine extends EventEmitter {
     for (const [name, toEnum] of toEnums) {
       if (fromEnums.has(name)) {
         const fromEnum = fromEnums.get(name);
-        const newValues = toEnum.values.filter(v => !fromEnum.values.includes(v));
+        const newValues = toEnum.values.filter((v) => !fromEnum.values.includes(v));
 
         for (const value of newValues) {
           migrations.push({
@@ -641,13 +647,14 @@ class ASTMigrationEngine extends EventEmitter {
         }
 
         // Check for removed values (PROBLEM!)
-        const removedValues = fromEnum.values.filter(v => !toEnum.values.includes(v));
+        const removedValues = fromEnum.values.filter((v) => !toEnum.values.includes(v));
         if (removedValues.length > 0) {
           migrations.push({
             type: 'DESTRUCTIVE',
             sql: `-- MANUAL INTERVENTION REQUIRED: Cannot remove enum values ${removedValues.join(', ')} from ${name}`,
             description: `Cannot remove enum values from ${name}`,
-            warning: 'PostgreSQL does not support removing enum values. Manual data migration required.',
+            warning:
+              'PostgreSQL does not support removing enum values. Manual data migration required.',
             requiresConfirmation: true
           });
         }
@@ -771,10 +778,8 @@ class ASTMigrationEngine extends EventEmitter {
   }
 
   triggersDiffer(t1, t2) {
-    return t1.timing !== t2.timing ||
-           t1.events !== t2.events ||
-           t1.function !== t2.function;
+    return t1.timing !== t2.timing || t1.events !== t2.events || t1.function !== t2.function;
   }
 }
 
-module.exports = ASTMigrationEngine;
+export default ASTMigrationEngine;

@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
  * @fileoverview Runtime Type Safety Demonstration - JavaScript Event Classes
- * 
+ *
  * This demonstration shows off the power of runtime instanceof validation
  * in pure JavaScript without TypeScript compilation overhead. Watch as we
  * create, validate, and manipulate events with complete type safety.
- * 
+ *
  * Run with: node src/lib/events/demo.js
- * 
+ *
  * @author JavaScript Pro (via Claude Code)
  */
 
@@ -57,12 +57,12 @@ function demonstrateBasicEvents() {
     // Create an error event with full context
     const dbError = new Error('Connection timeout');
     dbError.code = 'ETIMEDOUT';
-    
+
     const error = new ErrorEvent(
       'Database connection failed during migration',
       dbError,
       'DB_CONNECTION_FAILED',
-      { 
+      {
         host: 'localhost',
         port: 5432,
         database: 'test_migrations',
@@ -74,7 +74,6 @@ function demonstrateBasicEvents() {
     console.log('🔍 Has error object:', error.hasErrorObject());
     console.log('📋 Error code:', error.code);
     console.log('🔢 Original error code:', error.error.code);
-
   } catch (err) {
     console.error('💥 Demonstration failed:', err.message);
   }
@@ -88,18 +87,15 @@ function demonstrateMigrationEvents() {
 
   try {
     // Migration starts
-    const migrationStart = new MigrationStartEvent(
-      'Starting migration 004_add_user_preferences',
-      {
-        migrationId: '004',
-        migrationName: 'add_user_preferences',
-        version: '1.4.0',
-        tables: ['users', 'user_preferences'],
-        operations: ['CREATE_TABLE', 'ALTER_TABLE', 'CREATE_INDEX'],
-        estimatedDuration: 15000,
-        schema: 'public'
-      }
-    );
+    const migrationStart = new MigrationStartEvent('Starting migration 004_add_user_preferences', {
+      migrationId: '004',
+      migrationName: 'add_user_preferences',
+      version: '1.4.0',
+      tables: ['users', 'user_preferences'],
+      operations: ['CREATE_TABLE', 'ALTER_TABLE', 'CREATE_INDEX'],
+      estimatedDuration: 15000,
+      schema: 'public'
+    });
 
     console.log('🎬 Migration started:', migrationStart.toString());
     console.log('🎯 Migration ID:', migrationStart.migrationId);
@@ -110,7 +106,6 @@ function demonstrateMigrationEvents() {
     // Runtime validation of migration event
     validateEvent(migrationStart, MigrationStartEvent);
     console.log('✅ Migration event validation PASSED');
-
   } catch (err) {
     console.error('💥 Migration demonstration failed:', err.message);
   }
@@ -124,28 +119,25 @@ function demonstrateTestEvents() {
 
   try {
     // Test results
-    const testResults = new TestResultEvent(
-      'User management test suite completed',
-      {
-        testSuite: 'user_management',
-        totalTests: 42,
-        passedTests: 38,
-        failedTests: 3,
-        skippedTests: 1,
-        duration: 2340,
-        coverage: 87.5,
-        framework: 'pgTAP',
-        failures: [
-          { test: 'test_user_deletion', reason: 'Foreign key constraint' },
-          { test: 'test_email_validation', reason: 'Invalid regex pattern' }
-        ]
-      }
-    );
+    const testResults = new TestResultEvent('User management test suite completed', {
+      testSuite: 'user_management',
+      totalTests: 42,
+      passedTests: 38,
+      failedTests: 3,
+      skippedTests: 1,
+      duration: 2340,
+      coverage: 87.5,
+      framework: 'pgTAP',
+      failures: [
+        { test: 'test_user_deletion', reason: 'Foreign key constraint' },
+        { test: 'test_email_validation', reason: 'Invalid regex pattern' }
+      ]
+    });
 
     console.log('🎯 Test completed:', testResults.toString());
     console.log('📈 Success rate:', `${testResults.getSuccessRate()}%`);
     console.log('✅ All tests passed:', testResults.allTestsPassed());
-    
+
     const metrics = testResults.getMetrics();
     console.log('📊 Test metrics:', {
       total: metrics.total,
@@ -159,19 +151,16 @@ function demonstrateTestEvents() {
     console.log('🔥 Failures:', testResults.getFailures().length);
 
     // Coverage analysis
-    const coverage = new CoverageEvent(
-      'Code coverage analysis completed',
-      {
-        linesCovered: 1847,
-        totalLines: 2156,
-        functionsCovered: 89,
-        totalFunctions: 103,
-        branchesCovered: 234,
-        totalBranches: 267,
-        threshold: 80,
-        meetsThreshold: true
-      }
-    );
+    const coverage = new CoverageEvent('Code coverage analysis completed', {
+      linesCovered: 1847,
+      totalLines: 2156,
+      functionsCovered: 89,
+      totalFunctions: 103,
+      branchesCovered: 234,
+      totalBranches: 267,
+      threshold: 80,
+      meetsThreshold: true
+    });
 
     console.log('📏 Coverage analysis:', coverage.toString());
     console.log('📈 Line coverage:', `${coverage.getLineCoverage()}%`);
@@ -185,7 +174,6 @@ function demonstrateTestEvents() {
       threshold: `${summary.threshold}%`,
       meetsThreshold: summary.meetsThreshold
     });
-
   } catch (err) {
     console.error('💥 Test demonstration failed:', err.message);
   }
@@ -213,7 +201,10 @@ function demonstrateTypeChecking() {
     console.log('  Message:', event.message);
     console.log('  Is ProgressEvent:', isEventType(event, ProgressEvent));
     console.log('  Is ErrorEvent:', isEventType(event, ErrorEvent));
-    console.log('  Is Migration/Test event:', isEventType(event, [MigrationStartEvent, TestResultEvent]));
+    console.log(
+      '  Is Migration/Test event:',
+      isEventType(event, [MigrationStartEvent, TestResultEvent])
+    );
   });
 
   // Type guards in action
@@ -240,9 +231,9 @@ function demonstrateAdvancedValidation() {
     console.log('✅ Factory created valid event:', validEvent.constructor.name);
 
     // Validate with strict mode
-    const strictResult = validateEvent(validEvent, ProgressEvent, { 
-      strict: true, 
-      throwOnError: false 
+    const strictResult = validateEvent(validEvent, ProgressEvent, {
+      strict: true,
+      throwOnError: false
     });
     console.log('🔍 Strict validation result:', strictResult.valid ? 'PASSED' : 'FAILED');
 
@@ -262,14 +253,13 @@ function demonstrateAdvancedValidation() {
     // Event immutability test
     const immutableEvent = new ProgressEvent('Immutable test', 25);
     console.log('🔒 Event is frozen (immutable):', Object.isFrozen(immutableEvent));
-    
+
     try {
       immutableEvent.message = 'Try to change this'; // Should fail silently or throw
       console.log('🛡️ Immutability preserved - message unchanged:', immutableEvent.message);
     } catch (error) {
       console.log('🔐 Immutability enforced:', error.message);
     }
-
   } catch (err) {
     console.error('💥 Advanced validation failed:', err.message);
   }
@@ -282,14 +272,11 @@ function demonstrateEventSerialization() {
   console.log('\n📤 === EVENT SERIALIZATION AND JSON ===\n');
 
   try {
-    const event = new MigrationStartEvent(
-      'Complex migration with rich data',
-      {
-        migrationId: '007',
-        operations: ['CREATE_TABLE', 'CREATE_INDEX'],
-        metadata: { priority: 'high', category: 'schema' }
-      }
-    );
+    const event = new MigrationStartEvent('Complex migration with rich data', {
+      migrationId: '007',
+      operations: ['CREATE_TABLE', 'CREATE_INDEX'],
+      metadata: { priority: 'high', category: 'schema' }
+    });
 
     // JSON serialization
     const json = event.toJSON();
@@ -309,7 +296,6 @@ function demonstrateEventSerialization() {
     console.log('🔄 Cloned event with updates:', updatedEvent.toString());
     console.log('🔒 Original event unchanged:', event.details.phase === undefined);
     console.log('✨ New event has updates:', updatedEvent.details.phase === 'execution');
-
   } catch (err) {
     console.error('💥 Serialization demonstration failed:', err.message);
   }
@@ -336,7 +322,7 @@ function runDemonstration() {
   console.log('⚡ This is the power of PHENOMENAL JavaScript!\n');
 }
 
-// Run demo if this file is executed directly  
+// Run demo if this file is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   runDemonstration();
 }

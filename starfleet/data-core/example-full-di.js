@@ -22,9 +22,9 @@ const container = new DIContainer();
 
 // Register all Node.js adapters as singletons with no dependencies (they only take config objects)
 container
-  .registerSingleton('fileSystem', FileSystemAdapter, { 
+  .registerSingleton('fileSystem', FileSystemAdapter, {
     dependencies: [], // No DI dependencies, just config
-    config: { encoding: 'utf8', mode: 0o644 } 
+    config: { encoding: 'utf8', mode: 0o644 }
   })
   .registerSingleton('crypto', CryptoAdapter, {
     dependencies: [],
@@ -47,7 +47,7 @@ container.register('dataCore', DataCore, {
 // Resolve DataCore with all dependencies wired
 const dataCore1 = container.resolve('dataCore');
 console.log('✅ DataCore resolved from DIContainer');
-console.log(`   Ports injected: fileSystem, crypto, process, environment`);
+console.log('   Ports injected: fileSystem, crypto, process, environment');
 
 // Test functionality
 const packageInfo1 = dataCore1.getPackageInfo();
@@ -77,26 +77,25 @@ const ports = factory.createDataCorePorts({
 });
 
 // Wire DataCore manually
-const dataCore2 = new DataCore(
-  ports.fileSystem,
-  ports.crypto,
-  ports.process,
-  ports.environment
-);
+const dataCore2 = new DataCore(ports.fileSystem, ports.crypto, ports.process, ports.environment);
 
 console.log('✅ DataCore created with PortFactory');
 console.log(`   Generated ports: ${Object.keys(ports).join(', ')}`);
 
 // Test functionality
 const sampleSchema = dataCore2.createSampleSchema('factory-test');
-console.log(`   Sample schema created successfully`);
+console.log('   Sample schema created successfully');
 
 console.log('\n---\n');
 
 // === Method 3: wireDataCore Convenience Function ===
 console.log('⚡ Method 3: wireDataCore Convenience Function');
 
-const { ports: wireports, dataCore: dataCore3, factory: wirefactory } = wireDataCore(
+const {
+  ports: wireports,
+  dataCore: dataCore3,
+  factory: wirefactory
+} = wireDataCore(
   DataCore,
   {
     fileSystem: FileSystemAdapter,
@@ -149,7 +148,9 @@ console.log('✅ DataCore resolved from integrated Factory + Container');
 
 // Show container statistics
 const stats = integrationContainer.getStats();
-console.log(`   Container: ${stats.totalServices} services, ${stats.singletonInstances} singletons`);
+console.log(
+  `   Container: ${stats.totalServices} services, ${stats.singletonInstances} singletons`
+);
 
 console.log('\n---\n');
 
@@ -159,31 +160,31 @@ console.log('🎯 Testing DataCore Functionality');
 try {
   // Test with one of our DataCore instances
   const testDataCore = dataCore1;
-  
+
   // Get package information
   const info = testDataCore.getPackageInfo();
   console.log(`📋 Package: ${info.name} v${info.version}`);
   console.log(`🔌 Port interfaces: ${info.portInterfaces.join(', ')}`);
   console.log(`⚙️  Core engines: ${info.coreEngines.join(', ')}`);
-  
+
   // Create sample schema
   const schema = testDataCore.createSampleSchema('integration-test');
-  console.log(`📊 Sample schema created`);
-  
+  console.log('📊 Sample schema created');
+
   // Show capabilities
-  console.log(`🎪 Capabilities:`);
+  console.log('🎪 Capabilities:');
   for (const [capability, enabled] of Object.entries(info.capabilities)) {
     console.log(`   • ${capability}: ${enabled ? '✅' : '❌'}`);
   }
-  
+
   console.log('\n🎉 All integration methods working successfully!');
-  
+
   console.log('\n📋 Summary:');
   console.log('  1. DIContainer: Manual registration with full control');
   console.log('  2. PortFactory: Type-safe port creation with validation');
   console.log('  3. wireDataCore: One-liner convenience for simple cases');
   console.log('  4. Factory+Container: Best of both worlds for complex apps');
-  
+
   console.log('\n🔑 Key Benefits:');
   console.log('  • Constructor injection with automatic dependency resolution');
   console.log('  • Singleton lifecycle management for shared resources');
@@ -192,7 +193,6 @@ try {
   console.log('  • Port interface validation ensures contract compliance');
   console.log('  • Factory pattern enables reusable, configured instances');
   console.log('  • Multiple integration approaches for different use cases');
-  
 } catch (error) {
   console.error('❌ Error testing DataCore functionality:', error.message);
   console.error(error.stack);

@@ -4,10 +4,7 @@
 
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import {
-  CommandEvent,
-  ErrorEvent
-} from '../lib/events/CommandEvents.cjs';
+import { CommandEvent, ErrorEvent } from '../lib/events/CommandEvents.cjs';
 
 /**
  * Reporter that listens to command events and displays CLI output
@@ -42,7 +39,7 @@ class CliReporter {
 
           if (data && data.actions) {
             console.log(chalk.yellow('This will:'));
-            data.actions.forEach(action => {
+            data.actions.forEach((action) => {
               console.log(chalk.yellow(`  • ${action}`));
             });
             console.log(chalk.yellow('\nThis action cannot be undone!\n'));
@@ -177,7 +174,12 @@ class CliReporter {
     // Handle typed CommandEvent instances
     if (eventData instanceof CommandEvent) {
       // Return all properties except the standard ones
-      const { eventType: _eventType, timestamp: _timestamp, message: _message, ...data } = eventData;
+      const {
+        eventType: _eventType,
+        timestamp: _timestamp,
+        message: _message,
+        ...data
+      } = eventData;
       return Object.keys(data).length > 0 ? data : null;
     }
 

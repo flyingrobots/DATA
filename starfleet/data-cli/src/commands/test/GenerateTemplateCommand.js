@@ -15,12 +15,7 @@ import { TestRequirementAnalyzer } from '../../lib/testing/TestRequirementAnalyz
  * Generate pgTAP test templates with advanced analysis capabilities
  */
 class GenerateTemplateCommand extends TestCommand {
-  constructor(
-    testsDir,
-    outputDir,
-    logger = null,
-    isProd = false
-  ) {
+  constructor(testsDir, outputDir, logger = null, isProd = false) {
     super(null, null, testsDir, outputDir, logger, isProd);
 
     // Template generation doesn't require database access or production confirmation
@@ -70,15 +65,19 @@ class GenerateTemplateCommand extends TestCommand {
       }
 
       if (requirements.length === 0) {
-        throw new Error('No test requirements found. Check migration file or provide --type and --name options.');
+        throw new Error(
+          'No test requirements found. Check migration file or provide --type and --name options.'
+        );
       }
 
       // Generate templates
       const result = this.templateGenerator.generateBatch(requirements);
 
       if (result.errors.length > 0) {
-        this.warn(`Generated ${result.totalGenerated} templates with ${result.errors.length} errors`);
-        result.errors.forEach(error => {
+        this.warn(
+          `Generated ${result.totalGenerated} templates with ${result.errors.length} errors`
+        );
+        result.errors.forEach((error) => {
           this.error(`Error generating template for ${error.requirement?.name}: ${error.error}`);
         });
       }
@@ -101,7 +100,6 @@ class GenerateTemplateCommand extends TestCommand {
         totalGenerated: result.totalGenerated,
         errors: result.errors
       };
-
     } catch (error) {
       this.error('Test template generation failed', error);
       this.emit('template:generation:failed', {
@@ -133,7 +131,9 @@ class GenerateTemplateCommand extends TestCommand {
     if (options.type) {
       const validTypes = ['rpc', 'rls', 'trigger', 'constraint', 'function'];
       if (!validTypes.includes(options.type)) {
-        throw new Error(`Invalid test type: ${options.type}. Must be one of: ${validTypes.join(', ')}`);
+        throw new Error(
+          `Invalid test type: ${options.type}. Must be one of: ${validTypes.join(', ')}`
+        );
       }
     }
 
@@ -172,7 +172,6 @@ class GenerateTemplateCommand extends TestCommand {
 
       // Convert analysis results to template requirements
       return this.convertAnalysisToRequirements(analysis.requirements);
-
     } catch (error) {
       if (error.code === 'ENOENT') {
         throw new Error(`Migration file not found: ${migrationPath}`);
@@ -209,7 +208,10 @@ class GenerateTemplateCommand extends TestCommand {
       }
 
       // Create function operations
-      else if (trimmed.startsWith('CREATE OR REPLACE FUNCTION') || trimmed.startsWith('CREATE FUNCTION')) {
+      else if (
+        trimmed.startsWith('CREATE OR REPLACE FUNCTION') ||
+        trimmed.startsWith('CREATE FUNCTION')
+      ) {
         const match = line.match(/CREATE (?:OR REPLACE )?FUNCTION\s+(?:(\w+)\.)?(\w+)\s*\(/i);
         if (match) {
           operations.push({
@@ -222,7 +224,9 @@ class GenerateTemplateCommand extends TestCommand {
 
       // RLS enable operations
       else if (trimmed.includes('ROW LEVEL SECURITY') || trimmed.includes('ENABLE RLS')) {
-        const match = line.match(/ALTER TABLE\s+(?:(\w+)\.)?(\w+)\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/i);
+        const match = line.match(
+          /ALTER TABLE\s+(?:(\w+)\.)?(\w+)\s+ENABLE\s+ROW\s+LEVEL\s+SECURITY/i
+        );
         if (match) {
           operations.push({
             type: 'ENABLE_RLS',
@@ -266,14 +270,14 @@ class GenerateTemplateCommand extends TestCommand {
    * @returns {Array<Object>} Template requirements
    */
   convertAnalysisToRequirements(analysisRequirements) {
-    return analysisRequirements.map(req => {
+    return analysisRequirements.map((req) => {
       // Map analyzer requirement types to template types
       const typeMapping = {
-        'FUNCTION': 'rpc',
-        'RLS': 'rls',
-        'TRIGGER': 'trigger',
-        'CONSTRAINT': 'constraint',
-        'SCHEMA': 'function'
+        FUNCTION: 'rpc',
+        RLS: 'rls',
+        TRIGGER: 'trigger',
+        CONSTRAINT: 'constraint',
+        SCHEMA: 'function'
       };
 
       return {
@@ -312,7 +316,7 @@ class GenerateTemplateCommand extends TestCommand {
    * @returns {Array<Object>} Filtered requirements
    */
   filterRequirementsByType(requirements, type) {
-    return requirements.filter(req => req.type === type);
+    return requirements.filter((req) => req.type === type);
   }
 
   /**
@@ -323,15 +327,19 @@ class GenerateTemplateCommand extends TestCommand {
   async outputTemplates(templates, outputPath) {
     if (outputPath) {
       // Output to file
-      const combinedContent = templates.map(template => {
-        return '-- =========================================================================\n' +
-               `-- Generated Template: ${template.metadata.name} (${template.type})\n` +
-               `-- File: ${template.filename}\n` +
-               `-- Directory: ${template.directory}\n` +
-               `-- Generated: ${template.metadata.generatedAt}\n` +
-               '-- =========================================================================\n\n' +
-               template.content;
-      }).join('\n\n');
+      const combinedContent = templates
+        .map((template) => {
+          return (
+            '-- =========================================================================\n' +
+            `-- Generated Template: ${template.metadata.name} (${template.type})\n` +
+            `-- File: ${template.filename}\n` +
+            `-- Directory: ${template.directory}\n` +
+            `-- Generated: ${template.metadata.generatedAt}\n` +
+            '-- =========================================================================\n\n' +
+            template.content
+          );
+        })
+        .join('\n\n');
 
       // Ensure output directory exists
       await fs.mkdir(path.dirname(outputPath), { recursive: true });
@@ -342,7 +350,7 @@ class GenerateTemplateCommand extends TestCommand {
       this.progress(`Templates written to: ${outputPath}`);
     } else {
       // Output to stdout
-      templates.forEach(template => {
+      templates.forEach((template) => {
         console.log(`-- Generated Template: ${template.metadata.name} (${template.type})`);
         console.log(`-- Suggested path: ${path.join(template.directory, template.filename)}\n`);
         console.log(template.content);
@@ -353,9 +361,11 @@ class GenerateTemplateCommand extends TestCommand {
     // Also suggest individual file creation
     if (templates.length > 1 && !outputPath) {
       this.info('\nTo save individual template files, you can use:');
-      templates.forEach(template => {
+      templates.forEach((template) => {
         const fullPath = path.join('tests', template.directory, template.filename);
-        console.log(`  data test generate-template --type ${template.type} --name ${template.metadata.name} --output ${fullPath}`);
+        console.log(
+          `  data test generate-template --type ${template.type} --name ${template.metadata.name} --output ${fullPath}`
+        );
       });
     }
   }
@@ -366,9 +376,7 @@ class GenerateTemplateCommand extends TestCommand {
    * @returns {string} Formatted summary
    */
   formatGenerationSummary(result) {
-    const lines = [
-      `Total templates generated: ${result.totalGenerated}`
-    ];
+    const lines = [`Total templates generated: ${result.totalGenerated}`];
 
     if (Object.keys(result.summary).length > 0) {
       lines.push('Templates by type:');

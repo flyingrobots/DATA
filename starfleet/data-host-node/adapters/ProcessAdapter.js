@@ -7,13 +7,13 @@ const execAsync = promisify(exec);
 /**
  * Node.js implementation of the Process port.
  * Wraps child_process APIs to provide standardized process execution.
- * 
+ *
  * @class ProcessAdapter
  */
 export class ProcessAdapter extends ProcessPort {
   /**
    * Create a new ProcessAdapter instance.
-   * 
+   *
    * @param {Object} options - Configuration options
    * @param {string} [options.shell='/bin/sh'] - Default shell to use
    * @param {number} [options.timeout=30000] - Default timeout in milliseconds
@@ -28,7 +28,7 @@ export class ProcessAdapter extends ProcessPort {
 
   /**
    * Execute a command and return the result.
-   * 
+   *
    * @param {string} command - Command to execute
    * @param {Object} [options] - Execution options
    * @param {string} [options.cwd] - Working directory
@@ -50,7 +50,7 @@ export class ProcessAdapter extends ProcessPort {
       };
 
       const { stdout, stderr } = await execAsync(command, execOptions);
-      
+
       return {
         stdout: stdout || '',
         stderr: stderr || '',
@@ -73,14 +73,14 @@ export class ProcessAdapter extends ProcessPort {
       if (options.throwOnError !== false) {
         throw this._normalizeError(error, command, result);
       }
-      
+
       return result;
     }
   }
 
   /**
    * Spawn a process with streaming support.
-   * 
+   *
    * @param {string} command - Command to spawn
    * @param {Array<string>} [args=[]] - Command arguments
    * @param {Object} [options] - Spawn options
@@ -91,7 +91,7 @@ export class ProcessAdapter extends ProcessPort {
    * @returns {Promise<ProcessStream>} Process stream interface
    */
   async spawn(command, args = [], options = {}) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       try {
         const spawnOptions = {
           cwd: options.cwd || process.cwd(),
@@ -101,7 +101,7 @@ export class ProcessAdapter extends ProcessPort {
         };
 
         const child = spawn(command, args, spawnOptions);
-        
+
         let stdout = '';
         let stderr = '';
 
@@ -143,10 +143,11 @@ export class ProcessAdapter extends ProcessPort {
           stdin: child.stdin,
           pid: child.pid,
           kill: (signal = 'SIGTERM') => child.kill(signal),
-          wait: () => new Promise((res, rej) => {
-            child.on('close', (code, sig) => res({ exitCode: code, signal: sig }));
-            child.on('error', rej);
-          })
+          wait: () =>
+            new Promise((res, rej) => {
+              child.on('close', (code, sig) => res({ exitCode: code, signal: sig }));
+              child.on('error', rej);
+            })
         });
       } catch (error) {
         reject(this._normalizeError(error, `${command} ${args.join(' ')}`));
@@ -156,7 +157,7 @@ export class ProcessAdapter extends ProcessPort {
 
   /**
    * Execute a command in a specific shell.
-   * 
+   *
    * @param {string} script - Shell script to execute
    * @param {Object} [options] - Execution options
    * @param {string} [options.shell] - Shell to use
@@ -169,7 +170,7 @@ export class ProcessAdapter extends ProcessPort {
   async shell(script, options = {}) {
     const shell = options.shell || this.defaultShell;
     const shellArgs = shell.endsWith('sh') ? ['-c'] : ['/c'];
-    
+
     return this.execute(`${shell} ${shellArgs.join(' ')} "${script.replace(/"/g, '\\"')}"`, {
       ...options,
       shell: false // We're handling shell ourselves
@@ -178,7 +179,7 @@ export class ProcessAdapter extends ProcessPort {
 
   /**
    * Get current process information.
-   * 
+   *
    * @returns {ProcessInfo} Current process information
    */
   getProcessInfo() {
@@ -199,7 +200,7 @@ export class ProcessAdapter extends ProcessPort {
 
   /**
    * Kill a process by PID.
-   * 
+   *
    * @param {number} pid - Process ID to kill
    * @param {string} [signal='SIGTERM'] - Signal to send
    * @returns {Promise<boolean>} True if process was killed successfully
@@ -220,7 +221,7 @@ export class ProcessAdapter extends ProcessPort {
 
   /**
    * Check if a process is running.
-   * 
+   *
    * @param {number} pid - Process ID to check
    * @returns {Promise<boolean>} True if process is running
    */
@@ -239,7 +240,7 @@ export class ProcessAdapter extends ProcessPort {
 
   /**
    * Normalize process errors into consistent format.
-   * 
+   *
    * @private
    * @param {Error} error - Original error
    * @param {string} command - Command that failed
@@ -256,13 +257,13 @@ export class ProcessAdapter extends ProcessPort {
     normalizedError.signal = error.signal;
     normalizedError.killed = error.killed;
     normalizedError.originalError = error;
-    
+
     if (result) {
       normalizedError.stdout = result.stdout;
       normalizedError.stderr = result.stderr;
       normalizedError.exitCode = result.exitCode;
     }
-    
+
     return normalizedError;
   }
 }

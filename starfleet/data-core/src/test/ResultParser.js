@@ -142,7 +142,7 @@ class ResultParser {
     // Individual test results
     if (tests.length > 0) {
       lines.push('');
-      tests.forEach(test => {
+      tests.forEach((test) => {
         let symbol, color;
 
         switch (test.status) {
@@ -175,7 +175,7 @@ class ResultParser {
     if (diagnostics.length > 0) {
       lines.push('');
       lines.push(chalk.gray('Diagnostics:'));
-      diagnostics.forEach(diagnostic => {
+      diagnostics.forEach((diagnostic) => {
         lines.push(chalk.gray(`  ${diagnostic}`));
       });
     }
@@ -200,4 +200,4 @@ class ResultParser {
   }
 }
 
-module.exports = ResultParser;
+export default ResultParser;

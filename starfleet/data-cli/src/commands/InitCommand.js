@@ -39,15 +39,15 @@ class InitCommand extends Command {
 
       // Create .datarc.json config file
       const config = {
-        '$schema': 'https://raw.githubusercontent.com/supabase/cli/main/schemas/config.json',
-        'test': {
-          'minimum_coverage': 80,
-          'test_timeout': 300,
-          'output_formats': ['console', 'json']
+        $schema: 'https://raw.githubusercontent.com/supabase/cli/main/schemas/config.json',
+        test: {
+          minimum_coverage: 80,
+          test_timeout: 300,
+          output_formats: ['console', 'json']
         },
-        'environments': {
-          'local': {
-            'db': 'postgresql://postgres:postgres@localhost:54322/postgres'
+        environments: {
+          local: {
+            db: 'postgresql://postgres:postgres@localhost:54322/postgres'
           }
         }
       };

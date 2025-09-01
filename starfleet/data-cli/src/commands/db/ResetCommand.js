@@ -40,14 +40,11 @@ class ResetCommand extends DatabaseCommand {
     }
 
     // Double confirmation for production
-    const doubleConfirm = await this.input(
-      'Type "RESET PRODUCTION" to confirm:',
-      {
-        validate: (input) => {
-          return input === 'RESET PRODUCTION' ? true : 'Please type exactly: RESET PRODUCTION';
-        }
+    const doubleConfirm = await this.input('Type "RESET PRODUCTION" to confirm:', {
+      validate: (input) => {
+        return input === 'RESET PRODUCTION' ? true : 'Please type exactly: RESET PRODUCTION';
       }
-    );
+    });
 
     return doubleConfirm === 'RESET PRODUCTION';
   }
@@ -68,7 +65,7 @@ class ResetCommand extends DatabaseCommand {
       const { stdout, stderr } = await execAsync('npm run reset', {
         cwd: supabaseDir,
         env: {
-          ...process.env,  // Use process.env if config.envVars is not available
+          ...process.env, // Use process.env if config.envVars is not available
           ...(this.config?.envVars || {}),
           NODE_ENV: this.isProd ? 'production' : 'development'
         }

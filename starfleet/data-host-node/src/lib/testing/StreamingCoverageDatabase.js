@@ -1,9 +1,9 @@
 /**
  * Streaming coverage database implementation for D.A.T.A. CLI
- * 
+ *
  * Provides memory-efficient storage for large coverage datasets with
  * overflow protection and optional compression.
- * 
+ *
  * @class StreamingCoverageDatabase
  * @author D.A.T.A. Engineering Team
  */
@@ -22,7 +22,7 @@ class StreamingCoverageDatabase {
       batchSize: options.batchSize || 100,
       ...options
     };
-    
+
     this.objectCounts = new Map();
     this.compressed = new Map();
     this.overflow = new Set(); // Track overflowed object types
@@ -38,7 +38,7 @@ class StreamingCoverageDatabase {
    */
   addObject(objectType, objectName, data) {
     const count = this.objectCounts.get(objectType) || 0;
-    
+
     if (count >= this.options.maxObjectsPerType) {
       this.overflow.add(objectType);
       return false; // Reject to prevent memory overflow
@@ -49,14 +49,14 @@ class StreamingCoverageDatabase {
       this.data.set(objectType, new Map());
     }
     this.data.get(objectType).set(objectName, data);
-    
+
     this.objectCounts.set(objectType, count + 1);
-    
+
     // Auto-compress if enabled and threshold reached
     if (this.options.enableCompression && count > this.options.maxObjectsPerType * 0.7) {
       this.compress(objectType);
     }
-    
+
     return true;
   }
 
@@ -88,11 +88,11 @@ class StreamingCoverageDatabase {
    */
   compress(objectType) {
     if (this.compressed.has(objectType)) return;
-    
+
     // TODO: Implement actual compression logic
     // For now, just mark as compressed
     this.compressed.set(objectType, Date.now());
-    
+
     // In production, you might:
     // 1. Convert Map to more compact structure
     // 2. Remove redundant data

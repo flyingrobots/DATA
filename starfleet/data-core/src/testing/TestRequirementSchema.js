@@ -310,7 +310,7 @@
  */
 
 // Export all types for use in other modules
-module.exports = {
+export {
   // Type validation helpers - these are runtime functions, not types
 
   /**

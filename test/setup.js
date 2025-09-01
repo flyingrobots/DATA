@@ -19,7 +19,7 @@ afterEach(async () => {
     }
   }
   globalConnections.clear();
-  
+
   // Clear any remaining timers
   if (typeof global.clearAllTimers === 'function') {
     global.clearAllTimers();
@@ -33,12 +33,12 @@ afterAll(async () => {
     if (global.dbConnection) {
       await global.dbConnection.end();
     }
-    
+
     // Close any Supabase clients
     if (global.supabaseClient) {
       global.supabaseClient = null;
     }
-    
+
     // Close any remaining connections
     for (const connection of globalConnections) {
       try {
@@ -49,7 +49,6 @@ afterAll(async () => {
         console.warn('Failed to close connection in afterAll:', error.message);
       }
     }
-    
   } finally {
     // Force exit after longer timeout to prevent hanging
     setTimeout(() => {

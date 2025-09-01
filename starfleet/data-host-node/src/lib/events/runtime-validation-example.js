@@ -2,16 +2,16 @@
 
 /**
  * Runtime Validation Example for D.A.T.A. Event System
- * 
+ *
  * This example demonstrates the runtime validation capabilities of the
  * JavaScript Event Classes and how they integrate with the existing
  * Command class architecture.
- * 
+ *
  * Run with: node src/lib/events/runtime-validation-example.js
  */
 
-const { EventEmitter } = require('events');
-const {
+import { EventEmitter } from 'events';
+import {
   CommandEvent,
   ProgressEvent,
   ErrorEvent,
@@ -22,7 +22,7 @@ const {
   createCommandEvent,
   createValidatedListener,
   EventTypeGuards
-} = require('./index.cjs');
+} from './index.js';
 
 /**
  * Example Command class that demonstrates event system usage
@@ -118,12 +118,9 @@ class ExampleCommand extends EventEmitter {
 
     // 3. Emit a proper WarningEvent
     console.log('\n3. Emitting WarningEvent:');
-    const warningEvent = WarningEvent.deprecation(
-      'legacyMethod()',
-      'newMethod()',
-      'v2.0.0',
-      { component: 'DataProcessor' }
-    );
+    const warningEvent = WarningEvent.deprecation('legacyMethod()', 'newMethod()', 'v2.0.0', {
+      component: 'DataProcessor'
+    });
     this.emit('warning', warningEvent);
 
     // 4. Emit a proper SuccessEvent
@@ -161,8 +158,8 @@ class ExampleCommand extends EventEmitter {
     console.log('\n=== Command Class Integration Example ===\n');
 
     // Show how the event system integrates with existing Command patterns
-    const Command = require('../Command');
-    
+    import Command from '../Command.js';
+
     // Create a mock command to show integration
     class MockCommand extends Command {
       constructor() {
@@ -173,20 +170,20 @@ class ExampleCommand extends EventEmitter {
       async performExecute() {
         // The Command class already uses typed events internally
         this.progress('Starting mock operation', { step: 1 });
-        
+
         // Simulate some work
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         this.warn('This is a test warning', { level: 'info' });
         this.success('Mock operation completed', { result: 'success' });
-        
+
         return { status: 'completed' };
       }
     }
 
     // Set up listeners that use runtime validation
     const mockCommand = new MockCommand();
-    
+
     mockCommand.on('progress', (eventData) => {
       // eventData will be in the format emitted by Command.js
       console.log(`Command progress: ${eventData.message}`);
@@ -228,4 +225,4 @@ if (require.main === module) {
   runDemo().catch(console.error);
 }
 
-module.exports = { ExampleCommand, runDemo };
+export default { ExampleCommand, runDemo };

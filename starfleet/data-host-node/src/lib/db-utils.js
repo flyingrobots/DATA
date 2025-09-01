@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+import { Client } from 'pg';
 
 /**
  * Database utility functions for temp database management
@@ -55,15 +55,14 @@ class DatabaseUtils {
    */
   async databaseExists(databaseName) {
     const client = this.createAdminClient();
-    
+
     try {
       await client.connect();
-      
-      const result = await client.query(
-        'SELECT 1 FROM pg_database WHERE datname = $1',
-        [databaseName]
-      );
-      
+
+      const result = await client.query('SELECT 1 FROM pg_database WHERE datname = $1', [
+        databaseName
+      ]);
+
       return result.rows.length > 0;
     } finally {
       await client.end();
@@ -91,9 +90,9 @@ class DatabaseUtils {
     const results = [];
 
     const queryPromises = statements
-      .filter(statement => statement.trim())
-      .map(statement => client.query(statement));
-    
+      .filter((statement) => statement.trim())
+      .map((statement) => client.query(statement));
+
     const queryResults = await Promise.all(queryPromises);
     results.push(...queryResults);
 
@@ -115,10 +114,10 @@ class DatabaseUtils {
     // More sophisticated parsing could be added if needed
     return sql
       .split(/;\s*\n/)
-      .map(stmt => stmt.trim())
-      .filter(stmt => stmt.length > 0)
-      .map(stmt => stmt.endsWith(';') ? stmt : stmt + ';');
+      .map((stmt) => stmt.trim())
+      .filter((stmt) => stmt.length > 0)
+      .map((stmt) => (stmt.endsWith(';') ? stmt : stmt + ';'));
   }
 }
 
-module.exports = DatabaseUtils;
+export default DatabaseUtils;

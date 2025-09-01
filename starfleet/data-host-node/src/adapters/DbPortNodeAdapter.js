@@ -32,12 +32,8 @@ export class DbPortNodeAdapter {
       ...process.env,
       DATABASE_URL: this.connectionString
     };
-    
-    await exec('psql', [
-      '--no-psqlrc',
-      '-v', 'ON_ERROR_STOP=1',
-      '-c', sqlText
-    ], { env });
+
+    await exec('psql', ['--no-psqlrc', '-v', 'ON_ERROR_STOP=1', '-c', sqlText], { env });
   }
 
   async query(sqlText, params = []) {
@@ -49,16 +45,16 @@ export class DbPortNodeAdapter {
   async runPgTap(paths) {
     try {
       // Run pg_prove or custom pgTAP runner
-      const { stdout } = await exec('pg_prove', [
-        '--verbose',
-        '--formatter', 'TAP::Formatter::Console',
-        ...paths
-      ], {
-        env: {
-          ...process.env,
-          DATABASE_URL: this.connectionString
+      const { stdout } = await exec(
+        'pg_prove',
+        ['--verbose', '--formatter', 'TAP::Formatter::Console', ...paths],
+        {
+          env: {
+            ...process.env,
+            DATABASE_URL: this.connectionString
+          }
         }
-      });
+      );
 
       // Parse TAP output
       const lines = stdout.split('\n');
@@ -94,11 +90,7 @@ export class DbPortNodeAdapter {
 
     for (const path of paths) {
       try {
-        const { stdout } = await exec('psql', [
-          '--no-psqlrc',
-          '-tA',
-          '-f', path
-        ], {
+        const { stdout } = await exec('psql', ['--no-psqlrc', '-tA', '-f', path], {
           env: {
             ...process.env,
             DATABASE_URL: this.connectionString
@@ -130,15 +122,15 @@ export class DbPortNodeAdapter {
   async withTransaction(fn) {
     const pool = await this._getPool();
     const client = await pool.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       const txApi = {
         apply: (sql) => client.query(sql).then(() => undefined),
-        query: (sql, params) => client.query(sql, params).then(r => r.rows)
+        query: (sql, params) => client.query(sql, params).then((r) => r.rows)
       };
-      
+
       const result = await fn(txApi);
       await client.query('COMMIT');
       return result;

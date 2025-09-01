@@ -117,12 +117,8 @@ export class EdgeFunctionGenerator {
         { name: 'readme', filename: 'README.md', type: 'docs' },
         { name: 'config', filename: 'deno.json', type: 'config' }
       ],
-      'database-function': [
-        { name: 'database', filename: 'index.ts', type: 'main' }
-      ],
-      'webhook-handler': [
-        { name: 'webhook', filename: 'index.ts', type: 'main' }
-      ]
+      'database-function': [{ name: 'database', filename: 'index.ts', type: 'main' }],
+      'webhook-handler': [{ name: 'webhook', filename: 'index.ts', type: 'main' }]
     };
 
     const templateList = templates[type];

@@ -62,7 +62,6 @@ class MigrateCleanCommand extends Command {
         cleanedItems,
         totalSize: this.formatBytes(totalSize)
       });
-
     } catch (error) {
       this.error('Migration cleanup failed', error);
       this.emit('failed', { error });
@@ -79,7 +78,10 @@ class MigrateCleanCommand extends Command {
 
     try {
       const stagingDir = path.resolve('supabase/.staging');
-      const stagingExists = await fs.access(stagingDir).then(() => true).catch(() => false);
+      const stagingExists = await fs
+        .access(stagingDir)
+        .then(() => true)
+        .catch(() => false);
 
       if (!stagingExists) {
         if (verbose) this.progress('Staging directory not found, skipping...');
@@ -88,20 +90,22 @@ class MigrateCleanCommand extends Command {
 
       const files = await fs.readdir(stagingDir);
 
-      await Promise.all(files.map(async file => {
-        const filePath = path.join(stagingDir, file);
-        const stats = await fs.stat(filePath);
+      await Promise.all(
+        files.map(async (file) => {
+          const filePath = path.join(stagingDir, file);
+          const stats = await fs.stat(filePath);
 
-        if (force || await this.shouldCleanFile(filePath, stats)) {
-          size += stats.size;
-          await fs.unlink(filePath);
-          items++;
+          if (force || (await this.shouldCleanFile(filePath, stats))) {
+            size += stats.size;
+            await fs.unlink(filePath);
+            items++;
 
-          if (verbose) {
-            this.progress(`Cleaned: ${file} (${this.formatBytes(stats.size)})`);
+            if (verbose) {
+              this.progress(`Cleaned: ${file} (${this.formatBytes(stats.size)})`);
+            }
           }
-        }
-      }));
+        })
+      );
 
       // Remove directory if empty
       const remainingFiles = await fs.readdir(stagingDir);
@@ -109,7 +113,6 @@ class MigrateCleanCommand extends Command {
         await fs.rmdir(stagingDir);
         if (verbose) this.progress('Removed empty staging directory');
       }
-
     } catch (error) {
       this.warn('Could not clean staging directory', { error: error.message });
     }
@@ -126,7 +129,10 @@ class MigrateCleanCommand extends Command {
 
     try {
       const tempDbDir = path.resolve('supabase/.temp_dbs');
-      const tempDbExists = await fs.access(tempDbDir).then(() => true).catch(() => false);
+      const tempDbExists = await fs
+        .access(tempDbDir)
+        .then(() => true)
+        .catch(() => false);
 
       if (!tempDbExists) {
         if (verbose) this.progress('Temp databases directory not found, skipping...');
@@ -149,7 +155,6 @@ class MigrateCleanCommand extends Command {
           }
         }
       }
-
     } catch (error) {
       this.warn('Could not clean temporary databases', { error: error.message });
     }
@@ -166,7 +171,10 @@ class MigrateCleanCommand extends Command {
 
     try {
       const backupDir = path.resolve('supabase/.rollbacks');
-      const backupExists = await fs.access(backupDir).then(() => true).catch(() => false);
+      const backupExists = await fs
+        .access(backupDir)
+        .then(() => true)
+        .catch(() => false);
 
       if (!backupExists) {
         if (verbose) this.progress('Backup directory not found, skipping...');
@@ -174,7 +182,7 @@ class MigrateCleanCommand extends Command {
       }
 
       const files = await fs.readdir(backupDir);
-      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
 
       for (const file of files) {
         const filePath = path.join(backupDir, file);
@@ -190,7 +198,6 @@ class MigrateCleanCommand extends Command {
           }
         }
       }
-
     } catch (error) {
       this.warn('Could not clean backup files', { error: error.message });
     }
@@ -206,26 +213,19 @@ class MigrateCleanCommand extends Command {
     let size = 0;
 
     try {
-      const logPatterns = [
-        'supabase/.logs/**/*.log',
-        'supabase/logs/**/*.log',
-        '*.log'
-      ];
+      const logPatterns = ['supabase/.logs/**/*.log', 'supabase/logs/**/*.log', '*.log'];
 
       // This is a simplified implementation
       // In a real system, would use glob patterns to find log files
-      const possibleLogFiles = [
-        'supabase/migration.log',
-        'supabase/error.log',
-        'data.log'
-      ];
+      const possibleLogFiles = ['supabase/migration.log', 'supabase/error.log', 'data.log'];
 
       for (const logFile of possibleLogFiles) {
         try {
           const filePath = path.resolve(logFile);
           const stats = await fs.stat(filePath);
 
-          if (force || stats.size > 10 * 1024 * 1024) { // > 10MB
+          if (force || stats.size > 10 * 1024 * 1024) {
+            // > 10MB
             size += stats.size;
             await fs.unlink(filePath);
             items++;
@@ -238,7 +238,6 @@ class MigrateCleanCommand extends Command {
           // File doesn't exist, skip
         }
       }
-
     } catch (error) {
       this.warn('Could not clean log files', { error: error.message });
     }
@@ -251,7 +250,7 @@ class MigrateCleanCommand extends Command {
    */
   async shouldCleanFile(filePath, stats) {
     // Clean files older than 24 hours
-    const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+    const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
     return stats.mtime.getTime() < twentyFourHoursAgo;
   }
 
@@ -296,7 +295,7 @@ class MigrateCleanCommand extends Command {
  */
 export default async function cleanHandler(args, config, logger, isProd) {
   const command = new MigrateCleanCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateCleanCommand };

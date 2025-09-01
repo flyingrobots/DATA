@@ -55,7 +55,6 @@ class MigratePromoteCommand extends Command {
         production: productionPath,
         migration: migrationName
       });
-
     } catch (error) {
       this.error('Migration promotion failed', error);
       this.emit('failed', { error, migration: args.migration });
@@ -95,7 +94,9 @@ class MigratePromoteCommand extends Command {
 
       // Check if migration has been tested
       if (data.status !== 'tested') {
-        throw new Error(`Migration must be tested before promotion. Current status: ${data.status}`);
+        throw new Error(
+          `Migration must be tested before promotion. Current status: ${data.status}`
+        );
       }
 
       // Check if tests passed
@@ -104,7 +105,9 @@ class MigratePromoteCommand extends Command {
       }
 
       if (data.testing.tests_failed > 0) {
-        throw new Error(`Migration has failing tests: ${data.testing.tests_failed} failed, ${data.testing.tests_passed} passed`);
+        throw new Error(
+          `Migration has failing tests: ${data.testing.tests_failed} failed, ${data.testing.tests_passed} passed`
+        );
       }
 
       if (data.testing.tests_passed === 0) {
@@ -115,9 +118,10 @@ class MigratePromoteCommand extends Command {
         }
       }
 
-      this.progress(`Tests verified: ${data.testing.tests_passed} passed, ${data.testing.tests_failed} failed`);
+      this.progress(
+        `Tests verified: ${data.testing.tests_passed} passed, ${data.testing.tests_failed} failed`
+      );
       return data;
-
     } catch (error) {
       if (error.code === 'ENOENT') {
         throw new Error(`Migration not found: ${migrationPath}`);
@@ -247,7 +251,7 @@ class MigratePromoteCommand extends Command {
   async stageInGit(productionPath) {
     this.progress('Staging migration in Git...');
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const git = spawn('git', ['add', productionPath], {
         stdio: ['ignore', 'pipe', 'pipe']
       });
@@ -292,7 +296,9 @@ class MigratePromoteCommand extends Command {
       }
     }
 
-    throw new Error('Could not find supabase directory. Run this command from within a Supabase project.');
+    throw new Error(
+      'Could not find supabase directory. Run this command from within a Supabase project.'
+    );
   }
 
   /**
@@ -330,7 +336,7 @@ class MigratePromoteCommand extends Command {
  */
 export default async function promoteHandler(args, config, logger, isProd) {
   const command = new MigratePromoteCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigratePromoteCommand };

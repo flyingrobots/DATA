@@ -36,9 +36,11 @@ export class SafetyGateRules {
 
     // Coverage threshold validation
     if (config.coverageThreshold !== undefined) {
-      if (typeof config.coverageThreshold !== 'number' ||
-          config.coverageThreshold < 0 ||
-          config.coverageThreshold > 100) {
+      if (
+        typeof config.coverageThreshold !== 'number' ||
+        config.coverageThreshold < 0 ||
+        config.coverageThreshold > 100
+      ) {
         errors.push('Coverage threshold must be a number between 0 and 100');
       }
     }
@@ -182,7 +184,9 @@ export class SafetyGateRules {
       valid: isCorrectBranch,
       currentBranch: currentBranch.trim(),
       expectedBranch: expectedBranch.trim(),
-      issue: isCorrectBranch ? null : `Current branch "${currentBranch}" does not match expected "${expectedBranch}"`
+      issue: isCorrectBranch
+        ? null
+        : `Current branch "${currentBranch}" does not match expected "${expectedBranch}"`
     };
   }
 
@@ -210,12 +214,15 @@ export class SafetyGateRules {
     // Check coverage if available
     if (testResults.coverage && testResults.coverage.total !== undefined) {
       if (testResults.coverage.total < coverageThreshold) {
-        issues.push(`Coverage ${testResults.coverage.total}% is below required ${coverageThreshold}%`);
+        issues.push(
+          `Coverage ${testResults.coverage.total}% is below required ${coverageThreshold}%`
+        );
       }
     }
 
     // Validate test counts make sense
-    const totalTests = (testResults.passed || 0) + (testResults.failed || 0) + (testResults.skipped || 0);
+    const totalTests =
+      (testResults.passed || 0) + (testResults.failed || 0) + (testResults.skipped || 0);
     if (totalTests === 0) {
       issues.push('No tests found - at least some tests should exist');
     }
@@ -292,8 +299,8 @@ export class SafetyGateRules {
       };
     }
 
-    const passed = auditEntries.filter(entry => entry.status === 'PASSED').length;
-    const failed = auditEntries.filter(entry => entry.status === 'FAILED').length;
+    const passed = auditEntries.filter((entry) => entry.status === 'PASSED').length;
+    const failed = auditEntries.filter((entry) => entry.status === 'FAILED').length;
     const total = auditEntries.length;
     const percentage = total > 0 ? Math.round((passed / total) * 100) : 0;
 
@@ -305,8 +312,8 @@ export class SafetyGateRules {
       percentage,
       allPassed: failed === 0,
       criticalFailures: auditEntries
-        .filter(entry => entry.status === 'FAILED')
-        .map(entry => entry.gate)
+        .filter((entry) => entry.status === 'FAILED')
+        .map((entry) => entry.gate)
     };
   }
 
@@ -317,7 +324,7 @@ export class SafetyGateRules {
    */
   getRecommendedActions(auditEntries) {
     const actions = [];
-    const failedEntries = auditEntries.filter(entry => entry.status === 'FAILED');
+    const failedEntries = auditEntries.filter((entry) => entry.status === 'FAILED');
 
     for (const entry of failedEntries) {
       switch (entry.gate) {
@@ -328,10 +335,10 @@ export class SafetyGateRules {
         actions.push(`Switch to the correct branch: ${entry.metadata.expectedBranch}`);
         break;
       case 'test-validation':
-        if (entry.issues.some(issue => issue.includes('failed'))) {
+        if (entry.issues.some((issue) => issue.includes('failed'))) {
           actions.push('Fix failing tests before proceeding');
         }
-        if (entry.issues.some(issue => issue.includes('coverage'))) {
+        if (entry.issues.some((issue) => issue.includes('coverage'))) {
           actions.push('Increase test coverage to meet minimum threshold');
         }
         break;

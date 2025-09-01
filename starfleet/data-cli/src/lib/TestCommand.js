@@ -50,7 +50,7 @@ class TestCommand extends DatabaseCommand {
    * @returns {Promise<string>} Resolved tests directory path
    */
   async getTestsDir() {
-    return await this.pathResolver.resolveDirectoryForRead(this.testsDir);
+    return this.pathResolver.resolveDirectoryForRead(this.testsDir);
   }
 
   /**
@@ -58,7 +58,7 @@ class TestCommand extends DatabaseCommand {
    * @returns {Promise<string>} Resolved output directory path
    */
   async getOutputDir() {
-    return await this.pathResolver.resolveDirectoryForWrite(this.outputDir);
+    return this.pathResolver.resolveDirectoryForWrite(this.outputDir);
   }
 
   /**
@@ -69,7 +69,7 @@ class TestCommand extends DatabaseCommand {
   async getTestFile(filename) {
     const { join } = await import('path');
     const dir = await this.getTestsDir();
-    return await this.pathResolver.resolveFileForRead(join(dir, filename));
+    return this.pathResolver.resolveFileForRead(join(dir, filename));
   }
 
   /**
@@ -80,7 +80,7 @@ class TestCommand extends DatabaseCommand {
   async getOutputFile(filename) {
     const { join } = await import('path');
     const dir = await this.getOutputDir();
-    return await this.pathResolver.resolveFileForWrite(join(dir, filename));
+    return this.pathResolver.resolveFileForWrite(join(dir, filename));
   }
 
   /**
@@ -96,7 +96,7 @@ class TestCommand extends DatabaseCommand {
     try {
       const files = await fs.readdir(dir);
       return files
-        .filter(file => {
+        .filter((file) => {
           if (pattern === '*.sql') {
             return file.endsWith('.sql');
           }
@@ -107,7 +107,7 @@ class TestCommand extends DatabaseCommand {
           }
           return file.includes(pattern);
         })
-        .map(file => join(dir, file));
+        .map((file) => join(dir, file));
     } catch (error) {
       throw new Error(`Failed to list test files in ${dir}: ${error.message}`);
     }
@@ -157,7 +157,7 @@ class TestCommand extends DatabaseCommand {
     };
 
     if (queryResult.rows) {
-      queryResult.rows.forEach(row => {
+      queryResult.rows.forEach((row) => {
         // Parse TAP output format
         const tapLine = row[Object.keys(row)[0]];
         if (typeof tapLine === 'string') {
@@ -209,7 +209,9 @@ class TestCommand extends DatabaseCommand {
   formatAsJUnit(results) {
     const xml = [];
     xml.push('<?xml version="1.0" encoding="UTF-8"?>');
-    xml.push(`<testsuite tests="${results.total}" failures="${results.failed}" skipped="${results.skipped}">`);
+    xml.push(
+      `<testsuite tests="${results.total}" failures="${results.failed}" skipped="${results.skipped}">`
+    );
 
     results.tests.forEach((test, i) => {
       xml.push(`  <testcase name="Test ${i + 1}" classname="pgTAP">`);

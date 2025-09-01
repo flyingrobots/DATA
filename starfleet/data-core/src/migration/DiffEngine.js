@@ -237,7 +237,7 @@ export class DiffEngine {
     operations.sort((a, b) => a.getPriority() - b.getPriority());
 
     // Generate hashes for all operations
-    operations.forEach(op => op.generateHash(this.cryptoPort));
+    operations.forEach((op) => op.generateHash(this.cryptoPort));
 
     return operations;
   }
@@ -265,12 +265,9 @@ export class DiffEngine {
       indexes: `DROP INDEX IF EXISTS ${name}`
     };
 
-    return new MigrationOperation(
-      typeMap[objectType],
-      name,
-      sqlMap[objectType],
-      { originalDefinition: definition }
-    );
+    return new MigrationOperation(typeMap[objectType], name, sqlMap[objectType], {
+      originalDefinition: definition
+    });
   }
 
   /**

@@ -60,7 +60,8 @@ class WatchCommand extends TestCommand {
 
       // Configure debounce delay from options or config
       this.debounceMs = options.debounce || testConfig.debounce_delay || 1000;
-      this.autoCompile = options.autoCompile !== undefined ? options.autoCompile : testConfig.auto_compile;
+      this.autoCompile =
+        options.autoCompile !== undefined ? options.autoCompile : testConfig.auto_compile;
 
       this.progress('Starting test watch mode...');
 
@@ -85,7 +86,6 @@ class WatchCommand extends TestCommand {
 
       this.emit('watch:complete', { message: 'Test watch stopped' });
       return { success: true, message: 'Test watch stopped' };
-
     } catch (error) {
       this.error('Failed to start test watcher', error);
       this.emit('watch:failed', { error });
@@ -132,11 +132,11 @@ class WatchCommand extends TestCommand {
     const watchPattern = path.join(watchDir, '**/*.sql');
 
     this.watcher = chokidar.watch(watchPattern, {
-      ignored: /[\/\\]\./,  // ignore dotfiles
+      ignored: /[\/\\]\./, // ignore dotfiles
       persistent: true,
       ignoreInitial: false,
       followSymlinks: false,
-      depth: 3  // reasonable depth limit
+      depth: 3 // reasonable depth limit
     });
 
     // Handle file events
@@ -246,7 +246,6 @@ class WatchCommand extends TestCommand {
         duration: cycleDuration,
         timestamp: new Date().toISOString()
       });
-
     } catch (error) {
       this.error('Test cycle failed', error);
 

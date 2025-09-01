@@ -15,7 +15,15 @@ import Config from '../../lib/config.js';
  * Run compiled tests using pgTAP
  */
 class RunCommand extends TestCommand {
-  constructor(databaseUrl, serviceRoleKey = null, testsDir, outputDir, logger = null, isProd = false, config = null) {
+  constructor(
+    databaseUrl,
+    serviceRoleKey = null,
+    testsDir,
+    outputDir,
+    logger = null,
+    isProd = false,
+    config = null
+  ) {
     super(databaseUrl, serviceRoleKey, testsDir, outputDir, logger, isProd);
     this.parser = new ResultParser();
     this.config = config;
@@ -154,12 +162,17 @@ class RunCommand extends TestCommand {
           cacheMisses: this.performanceMetrics.cacheMisses,
           testsExecuted: this.performanceMetrics.testsExecuted,
           testsFromCache: this.performanceMetrics.testsFromCache,
-          cacheHitRate: this.performanceMetrics.testsExecuted > 0
-            ? (this.performanceMetrics.testsFromCache / this.performanceMetrics.testsExecuted * 100).toFixed(1)
-            : '0.0',
-          averageTestTime: this.performanceMetrics.testsExecuted > 0
-            ? Math.round(totalTime / this.performanceMetrics.testsExecuted)
-            : 0
+          cacheHitRate:
+            this.performanceMetrics.testsExecuted > 0
+              ? (
+                (this.performanceMetrics.testsFromCache / this.performanceMetrics.testsExecuted) *
+                  100
+              ).toFixed(1)
+              : '0.0',
+          averageTestTime:
+            this.performanceMetrics.testsExecuted > 0
+              ? Math.round(totalTime / this.performanceMetrics.testsExecuted)
+              : 0
         };
 
         // Handle output formatting based on options
@@ -167,7 +180,6 @@ class RunCommand extends TestCommand {
 
         this.emit('complete', { results: combinedResults });
         return combinedResults;
-
       } finally {
         await client.end();
       }
@@ -184,7 +196,9 @@ class RunCommand extends TestCommand {
    */
   async _createDatabaseClient() {
     if (!this.databaseUrl) {
-      throw new Error(`Database connection string not configured for ${this.isProd ? 'production' : 'local'} environment`);
+      throw new Error(
+        `Database connection string not configured for ${this.isProd ? 'production' : 'local'} environment`
+      );
     }
 
     const client = new Client({
@@ -211,7 +225,7 @@ class RunCommand extends TestCommand {
     `;
 
     const result = await client.query(query);
-    return result.rows.map(row => row.proname);
+    return result.rows.map((row) => row.proname);
   }
 
   /**
@@ -245,7 +259,7 @@ class RunCommand extends TestCommand {
    * @private
    */
   _filterBySuite(testFunctions, suite) {
-    return testFunctions.filter(func => {
+    return testFunctions.filter((func) => {
       // Handle suite names like "admin" -> "run_admin_*" (e.g., "run_admin_delete_pet_tests")
       // Also handle direct matches like "admin" -> "run_admin_tests"
       const regex = new RegExp(`^run_${suite}(_.*)?_tests$`, 'i');
@@ -261,7 +275,7 @@ class RunCommand extends TestCommand {
     // Convert glob patterns to regex patterns
     const regexPattern = this._globToRegex(pattern);
     const regex = new RegExp(regexPattern, 'i');
-    return testFunctions.filter(func => regex.test(func));
+    return testFunctions.filter((func) => regex.test(func));
   }
 
   /**
@@ -271,9 +285,9 @@ class RunCommand extends TestCommand {
   _globToRegex(pattern) {
     // Escape special regex characters except * and ?
     const regex = pattern
-      .replace(/[.+^${}()|[\]\\]/g, '\\$&')  // Escape regex special chars
-      .replace(/\*/g, '.*')                   // Convert * to .*
-      .replace(/\?/g, '.');                   // Convert ? to .
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&') // Escape regex special chars
+      .replace(/\*/g, '.*') // Convert * to .*
+      .replace(/\?/g, '.'); // Convert ? to .
 
     // Anchor the pattern to match the whole string
     return `^${regex}$`;
@@ -323,7 +337,7 @@ class RunCommand extends TestCommand {
     try {
       const result = await client.query(query);
       // Join all result rows into TAP output
-      return result.rows.map(row => Object.values(row)[0]).join('\n');
+      return result.rows.map((row) => Object.values(row)[0]).join('\n');
     } catch (error) {
       // Return TAP format error
       return `not ok 1 ${functionName} failed: ${error.message}`;
@@ -350,7 +364,7 @@ class RunCommand extends TestCommand {
       totalSkipped += funcResults.skipped;
 
       // Prefix test descriptions with function name
-      const prefixedTests = funcResults.tests.map(test => ({
+      const prefixedTests = funcResults.tests.map((test) => ({
         ...test,
         description: `${funcName}: ${test.description}`,
         function: funcName
@@ -466,7 +480,7 @@ class RunCommand extends TestCommand {
     // Summary by function
     if (testFunctions.length > 1) {
       console.log(chalk.bold('Test Functions:'));
-      testFunctions.forEach(func => {
+      testFunctions.forEach((func) => {
         const symbol = func.success ? chalk.green('✓') : chalk.red('✗');
         const summary = `${func.passed}/${func.total} passed`;
         const skippedText = func.skipped > 0 ? `, ${func.skipped} skipped` : '';
@@ -491,8 +505,8 @@ class RunCommand extends TestCommand {
       console.log(''); // Empty line
       console.log(chalk.red.bold('Failed Tests:'));
       tests
-        .filter(test => test.status === 'fail')
-        .forEach(test => {
+        .filter((test) => test.status === 'fail')
+        .forEach((test) => {
           console.log(chalk.red(`  ✗ ${test.description}`));
         });
     }
@@ -501,7 +515,7 @@ class RunCommand extends TestCommand {
     if (diagnostics.length > 0) {
       console.log(''); // Empty line
       console.log(chalk.gray.bold('Diagnostics:'));
-      diagnostics.forEach(diagnostic => {
+      diagnostics.forEach((diagnostic) => {
         console.log(chalk.gray(`  ${diagnostic}`));
       });
     }
@@ -517,13 +531,19 @@ class RunCommand extends TestCommand {
 
       if (perf.cacheEnabled) {
         if (perf.testsFromCache > 0) {
-          console.log(chalk.green(`  Cache performance: ${perf.cacheHitRate}% hit rate (${perf.testsFromCache}/${perf.testsExecuted} from cache)`));
+          console.log(
+            chalk.green(
+              `  Cache performance: ${perf.cacheHitRate}% hit rate (${perf.testsFromCache}/${perf.testsExecuted} from cache)`
+            )
+          );
 
           // Calculate estimated time saved
           const avgExecutionTime = perf.averageTestTime;
           const estimatedTimeSaved = perf.testsFromCache * avgExecutionTime * 0.8; // Assume 80% time savings
           if (estimatedTimeSaved > 0) {
-            console.log(chalk.green(`  Estimated time saved: ~${Math.round(estimatedTimeSaved)}ms`));
+            console.log(
+              chalk.green(`  Estimated time saved: ~${Math.round(estimatedTimeSaved)}ms`)
+            );
           }
         } else {
           console.log(chalk.yellow('  Cache performance: 0% hit rate (building cache...)'));
@@ -570,7 +590,11 @@ class RunCommand extends TestCommand {
     const mergedOptions = { ...options };
 
     // Apply default output format if not specified
-    if (!mergedOptions.format && testConfig.output_formats && testConfig.output_formats.length > 0) {
+    if (
+      !mergedOptions.format &&
+      testConfig.output_formats &&
+      testConfig.output_formats.length > 0
+    ) {
       mergedOptions.format = testConfig.output_formats[0];
     }
 

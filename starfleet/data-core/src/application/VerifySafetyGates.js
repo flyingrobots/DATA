@@ -91,11 +91,14 @@ export function makeVerifySafetyGates({ git, db, logger, bus }) {
         const testsPass = testResult.failed === 0;
         if (!testsPass) {
           failures.push('tests_failed');
-          logger.error({
-            failed: testResult.failed,
-            total: testResult.total,
-            failures: testResult.failures
-          }, 'Tests failed');
+          logger.error(
+            {
+              failed: testResult.failed,
+              total: testResult.total,
+              failures: testResult.failures
+            },
+            'Tests failed'
+          );
         }
 
         bus.emit(Events.SAFETY_CHECK_ITEM, {

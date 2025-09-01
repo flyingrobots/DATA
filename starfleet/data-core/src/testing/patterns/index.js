@@ -11,11 +11,7 @@ import { performancePatterns } from './performance.js';
  * Complete pattern library
  * @type {Array<Object>}
  */
-export const PATTERNS = [
-  ...securityPatterns,
-  ...dataPatterns,
-  ...performancePatterns
-];
+export const PATTERNS = [...securityPatterns, ...dataPatterns, ...performancePatterns];
 
 /**
  * Get patterns by category
@@ -23,7 +19,7 @@ export const PATTERNS = [
  * @returns {Array<Object>} Filtered patterns
  */
 export function getPatternsByCategory(category) {
-  return PATTERNS.filter(p => p.category === category);
+  return PATTERNS.filter((p) => p.category === category);
 }
 
 /**
@@ -32,7 +28,7 @@ export function getPatternsByCategory(category) {
  * @returns {Object|undefined} Pattern or undefined
  */
 export function getPatternById(id) {
-  return PATTERNS.find(p => p.id === id);
+  return PATTERNS.find((p) => p.id === id);
 }
 
 /**
@@ -40,7 +36,7 @@ export function getPatternById(id) {
  * @returns {Array<string>} Unique category names
  */
 export function getCategories() {
-  return [...new Set(PATTERNS.map(p => p.category))];
+  return [...new Set(PATTERNS.map((p) => p.category))];
 }
 
 /**
@@ -49,5 +45,5 @@ export function getCategories() {
  * @returns {Array<Object>} Filtered patterns
  */
 export function getPatternsByDifficulty(difficulty) {
-  return PATTERNS.filter(p => p.difficulty === difficulty);
+  return PATTERNS.filter((p) => p.difficulty === difficulty);
 }

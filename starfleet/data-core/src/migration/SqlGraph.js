@@ -87,7 +87,8 @@ export class SqlGraph {
     this.nodes = new Map();
     this.sqlPatterns = {
       // Pattern to match CREATE statements
-      create: /CREATE\s+(?:OR\s+REPLACE\s+)?(?:TEMP|TEMPORARY\s+)?(?:TABLE|VIEW|FUNCTION|PROCEDURE|TRIGGER|INDEX)\s+(?:IF\s+NOT\s+EXISTS\s+)?([.\w]+)/gi,
+      create:
+        /CREATE\s+(?:OR\s+REPLACE\s+)?(?:TEMP|TEMPORARY\s+)?(?:TABLE|VIEW|FUNCTION|PROCEDURE|TRIGGER|INDEX)\s+(?:IF\s+NOT\s+EXISTS\s+)?([.\w]+)/gi,
       // Pattern to match references (FROM, JOIN, REFERENCES, etc.)
       reference: /(?:FROM|JOIN|REFERENCES|USING)\s+([.\w]+)/gi,
       // Pattern to match function calls
@@ -126,7 +127,9 @@ export class SqlGraph {
 
     for (const match of createMatches) {
       const objectName = match[1].toLowerCase();
-      const objectType = match[0].match(/(?:TABLE|VIEW|FUNCTION|PROCEDURE|TRIGGER|INDEX)/i)[0].toLowerCase();
+      const objectType = match[0]
+        .match(/(?:TABLE|VIEW|FUNCTION|PROCEDURE|TRIGGER|INDEX)/i)[0]
+        .toLowerCase();
 
       const node = new SqlNode(objectName, objectType, filePath, content);
       this.nodes.set(objectName, node);
@@ -134,7 +137,10 @@ export class SqlGraph {
 
     // If no CREATE statements found, treat as migration script
     if (createMatches.length === 0) {
-      const scriptName = filePath.split('/').pop().replace(/\.sql$/, '');
+      const scriptName = filePath
+        .split('/')
+        .pop()
+        .replace(/\.sql$/, '');
       const node = new SqlNode(scriptName, 'script', filePath, content);
       this.nodes.set(scriptName, node);
     }
@@ -215,8 +221,7 @@ export class SqlGraph {
    * @returns {SqlNode[]} Independent nodes
    */
   getIndependentNodes() {
-    return Array.from(this.nodes.values())
-      .filter(node => node.dependencies.size === 0);
+    return Array.from(this.nodes.values()).filter((node) => node.dependencies.size === 0);
   }
 
   /**
@@ -224,8 +229,7 @@ export class SqlGraph {
    * @returns {SqlNode[]} Terminal nodes
    */
   getTerminalNodes() {
-    return Array.from(this.nodes.values())
-      .filter(node => node.dependents.size === 0);
+    return Array.from(this.nodes.values()).filter((node) => node.dependents.size === 0);
   }
 
   /**

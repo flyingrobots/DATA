@@ -31,13 +31,18 @@ import { attachCliReporter } from '../reporters/attachCliReporter.js';
  */
 export function buildServices(config = {}) {
   // Get database URL from config or environment
-  const databaseUrl = config.databaseUrl ||
-    process.env.DATABASE_URL ||
-    process.env.DATA_DATABASE_URL;
+  const databaseUrl =
+    config.databaseUrl || process.env.DATABASE_URL || process.env.DATA_DATABASE_URL;
 
   // Instantiate adapters with runtime validation
   const fs = ensurePort('FileSystemPort', FileSystemAdapter, [
-    'readFile', 'writeFile', 'exists', 'mkdirp', 'rm', 'readdir', 'stat'
+    'readFile',
+    'writeFile',
+    'exists',
+    'mkdirp',
+    'rm',
+    'readdir',
+    'stat'
   ]);
 
   const glob = ensurePort('GlobPort', GlobAdapter, ['find']);
@@ -47,41 +52,70 @@ export function buildServices(config = {}) {
   const env = ensurePort('EnvironmentPort', EnvironmentAdapter, ['get', 'has']);
 
   const git = ensurePort('GitPort', new GitPortNodeAdapter(), [
-    'status', 'tag', 'latestTag', 'revParse'
+    'status',
+    'tag',
+    'latestTag',
+    'revParse'
   ]);
 
   const db = ensurePort('DbPort', new DbPortNodeAdapter(databaseUrl), [
-    'apply', 'query', 'runPgTap', 'withTransaction'
+    'apply',
+    'query',
+    'runPgTap',
+    'withTransaction'
   ]);
 
   const proc = ensurePort('ProcessPort', new ProcessPortNodeAdapter(), [
-    'spawn', 'exec', 'exit', 'cwd', 'chdir', 'which'
+    'spawn',
+    'exec',
+    'exit',
+    'cwd',
+    'chdir',
+    'which'
   ]);
 
   const crypto = ensurePort('CryptoPort', new CryptoPortNodeAdapter(), [
-    'hash', 'randomUUID', 'randomBytes', 'timingSafeEqual'
+    'hash',
+    'randomUUID',
+    'randomBytes',
+    'timingSafeEqual'
   ]);
 
   // Logger with context bindings
-  const logger = ensurePort('LoggerPort', new LoggerConsoleAdapter({
-    service: 'data-cli',
-    version: '1.0.0'
-  }), ['info', 'warn', 'error', 'debug', 'child']);
+  const logger = ensurePort(
+    'LoggerPort',
+    new LoggerConsoleAdapter({
+      service: 'data-cli',
+      version: '1.0.0'
+    }),
+    ['info', 'warn', 'error', 'debug', 'child']
+  );
 
   // Event bus for decoupled communication
   const bus = new EventBusNodeAdapter();
 
   // Wire up use-cases with dependencies
   const generateMigrationPlan = makeGenerateMigrationPlan({
-    fs, glob, crypto, logger, clock, bus
+    fs,
+    glob,
+    crypto,
+    logger,
+    clock,
+    bus
   });
 
   const applyMigrationPlan = makeApplyMigrationPlan({
-    db, logger, clock, bus
+    db,
+    logger,
+    clock,
+    bus
   });
 
   const verifySafetyGates = makeVerifySafetyGates({
-    git, db, logger, bus
+    git,
+    db,
+    logger,
+    bus
   });
 
   // Attach CLI reporter for formatted output
@@ -91,7 +125,16 @@ export function buildServices(config = {}) {
   return {
     // Ports for direct access when needed
     ports: {
-      fs, glob, clock, env, git, db, proc, crypto, logger, bus
+      fs,
+      glob,
+      clock,
+      env,
+      git,
+      db,
+      proc,
+      crypto,
+      logger,
+      bus
     },
 
     // Use-cases for business logic

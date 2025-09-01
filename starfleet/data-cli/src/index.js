@@ -132,9 +132,7 @@ async function cli(argv) {
     });
 
   // Add database commands
-  const db = program
-    .command('db')
-    .description('Database operations');
+  const db = program.command('db').description('Database operations');
 
   db.command('reset')
     .description('Reset the local database')
@@ -204,12 +202,7 @@ async function cli(argv) {
       const { CompileCommand } = await import('./commands/db/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
 
-      const command = new CompileCommand(
-        paths.sqlDir,
-        paths.migrationsDir,
-        null,
-        parentOpts.prod
-      );
+      const command = new CompileCommand(paths.sqlDir, paths.migrationsDir, null, parentOpts.prod);
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
 
@@ -232,11 +225,10 @@ async function cli(argv) {
     });
 
   // Add migrate subcommands
-  const migrate = db
-    .command('migrate')
-    .description('Database migration management');
+  const migrate = db.command('migrate').description('Database migration management');
 
-  migrate.command('generate')
+  migrate
+    .command('generate')
     .description('Generate migration from schema diff')
     .option('--name <name>', 'Migration name (required)')
     .option('--skip-compile', 'Skip source compilation step')
@@ -284,7 +276,8 @@ async function cli(argv) {
       }
     });
 
-  migrate.command('promote')
+  migrate
+    .command('promote')
     .description('Promote tested migration to production')
     .option('-m, --migration <name>', 'Migration to promote', 'current')
     .option('--no-git', 'Skip Git staging')
@@ -316,7 +309,8 @@ async function cli(argv) {
     .alias('fn')
     .description('Edge Functions deployment and management');
 
-  functions.command('deploy [functions...]')
+  functions
+    .command('deploy [functions...]')
     .description('Deploy Edge Functions to Supabase')
     .option('--no-verify-jwt', 'Skip JWT verification during deployment')
     .option('--debug', 'Enable debug output')
@@ -340,19 +334,15 @@ async function cli(argv) {
       }
     });
 
-  functions.command('validate [functions...]')
+  functions
+    .command('validate [functions...]')
     .description('Validate Edge Functions without deploying')
     .action(async (functionNames, _options) => {
       const parentOpts = program.opts();
       const { ValidateCommand } = await import('./commands/functions/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
 
-      const command = new ValidateCommand(
-        paths.testsDir,
-        paths.reportsDir,
-        null,
-        parentOpts.prod
-      );
+      const command = new ValidateCommand(paths.testsDir, paths.reportsDir, null, parentOpts.prod);
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
 
@@ -366,7 +356,8 @@ async function cli(argv) {
       }
     });
 
-  functions.command('status [functions...]')
+  functions
+    .command('status [functions...]')
     .description('Show Edge Functions deployment status')
     .action(async (functionNames, _options) => {
       const parentOpts = program.opts();
@@ -388,11 +379,10 @@ async function cli(argv) {
     });
 
   // Add test commands
-  const test = program
-    .command('test')
-    .description('Database and application testing');
+  const test = program.command('test').description('Database and application testing');
 
-  test.command('compile')
+  test
+    .command('compile')
     .description('Compile tests for execution')
     .action(async () => {
       const parentOpts = program.opts();
@@ -418,7 +408,8 @@ async function cli(argv) {
       }
     });
 
-  test.command('run')
+  test
+    .command('run')
     .description('Run compiled tests')
     .option('--pattern <pattern>', 'Pattern to match test function names')
     .option('--suite <suite>', 'Run only tests in this suite')
@@ -461,7 +452,8 @@ async function cli(argv) {
       }
     });
 
-  test.command('dev-cycle')
+  test
+    .command('dev-cycle')
     .description('Run full development cycle: compile → reset → test')
     .option('--pattern <pattern>', 'Pattern to match test function names')
     .option('--suite <suite>', 'Run only tests in this suite')
@@ -502,7 +494,8 @@ async function cli(argv) {
       }
     });
 
-  test.command('coverage')
+  test
+    .command('coverage')
     .description('Generate test coverage reports')
     .option('--format <format>', 'Output format (html, json, lcov)', 'html')
     .option('--output <dir>', 'Output directory', 'coverage')
@@ -536,7 +529,8 @@ async function cli(argv) {
       }
     });
 
-  test.command('watch')
+  test
+    .command('watch')
     .description('Watch for changes and re-run tests')
     .option('--pattern <pattern>', 'Pattern to match test files')
     .option('--ignore <pattern>', 'Pattern to ignore files')
@@ -566,7 +560,8 @@ async function cli(argv) {
       }
     });
 
-  test.command('validate')
+  test
+    .command('validate')
     .description('Validate test configuration and setup')
     .option('--fix', 'Attempt to fix validation issues')
     .action(async (options) => {
@@ -595,7 +590,8 @@ async function cli(argv) {
       }
     });
 
-  test.command('generate')
+  test
+    .command('generate')
     .description('Generate pgTAP test templates for RPC functions and RLS policies')
     .option('--rpc <name>', 'Generate RPC function test template')
     .option('--rls <name>', 'Generate RLS policy test template')
@@ -617,12 +613,7 @@ async function cli(argv) {
         process.exit(1);
       }
 
-      const command = new GenerateCommand(
-        paths.testsDir,
-        paths.reportsDir,
-        null,
-        parentOpts.prod
-      );
+      const command = new GenerateCommand(paths.testsDir, paths.reportsDir, null, parentOpts.prod);
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
 
@@ -636,11 +627,17 @@ async function cli(argv) {
       }
     });
 
-  test.command('generate-template')
-    .description('Generate pgTAP test templates using TestTemplateGenerator and TestRequirementAnalyzer')
+  test
+    .command('generate-template')
+    .description(
+      'Generate pgTAP test templates using TestTemplateGenerator and TestRequirementAnalyzer'
+    )
     .option('--migration <file>', 'Migration file to analyze for test requirements')
     .option('--type <type>', 'Test type (rpc, rls, trigger, constraint, function)')
-    .option('--name <name>', 'Name of entity to generate tests for (required if not using --migration)')
+    .option(
+      '--name <name>',
+      'Name of entity to generate tests for (required if not using --migration)'
+    )
     .option('--output <file>', 'Output file path (default: stdout)')
     .option('--schema <schema>', 'Schema name (default: public)')
     .option('--parameters <params>', 'Comma-separated function parameters for RPC tests')
@@ -671,7 +668,8 @@ async function cli(argv) {
     });
 
   // CI Commands - Optimized for continuous integration
-  test.command('ci-validate')
+  test
+    .command('ci-validate')
     .description('CI-optimized test validation with machine-readable output')
     .option('--output <file>', 'Output file for validation results (JSON format)')
     .action(async (options) => {
@@ -699,7 +697,8 @@ async function cli(argv) {
       }
     });
 
-  test.command('ci-run')
+  test
+    .command('ci-run')
     .description('CI-optimized test execution with JUnit/JSON output')
     .option('--pattern <pattern>', 'Pattern to match test function names')
     .option('--suite <suite>', 'Run only tests in this suite')
@@ -734,7 +733,8 @@ async function cli(argv) {
       }
     });
 
-  test.command('ci-coverage')
+  test
+    .command('ci-coverage')
     .description('CI-optimized coverage analysis with enforcement')
     .option('--enforce', 'Enforce coverage thresholds (default: false)', false)
     .option('--min-coverage <percent>', 'Minimum overall coverage percentage', '80')

@@ -47,7 +47,7 @@ try {
   const safetyResult = await services.useCases.verifySafetyGates.execute({
     requireClean: false, // Don't require clean for smoke test
     allowedBranches: [], // Allow any branch for smoke test
-    requireTests: false  // Don't run tests for smoke test
+    requireTests: false // Don't run tests for smoke test
   });
 
   console.log(`   ✅ Safety gates checked: ${safetyResult.passed ? 'PASSED' : 'FAILED'}`);

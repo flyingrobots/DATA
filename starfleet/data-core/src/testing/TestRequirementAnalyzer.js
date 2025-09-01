@@ -8,7 +8,7 @@
  * @module TestRequirementAnalyzer
  */
 
-const { EventEmitter } = require('events');
+import { EventEmitter } from 'events';
 
 /**
  * Test requirement types
@@ -16,16 +16,16 @@ const { EventEmitter } = require('events');
  * @enum {string}
  */
 const TEST_TYPES = {
-  SCHEMA: 'SCHEMA',           // Table structure tests
-  DATA: 'DATA',               // Data integrity tests
-  CONSTRAINT: 'CONSTRAINT',   // Constraint validation tests
-  INDEX: 'INDEX',             // Index existence and performance tests
-  FUNCTION: 'FUNCTION',       // Function behavior tests
-  TRIGGER: 'TRIGGER',         // Trigger functionality tests
-  RLS: 'RLS',                 // Row Level Security tests
-  VIEW: 'VIEW',               // View definition tests
-  ENUM: 'ENUM',               // Enum type tests
-  PERMISSION: 'PERMISSION'    // Permission and security tests
+  SCHEMA: 'SCHEMA', // Table structure tests
+  DATA: 'DATA', // Data integrity tests
+  CONSTRAINT: 'CONSTRAINT', // Constraint validation tests
+  INDEX: 'INDEX', // Index existence and performance tests
+  FUNCTION: 'FUNCTION', // Function behavior tests
+  TRIGGER: 'TRIGGER', // Trigger functionality tests
+  RLS: 'RLS', // Row Level Security tests
+  VIEW: 'VIEW', // View definition tests
+  ENUM: 'ENUM', // Enum type tests
+  PERMISSION: 'PERMISSION' // Permission and security tests
 };
 
 /**
@@ -34,10 +34,10 @@ const TEST_TYPES = {
  * @enum {string}
  */
 const TEST_PRIORITIES = {
-  CRITICAL: 'CRITICAL',       // Must have - blocks deployment
-  HIGH: 'HIGH',               // Should have - important coverage
-  MEDIUM: 'MEDIUM',           // Nice to have - good practice
-  LOW: 'LOW'                  // Optional - comprehensive coverage
+  CRITICAL: 'CRITICAL', // Must have - blocks deployment
+  HIGH: 'HIGH', // Should have - important coverage
+  MEDIUM: 'MEDIUM', // Nice to have - good practice
+  LOW: 'LOW' // Optional - comprehensive coverage
 };
 
 /**
@@ -77,7 +77,8 @@ class TestRequirementAnalyzer extends EventEmitter {
       requireSecurityTests: options.requireSecurityTests !== false,
 
       // Risk-based test priorities
-      destructiveOperationPriority: options.destructiveOperationPriority || TEST_PRIORITIES.CRITICAL,
+      destructiveOperationPriority:
+        options.destructiveOperationPriority || TEST_PRIORITIES.CRITICAL,
       warningOperationPriority: options.warningOperationPriority || TEST_PRIORITIES.HIGH,
       safeOperationPriority: options.safeOperationPriority || TEST_PRIORITIES.MEDIUM,
 
@@ -152,13 +153,16 @@ class TestRequirementAnalyzer extends EventEmitter {
       // Update statistics
       for (const req of requirements) {
         analysis.summary.byType[req.type] = (analysis.summary.byType[req.type] || 0) + 1;
-        analysis.summary.byPriority[req.priority] = (analysis.summary.byPriority[req.priority] || 0) + 1;
+        analysis.summary.byPriority[req.priority] =
+          (analysis.summary.byPriority[req.priority] || 0) + 1;
         analysis.estimatedEffort += this._estimateTestEffort(req);
       }
 
       // Check for risk areas
       if (this._isHighRiskOperation(operation)) {
-        analysis.riskAreas.push(operation.description || this._extractOperationDescription(operation));
+        analysis.riskAreas.push(
+          operation.description || this._extractOperationDescription(operation)
+        );
       }
     }
 
@@ -195,11 +199,15 @@ class TestRequirementAnalyzer extends EventEmitter {
 
     // Check required properties
     if (!operation.sql || typeof operation.sql !== 'string') {
-      throw new Error(`Invalid operation: missing or invalid 'sql' property (got ${typeof operation.sql})`);
+      throw new Error(
+        `Invalid operation: missing or invalid 'sql' property (got ${typeof operation.sql})`
+      );
     }
 
     if (!operation.type || typeof operation.type !== 'string') {
-      throw new Error(`Invalid operation: missing or invalid 'type' property (got ${typeof operation.type})`);
+      throw new Error(
+        `Invalid operation: missing or invalid 'type' property (got ${typeof operation.type})`
+      );
     }
 
     // Validate operation type is known
@@ -214,11 +222,15 @@ class TestRequirementAnalyzer extends EventEmitter {
 
     // Validate optional properties if present
     if (operation.description && typeof operation.description !== 'string') {
-      throw new Error(`Invalid operation: 'description' must be a string (got ${typeof operation.description})`);
+      throw new Error(
+        `Invalid operation: 'description' must be a string (got ${typeof operation.description})`
+      );
     }
 
     if (operation.warning && typeof operation.warning !== 'string') {
-      throw new Error(`Invalid operation: 'warning' must be a string (got ${typeof operation.warning})`);
+      throw new Error(
+        `Invalid operation: 'warning' must be a string (got ${typeof operation.warning})`
+      );
     }
 
     // Check for malformed SQL (basic validation)
@@ -396,10 +408,16 @@ class TestRequirementAnalyzer extends EventEmitter {
       target,
       testCases: [
         `has_table('${target}')`,
-        `columns_are('${target}', ARRAY[${tableStructure.columns.map(c => `'${c.name}'`).join(', ')}])`,
-        ...tableStructure.columns.map(col => `col_type_is('${target}', '${col.name}', '${col.type}')`),
-        ...tableStructure.columns.filter(col => col.notNull).map(col => `col_not_null('${target}', '${col.name}')`),
-        ...tableStructure.columns.filter(col => col.hasDefault).map(col => `col_has_default('${target}', '${col.name}')`)
+        `columns_are('${target}', ARRAY[${tableStructure.columns.map((c) => `'${c.name}'`).join(', ')}])`,
+        ...tableStructure.columns.map(
+          (col) => `col_type_is('${target}', '${col.name}', '${col.type}')`
+        ),
+        ...tableStructure.columns
+          .filter((col) => col.notNull)
+          .map((col) => `col_not_null('${target}', '${col.name}')`),
+        ...tableStructure.columns
+          .filter((col) => col.hasDefault)
+          .map((col) => `col_has_default('${target}', '${col.name}')`)
       ]
     });
 
@@ -412,7 +430,7 @@ class TestRequirementAnalyzer extends EventEmitter {
         target,
         testCases: [
           `has_pk('${target}')`,
-          ...tableStructure.primaryKeys.map(pk => `col_is_pk('${target}', '${pk}')`)
+          ...tableStructure.primaryKeys.map((pk) => `col_is_pk('${target}', '${pk}')`)
         ]
       });
     }
@@ -425,8 +443,11 @@ class TestRequirementAnalyzer extends EventEmitter {
         description: `Verify foreign key constraints on table ${target}`,
         target,
         testCases: [
-          ...tableStructure.foreignKeys.map(fk => `has_fk('${target}', '${fk.column}')`),
-          ...tableStructure.foreignKeys.map(fk => `fk_ok('${target}', '${fk.column}', '${fk.referencedTable}', '${fk.referencedColumn}')`)
+          ...tableStructure.foreignKeys.map((fk) => `has_fk('${target}', '${fk.column}')`),
+          ...tableStructure.foreignKeys.map(
+            (fk) =>
+              `fk_ok('${target}', '${fk.column}', '${fk.referencedTable}', '${fk.referencedColumn}')`
+          )
         ]
       });
     }
@@ -436,12 +457,12 @@ class TestRequirementAnalyzer extends EventEmitter {
       const constraintTests = [];
 
       // Check constraints
-      tableStructure.checkConstraints.forEach(constraint => {
+      tableStructure.checkConstraints.forEach((constraint) => {
         constraintTests.push(`has_check('${target}', '${constraint.name}')`);
       });
 
       // Unique constraints
-      tableStructure.uniqueConstraints.forEach(constraint => {
+      tableStructure.uniqueConstraints.forEach((constraint) => {
         constraintTests.push(`has_unique('${target}', '${constraint.name}')`);
       });
 
@@ -464,7 +485,10 @@ class TestRequirementAnalyzer extends EventEmitter {
         description: `Verify indexes created for table ${target}`,
         target,
         testCases: [
-          ...tableStructure.indexes.map(idx => `has_index('${target}', '${idx.name}', ARRAY[${idx.columns.map(c => `'${c}'`).join(', ')}])`)
+          ...tableStructure.indexes.map(
+            (idx) =>
+              `has_index('${target}', '${idx.name}', ARRAY[${idx.columns.map((c) => `'${c}'`).join(', ')}])`
+          )
         ]
       });
     }
@@ -480,10 +504,7 @@ class TestRequirementAnalyzer extends EventEmitter {
     const sql = operation.sql || '';
     const isCascade = sql.toUpperCase().includes('CASCADE');
 
-    const testCases = [
-      `hasnt_table('${target}')`,
-      '-- Verify table no longer exists in schema'
-    ];
+    const testCases = [`hasnt_table('${target}')`, '-- Verify table no longer exists in schema'];
 
     if (isCascade) {
       testCases.push(
@@ -500,13 +521,15 @@ class TestRequirementAnalyzer extends EventEmitter {
       );
     }
 
-    return [{
-      type: TEST_TYPES.SCHEMA,
-      priority: TEST_PRIORITIES.CRITICAL, // Always critical for destructive ops
-      description: `Verify table ${target} is properly dropped${isCascade ? ' with CASCADE' : ''}`,
-      target,
-      testCases
-    }];
+    return [
+      {
+        type: TEST_TYPES.SCHEMA,
+        priority: TEST_PRIORITIES.CRITICAL, // Always critical for destructive ops
+        description: `Verify table ${target} is properly dropped${isCascade ? ' with CASCADE' : ''}`,
+        target,
+        testCases
+      }
+    ];
   }
 
   /**
@@ -519,7 +542,7 @@ class TestRequirementAnalyzer extends EventEmitter {
     const alterations = this._parseTableAlterations(sql, target);
 
     // Handle ADD COLUMN operations
-    alterations.addedColumns.forEach(column => {
+    alterations.addedColumns.forEach((column) => {
       const testCases = [
         `has_column('${target}', '${column.name}')`,
         `col_type_is('${target}', '${column.name}', '${column.type}')`
@@ -539,7 +562,9 @@ class TestRequirementAnalyzer extends EventEmitter {
       // Add foreign key test if it's a reference column
       if (column.foreignKey) {
         testCases.push(`has_fk('${target}', '${column.name}')`);
-        testCases.push(`fk_ok('${target}', '${column.name}', '${column.foreignKey.referencedTable}', '${column.foreignKey.referencedColumn}')`);
+        testCases.push(
+          `fk_ok('${target}', '${column.name}', '${column.foreignKey.referencedTable}', '${column.foreignKey.referencedColumn}')`
+        );
       }
 
       requirements.push({
@@ -552,7 +577,7 @@ class TestRequirementAnalyzer extends EventEmitter {
     });
 
     // Handle DROP COLUMN operations
-    alterations.droppedColumns.forEach(columnName => {
+    alterations.droppedColumns.forEach((columnName) => {
       requirements.push({
         type: TEST_TYPES.SCHEMA,
         priority: TEST_PRIORITIES.CRITICAL,
@@ -567,10 +592,8 @@ class TestRequirementAnalyzer extends EventEmitter {
     });
 
     // Handle ALTER COLUMN TYPE operations
-    alterations.alteredColumns.forEach(column => {
-      const testCases = [
-        `col_type_is('${target}', '${column.name}', '${column.newType}')`
-      ];
+    alterations.alteredColumns.forEach((column) => {
+      const testCases = [`col_type_is('${target}', '${column.name}', '${column.newType}')`];
 
       // Add data integrity tests for type changes
       if (column.oldType !== column.newType) {
@@ -607,7 +630,7 @@ class TestRequirementAnalyzer extends EventEmitter {
     }
 
     // Handle RENAME COLUMN operations
-    alterations.renamedColumns.forEach(rename => {
+    alterations.renamedColumns.forEach((rename) => {
       requirements.push({
         type: TEST_TYPES.SCHEMA,
         priority: TEST_PRIORITIES.HIGH,
@@ -623,19 +646,21 @@ class TestRequirementAnalyzer extends EventEmitter {
     });
 
     // Handle ADD CONSTRAINT operations
-    alterations.addedConstraints.forEach(constraint => {
+    alterations.addedConstraints.forEach((constraint) => {
       const testCases = [];
 
       switch (constraint.type) {
       case 'PRIMARY KEY':
         testCases.push(`has_pk('${target}')`);
-        constraint.columns.forEach(col => {
+        constraint.columns.forEach((col) => {
           testCases.push(`col_is_pk('${target}', '${col}')`);
         });
         break;
       case 'FOREIGN KEY':
         testCases.push(`has_fk('${target}', '${constraint.column}')`);
-        testCases.push(`fk_ok('${target}', '${constraint.column}', '${constraint.referencedTable}', '${constraint.referencedColumn}')`);
+        testCases.push(
+          `fk_ok('${target}', '${constraint.column}', '${constraint.referencedTable}', '${constraint.referencedColumn}')`
+        );
         break;
       case 'UNIQUE':
         testCases.push(`has_unique('${target}', '${constraint.name}')`);
@@ -655,7 +680,7 @@ class TestRequirementAnalyzer extends EventEmitter {
     });
 
     // Handle DROP CONSTRAINT operations
-    alterations.droppedConstraints.forEach(constraint => {
+    alterations.droppedConstraints.forEach((constraint) => {
       requirements.push({
         type: TEST_TYPES.CONSTRAINT,
         priority: TEST_PRIORITIES.CRITICAL,
@@ -689,7 +714,9 @@ class TestRequirementAnalyzer extends EventEmitter {
       break;
 
     case 'CREATE_UNIQUE_INDEX':
-      requirements.push(...this._generateCreateUniqueIndexTests(operation, target, priority, sql));
+      requirements.push(
+        ...this._generateCreateUniqueIndexTests(operation, target, priority, sql)
+      );
       break;
 
     case 'DROP_INDEX':
@@ -707,10 +734,7 @@ class TestRequirementAnalyzer extends EventEmitter {
         priority,
         description: `Verify index ${target} operation`,
         target,
-        testCases: [
-          'has_index()',
-          'Verify index operation completed successfully'
-        ]
+        testCases: ['has_index()', 'Verify index operation completed successfully']
       });
     }
 
@@ -770,7 +794,9 @@ class TestRequirementAnalyzer extends EventEmitter {
         priority,
         description: `Verify index ${target} column mappings`,
         target,
-        testCases: indexDetails.columns.map(col => `index_is_on('${indexDetails.tableName}', '${target}', '${col}')`),
+        testCases: indexDetails.columns.map(
+          (col) => `index_is_on('${indexDetails.tableName}', '${target}', '${col}')`
+        ),
         metadata: {
           columns: indexDetails.columns,
           tableName: indexDetails.tableName
@@ -1078,8 +1104,8 @@ class TestRequirementAnalyzer extends EventEmitter {
     if (match) {
       details.columns = match[1]
         .split(',')
-        .map(col => col.trim())
-        .map(col => col.replace(/["'`]/g, '')); // Remove quotes
+        .map((col) => col.trim())
+        .map((col) => col.replace(/["'`]/g, '')); // Remove quotes
     }
 
     // Check for index type
@@ -1125,10 +1151,12 @@ class TestRequirementAnalyzer extends EventEmitter {
     // - Indexes on likely large tables
     // - Complex expressions or functions in indexes
     // - Partial indexes with complex conditions
-    return sql.includes('CREATE INDEX') &&
-           (sql.includes('WHERE') || // Partial index
-            sql.includes('(') && sql.includes('||') || // Expression index
-            this.options.requirePerformanceTests);
+    return (
+      sql.includes('CREATE INDEX') &&
+      (sql.includes('WHERE') || // Partial index
+        (sql.includes('(') && sql.includes('||')) || // Expression index
+        this.options.requirePerformanceTests)
+    );
   }
 
   /**
@@ -1152,7 +1180,7 @@ class TestRequirementAnalyzer extends EventEmitter {
       /metrics?$/i
     ];
 
-    return largeTablePatterns.some(pattern => pattern.test(tableName));
+    return largeTablePatterns.some((pattern) => pattern.test(tableName));
   }
 
   /**
@@ -1173,7 +1201,9 @@ class TestRequirementAnalyzer extends EventEmitter {
     switch (functionOperation) {
     case 'CREATE_FUNCTION':
     case 'CREATE_OR_REPLACE_FUNCTION':
-      requirements.push(...this._generateFunctionCreationTests(operation, target, priority, functionMetadata));
+      requirements.push(
+        ...this._generateFunctionCreationTests(operation, target, priority, functionMetadata)
+      );
       break;
 
     case 'DROP_FUNCTION':
@@ -1181,7 +1211,9 @@ class TestRequirementAnalyzer extends EventEmitter {
       break;
 
     case 'ALTER_FUNCTION':
-      requirements.push(...this._generateFunctionAlterationTests(operation, target, priority, functionMetadata));
+      requirements.push(
+        ...this._generateFunctionAlterationTests(operation, target, priority, functionMetadata)
+      );
       break;
 
     default:
@@ -1190,12 +1222,16 @@ class TestRequirementAnalyzer extends EventEmitter {
 
     // Add Supabase RPC-specific tests if applicable
     if (this._isSupabaseRpcFunction(operation, functionMetadata)) {
-      requirements.push(...this._generateSupabaseRpcTests(operation, target, priority, functionMetadata));
+      requirements.push(
+        ...this._generateSupabaseRpcTests(operation, target, priority, functionMetadata)
+      );
     }
 
     // Add security tests for security definer functions
     if (functionMetadata.securityDefiner) {
-      requirements.push(...this._generateFunctionSecurityTests(operation, target, priority, functionMetadata));
+      requirements.push(
+        ...this._generateFunctionSecurityTests(operation, target, priority, functionMetadata)
+      );
     }
 
     return requirements;
@@ -1237,7 +1273,7 @@ class TestRequirementAnalyzer extends EventEmitter {
     if (paramMatch && paramMatch[1].trim()) {
       metadata.hasParameters = true;
       // Basic parameter extraction - can be enhanced
-      metadata.parameterTypes = paramMatch[1].split(',').map(p => p.trim().split(' ').pop());
+      metadata.parameterTypes = paramMatch[1].split(',').map((p) => p.trim().split(' ').pop());
     }
 
     // Extract return type
@@ -1296,7 +1332,8 @@ class TestRequirementAnalyzer extends EventEmitter {
     // Behavioral testing
     requirements.push({
       type: TEST_TYPES.FUNCTION,
-      priority: priority === TEST_PRIORITIES.CRITICAL ? TEST_PRIORITIES.HIGH : TEST_PRIORITIES.MEDIUM,
+      priority:
+        priority === TEST_PRIORITIES.CRITICAL ? TEST_PRIORITIES.HIGH : TEST_PRIORITIES.MEDIUM,
       description: `Verify function ${target} behavior and logic`,
       target,
       testCases: [
@@ -1304,7 +1341,9 @@ class TestRequirementAnalyzer extends EventEmitter {
         'Test return value correctness',
         'Test error handling for invalid inputs',
         'Test edge cases and boundary conditions',
-        ...(metadata.returnType === 'SETOF' || metadata.returnType?.includes('[]') ? ['Test result set completeness'] : [])
+        ...(metadata.returnType === 'SETOF' || metadata.returnType?.includes('[]')
+          ? ['Test result set completeness']
+          : [])
       ],
       metadata: {
         functionMetadata: metadata,
@@ -1320,21 +1359,23 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateFunctionDropTests(operation, target, priority) {
-    return [{
-      type: TEST_TYPES.FUNCTION,
-      priority: TEST_PRIORITIES.CRITICAL,
-      description: `Verify function ${target} is properly dropped`,
-      target,
-      testCases: [
-        'hasnt_function() - function no longer exists',
-        'Verify dependent objects are handled',
-        'Check cascade behavior if applicable',
-        'Verify no orphaned permissions remain'
-      ],
-      metadata: {
-        testType: 'removal'
+    return [
+      {
+        type: TEST_TYPES.FUNCTION,
+        priority: TEST_PRIORITIES.CRITICAL,
+        description: `Verify function ${target} is properly dropped`,
+        target,
+        testCases: [
+          'hasnt_function() - function no longer exists',
+          'Verify dependent objects are handled',
+          'Check cascade behavior if applicable',
+          'Verify no orphaned permissions remain'
+        ],
+        metadata: {
+          testType: 'removal'
+        }
       }
-    }];
+    ];
   }
 
   /**
@@ -1405,20 +1446,22 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateGenericFunctionTests(operation, target, priority) {
-    return [{
-      type: TEST_TYPES.FUNCTION,
-      priority: TEST_PRIORITIES.LOW,
-      description: `Verify function ${target} after operation`,
-      target,
-      testCases: [
-        'has_function() - function exists',
-        'Test basic function execution',
-        'Verify no unexpected side effects'
-      ],
-      metadata: {
-        testType: 'generic'
+    return [
+      {
+        type: TEST_TYPES.FUNCTION,
+        priority: TEST_PRIORITIES.LOW,
+        description: `Verify function ${target} after operation`,
+        target,
+        testCases: [
+          'has_function() - function exists',
+          'Test basic function execution',
+          'Verify no unexpected side effects'
+        ],
+        metadata: {
+          testType: 'generic'
+        }
       }
-    }];
+    ];
   }
 
   /**
@@ -1496,25 +1539,27 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateFunctionSecurityTests(operation, target, priority, metadata) {
-    return [{
-      type: TEST_TYPES.PERMISSION,
-      priority: TEST_PRIORITIES.CRITICAL,
-      description: `Verify security definer function ${target} security`,
-      target,
-      testCases: [
-        'is_definer() - verify security definer setting',
-        'Test function executes with definer privileges',
-        'Test privilege escalation protection',
-        'Verify input parameter sanitization',
-        'Test SQL injection protection',
-        'Test with different invoker roles'
-      ],
-      metadata: {
-        functionMetadata: metadata,
-        testType: 'security_definer',
-        securityCritical: true
+    return [
+      {
+        type: TEST_TYPES.PERMISSION,
+        priority: TEST_PRIORITIES.CRITICAL,
+        description: `Verify security definer function ${target} security`,
+        target,
+        testCases: [
+          'is_definer() - verify security definer setting',
+          'Test function executes with definer privileges',
+          'Test privilege escalation protection',
+          'Verify input parameter sanitization',
+          'Test SQL injection protection',
+          'Test with different invoker roles'
+        ],
+        metadata: {
+          functionMetadata: metadata,
+          testType: 'security_definer',
+          securityCritical: true
+        }
       }
-    }];
+    ];
   }
 
   /**
@@ -1533,9 +1578,11 @@ class TestRequirementAnalyzer extends EventEmitter {
       /find_.*\(/i
     ];
 
-    return apiPatterns.some(pattern => pattern.test(sql)) ||
-           metadata.language === 'plpgsql' ||
-           metadata.returnType?.toLowerCase().includes('json');
+    return (
+      apiPatterns.some((pattern) => pattern.test(sql)) ||
+      metadata.language === 'plpgsql' ||
+      metadata.returnType?.toLowerCase().includes('json')
+    );
   }
 
   /**
@@ -1548,30 +1595,51 @@ class TestRequirementAnalyzer extends EventEmitter {
     const sql = operation.sql || '';
 
     // Skip system schema functions
-    if (sql.includes('auth.') || sql.includes('storage.') || sql.includes('realtime.') || sql.includes('supabase_functions.')) {
+    if (
+      sql.includes('auth.') ||
+      sql.includes('storage.') ||
+      sql.includes('realtime.') ||
+      sql.includes('supabase_functions.')
+    ) {
       return false;
     }
 
     // Functions in public schema are typically RPC-accessible
-    if (sql.includes('public.') || (!sql.includes('.') && !sql.includes('CREATE FUNCTION auth.') && !sql.includes('CREATE FUNCTION storage.'))) {
+    if (
+      sql.includes('public.') ||
+      (!sql.includes('.') &&
+        !sql.includes('CREATE FUNCTION auth.') &&
+        !sql.includes('CREATE FUNCTION storage.'))
+    ) {
       return true;
     }
 
     // Functions with simple parameter types are more likely to be RPC
-    if (metadata.parameterTypes.length === 0 ||
-        metadata.parameterTypes.every(type => ['text', 'integer', 'boolean', 'json', 'jsonb', 'uuid'].includes(type.toLowerCase()))) {
+    if (
+      metadata.parameterTypes.length === 0 ||
+      metadata.parameterTypes.every((type) =>
+        ['text', 'integer', 'boolean', 'json', 'jsonb', 'uuid'].includes(type.toLowerCase())
+      )
+    ) {
       return true;
     }
 
     // Functions returning JSON or simple types
-    if (metadata.returnType && ['json', 'jsonb', 'text', 'integer', 'boolean', 'uuid'].includes(metadata.returnType.toLowerCase())) {
+    if (
+      metadata.returnType &&
+      ['json', 'jsonb', 'text', 'integer', 'boolean', 'uuid'].includes(
+        metadata.returnType.toLowerCase()
+      )
+    ) {
       return true;
     }
 
     // Functions in public schema or without schema qualifier are likely RPC
-    return metadata.isRpcFunction ||
-           sql.includes('public.') ||
-           (!sql.includes('.') && !sql.includes('pg_') && !sql.includes('information_schema'));
+    return (
+      metadata.isRpcFunction ||
+      sql.includes('public.') ||
+      (!sql.includes('.') && !sql.includes('pg_') && !sql.includes('information_schema'))
+    );
   }
 
   /**
@@ -1614,9 +1682,7 @@ class TestRequirementAnalyzer extends EventEmitter {
       priority: TEST_PRIORITIES.CRITICAL,
       description: `Verify RLS is enabled on table ${tableName}`,
       target: tableName,
-      testCases: [
-        'is_rls_enabled() - ensure RLS is active on the table'
-      ],
+      testCases: ['is_rls_enabled() - ensure RLS is active on the table'],
       metadata: {
         tableName,
         testType: 'rls_enablement',
@@ -1685,7 +1751,8 @@ class TestRequirementAnalyzer extends EventEmitter {
     });
 
     // Re-test security boundaries with updated policy
-    const userRoles = policyDetails.roles.length > 0 ? policyDetails.roles : ['anon', 'authenticated'];
+    const userRoles =
+      policyDetails.roles.length > 0 ? policyDetails.roles : ['anon', 'authenticated'];
     for (const role of userRoles) {
       requirements.push({
         type: TEST_TYPES.PERMISSION,
@@ -1745,7 +1812,7 @@ class TestRequirementAnalyzer extends EventEmitter {
       target: `${tableName}_post_drop`,
       testCases: [
         'results_eq() - verify expected access changes after policy drop',
-        'Test that removal doesn\'t unexpectedly grant access',
+        "Test that removal doesn't unexpectedly grant access",
         'Verify other policies still function correctly',
         'Test with different user roles'
       ],
@@ -1822,9 +1889,7 @@ class TestRequirementAnalyzer extends EventEmitter {
       priority: TEST_PRIORITIES.CRITICAL,
       description: `Verify RLS is disabled on table ${tableName}`,
       target: tableName,
-      testCases: [
-        'is_rls_enabled() - verify RLS is inactive'
-      ],
+      testCases: ['is_rls_enabled() - verify RLS is inactive'],
       metadata: {
         tableName,
         testType: 'rls_disablement'
@@ -1881,7 +1946,7 @@ class TestRequirementAnalyzer extends EventEmitter {
     // Extract roles (TO role1, role2, ...)
     const rolesMatch = sql.match(/TO\s+((?:\w+(?:\s*,\s*\w+)*))\s+(?:USING|WITH|$)/i);
     if (rolesMatch) {
-      details.roles = rolesMatch[1].split(',').map(role => role.trim());
+      details.roles = rolesMatch[1].split(',').map((role) => role.trim());
     }
 
     // Check if restrictive policy
@@ -1994,18 +2059,20 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateViewTests(operation, target, priority) {
-    return [{
-      type: TEST_TYPES.VIEW,
-      priority,
-      description: `Verify view ${target} definition and data`,
-      target,
-      testCases: [
-        'has_view()',
-        'Verify view returns expected columns',
-        'Test view data accuracy',
-        'Verify view permissions'
-      ]
-    }];
+    return [
+      {
+        type: TEST_TYPES.VIEW,
+        priority,
+        description: `Verify view ${target} definition and data`,
+        target,
+        testCases: [
+          'has_view()',
+          'Verify view returns expected columns',
+          'Test view data accuracy',
+          'Verify view permissions'
+        ]
+      }
+    ];
   }
 
   /**
@@ -2013,18 +2080,20 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateEnumTests(operation, target, priority) {
-    return [{
-      type: TEST_TYPES.ENUM,
-      priority,
-      description: `Verify enum type ${target} values`,
-      target,
-      testCases: [
-        'has_type()',
-        'Test all enum values are valid',
-        'Test invalid values are rejected',
-        'Verify enum usage in tables'
-      ]
-    }];
+    return [
+      {
+        type: TEST_TYPES.ENUM,
+        priority,
+        description: `Verify enum type ${target} values`,
+        target,
+        testCases: [
+          'has_type()',
+          'Test all enum values are valid',
+          'Test invalid values are rejected',
+          'Verify enum usage in tables'
+        ]
+      }
+    ];
   }
 
   /**
@@ -2052,23 +2121,25 @@ class TestRequirementAnalyzer extends EventEmitter {
     }
 
     // Fallback for unknown trigger operations
-    return [{
-      type: TEST_TYPES.TRIGGER,
-      priority,
-      description: `Verify trigger ${target} functionality`,
-      target,
-      testCases: [
-        'has_trigger() - trigger exists',
-        'trigger_is() - verify trigger properties',
-        'Test trigger fires on correct events',
-        'Test trigger function execution',
-        'Verify trigger timing (BEFORE/AFTER)',
-        'Test trigger with different data scenarios'
-      ],
-      metadata: {
-        testType: 'functionality'
+    return [
+      {
+        type: TEST_TYPES.TRIGGER,
+        priority,
+        description: `Verify trigger ${target} functionality`,
+        target,
+        testCases: [
+          'has_trigger() - trigger exists',
+          'trigger_is() - verify trigger properties',
+          'Test trigger fires on correct events',
+          'Test trigger function execution',
+          'Verify trigger timing (BEFORE/AFTER)',
+          'Test trigger with different data scenarios'
+        ],
+        metadata: {
+          testType: 'functionality'
+        }
       }
-    }];
+    ];
   }
 
   /**
@@ -2076,16 +2147,15 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateGenericTests(operation, target, priority) {
-    return [{
-      type: TEST_TYPES.SCHEMA,
-      priority: TEST_PRIORITIES.LOW,
-      description: `Verify operation executed successfully: ${operation.description || 'Unknown operation'}`,
-      target: target || 'Unknown',
-      testCases: [
-        'Verify operation completed without errors',
-        'Check database state consistency'
-      ]
-    }];
+    return [
+      {
+        type: TEST_TYPES.SCHEMA,
+        priority: TEST_PRIORITIES.LOW,
+        description: `Verify operation executed successfully: ${operation.description || 'Unknown operation'}`,
+        target: target || 'Unknown',
+        testCases: ['Verify operation completed without errors', 'Check database state consistency']
+      }
+    ];
   }
 
   /**
@@ -2093,18 +2163,20 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateSecurityTests(operation, target, priority) {
-    return [{
-      type: TEST_TYPES.PERMISSION,
-      priority: TEST_PRIORITIES.CRITICAL,
-      description: `Verify security implications of ${target} changes`,
-      target,
-      testCases: [
-        'Test access control enforcement',
-        'Verify unauthorized access is blocked',
-        'Test with different user roles',
-        'Audit security policy changes'
-      ]
-    }];
+    return [
+      {
+        type: TEST_TYPES.PERMISSION,
+        priority: TEST_PRIORITIES.CRITICAL,
+        description: `Verify security implications of ${target} changes`,
+        target,
+        testCases: [
+          'Test access control enforcement',
+          'Verify unauthorized access is blocked',
+          'Test with different user roles',
+          'Audit security policy changes'
+        ]
+      }
+    ];
   }
 
   /**
@@ -2112,18 +2184,20 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generatePerformanceTests(operation, target, priority) {
-    return [{
-      type: TEST_TYPES.INDEX,
-      priority: TEST_PRIORITIES.MEDIUM,
-      description: `Verify performance impact of ${target} changes`,
-      target,
-      testCases: [
-        'Measure query performance before/after',
-        'Verify indexes are utilized',
-        'Check for performance regressions',
-        'Test with realistic data volumes'
-      ]
-    }];
+    return [
+      {
+        type: TEST_TYPES.INDEX,
+        priority: TEST_PRIORITIES.MEDIUM,
+        description: `Verify performance impact of ${target} changes`,
+        target,
+        testCases: [
+          'Measure query performance before/after',
+          'Verify indexes are utilized',
+          'Check for performance regressions',
+          'Test with realistic data volumes'
+        ]
+      }
+    ];
   }
 
   /**
@@ -2169,10 +2243,7 @@ class TestRequirementAnalyzer extends EventEmitter {
         priority,
         description: `Verify check constraint on ${tableName}.${columnName}`,
         target: `${tableName}.${columnName}`,
-        testCases: [
-          'has_check()',
-          'check_test()'
-        ],
+        testCases: ['has_check()', 'check_test()'],
         metadata: {
           checkExpression: columnMetadata.checkExpression
         }
@@ -2187,22 +2258,24 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateColumnDropTests(operation, tableName, columnName, priority) {
-    return [{
-      type: TEST_TYPES.SCHEMA,
-      priority: TEST_PRIORITIES.CRITICAL, // Always critical for destructive ops
-      description: `Verify column ${columnName} dropped from ${tableName}`,
-      target: `${tableName}.${columnName}`,
-      testCases: [
-        'hasnt_column()',
-        'Verify dependent constraints are handled',
-        'Verify dependent indexes are handled',
-        'Check data integrity after column drop'
-      ],
-      metadata: {
-        destructive: true,
-        requiresDataValidation: true
+    return [
+      {
+        type: TEST_TYPES.SCHEMA,
+        priority: TEST_PRIORITIES.CRITICAL, // Always critical for destructive ops
+        description: `Verify column ${columnName} dropped from ${tableName}`,
+        target: `${tableName}.${columnName}`,
+        testCases: [
+          'hasnt_column()',
+          'Verify dependent constraints are handled',
+          'Verify dependent indexes are handled',
+          'Check data integrity after column drop'
+        ],
+        metadata: {
+          destructive: true,
+          requiresDataValidation: true
+        }
       }
-    }];
+    ];
   }
 
   /**
@@ -2261,22 +2334,24 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateColumnNotNullTests(operation, tableName, columnName, priority) {
-    return [{
-      type: TEST_TYPES.CONSTRAINT,
-      priority: TEST_PRIORITIES.HIGH,
-      description: `Verify column ${columnName} NOT NULL constraint in ${tableName}`,
-      target: `${tableName}.${columnName}`,
-      testCases: [
-        'col_not_null()',
-        'Test null insertion rejection',
-        'Verify existing data has no nulls',
-        'Test constraint enforcement'
-      ],
-      metadata: {
-        constraintType: 'NOT NULL',
-        requiresDataValidation: true
+    return [
+      {
+        type: TEST_TYPES.CONSTRAINT,
+        priority: TEST_PRIORITIES.HIGH,
+        description: `Verify column ${columnName} NOT NULL constraint in ${tableName}`,
+        target: `${tableName}.${columnName}`,
+        testCases: [
+          'col_not_null()',
+          'Test null insertion rejection',
+          'Verify existing data has no nulls',
+          'Test constraint enforcement'
+        ],
+        metadata: {
+          constraintType: 'NOT NULL',
+          requiresDataValidation: true
+        }
       }
-    }];
+    ];
   }
 
   /**
@@ -2284,21 +2359,23 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateColumnNullableTests(operation, tableName, columnName, priority) {
-    return [{
-      type: TEST_TYPES.CONSTRAINT,
-      priority,
-      description: `Verify column ${columnName} nullable constraint removed in ${tableName}`,
-      target: `${tableName}.${columnName}`,
-      testCases: [
-        'col_is_null() - column allows nulls',
-        'Test null insertion acceptance',
-        'Verify constraint properly removed'
-      ],
-      metadata: {
-        constraintType: 'NULLABLE',
-        constraintRemoved: true
+    return [
+      {
+        type: TEST_TYPES.CONSTRAINT,
+        priority,
+        description: `Verify column ${columnName} nullable constraint removed in ${tableName}`,
+        target: `${tableName}.${columnName}`,
+        testCases: [
+          'col_is_null() - column allows nulls',
+          'Test null insertion acceptance',
+          'Verify constraint properly removed'
+        ],
+        metadata: {
+          constraintType: 'NULLABLE',
+          constraintRemoved: true
+        }
       }
-    }];
+    ];
   }
 
   /**
@@ -2309,22 +2386,24 @@ class TestRequirementAnalyzer extends EventEmitter {
     const sql = operation.sql || '';
     const defaultValue = this._extractDefaultValue(sql, columnName);
 
-    return [{
-      type: TEST_TYPES.CONSTRAINT,
-      priority,
-      description: `Verify column ${columnName} default value set in ${tableName}`,
-      target: `${tableName}.${columnName}`,
-      testCases: [
-        'col_has_default()',
-        'col_default_is()',
-        'Test default value application on insert',
-        'Verify default value type compatibility'
-      ],
-      metadata: {
-        defaultValue,
-        requiresInsertTest: true
+    return [
+      {
+        type: TEST_TYPES.CONSTRAINT,
+        priority,
+        description: `Verify column ${columnName} default value set in ${tableName}`,
+        target: `${tableName}.${columnName}`,
+        testCases: [
+          'col_has_default()',
+          'col_default_is()',
+          'Test default value application on insert',
+          'Verify default value type compatibility'
+        ],
+        metadata: {
+          defaultValue,
+          requiresInsertTest: true
+        }
       }
-    }];
+    ];
   }
 
   /**
@@ -2332,21 +2411,23 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateColumnDropDefaultTests(operation, tableName, columnName, priority) {
-    return [{
-      type: TEST_TYPES.CONSTRAINT,
-      priority,
-      description: `Verify column ${columnName} default value removed in ${tableName}`,
-      target: `${tableName}.${columnName}`,
-      testCases: [
-        'col_hasnt_default()',
-        'Test explicit value requirement on insert',
-        'Verify default properly removed'
-      ],
-      metadata: {
-        defaultRemoved: true,
-        requiresInsertTest: true
+    return [
+      {
+        type: TEST_TYPES.CONSTRAINT,
+        priority,
+        description: `Verify column ${columnName} default value removed in ${tableName}`,
+        target: `${tableName}.${columnName}`,
+        testCases: [
+          'col_hasnt_default()',
+          'Test explicit value requirement on insert',
+          'Verify default properly removed'
+        ],
+        metadata: {
+          defaultRemoved: true,
+          requiresInsertTest: true
+        }
       }
-    }];
+    ];
   }
 
   /**
@@ -2436,16 +2517,12 @@ class TestRequirementAnalyzer extends EventEmitter {
         priority,
         description: `Verify constraint ${constraintName} on ${tableName}`,
         target: `${tableName}.${constraintName}`,
-        testCases: [
-          'Verify constraint existence',
-          'Test constraint enforcement'
-        ]
+        testCases: ['Verify constraint existence', 'Test constraint enforcement']
       });
     }
 
     return requirements;
   }
-
 
   /**
    * Generate comprehensive column validation test
@@ -2534,7 +2611,10 @@ class TestRequirementAnalyzer extends EventEmitter {
 
   _parseTypeChange(sql, columnName) {
     // This is simplified - in production you'd want more sophisticated parsing
-    const typePattern = new RegExp(`ALTER\\s+COLUMN\\s+${columnName}\\s+(?:SET\\s+DATA\\s+)?TYPE\\s+([^\\s,;]+)`, 'i');
+    const typePattern = new RegExp(
+      `ALTER\\s+COLUMN\\s+${columnName}\\s+(?:SET\\s+DATA\\s+)?TYPE\\s+([^\\s,;]+)`,
+      'i'
+    );
     const match = sql.match(typePattern);
 
     return {
@@ -2545,7 +2625,10 @@ class TestRequirementAnalyzer extends EventEmitter {
   }
 
   _extractDefaultValue(sql, columnName) {
-    const defaultPattern = new RegExp(`ALTER\\s+COLUMN\\s+${columnName}\\s+SET\\s+DEFAULT\\s+([^;,\\s]+(?:\\s*'[^']*')?[^;,]*)`, 'i');
+    const defaultPattern = new RegExp(
+      `ALTER\\s+COLUMN\\s+${columnName}\\s+SET\\s+DEFAULT\\s+([^;,\\s]+(?:\\s*'[^']*')?[^;,]*)`,
+      'i'
+    );
     const match = sql.match(defaultPattern);
     return match ? match[1].trim() : null;
   }
@@ -2561,8 +2644,10 @@ class TestRequirementAnalyzer extends EventEmitter {
 
   _parseForeignKeyConstraint(sql) {
     const referencesPattern = /REFERENCES\s+([^\s(]+)(?:\s*\(\s*([^)]+)\s*\))?/i;
-    const onDeletePattern = /ON\s+DELETE\s+(CASCADE|RESTRICT|SET\s+NULL|SET\s+DEFAULT|NO\s+ACTION)/i;
-    const onUpdatePattern = /ON\s+UPDATE\s+(CASCADE|RESTRICT|SET\s+NULL|SET\s+DEFAULT|NO\s+ACTION)/i;
+    const onDeletePattern =
+      /ON\s+DELETE\s+(CASCADE|RESTRICT|SET\s+NULL|SET\s+DEFAULT|NO\s+ACTION)/i;
+    const onUpdatePattern =
+      /ON\s+UPDATE\s+(CASCADE|RESTRICT|SET\s+NULL|SET\s+DEFAULT|NO\s+ACTION)/i;
 
     const referencesMatch = sql.match(referencesPattern);
     const onDeleteMatch = sql.match(onDeletePattern);
@@ -2710,15 +2795,16 @@ class TestRequirementAnalyzer extends EventEmitter {
 
   _isHighRiskOperation(operation) {
     const sql = operation.sql || '';
-    return this.highRiskPatterns.some(pattern => pattern.test(sql)) ||
-           operation.type === 'DESTRUCTIVE';
+    return (
+      this.highRiskPatterns.some((pattern) => pattern.test(sql)) || operation.type === 'DESTRUCTIVE'
+    );
   }
 
   _requiresSecurityTests(operation) {
     if (!this.options.requireSecurityTests) return false;
 
     const sql = operation.sql || '';
-    return this.securityPatterns.some(pattern => pattern.test(sql));
+    return this.securityPatterns.some((pattern) => pattern.test(sql));
   }
 
   _requiresPerformanceTests(operation) {
@@ -2764,9 +2850,7 @@ class TestRequirementAnalyzer extends EventEmitter {
   }
 
   _extractOperationDescription(operation) {
-    return operation.description ||
-           operation.sql?.substring(0, 100) + '...' ||
-           'Unknown operation';
+    return operation.description || operation.sql?.substring(0, 100) + '...' || 'Unknown operation';
   }
 
   _generateTestingSuggestions(analysis, operations, context) {
@@ -2782,12 +2866,16 @@ class TestRequirementAnalyzer extends EventEmitter {
     // Priority-based suggestions
     const criticalTests = analysis.summary.byPriority[TEST_PRIORITIES.CRITICAL] || 0;
     if (criticalTests > 0) {
-      suggestions.push(`${criticalTests} critical tests required - these must pass before deployment`);
+      suggestions.push(
+        `${criticalTests} critical tests required - these must pass before deployment`
+      );
     }
 
     // Risk area suggestions
     if (analysis.riskAreas.length > 0) {
-      suggestions.push(`${analysis.riskAreas.length} high-risk operations require extra testing attention`);
+      suggestions.push(
+        `${analysis.riskAreas.length} high-risk operations require extra testing attention`
+      );
     }
 
     // Effort estimation
@@ -2796,8 +2884,10 @@ class TestRequirementAnalyzer extends EventEmitter {
     }
 
     // Security focus
-    const securityTests = analysis.summary.byType[TEST_TYPES.RLS] || 0 +
-                         analysis.summary.byType[TEST_TYPES.PERMISSION] || 0;
+    const securityTests =
+      analysis.summary.byType[TEST_TYPES.RLS] ||
+      0 + analysis.summary.byType[TEST_TYPES.PERMISSION] ||
+      0;
     if (securityTests > 0) {
       suggestions.push('Security-related changes detected - prioritize RLS and permission tests');
     }
@@ -2819,25 +2909,39 @@ class TestRequirementAnalyzer extends EventEmitter {
 
     switch (operationType) {
     case 'ADD_COLUMN':
-      requirements.push(...this._generateColumnAdditionTests(operation, tableName, columnName, priority));
+      requirements.push(
+        ...this._generateColumnAdditionTests(operation, tableName, columnName, priority)
+      );
       break;
     case 'DROP_COLUMN':
-      requirements.push(...this._generateColumnDropTests(operation, tableName, columnName, priority));
+      requirements.push(
+        ...this._generateColumnDropTests(operation, tableName, columnName, priority)
+      );
       break;
     case 'ALTER_TYPE':
-      requirements.push(...this._generateColumnTypeChangeTests(operation, tableName, columnName, priority));
+      requirements.push(
+        ...this._generateColumnTypeChangeTests(operation, tableName, columnName, priority)
+      );
       break;
     case 'SET_NOT_NULL':
-      requirements.push(...this._generateColumnNotNullTests(operation, tableName, columnName, priority));
+      requirements.push(
+        ...this._generateColumnNotNullTests(operation, tableName, columnName, priority)
+      );
       break;
     case 'DROP_NOT_NULL':
-      requirements.push(...this._generateColumnNullableTests(operation, tableName, columnName, priority));
+      requirements.push(
+        ...this._generateColumnNullableTests(operation, tableName, columnName, priority)
+      );
       break;
     case 'SET_DEFAULT':
-      requirements.push(...this._generateColumnSetDefaultTests(operation, tableName, columnName, priority));
+      requirements.push(
+        ...this._generateColumnSetDefaultTests(operation, tableName, columnName, priority)
+      );
       break;
     case 'DROP_DEFAULT':
-      requirements.push(...this._generateColumnDropDefaultTests(operation, tableName, columnName, priority));
+      requirements.push(
+        ...this._generateColumnDropDefaultTests(operation, tableName, columnName, priority)
+      );
       break;
     default:
       // Generic column operation test
@@ -2846,10 +2950,7 @@ class TestRequirementAnalyzer extends EventEmitter {
         priority: TEST_PRIORITIES.MEDIUM,
         description: `Verify column ${columnName} operation in ${tableName}`,
         target: `${tableName}.${columnName}`,
-        testCases: [
-          'has_column()',
-          '-- Verify column operation completed successfully'
-        ],
+        testCases: ['has_column()', '-- Verify column operation completed successfully'],
         metadata: {
           operationType,
           tableName,
@@ -2867,10 +2968,7 @@ class TestRequirementAnalyzer extends EventEmitter {
    */
   _generateColumnAdditionTests(operation, tableName, columnName, priority) {
     const columnMeta = this._parseColumnDefinition(operation.sql, columnName);
-    const testCases = [
-      'has_column()',
-      'col_type_is()'
-    ];
+    const testCases = ['has_column()', 'col_type_is()'];
 
     if (columnMeta && columnMeta.notNull) {
       testCases.push('col_not_null()');
@@ -2880,14 +2978,16 @@ class TestRequirementAnalyzer extends EventEmitter {
       testCases.push('col_has_default()');
     }
 
-    return [{
-      type: TEST_TYPES.SCHEMA,
-      priority,
-      description: `Verify column ${columnName} added to ${tableName}`,
-      target: `${tableName}.${columnName}`,
-      testCases,
-      metadata: columnMeta
-    }];
+    return [
+      {
+        type: TEST_TYPES.SCHEMA,
+        priority,
+        description: `Verify column ${columnName} added to ${tableName}`,
+        target: `${tableName}.${columnName}`,
+        testCases,
+        metadata: columnMeta
+      }
+    ];
   }
 
   /**
@@ -2909,10 +3009,7 @@ class TestRequirementAnalyzer extends EventEmitter {
         priority: TEST_PRIORITIES.HIGH,
         description: `Comprehensive validation after ${columnName} drop from ${tableName}`,
         target: tableName,
-        testCases: [
-          '-- Verify table structure integrity',
-          '-- Check remaining columns are intact'
-        ]
+        testCases: ['-- Verify table structure integrity', '-- Check remaining columns are intact']
       }
     ];
   }
@@ -2935,20 +3032,14 @@ class TestRequirementAnalyzer extends EventEmitter {
         priority: TEST_PRIORITIES.CRITICAL,
         description: `Verify data migration for ${columnName} in ${tableName}`,
         target: `${tableName}.${columnName}`,
-        testCases: [
-          '-- Test data conversion',
-          '-- Verify no data loss'
-        ]
+        testCases: ['-- Test data conversion', '-- Verify no data loss']
       },
       {
         type: TEST_TYPES.DATA,
         priority: TEST_PRIORITIES.HIGH,
         description: `Comprehensive validation after ${columnName} type change`,
         target: tableName,
-        testCases: [
-          '-- Check data integrity',
-          '-- Test edge cases'
-        ]
+        testCases: ['-- Check data integrity', '-- Test edge cases']
       }
     ];
   }
@@ -2985,14 +3076,16 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateColumnNullableTests(operation, tableName, columnName, priority) {
-    return [{
-      type: TEST_TYPES.CONSTRAINT,
-      priority,
-      description: `Verify nullable constraint removed from ${columnName} in ${tableName}`,
-      target: `${tableName}.${columnName}`,
-      testCases: ['col_is_null() - column allows nulls'],
-      metadata: { constraintRemoved: true }
-    }];
+    return [
+      {
+        type: TEST_TYPES.CONSTRAINT,
+        priority,
+        description: `Verify nullable constraint removed from ${columnName} in ${tableName}`,
+        target: `${tableName}.${columnName}`,
+        testCases: ['col_is_null() - column allows nulls'],
+        metadata: { constraintRemoved: true }
+      }
+    ];
   }
 
   /**
@@ -3000,14 +3093,16 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateColumnSetDefaultTests(operation, tableName, columnName, priority) {
-    return [{
-      type: TEST_TYPES.CONSTRAINT,
-      priority,
-      description: `Verify default value set for ${columnName} in ${tableName}`,
-      target: `${tableName}.${columnName}`,
-      testCases: ['col_has_default()', 'col_default_is()'],
-      metadata: { requiresInsertTest: true }
-    }];
+    return [
+      {
+        type: TEST_TYPES.CONSTRAINT,
+        priority,
+        description: `Verify default value set for ${columnName} in ${tableName}`,
+        target: `${tableName}.${columnName}`,
+        testCases: ['col_has_default()', 'col_default_is()'],
+        metadata: { requiresInsertTest: true }
+      }
+    ];
   }
 
   /**
@@ -3015,14 +3110,16 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateColumnDropDefaultTests(operation, tableName, columnName, priority) {
-    return [{
-      type: TEST_TYPES.CONSTRAINT,
-      priority,
-      description: `Verify default value removed from ${columnName} in ${tableName}`,
-      target: `${tableName}.${columnName}`,
-      testCases: ['col_hasnt_default()'],
-      metadata: { defaultRemoved: true }
-    }];
+    return [
+      {
+        type: TEST_TYPES.CONSTRAINT,
+        priority,
+        description: `Verify default value removed from ${columnName} in ${tableName}`,
+        target: `${tableName}.${columnName}`,
+        testCases: ['col_hasnt_default()'],
+        metadata: { defaultRemoved: true }
+      }
+    ];
   }
 
   /**
@@ -3131,11 +3228,15 @@ class TestRequirementAnalyzer extends EventEmitter {
           // Parse primary key constraint
           const pkMatch = cleanItem.match(/PRIMARY KEY\s*\(\s*([^)]+)\s*\)/i);
           if (pkMatch) {
-            structure.primaryKeys = pkMatch[1].split(',').map(col => col.trim().replace(/"/g, ''));
+            structure.primaryKeys = pkMatch[1]
+              .split(',')
+              .map((col) => col.trim().replace(/"/g, ''));
           }
         } else if (cleanItem.toUpperCase().startsWith('FOREIGN KEY')) {
           // Parse foreign key constraint
-          const fkMatch = cleanItem.match(/FOREIGN KEY\s*\(\s*([^)]+)\s*\)\s*REFERENCES\s+([^\s(]+)\s*\(\s*([^)]+)\s*\)/i);
+          const fkMatch = cleanItem.match(
+            /FOREIGN KEY\s*\(\s*([^)]+)\s*\)\s*REFERENCES\s+([^\s(]+)\s*\(\s*([^)]+)\s*\)/i
+          );
           if (fkMatch) {
             structure.foreignKeys.push({
               column: fkMatch[1].trim().replace(/"/g, ''),
@@ -3149,7 +3250,7 @@ class TestRequirementAnalyzer extends EventEmitter {
           if (uniqueMatch) {
             structure.uniqueConstraints.push({
               name: `unique_${uniqueMatch[1] || 'constraint'}`,
-              columns: uniqueMatch[1] ? uniqueMatch[1].split(',').map(c => c.trim()) : []
+              columns: uniqueMatch[1] ? uniqueMatch[1].split(',').map((c) => c.trim()) : []
             });
           }
         } else if (cleanItem.toUpperCase().startsWith('CHECK')) {
@@ -3171,10 +3272,14 @@ class TestRequirementAnalyzer extends EventEmitter {
             if (constraintDef.toUpperCase().startsWith('PRIMARY KEY')) {
               const pkMatch = constraintDef.match(/PRIMARY KEY\s*\(\s*([^)]+)\s*\)/i);
               if (pkMatch) {
-                structure.primaryKeys = pkMatch[1].split(',').map(col => col.trim().replace(/"/g, ''));
+                structure.primaryKeys = pkMatch[1]
+                  .split(',')
+                  .map((col) => col.trim().replace(/"/g, ''));
               }
             } else if (constraintDef.toUpperCase().startsWith('FOREIGN KEY')) {
-              const fkMatch = constraintDef.match(/FOREIGN KEY\s*\(\s*([^)]+)\s*\)\s*REFERENCES\s+([^\s(]+)\s*\(\s*([^)]+)\s*\)/i);
+              const fkMatch = constraintDef.match(
+                /FOREIGN KEY\s*\(\s*([^)]+)\s*\)\s*REFERENCES\s+([^\s(]+)\s*\(\s*([^)]+)\s*\)/i
+              );
               if (fkMatch) {
                 structure.foreignKeys.push({
                   name: constraintName,
@@ -3188,7 +3293,7 @@ class TestRequirementAnalyzer extends EventEmitter {
               if (uniqueMatch) {
                 structure.uniqueConstraints.push({
                   name: constraintName,
-                  columns: uniqueMatch[1].split(',').map(c => c.trim().replace(/"/g, ''))
+                  columns: uniqueMatch[1].split(',').map((c) => c.trim().replace(/"/g, ''))
                 });
               }
             } else if (constraintDef.toUpperCase().startsWith('CHECK')) {
@@ -3209,7 +3314,6 @@ class TestRequirementAnalyzer extends EventEmitter {
           }
         }
       }
-
     } catch (error) {
       // If parsing fails, return basic structure
       console.warn('Failed to parse table structure:', error.message);
@@ -3240,7 +3344,8 @@ class TestRequirementAnalyzer extends EventEmitter {
       const upperSql = sql.toUpperCase();
 
       // Handle ADD COLUMN
-      const addColumnRegex = /ADD\s+(?:COLUMN\s+)?([^\s,;]+)\s+([^,;]*?)(?=\s*(?:,|;|$|ADD|DROP|ALTER))/gi;
+      const addColumnRegex =
+        /ADD\s+(?:COLUMN\s+)?([^\s,;]+)\s+([^,;]*?)(?=\s*(?:,|;|$|ADD|DROP|ALTER))/gi;
       let addMatch;
       while ((addMatch = addColumnRegex.exec(upperSql)) !== null) {
         const columnName = addMatch[1].replace(/"/g, '');
@@ -3256,7 +3361,8 @@ class TestRequirementAnalyzer extends EventEmitter {
       }
 
       // Handle ALTER COLUMN TYPE
-      const alterTypeRegex = /ALTER\s+(?:COLUMN\s+)?([^\s]+)\s+(?:SET\s+DATA\s+)?TYPE\s+([^\s,;]+)/gi;
+      const alterTypeRegex =
+        /ALTER\s+(?:COLUMN\s+)?([^\s]+)\s+(?:SET\s+DATA\s+)?TYPE\s+([^\s,;]+)/gi;
       let alterTypeMatch;
       while ((alterTypeMatch = alterTypeRegex.exec(upperSql)) !== null) {
         alterations.alteredColumns.push({
@@ -3284,7 +3390,8 @@ class TestRequirementAnalyzer extends EventEmitter {
       }
 
       // Handle ADD CONSTRAINT
-      const addConstraintRegex = /ADD\s+(?:CONSTRAINT\s+([^\s]+)\s+)?(PRIMARY\s+KEY|FOREIGN\s+KEY|UNIQUE|CHECK)\s*([^,;]*?)(?=\s*(?:,|;|$|ADD|DROP|ALTER))/gi;
+      const addConstraintRegex =
+        /ADD\s+(?:CONSTRAINT\s+([^\s]+)\s+)?(PRIMARY\s+KEY|FOREIGN\s+KEY|UNIQUE|CHECK)\s*([^,;]*?)(?=\s*(?:,|;|$|ADD|DROP|ALTER))/gi;
       let constraintMatch;
       while ((constraintMatch = addConstraintRegex.exec(upperSql)) !== null) {
         const constraintName = constraintMatch[1] || `auto_${Date.now()}`;
@@ -3299,7 +3406,9 @@ class TestRequirementAnalyzer extends EventEmitter {
 
         // Parse specific constraint details
         if (constraintType.includes('FOREIGN KEY')) {
-          const fkMatch = constraintDef.match(/\(\s*([^)]+)\s*\)\s*REFERENCES\s+([^\s(]+)\s*\(\s*([^)]+)\s*\)/i);
+          const fkMatch = constraintDef.match(
+            /\(\s*([^)]+)\s*\)\s*REFERENCES\s+([^\s(]+)\s*\(\s*([^)]+)\s*\)/i
+          );
           if (fkMatch) {
             constraint.column = fkMatch[1].trim().replace(/"/g, '');
             constraint.referencedTable = fkMatch[2].trim().replace(/"/g, '');
@@ -3308,7 +3417,7 @@ class TestRequirementAnalyzer extends EventEmitter {
         } else if (constraintType.includes('PRIMARY KEY')) {
           const pkMatch = constraintDef.match(/\(\s*([^)]+)\s*\)/i);
           if (pkMatch) {
-            constraint.columns = pkMatch[1].split(',').map(col => col.trim().replace(/"/g, ''));
+            constraint.columns = pkMatch[1].split(',').map((col) => col.trim().replace(/"/g, ''));
           }
         }
 
@@ -3323,7 +3432,6 @@ class TestRequirementAnalyzer extends EventEmitter {
           name: dropConstraintMatch[1].replace(/"/g, '')
         });
       }
-
     } catch (error) {
       console.warn('Failed to parse table alterations:', error.message);
     }
@@ -3389,7 +3497,11 @@ class TestRequirementAnalyzer extends EventEmitter {
       }
 
       const column = {
-        name: columnName || (nameIndex !== null && nameIndex < parts.length ? parts[nameIndex].replace(/"/g, '') : 'unknown'),
+        name:
+          columnName ||
+          (nameIndex !== null && nameIndex < parts.length
+            ? parts[nameIndex].replace(/"/g, '')
+            : 'unknown'),
         type: this._parseColumnType(parts, typeIndex),
         notNull: false,
         hasDefault: false,
@@ -3407,7 +3519,9 @@ class TestRequirementAnalyzer extends EventEmitter {
       column.isUnique = defString.includes('UNIQUE');
 
       // Check for DEFAULT - more comprehensive pattern, preserve original case
-      const defaultMatch = columnDef.match(/DEFAULT\s+('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|\d+\.?\d*|[a-zA-Z_][a-zA-Z0-9_]*(?:\([^)]*\))?)/i);
+      const defaultMatch = columnDef.match(
+        /DEFAULT\s+('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|\d+\.?\d*|[a-zA-Z_][a-zA-Z0-9_]*(?:\([^)]*\))?)/i
+      );
       if (defaultMatch) {
         column.hasDefault = true;
         column.defaultValue = defaultMatch[1];
@@ -3515,7 +3629,12 @@ class TestRequirementAnalyzer extends EventEmitter {
   }
 
   _comparePriority(priority1, priority2) {
-    const priorities = [TEST_PRIORITIES.LOW, TEST_PRIORITIES.MEDIUM, TEST_PRIORITIES.HIGH, TEST_PRIORITIES.CRITICAL];
+    const priorities = [
+      TEST_PRIORITIES.LOW,
+      TEST_PRIORITIES.MEDIUM,
+      TEST_PRIORITIES.HIGH,
+      TEST_PRIORITIES.CRITICAL
+    ];
     return priorities.indexOf(priority2) - priorities.indexOf(priority1); // Reverse order (highest first)
   }
 
@@ -3619,7 +3738,10 @@ class TestRequirementAnalyzer extends EventEmitter {
     }
 
     // Performance tests for potentially expensive triggers
-    if (this.options.requirePerformanceTests && this._isTriggerPerformanceSensitive(triggerDetails)) {
+    if (
+      this.options.requirePerformanceTests &&
+      this._isTriggerPerformanceSensitive(triggerDetails)
+    ) {
       requirements.push({
         type: TEST_TYPES.INDEX,
         priority: TEST_PRIORITIES.MEDIUM,
@@ -3628,7 +3750,7 @@ class TestRequirementAnalyzer extends EventEmitter {
         testCases: [
           'Measure operation performance with/without trigger',
           'Test trigger performance with large data sets',
-          'Verify trigger doesn\'t create deadlocks',
+          "Verify trigger doesn't create deadlocks",
           'Test concurrent operation performance'
         ],
         metadata: {
@@ -3680,9 +3802,9 @@ class TestRequirementAnalyzer extends EventEmitter {
         description: `Test trigger ${target} ${isEnabled ? 'enabled' : 'disabled'} state`,
         target,
         testCases: [
-          isEnabled ?
-            'Test trigger fires after being enabled' :
-            'Test trigger does not fire when disabled',
+          isEnabled
+            ? 'Test trigger fires after being enabled'
+            : 'Test trigger does not fire when disabled',
           'Verify state change is persistent',
           'Test operations that should/should not trigger'
         ],
@@ -3792,7 +3914,7 @@ class TestRequirementAnalyzer extends EventEmitter {
           'function_returns() - returns event_trigger type',
           'Test function handles TG_EVENT correctly',
           'Test function accesses pg_event_trigger_ddl_commands()',
-          'Verify function error handling doesn\'t block DDL'
+          "Verify function error handling doesn't block DDL"
         ],
         metadata: {
           isEventTriggerFunction: true,
@@ -3812,7 +3934,7 @@ class TestRequirementAnalyzer extends EventEmitter {
         'Test CREATE operations trigger the event',
         'Test ALTER operations trigger the event',
         'Test DROP operations trigger the event',
-        'Test event trigger doesn\'t break normal DDL',
+        "Test event trigger doesn't break normal DDL",
         'Test event trigger handles DDL failures gracefully'
       ],
       metadata: {
@@ -3892,7 +4014,9 @@ class TestRequirementAnalyzer extends EventEmitter {
     // Extract filter conditions
     const filterMatch = sql.match(/WHEN\s+TAG\s+IN\s*\(([^)]+)\)/i);
     if (filterMatch) {
-      details.filterConditions = filterMatch[1].split(',').map(tag => tag.trim().replace(/'/g, ''));
+      details.filterConditions = filterMatch[1]
+        .split(',')
+        .map((tag) => tag.trim().replace(/'/g, ''));
     }
 
     return details;
@@ -3908,7 +4032,7 @@ class TestRequirementAnalyzer extends EventEmitter {
     const scenarios = [];
 
     // Generate scenarios based on events
-    (triggerDetails.events || []).forEach(event => {
+    (triggerDetails.events || []).forEach((event) => {
       scenarios.push({
         scenario: `Test ${event} operation fires trigger`,
         operation: event,
@@ -3973,17 +4097,20 @@ class TestRequirementAnalyzer extends EventEmitter {
    */
   _isTriggerPerformanceSensitive(triggerDetails) {
     // Row-level triggers on high-frequency operations are performance sensitive
-    if (triggerDetails.level === 'ROW' &&
-        triggerDetails.events &&
-        (triggerDetails.events.includes('INSERT') ||
-         triggerDetails.events.includes('UPDATE'))) {
+    if (
+      triggerDetails.level === 'ROW' &&
+      triggerDetails.events &&
+      (triggerDetails.events.includes('INSERT') || triggerDetails.events.includes('UPDATE'))
+    ) {
       return true;
     }
 
     // Complex trigger functions may be performance sensitive
-    if (triggerDetails.functionName &&
-        (triggerDetails.functionName.includes('complex') ||
-         triggerDetails.functionName.includes('heavy'))) {
+    if (
+      triggerDetails.functionName &&
+      (triggerDetails.functionName.includes('complex') ||
+        triggerDetails.functionName.includes('heavy'))
+    ) {
       return true;
     }
 
@@ -4122,7 +4249,9 @@ class TestRequirementAnalyzer extends EventEmitter {
       if (requirement.metadata.referencedTable) {
         objectInfo.dependencies.add(requirement.metadata.referencedTable);
         this._ensureRelatedObject(requirement.metadata.referencedTable, 'TABLE', aggregationState);
-        aggregationState.relatedObjects.get(requirement.metadata.referencedTable).dependents.add(target);
+        aggregationState.relatedObjects
+          .get(requirement.metadata.referencedTable)
+          .dependents.add(target);
       }
 
       // Policy -> Table relationship
@@ -4218,7 +4347,7 @@ class TestRequirementAnalyzer extends EventEmitter {
     // Similar descriptions (basic keyword matching)
     const desc1Keywords = this._extractDescriptionKeywords(req1.description);
     const desc2Keywords = this._extractDescriptionKeywords(req2.description);
-    const commonKeywords = desc1Keywords.filter(k => desc2Keywords.includes(k));
+    const commonKeywords = desc1Keywords.filter((k) => desc2Keywords.includes(k));
 
     // At least 50% keyword overlap
     return commonKeywords.length >= Math.max(desc1Keywords.length, desc2Keywords.length) * 0.5;
@@ -4229,9 +4358,14 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _extractDescriptionKeywords(description) {
-    return description.toLowerCase()
+    return description
+      .toLowerCase()
       .split(/\s+/)
-      .filter(word => word.length > 3 && !['verify', 'test', 'check', 'with', 'that', 'this', 'table'].includes(word));
+      .filter(
+        (word) =>
+          word.length > 3 &&
+          !['verify', 'test', 'check', 'with', 'that', 'this', 'table'].includes(word)
+      );
   }
 
   /**
@@ -4242,21 +4376,21 @@ class TestRequirementAnalyzer extends EventEmitter {
     const base = group[0];
 
     // Take highest priority
-    const priority = this._getHighestPriority(group.map(r => r.priority));
+    const priority = this._getHighestPriority(group.map((r) => r.priority));
 
     // Merge test cases (deduplicate)
     const allTestCases = new Set();
-    group.forEach(req => {
+    group.forEach((req) => {
       if (req.testCases) {
-        req.testCases.forEach(testCase => allTestCases.add(testCase));
+        req.testCases.forEach((testCase) => allTestCases.add(testCase));
       }
     });
 
     // Merge metadata
-    const mergedMetadata = this._mergeMetadata(group.map(r => r.metadata).filter(Boolean));
+    const mergedMetadata = this._mergeMetadata(group.map((r) => r.metadata).filter(Boolean));
 
     // Combine operations
-    const operations = group.map(r => r.operation).filter(Boolean);
+    const operations = group.map((r) => r.operation).filter(Boolean);
 
     return {
       type: base.type,
@@ -4267,7 +4401,7 @@ class TestRequirementAnalyzer extends EventEmitter {
       metadata: {
         ...mergedMetadata,
         mergedFrom: group.length,
-        originalDescriptions: group.map(r => r.description)
+        originalDescriptions: group.map((r) => r.description)
       },
       operations,
       reason: this._generateMergedReason(group)
@@ -4279,7 +4413,12 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _getHighestPriority(priorities) {
-    const priorityOrder = [TEST_PRIORITIES.LOW, TEST_PRIORITIES.MEDIUM, TEST_PRIORITIES.HIGH, TEST_PRIORITIES.CRITICAL];
+    const priorityOrder = [
+      TEST_PRIORITIES.LOW,
+      TEST_PRIORITIES.MEDIUM,
+      TEST_PRIORITIES.HIGH,
+      TEST_PRIORITIES.CRITICAL
+    ];
 
     return priorities.reduce((highest, current) => {
       const currentIndex = priorityOrder.indexOf(current);
@@ -4334,7 +4473,7 @@ class TestRequirementAnalyzer extends EventEmitter {
    * @private
    */
   _generateMergedReason(group) {
-    const reasons = group.map(r => r.reason).filter(Boolean);
+    const reasons = group.map((r) => r.reason).filter(Boolean);
     if (reasons.length === 0) return undefined;
 
     const uniqueReasons = [...new Set(reasons)];
@@ -4353,7 +4492,7 @@ class TestRequirementAnalyzer extends EventEmitter {
       const cascadingOps = ['DROP', 'RENAME', 'ALTER'];
 
       for (const operation of objectInfo.operations) {
-        if (cascadingOps.some(op => operation.toUpperCase().includes(op))) {
+        if (cascadingOps.some((op) => operation.toUpperCase().includes(op))) {
           // Check if this affects dependent objects
           for (const dependent of objectInfo.dependents) {
             aggregationState.cascadingChanges.push({
@@ -4409,8 +4548,18 @@ class TestRequirementAnalyzer extends EventEmitter {
     for (const [targetKey, requirements] of aggregationState.targetGroups) {
       if (targetKey.startsWith(`${target}:`)) {
         for (const req of requirements) {
-          const currentPriorityIndex = [TEST_PRIORITIES.LOW, TEST_PRIORITIES.MEDIUM, TEST_PRIORITIES.HIGH, TEST_PRIORITIES.CRITICAL].indexOf(req.priority);
-          const minPriorityIndex = [TEST_PRIORITIES.LOW, TEST_PRIORITIES.MEDIUM, TEST_PRIORITIES.HIGH, TEST_PRIORITIES.CRITICAL].indexOf(minPriority);
+          const currentPriorityIndex = [
+            TEST_PRIORITIES.LOW,
+            TEST_PRIORITIES.MEDIUM,
+            TEST_PRIORITIES.HIGH,
+            TEST_PRIORITIES.CRITICAL
+          ].indexOf(req.priority);
+          const minPriorityIndex = [
+            TEST_PRIORITIES.LOW,
+            TEST_PRIORITIES.MEDIUM,
+            TEST_PRIORITIES.HIGH,
+            TEST_PRIORITIES.CRITICAL
+          ].indexOf(minPriority);
 
           if (currentPriorityIndex < minPriorityIndex) {
             req.priority = minPriority;
@@ -4447,7 +4596,12 @@ class TestRequirementAnalyzer extends EventEmitter {
    * Generate summary statistics for aggregation
    * @private
    */
-  _generateAggregationSummary(aggregatedRequirements, operationCount, originalCount, duplicatesRemoved) {
+  _generateAggregationSummary(
+    aggregatedRequirements,
+    operationCount,
+    originalCount,
+    duplicatesRemoved
+  ) {
     const priorityDistribution = {};
     const typeDistribution = {};
     const targetCoverage = {};
@@ -4470,21 +4624,25 @@ class TestRequirementAnalyzer extends EventEmitter {
       totalOperations: operationCount,
       originalRequirements: originalCount,
       duplicatesRemoved,
-      deduplicationRate: originalCount > 0 ? ((duplicatesRemoved / originalCount) * 100).toFixed(1) : 0,
+      deduplicationRate:
+        originalCount > 0 ? ((duplicatesRemoved / originalCount) * 100).toFixed(1) : 0,
       priorityDistribution,
       typeDistribution,
       targetCoverage,
-      estimatedEffort: aggregatedRequirements.reduce((sum, req) => sum + this._estimateTestEffort(req), 0),
-      criticalRequirements: aggregatedRequirements.filter(r => r.priority === TEST_PRIORITIES.CRITICAL).length,
-      highPriorityRequirements: aggregatedRequirements.filter(r => r.priority === TEST_PRIORITIES.HIGH).length,
+      estimatedEffort: aggregatedRequirements.reduce(
+        (sum, req) => sum + this._estimateTestEffort(req),
+        0
+      ),
+      criticalRequirements: aggregatedRequirements.filter(
+        (r) => r.priority === TEST_PRIORITIES.CRITICAL
+      ).length,
+      highPriorityRequirements: aggregatedRequirements.filter(
+        (r) => r.priority === TEST_PRIORITIES.HIGH
+      ).length,
       coverageAreas: Object.keys(typeDistribution).length,
       uniqueTargets: Object.keys(targetCoverage).length
     };
   }
 }
 
-module.exports = {
-  TestRequirementAnalyzer,
-  TEST_TYPES,
-  TEST_PRIORITIES
-};
+export { TestRequirementAnalyzer, TEST_TYPES, TEST_PRIORITIES };

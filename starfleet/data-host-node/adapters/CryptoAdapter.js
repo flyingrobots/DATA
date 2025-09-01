@@ -4,13 +4,13 @@ import { CryptoPort } from '../../data-core/ports/index.js';
 /**
  * Node.js implementation of the Crypto port.
  * Wraps Node.js crypto APIs to provide standardized cryptographic operations.
- * 
+ *
  * @class CryptoAdapter
  */
 export class CryptoAdapter extends CryptoPort {
   /**
    * Create a new CryptoAdapter instance.
-   * 
+   *
    * @param {Object} options - Configuration options
    * @param {string} [options.defaultAlgorithm='sha256'] - Default hash algorithm
    * @param {string} [options.encoding='hex'] - Default output encoding
@@ -23,7 +23,7 @@ export class CryptoAdapter extends CryptoPort {
 
   /**
    * Generate hash of data.
-   * 
+   *
    * @param {Buffer|Uint8Array|string} data - Data to hash
    * @param {string} [algorithm] - Hash algorithm override
    * @param {string} [encoding] - Output encoding override
@@ -34,7 +34,7 @@ export class CryptoAdapter extends CryptoPort {
     try {
       const hashAlgorithm = algorithm || this.defaultAlgorithm;
       const outputEncoding = encoding || this.encoding;
-      
+
       const hash = createHash(hashAlgorithm);
       hash.update(data);
       return hash.digest(outputEncoding);
@@ -45,7 +45,7 @@ export class CryptoAdapter extends CryptoPort {
 
   /**
    * Generate HMAC of data with a key.
-   * 
+   *
    * @param {string} key - Secret key
    * @param {Buffer|Uint8Array|string} data - Data to sign
    * @param {string} [algorithm] - Hash algorithm
@@ -57,7 +57,7 @@ export class CryptoAdapter extends CryptoPort {
     try {
       const hashAlgorithm = algorithm || this.defaultAlgorithm;
       const outputEncoding = encoding || this.encoding;
-      
+
       const hmac = createHmac(hashAlgorithm, key);
       hmac.update(data);
       return hmac.digest(outputEncoding);
@@ -68,7 +68,7 @@ export class CryptoAdapter extends CryptoPort {
 
   /**
    * Generate random bytes.
-   * 
+   *
    * @param {number} size - Number of bytes to generate
    * @param {string} [encoding] - Output encoding (defaults to Buffer)
    * @returns {Buffer|string} Random bytes
@@ -85,7 +85,7 @@ export class CryptoAdapter extends CryptoPort {
 
   /**
    * Compare two values in constant time to prevent timing attacks.
-   * 
+   *
    * @param {Buffer|Uint8Array} a - First value
    * @param {Buffer|Uint8Array} b - Second value
    * @returns {boolean} True if values are equal
@@ -95,16 +95,16 @@ export class CryptoAdapter extends CryptoPort {
     try {
       return timingSafeEqual(a, b);
     } catch (error) {
-      throw this._normalizeError(error, 'timingSafeEqual', { 
-        aLength: a.length, 
-        bLength: b.length 
+      throw this._normalizeError(error, 'timingSafeEqual', {
+        aLength: a.length,
+        bLength: b.length
       });
     }
   }
 
   /**
    * Normalize crypto errors into consistent format.
-   * 
+   *
    * @private
    * @param {Error} error - Original error
    * @param {string} operation - Operation that failed
@@ -112,15 +112,13 @@ export class CryptoAdapter extends CryptoPort {
    * @returns {CryptoError} Normalized error
    */
   _normalizeError(error, operation, context = {}) {
-    const normalizedError = new Error(
-      `Crypto ${operation} failed: ${error.message}`
-    );
+    const normalizedError = new Error(`Crypto ${operation} failed: ${error.message}`);
     normalizedError.name = 'CryptoError';
     normalizedError.code = error.code;
     normalizedError.operation = operation;
     normalizedError.context = context;
     normalizedError.originalError = error;
-    
+
     return normalizedError;
   }
 }

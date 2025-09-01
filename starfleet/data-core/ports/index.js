@@ -2,7 +2,7 @@
  * Port interfaces for dependency injection in data-core package.
  * These define the contracts that external adapters must implement.
  * All ports are validated at runtime using instanceof checks.
- * 
+ *
  * @fileoverview Core port definitions for I/O abstraction
  */
 

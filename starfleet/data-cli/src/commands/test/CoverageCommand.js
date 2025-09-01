@@ -28,9 +28,13 @@ class CoverageCommand extends TestCommand {
     const testConfig = await this._getTestConfig();
 
     // Parse enforcement options with config defaults
-    const enforce = options.enforce !== undefined ? options.enforce : testConfig.coverage_enforcement;
+    const enforce =
+      options.enforce !== undefined ? options.enforce : testConfig.coverage_enforcement;
     const minCoverage = parseInt(options.minCoverage || testConfig.minimum_coverage || '80', 10);
-    const minRpcCoverage = parseInt(options.minRpcCoverage || testConfig.minimum_coverage || '75', 10);
+    const minRpcCoverage = parseInt(
+      options.minRpcCoverage || testConfig.minimum_coverage || '75',
+      10
+    );
     const minRlsCoverage = parseInt(options.minRlsCoverage || '70', 10);
 
     let client = null;
@@ -89,7 +93,10 @@ class CoverageCommand extends TestCommand {
 
         if (!this.enforcementResult.passed) {
           // Exit after emitting the event and returning result
-          this.emit('failed', { error: new Error('Coverage enforcement failed'), thresholds: this.enforcementResult });
+          this.emit('failed', {
+            error: new Error('Coverage enforcement failed'),
+            thresholds: this.enforcementResult
+          });
           // Note: process.exit will be handled after the function returns
         } else {
           this.success('All coverage thresholds met!');
@@ -115,7 +122,6 @@ class CoverageCommand extends TestCommand {
         summary: summaryResult,
         overall: stats.overall
       };
-
     } catch (error) {
       // Handle common database connection errors with helpful messages
       if (error.code === 'ECONNREFUSED') {
@@ -124,10 +130,17 @@ class CoverageCommand extends TestCommand {
       } else if (error.code === '3D000') {
         this.error('Database "postgres" does not exist.');
         this.info('Make sure you are connected to the correct database.');
-      } else if (error.message.includes('test.analyze_rpc_coverage') || error.message.includes('does not exist')) {
+      } else if (
+        error.message.includes('test.analyze_rpc_coverage') ||
+        error.message.includes('does not exist')
+      ) {
         this.error('Test coverage functions not found in database.');
-        this.info('Run the test coverage migration: data db compile-migration && supabase db reset');
-        this.warn('Make sure migration 20250829_050000_test_coverage_analysis.sql has been applied.');
+        this.info(
+          'Run the test coverage migration: data db compile-migration && supabase db reset'
+        );
+        this.warn(
+          'Make sure migration 20250829_050000_test_coverage_analysis.sql has been applied.'
+        );
       } else {
         this.error('Failed to analyze test coverage', error);
       }
@@ -161,10 +174,19 @@ class CoverageCommand extends TestCommand {
     if (stats.overall && stats.overall.percentage < minOverall) {
       const message = `Overall coverage ${stats.overall.percentage}% below threshold ${minOverall}%`;
       this.error(chalk.red(message));
-      failures.push({ type: 'overall', actual: stats.overall.percentage, expected: minOverall, message });
+      failures.push({
+        type: 'overall',
+        actual: stats.overall.percentage,
+        expected: minOverall,
+        message
+      });
       passed = false;
     } else if (stats.overall) {
-      this.success(chalk.green(`✓ Overall coverage ${stats.overall.percentage}% meets threshold ${minOverall}%`));
+      this.success(
+        chalk.green(
+          `✓ Overall coverage ${stats.overall.percentage}% meets threshold ${minOverall}%`
+        )
+      );
     }
 
     // Check RPC coverage
@@ -174,7 +196,9 @@ class CoverageCommand extends TestCommand {
       failures.push({ type: 'rpc', actual: stats.rpc.percentage, expected: minRpc, message });
       passed = false;
     } else if (stats.rpc) {
-      this.success(chalk.green(`✓ RPC function coverage ${stats.rpc.percentage}% meets threshold ${minRpc}%`));
+      this.success(
+        chalk.green(`✓ RPC function coverage ${stats.rpc.percentage}% meets threshold ${minRpc}%`)
+      );
     }
 
     // Check RLS policy coverage
@@ -184,23 +208,33 @@ class CoverageCommand extends TestCommand {
       failures.push({ type: 'rls', actual: stats.policies.percentage, expected: minRls, message });
       passed = false;
     } else if (stats.policies) {
-      this.success(chalk.green(`✓ RLS policy coverage ${stats.policies.percentage}% meets threshold ${minRls}%`));
+      this.success(
+        chalk.green(
+          `✓ RLS policy coverage ${stats.policies.percentage}% meets threshold ${minRls}%`
+        )
+      );
     }
 
     // Summary
     if (passed) {
       this.success(chalk.bold.green('🎉 All coverage thresholds met!'));
     } else {
-      this.error(chalk.bold.red(`💥 Coverage enforcement failed - ${failures.length} threshold(s) not met`));
+      this.error(
+        chalk.bold.red(`💥 Coverage enforcement failed - ${failures.length} threshold(s) not met`)
+      );
 
       // Show details of failures
-      failures.forEach(failure => {
+      failures.forEach((failure) => {
         this.error(chalk.red(`  • ${failure.type}: ${failure.actual}% < ${failure.expected}%`));
       });
 
       this.progress(chalk.yellow('\nTo fix coverage issues:'));
-      this.progress(chalk.yellow('  1. Run: ./build/data test coverage (to see detailed coverage report)'));
-      this.progress(chalk.yellow('  2. Add missing tests for uncovered RPC functions and RLS policies'));
+      this.progress(
+        chalk.yellow('  1. Run: ./build/data test coverage (to see detailed coverage report)')
+      );
+      this.progress(
+        chalk.yellow('  2. Add missing tests for uncovered RPC functions and RLS policies')
+      );
       this.progress(chalk.yellow('  3. Re-run with --enforce to validate improvements'));
     }
 

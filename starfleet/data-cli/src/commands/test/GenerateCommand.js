@@ -13,12 +13,7 @@ import TestCommand from '../../lib/TestCommand.js';
  * Generate pgTAP test templates for RPC functions and RLS policies
  */
 class GenerateCommand extends TestCommand {
-  constructor(
-    testsDir,
-    outputDir,
-    logger = null,
-    isProd = false
-  ) {
+  constructor(testsDir, outputDir, logger = null, isProd = false) {
     super(null, null, testsDir, outputDir, logger, isProd);
 
     // Test generation doesn't require database access
@@ -53,7 +48,6 @@ class GenerateCommand extends TestCommand {
       this.emit('generation:complete', result);
 
       return result;
-
     } catch (error) {
       this.error('Test template generation failed', error);
       this.emit('generation:failed', { error, type: options.type, name: options.name });
@@ -427,13 +421,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for Row Level Security 
    */
   async listAvailableTables() {
     // Common tables from the schema
-    return [
-      'pets',
-      'applications',
-      'donations',
-      'profiles',
-      'admin_members'
-    ];
+    return ['pets', 'applications', 'donations', 'profiles', 'admin_members'];
   }
 }
 

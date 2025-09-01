@@ -57,7 +57,6 @@ class MigrateRollbackCommand extends DatabaseCommand {
 
       this.success(`Migration rollback completed to: ${rollbackInfo.migration}`);
       this.emit('complete', { target: rollbackInfo.migration });
-
     } catch (error) {
       this.error('Migration rollback failed', error);
       this.emit('failed', { error });
@@ -71,7 +70,10 @@ class MigrateRollbackCommand extends DatabaseCommand {
   async getRollbackTarget(target) {
     try {
       const historyFile = path.resolve('supabase/.migration_history.json');
-      const historyExists = await fs.access(historyFile).then(() => true).catch(() => false);
+      const historyExists = await fs
+        .access(historyFile)
+        .then(() => true)
+        .catch(() => false);
 
       if (!historyExists) {
         this.warn('No migration history found');
@@ -82,7 +84,7 @@ class MigrateRollbackCommand extends DatabaseCommand {
       const history = JSON.parse(historyContent);
 
       // Get promotions only
-      const promotions = history.filter(entry => entry.action === 'promote');
+      const promotions = history.filter((entry) => entry.action === 'promote');
 
       if (promotions.length === 0) {
         this.warn('No promoted migrations found');
@@ -95,8 +97,7 @@ class MigrateRollbackCommand extends DatabaseCommand {
       }
 
       // Find specific migration
-      return promotions.find(p => p.migration === target) || null;
-
+      return promotions.find((p) => p.migration === target) || null;
     } catch (error) {
       this.warn('Could not determine rollback target', { error: error.message });
       return null;
@@ -116,7 +117,7 @@ class MigrateRollbackCommand extends DatabaseCommand {
     console.log('⚠️  Make sure you have a backup before proceeding!');
     console.log('');
 
-    return await this.confirm('Are you absolutely sure you want to rollback?', false);
+    return this.confirm('Are you absolutely sure you want to rollback?', false);
   }
 
   /**
@@ -146,7 +147,10 @@ class MigrateRollbackCommand extends DatabaseCommand {
     await fs.mkdir(rollbackDir, { recursive: true });
 
     const rollbackFile = path.join(rollbackDir, `rollback_${Date.now()}.sql`);
-    await fs.writeFile(rollbackFile, `-- Rollback to ${rollbackInfo.migration}\n-- Generated: ${new Date().toISOString()}\n`);
+    await fs.writeFile(
+      rollbackFile,
+      `-- Rollback to ${rollbackInfo.migration}\n-- Generated: ${new Date().toISOString()}\n`
+    );
 
     this.progress(`Rollback SQL saved to: ${rollbackFile}`);
   }
@@ -171,7 +175,6 @@ class MigrateRollbackCommand extends DatabaseCommand {
 
       await fs.writeFile(historyFile, JSON.stringify(history, null, 2));
       this.progress('Rollback recorded in migration history');
-
     } catch (error) {
       this.warn('Could not update migration history', { error: error.message });
     }
@@ -181,7 +184,7 @@ class MigrateRollbackCommand extends DatabaseCommand {
    * Sleep utility for simulation
    */
   sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -195,7 +198,7 @@ class MigrateRollbackCommand extends DatabaseCommand {
  */
 export default async function rollbackHandler(args, config, logger, isProd) {
   const command = new MigrateRollbackCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateRollbackCommand };

@@ -5,7 +5,7 @@
  * for CI/CD environments.
  */
 
-const ValidateCommand = require('../ValidateCommand');
+import ValidateCommand from '../ValidateCommand.js';
 
 /**
  * CI-friendly test validation with structured output
@@ -199,7 +199,7 @@ class CIValidateCommand extends ValidateCommand {
   async writeCIResults(report, filename) {
     try {
       const filePath = await this.getOutputFile(filename);
-      const fs = require('fs').promises;
+      import fs from 'fs'.promises;
       await fs.writeFile(filePath, JSON.stringify(report, null, 2), 'utf8');
     } catch (error) {
       // Don't fail the entire validation if we can't write results
@@ -279,4 +279,4 @@ class CIValidateCommand extends ValidateCommand {
   }
 }
 
-module.exports = CIValidateCommand;
+export default CIValidateCommand;

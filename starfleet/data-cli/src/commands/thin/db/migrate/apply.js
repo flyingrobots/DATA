@@ -42,10 +42,7 @@ export async function run({ services }, flags) {
 
   // Handle result
   if (!result.success && !dryRun) {
-    services.ports.logger.error(
-      { errors: result.errors },
-      'Migration failed'
-    );
+    services.ports.logger.error({ errors: result.errors }, 'Migration failed');
     services.ports.proc.exit(1);
   }
 

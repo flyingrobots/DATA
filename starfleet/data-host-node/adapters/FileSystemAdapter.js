@@ -5,13 +5,13 @@ import { FileSystemPort } from '../../data-core/ports/index.js';
 /**
  * Node.js implementation of the FileSystem port.
  * Wraps fs/promises APIs to provide standardized file system operations.
- * 
+ *
  * @class FileSystemAdapter
  */
 export class FileSystemAdapter extends FileSystemPort {
   /**
    * Create a new FileSystemAdapter instance.
-   * 
+   *
    * @param {Object} options - Configuration options
    * @param {string} [options.encoding='utf8'] - Default file encoding
    * @param {number} [options.mode=0o644] - Default file creation mode
@@ -24,7 +24,7 @@ export class FileSystemAdapter extends FileSystemPort {
 
   /**
    * Read file contents as text.
-   * 
+   *
    * @param {string} filePath - Path to the file
    * @param {Object} [options] - Read options
    * @param {string} [options.encoding] - File encoding override
@@ -34,7 +34,7 @@ export class FileSystemAdapter extends FileSystemPort {
   async readFile(filePath, options = {}) {
     try {
       const encoding = options.encoding || this.encoding;
-      return await fs.readFile(resolve(filePath), { encoding });
+      return fs.readFile(resolve(filePath), { encoding });
     } catch (error) {
       throw this._normalizeError(error, 'readFile', filePath);
     }
@@ -42,7 +42,7 @@ export class FileSystemAdapter extends FileSystemPort {
 
   /**
    * Write text content to file.
-   * 
+   *
    * @param {string} filePath - Path to the file
    * @param {string} content - Content to write
    * @param {Object} [options] - Write options
@@ -55,11 +55,11 @@ export class FileSystemAdapter extends FileSystemPort {
     try {
       const encoding = options.encoding || this.encoding;
       const mode = options.mode || this.defaultMode;
-      
+
       // Ensure directory exists
       await this.ensureDir(dirname(filePath));
-      
-      return await fs.writeFile(resolve(filePath), content, { encoding, mode });
+
+      return fs.writeFile(resolve(filePath), content, { encoding, mode });
     } catch (error) {
       throw this._normalizeError(error, 'writeFile', filePath);
     }
@@ -67,7 +67,7 @@ export class FileSystemAdapter extends FileSystemPort {
 
   /**
    * Check if file or directory exists.
-   * 
+   *
    * @param {string} path - Path to check
    * @returns {Promise<boolean>} True if path exists
    */
@@ -82,7 +82,7 @@ export class FileSystemAdapter extends FileSystemPort {
 
   /**
    * Get file or directory stats.
-   * 
+   *
    * @param {string} path - Path to stat
    * @returns {Promise<Object>} Stat information with normalized properties
    * @throws {FileSystemError} When path cannot be accessed
@@ -105,7 +105,7 @@ export class FileSystemAdapter extends FileSystemPort {
 
   /**
    * Create directory recursively.
-   * 
+   *
    * @param {string} dirPath - Directory path to create
    * @param {Object} [options] - Creation options
    * @param {number} [options.mode] - Directory creation mode
@@ -123,7 +123,7 @@ export class FileSystemAdapter extends FileSystemPort {
 
   /**
    * Remove file or directory.
-   * 
+   *
    * @param {string} path - Path to remove
    * @param {Object} [options] - Removal options
    * @param {boolean} [options.recursive=false] - Remove directories recursively
@@ -134,7 +134,7 @@ export class FileSystemAdapter extends FileSystemPort {
     try {
       const resolvedPath = resolve(path);
       const stats = await this.stat(resolvedPath);
-      
+
       if (stats.isDirectory) {
         if (options.recursive) {
           await fs.rm(resolvedPath, { recursive: true, force: true });
@@ -151,7 +151,7 @@ export class FileSystemAdapter extends FileSystemPort {
 
   /**
    * List directory contents.
-   * 
+   *
    * @param {string} dirPath - Directory path
    * @param {Object} [options] - List options
    * @param {boolean} [options.withFileTypes=false] - Return file type info
@@ -161,16 +161,16 @@ export class FileSystemAdapter extends FileSystemPort {
   async readDir(dirPath, options = {}) {
     try {
       const resolvedPath = resolve(dirPath);
-      
+
       if (options.withFileTypes) {
         const entries = await fs.readdir(resolvedPath, { withFileTypes: true });
-        return entries.map(entry => ({
+        return entries.map((entry) => ({
           name: entry.name,
           isFile: entry.isFile(),
           isDirectory: entry.isDirectory()
         }));
       } else {
-        return await fs.readdir(resolvedPath);
+        return fs.readdir(resolvedPath);
       }
     } catch (error) {
       throw this._normalizeError(error, 'readDir', dirPath);
@@ -179,7 +179,7 @@ export class FileSystemAdapter extends FileSystemPort {
 
   /**
    * Copy file or directory.
-   * 
+   *
    * @param {string} src - Source path
    * @param {string} dest - Destination path
    * @param {Object} [options] - Copy options
@@ -191,7 +191,7 @@ export class FileSystemAdapter extends FileSystemPort {
     try {
       const srcPath = resolve(src);
       const destPath = resolve(dest);
-      
+
       await fs.cp(srcPath, destPath, {
         recursive: options.recursive || false,
         force: true,
@@ -204,7 +204,7 @@ export class FileSystemAdapter extends FileSystemPort {
 
   /**
    * Normalize file system errors into consistent format.
-   * 
+   *
    * @private
    * @param {Error} error - Original error
    * @param {string} operation - Operation that failed
@@ -220,7 +220,7 @@ export class FileSystemAdapter extends FileSystemPort {
     normalizedError.operation = operation;
     normalizedError.path = path;
     normalizedError.originalError = error;
-    
+
     return normalizedError;
   }
 }

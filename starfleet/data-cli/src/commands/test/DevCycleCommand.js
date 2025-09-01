@@ -75,7 +75,6 @@ class DevCycleCommand extends TestCommand {
       });
 
       return testResults;
-
     } catch (error) {
       const totalTime = new Date() - startTime;
       this.error(`Development cycle failed after ${this._formatDuration(totalTime)}`, error);
@@ -123,7 +122,6 @@ class DevCycleCommand extends TestCommand {
       });
 
       return result;
-
     } catch (error) {
       const stepTime = new Date() - stepStart;
       this.timings.compile = stepTime;
@@ -180,7 +178,6 @@ class DevCycleCommand extends TestCommand {
         status: 'complete',
         duration: stepTime
       });
-
     } catch (error) {
       const stepTime = new Date() - stepStart;
       this.timings.reset = stepTime;
@@ -234,7 +231,9 @@ class DevCycleCommand extends TestCommand {
       if (testResults.failed === 0) {
         this.success(`✓ All tests passed (${this._formatDuration(stepTime)})`);
       } else {
-        this.warn(`✗ ${testResults.failed}/${testResults.total} tests failed (${this._formatDuration(stepTime)})`);
+        this.warn(
+          `✗ ${testResults.failed}/${testResults.total} tests failed (${this._formatDuration(stepTime)})`
+        );
       }
 
       this.emit('dev-cycle:step', {
@@ -246,7 +245,6 @@ class DevCycleCommand extends TestCommand {
       });
 
       return testResults;
-
     } catch (error) {
       const stepTime = new Date() - stepStart;
       this.timings.test = stepTime;

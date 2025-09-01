@@ -1,10 +1,10 @@
 /**
  * @fileoverview Node.js host adapters for data-core ports.
- * 
+ *
  * This module provides Node.js-specific implementations of the ports that
  * data-core requires. These adapters wrap Node.js built-ins to match the
  * port interfaces defined by data-core.
- * 
+ *
  * @module data-host-node
  * @version 1.0.0
  */
@@ -18,7 +18,7 @@ import { GlobAdapter } from './adapters/GlobAdapter.js';
 
 /**
  * Create a complete set of Node.js adapters with default configuration.
- * 
+ *
  * @param {Object} [config] - Global configuration options
  * @param {Object} [config.fileSystem] - FileSystem adapter options
  * @param {Object} [config.crypto] - Crypto adapter options
@@ -26,17 +26,17 @@ import { GlobAdapter } from './adapters/GlobAdapter.js';
  * @param {Object} [config.environment] - Environment adapter options
  * @param {Object} [config.glob] - Glob adapter options
  * @returns {NodeAdapters} Object containing all configured adapters
- * 
+ *
  * @example
  * ```javascript
  * import { createNodeAdapters } from 'data-host-node';
- * 
+ *
  * const adapters = createNodeAdapters({
  *   fileSystem: { encoding: 'utf8' },
  *   environment: { prefix: 'DATA_' },
  *   glob: { followSymlinks: true }
  * });
- * 
+ *
  * // Use with data-core
  * const core = new DataCore(adapters);
  * ```
@@ -53,14 +53,14 @@ export function createNodeAdapters(config = {}) {
 
 /**
  * Create Node.js adapters with development-optimized configuration.
- * 
+ *
  * @param {Object} [overrides] - Configuration overrides
  * @returns {NodeAdapters} Development-configured adapters
- * 
+ *
  * @example
  * ```javascript
  * import { createDevAdapters } from 'data-host-node';
- * 
+ *
  * const adapters = createDevAdapters();
  * // Includes helpful defaults for development work
  * ```
@@ -102,14 +102,14 @@ export function createDevAdapters(overrides = {}) {
 
 /**
  * Create Node.js adapters with production-optimized configuration.
- * 
+ *
  * @param {Object} [overrides] - Configuration overrides
  * @returns {NodeAdapters} Production-configured adapters
- * 
+ *
  * @example
  * ```javascript
  * import { createProdAdapters } from 'data-host-node';
- * 
+ *
  * const adapters = createProdAdapters();
  * // Includes optimized defaults for production use
  * ```
@@ -137,12 +137,7 @@ export function createProdAdapters(overrides = {}) {
       absolute: true,
       followSymlinks: false, // Security: don't follow symlinks in prod
       caseSensitive: true,
-      ignore: [
-        'node_modules/**',
-        '.git/**',
-        '**/.env*',
-        '**/.*'
-      ],
+      ignore: ['node_modules/**', '.git/**', '**/.env*', '**/.*'],
       ...overrides.glob
     }
   });
@@ -152,22 +147,22 @@ export function createProdAdapters(overrides = {}) {
  * Wire adapters to a data-core instance.
  * This is a convenience function that handles the common pattern
  * of injecting adapters into data-core's dependency injection system.
- * 
+ *
  * @param {Object} core - data-core instance
  * @param {NodeAdapters} adapters - Node.js adapters
  * @returns {Object} The core instance with adapters wired
- * 
+ *
  * @example
  * ```javascript
  * import { DataCore } from 'data-core';
  * import { createNodeAdapters, wireAdapters } from 'data-host-node';
- * 
+ *
  * const core = new DataCore();
  * const adapters = createNodeAdapters();
- * 
+ *
  * // Wire the adapters to the core
  * wireAdapters(core, adapters);
- * 
+ *
  * // Now core can use the Node.js implementations
  * await core.initialize();
  * ```
@@ -185,18 +180,12 @@ export function wireAdapters(core, adapters) {
     // Fallback: try direct property assignment
     Object.assign(core, adapters);
   }
-  
+
   return core;
 }
 
 // Export individual adapter classes for advanced use cases
-export {
-  FileSystemAdapter,
-  CryptoAdapter,
-  ProcessAdapter,
-  EnvironmentAdapter,
-  GlobAdapter
-};
+export { FileSystemAdapter, CryptoAdapter, ProcessAdapter, EnvironmentAdapter, GlobAdapter };
 
 /**
  * @typedef {Object} NodeAdapters
@@ -209,11 +198,11 @@ export {
 
 /**
  * Default export provides the most common use case.
- * 
+ *
  * @example
  * ```javascript
  * import nodeAdapters from 'data-host-node';
- * 
+ *
  * const adapters = nodeAdapters(); // Uses createNodeAdapters() with defaults
  * ```
  */

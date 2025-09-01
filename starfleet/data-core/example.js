@@ -44,7 +44,7 @@ class NodeProcessAdapter extends ProcessPort {
     const { spawn } = await import('child_process');
     const { promisify } = await import('util');
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const child = spawn(command, args, options);
       let stdout = '';
       let stderr = '';
@@ -56,7 +56,7 @@ class NodeProcessAdapter extends ProcessPort {
         resolve({ stdout, stderr, exitCode });
       });
       
-      child.on('error', reject);
+      child.on('error', _reject);
     });
   }
 }

@@ -44,7 +44,6 @@ class MigrateStatusCommand extends Command {
         pendingMigrations: pendingMigrations.length,
         lastPromoted
       });
-
     } catch (error) {
       this.error('Migration status check failed', error);
       this.emit('failed', { error });
@@ -58,7 +57,10 @@ class MigrateStatusCommand extends Command {
   async getStagingStatus() {
     try {
       const stagingDir = path.resolve('supabase/.staging');
-      const stagingExists = await fs.access(stagingDir).then(() => true).catch(() => false);
+      const stagingExists = await fs
+        .access(stagingDir)
+        .then(() => true)
+        .catch(() => false);
 
       if (!stagingExists) {
         return { status: 'clean', files: 0 };
@@ -81,14 +83,17 @@ class MigrateStatusCommand extends Command {
   async getPendingMigrations() {
     try {
       const migrationsDir = path.resolve('supabase/migrations');
-      const migrationsExists = await fs.access(migrationsDir).then(() => true).catch(() => false);
+      const migrationsExists = await fs
+        .access(migrationsDir)
+        .then(() => true)
+        .catch(() => false);
 
       if (!migrationsExists) {
         return [];
       }
 
       const files = await fs.readdir(migrationsDir);
-      const migrationFiles = files.filter(f => f.endsWith('.sql'));
+      const migrationFiles = files.filter((f) => f.endsWith('.sql'));
 
       return migrationFiles.sort();
     } catch (error) {
@@ -103,7 +108,10 @@ class MigrateStatusCommand extends Command {
   async getLastPromotedMigration() {
     try {
       const historyFile = path.resolve('supabase/.migration_history.json');
-      const historyExists = await fs.access(historyFile).then(() => true).catch(() => false);
+      const historyExists = await fs
+        .access(historyFile)
+        .then(() => true)
+        .catch(() => false);
 
       if (!historyExists) {
         return null;
@@ -113,9 +121,8 @@ class MigrateStatusCommand extends Command {
       const history = JSON.parse(historyContent);
 
       // Find most recent promotion
-      const promotions = history.filter(entry => entry.action === 'promote');
+      const promotions = history.filter((entry) => entry.action === 'promote');
       return promotions.length > 0 ? promotions[promotions.length - 1] : null;
-
     } catch (error) {
       this.warn('Could not read migration history', { error: error.message });
       return null;
@@ -133,7 +140,7 @@ class MigrateStatusCommand extends Command {
     console.log(`📦 Staging Area: ${stagingStatus.status.toUpperCase()}`);
     if (stagingStatus.status === 'dirty') {
       console.log(`   Files in staging: ${stagingStatus.files}`);
-      stagingStatus.fileList?.forEach(file => {
+      stagingStatus.fileList?.forEach((file) => {
         console.log(`   • ${file}`);
       });
     } else if (stagingStatus.status === 'error') {
@@ -144,7 +151,7 @@ class MigrateStatusCommand extends Command {
     // Pending migrations
     console.log(`📋 Pending Migrations: ${pendingMigrations.length}`);
     if (pendingMigrations.length > 0) {
-      pendingMigrations.slice(0, 5).forEach(migration => {
+      pendingMigrations.slice(0, 5).forEach((migration) => {
         console.log(`   • ${migration}`);
       });
       if (pendingMigrations.length > 5) {
@@ -176,7 +183,7 @@ class MigrateStatusCommand extends Command {
  */
 export default async function statusHandler(args, config, logger, isProd) {
   const command = new MigrateStatusCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateStatusCommand };

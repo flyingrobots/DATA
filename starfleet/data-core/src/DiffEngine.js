@@ -1,5 +1,5 @@
-const EventEmitter = require('events');
-const DatabaseUtils = require('./db-utils');
+import EventEmitter from 'events';
+import DatabaseUtils from './db-utils.js';
 
 /**
  * DiffEngine - Event-driven database schema difference generator
@@ -114,7 +114,6 @@ class DiffEngine extends EventEmitter {
       });
 
       return diffResult;
-
     } catch (error) {
       this.endTime = new Date();
 
@@ -194,11 +193,9 @@ class DiffEngine extends EventEmitter {
         });
 
         return connectionString;
-
       } finally {
         await adminClient.end();
       }
-
     } catch (error) {
       this.emit('error', {
         error,
@@ -246,11 +243,14 @@ class DiffEngine extends EventEmitter {
         await adminClient.connect();
 
         // Terminate all connections to the database first
-        await adminClient.query(`
+        await adminClient.query(
+          `
           SELECT pg_terminate_backend(pid) 
           FROM pg_stat_activity 
           WHERE datname = $1 AND pid <> pg_backend_pid()
-        `, [dbName]);
+        `,
+          [dbName]
+        );
 
         // Drop the database
         await adminClient.query(`DROP DATABASE IF EXISTS "${dbName}"`);
@@ -266,11 +266,9 @@ class DiffEngine extends EventEmitter {
         });
 
         return true;
-
       } finally {
         await adminClient.end();
       }
-
     } catch (error) {
       this.emit('error', {
         error,
@@ -333,11 +331,9 @@ class DiffEngine extends EventEmitter {
           statementsExecuted: result.statementCount,
           results: result.results
         };
-
       } finally {
         await client.end();
       }
-
     } catch (error) {
       this.emit('error', {
         error,
@@ -440,4 +436,4 @@ class DiffEngine extends EventEmitter {
   }
 }
 
-module.exports = DiffEngine;
+export default DiffEngine;

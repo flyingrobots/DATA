@@ -159,7 +159,7 @@ class DataInputPaths {
    * @returns {Promise<string|null>} First existing path or null
    */
   async findDirectory(key, candidates) {
-    const checkPromises = candidates.map(async candidate => {
+    const checkPromises = candidates.map(async (candidate) => {
       this._config[key] = candidate;
       const exists = await this.hasDirectory(key);
       return exists ? { candidate, exists } : null;
@@ -224,13 +224,14 @@ class DataInputPaths {
     }
 
     // Start resolution
-    this._resolving[key] = this.pathResolver.resolveDirectoryForRead(this._config[key])
-      .then(resolved => {
+    this._resolving[key] = this.pathResolver
+      .resolveDirectoryForRead(this._config[key])
+      .then((resolved) => {
         this._resolvedPaths[key] = resolved;
         delete this._resolving[key];
         return resolved;
       })
-      .catch(error => {
+      .catch((_error) => {
         delete this._resolving[key];
         throw new Error(`Failed to resolve input path ${key}: ${error.message}`);
       });

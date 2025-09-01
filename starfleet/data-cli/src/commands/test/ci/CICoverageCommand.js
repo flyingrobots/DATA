@@ -5,7 +5,7 @@
  * and proper exit codes for CI/CD environments.
  */
 
-const CoverageCommand = require('../CoverageCommand');
+import CoverageCommand from '../CoverageCommand.js';
 
 /**
  * CI-friendly test coverage analysis with structured output
@@ -384,7 +384,7 @@ class CICoverageCommand extends CoverageCommand {
   async writeJSONArtifact(data, filename) {
     try {
       const filePath = await this.getOutputFile(filename);
-      const fs = require('fs').promises;
+      import fs from 'fs'.promises;
       await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
     } catch (error) {
       throw new Error(`Failed to write ${filename}: ${error.message}`);
@@ -477,4 +477,4 @@ class CICoverageCommand extends CoverageCommand {
   }
 }
 
-module.exports = CICoverageCommand;
+export default CICoverageCommand;

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const pgTAPTestScanner = require('./src/lib/testing/pgTAPTestScanner.js');
+import pgTAPTestScanner from './src/lib/testing/pgTAPTestScanner.js';
 
 console.log('✅ Testing trigger assertion parsing functionality...\n');
 
@@ -58,11 +58,14 @@ let failed = 0;
 testCases.forEach((testCase, index) => {
   try {
     const assertions = scanner.extractAssertions(testCase.sql);
-    
+
     if (assertions.length === 1) {
       const assertion = assertions[0];
-      
-      if (assertion.type === testCase.expectedType && assertion.target === testCase.expectedTarget) {
+
+      if (
+        assertion.type === testCase.expectedType &&
+        assertion.target === testCase.expectedTarget
+      ) {
         console.log(`✅ Test ${index + 1}: ${testCase.name} - PASSED`);
         console.log(`   Target: ${assertion.target}`);
         console.log(`   Type: ${assertion.type}`);
@@ -89,23 +92,29 @@ console.log(`\n📊 Test Results: ${passed} passed, ${failed} failed`);
 
 // Test coverage map integration
 console.log('\n🗺️ Testing coverage map integration...');
-const combinedSql = testCases.map(tc => tc.sql).join('\n');
+const combinedSql = testCases.map((tc) => tc.sql).join('\n');
 const allAssertions = scanner.extractAssertions(combinedSql);
 
-scanner.testFiles = [{
-  filePath: '/test/triggers.sql',
-  fileName: 'triggers.sql',
-  assertions: allAssertions,
-  planCount: allAssertions.length,
-  dependencies: [],
-  metadata: { size: combinedSql.length, lines: combinedSql.split('\n').length, parsed: new Date() }
-}];
+scanner.testFiles = [
+  {
+    filePath: '/test/triggers.sql',
+    fileName: 'triggers.sql',
+    assertions: allAssertions,
+    planCount: allAssertions.length,
+    dependencies: [],
+    metadata: {
+      size: combinedSql.length,
+      lines: combinedSql.split('\n').length,
+      parsed: new Date()
+    }
+  }
+];
 
 scanner._buildCoverageMap();
 const coverageMap = scanner.getCoverageMap();
 
 console.log(`Found ${Object.keys(coverageMap.triggers || {}).length} triggers in coverage map:`);
-Object.keys(coverageMap.triggers || {}).forEach(trigger => {
+Object.keys(coverageMap.triggers || {}).forEach((trigger) => {
   const tests = coverageMap.triggers[trigger];
   console.log(`  - ${trigger}: [${tests.join(', ')}]`);
 });

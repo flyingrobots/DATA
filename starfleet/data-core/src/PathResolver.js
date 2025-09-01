@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const { promisify } = require('util');
+import path from 'path';
+import fs from 'fs';
+import { promisify } from 'util';
 
 /**
  * A utility class for resolving and ensuring the existence of file and directory paths.
@@ -66,7 +66,9 @@ class PathResolver {
       if (error.code === 'EACCES') {
         throw new Error(`Directory is not writable: ${absolutePath}`);
       }
-      throw new Error(`Failed to create/access directory for writing: ${absolutePath} - ${error.message}`);
+      throw new Error(
+        `Failed to create/access directory for writing: ${absolutePath} - ${error.message}`
+      );
     }
   }
 
@@ -158,4 +160,4 @@ class PathResolver {
   }
 }
 
-module.exports = PathResolver;
+export default PathResolver;

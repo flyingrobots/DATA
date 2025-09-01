@@ -21,7 +21,7 @@ config();
 import { cli } from '../src/index.js';
 
 // Run the CLI with process arguments
-cli(process.argv).catch(error => {
+cli(process.argv).catch((error) => {
   console.error('Fatal error:', error.message);
   if (process.env.DEBUG) {
     console.error(error.stack);

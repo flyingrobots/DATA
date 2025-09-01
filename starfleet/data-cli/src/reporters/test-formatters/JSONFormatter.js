@@ -35,14 +35,14 @@ class JSONFormatter {
         skipped,
         success: failed === 0
       },
-      testFunctions: testFunctions.map(func => ({
+      testFunctions: testFunctions.map((func) => ({
         name: func.name,
         total: func.total,
         passed: func.passed,
         failed: func.failed,
         skipped: func.skipped,
         success: func.success,
-        passRate: func.total > 0 ? (func.passed / func.total * 100).toFixed(1) : 0
+        passRate: func.total > 0 ? ((func.passed / func.total) * 100).toFixed(1) : 0
       })),
       tests: tests.map((test, index) => {
         const testResult = {
@@ -66,9 +66,9 @@ class JSONFormatter {
       }),
       diagnostics: diagnostics || [],
       summary: {
-        passRate: total > 0 ? (passed / total * 100).toFixed(1) : 0,
-        failRate: total > 0 ? (failed / total * 100).toFixed(1) : 0,
-        skipRate: total > 0 ? (skipped / total * 100).toFixed(1) : 0,
+        passRate: total > 0 ? ((passed / total) * 100).toFixed(1) : 0,
+        failRate: total > 0 ? ((failed / total) * 100).toFixed(1) : 0,
+        skipRate: total > 0 ? ((skipped / total) * 100).toFixed(1) : 0,
         overallSuccess: failed === 0,
         executionTime: {
           total: duration,
@@ -82,7 +82,7 @@ class JSONFormatter {
     if (testFunctions && testFunctions.length > 1) {
       jsonResult.functionBreakdown = testFunctions.reduce((breakdown, func) => {
         breakdown[func.name] = {
-          tests: tests.filter(test => test.function === func.name),
+          tests: tests.filter((test) => test.function === func.name),
           stats: {
             total: func.total,
             passed: func.passed,
