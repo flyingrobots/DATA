@@ -1,7 +1,7 @@
 /**
  * CryptoPort - Interface for cryptographic operations
  * Pure interface definition - no implementation
- * 
+ *
  * @typedef {Object} CryptoPort
  * @property {(data: string, algorithm?: string) => string} hash - Generate hash of data
  * @property {() => string} randomUUID - Generate random UUID

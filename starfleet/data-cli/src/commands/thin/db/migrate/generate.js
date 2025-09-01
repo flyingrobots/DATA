@@ -10,9 +10,9 @@ export async function run({ services }, flags) {
   const migrationName = flags.name;
 
   // Execute use-case
-  const plan = await services.useCases.generateMigrationPlan.execute({ 
+  const plan = await services.useCases.generateMigrationPlan.execute({
     sqlRoot,
-    migrationName 
+    migrationName
   });
 
   // Write output if requested

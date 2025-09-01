@@ -26,10 +26,10 @@ export function makeGenerateMigrationPlan(deps) {
      * @returns {Promise<{steps: Array, preview: string, checksum: string}>}
      */
     async execute({ sqlRoot, migrationName }) {
-      bus.emit(Events.MIGRATION_PLAN_STARTED, { 
-        at: clock.now(), 
+      bus.emit(Events.MIGRATION_PLAN_STARTED, {
+        at: clock.now(),
         root: sqlRoot,
-        name: migrationName 
+        name: migrationName
       });
 
       // Find all SQL files
@@ -42,17 +42,17 @@ export function makeGenerateMigrationPlan(deps) {
       // Process each SQL file
       for (const path of paths) {
         bus.emit(Events.MIGRATION_PLAN_STEP, { path });
-        
+
         const sql = await fs.readFile(path);
         const id = crypto.hash(sql); // Stable content hash
-        
-        steps.push({ 
-          id, 
-          path, 
+
+        steps.push({
+          id,
+          path,
           sql,
           checksum: id
         });
-        
+
         contents.push(`-- Source: ${path}\n-- Checksum: ${id}\n${sql}`);
       }
 
@@ -60,18 +60,18 @@ export function makeGenerateMigrationPlan(deps) {
       const preview = contents.join('\n\n-- ===== Next File =====\n\n');
       const planChecksum = crypto.hash(preview);
 
-      const plan = { 
-        steps, 
+      const plan = {
+        steps,
         preview,
         checksum: planChecksum,
         timestamp: clock.nowMs(),
         name: migrationName || `migration_${clock.nowMs()}`
       };
 
-      bus.emit(Events.MIGRATION_PLAN_READY, { 
-        at: clock.now(), 
+      bus.emit(Events.MIGRATION_PLAN_READY, {
+        at: clock.now(),
         count: steps.length,
-        checksum: planChecksum 
+        checksum: planChecksum
       });
 
       return plan;

@@ -26,7 +26,7 @@ try {
 
   // Test a simple use-case with fake data
   console.log('\n4. Testing generateMigrationPlan with mock SQL directory...');
-  
+
   // Create a temporary test directory
   const testDir = '/tmp/smoke-test-sql';
   await services.ports.fs.mkdirp(testDir);
@@ -62,13 +62,13 @@ try {
     eventReceived = true;
   });
   services.ports.bus.emit('test.event', { test: true });
-  
+
   if (eventReceived) {
     console.log('   ✅ Event bus working');
   } else {
     throw new Error('Event bus not working');
   }
-  
+
   // Test unsubscribe
   unsubscribe();
 

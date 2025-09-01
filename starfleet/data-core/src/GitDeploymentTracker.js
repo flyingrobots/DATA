@@ -1,6 +1,6 @@
 /**
  * Git Deployment Tracker Interfaces and Business Logic
- * 
+ *
  * Pure interfaces and business logic for git-based deployment tracking.
  * No process, filesystem, or I/O dependencies - only data structures and validation.
  */
@@ -68,7 +68,7 @@ export class GitDeploymentLogic {
     }
 
     // Optional rollbackFrom validation
-    if (metadata.rollbackFrom !== undefined && 
+    if (metadata.rollbackFrom !== undefined &&
         (typeof metadata.rollbackFrom !== 'string' || metadata.rollbackFrom.trim() === '')) {
       errors.push('rollbackFrom must be a non-empty string if provided');
     }
@@ -96,7 +96,7 @@ export class GitDeploymentLogic {
     }
 
     const tagTimestamp = timestamp || new Date().toISOString().replace(/[:.]/g, '-');
-    
+
     return `${DEPLOYMENT_TAG_PREFIX}${environment}-${migrationId}-${tagTimestamp}`;
   }
 
@@ -279,7 +279,7 @@ export class GitDeploymentLogic {
 
     // Check if this looks like a rollback based on available tags
     const environmentTags = this.filterTagsByEnvironment(availableTags, metadata.environment);
-    
+
     if (environmentTags.length <= 1) {
       return {
         isRollback: false,
@@ -289,7 +289,7 @@ export class GitDeploymentLogic {
 
     // Find if there's a newer tag with the same migration ID
     const thisTagData = environmentTags.find(tag => tag.migrationId === metadata.migrationId);
-    const newerTags = environmentTags.filter(tag => 
+    const newerTags = environmentTags.filter(tag =>
       this.compareDeploymentTags(tag.fullTag, thisTagData?.fullTag || '') > 0
     );
 
@@ -308,7 +308,7 @@ export class GitDeploymentLogic {
    */
   _isValidISO8601(dateString) {
     const date = new Date(dateString);
-    return date instanceof Date && !isNaN(date.getTime()) && 
+    return date instanceof Date && !isNaN(date.getTime()) &&
            dateString === date.toISOString();
   }
 }

@@ -30,7 +30,7 @@ export {
 export {
   SqlNode,
   SqlGraph
-} from './lib/SqlGraph.js';
+} from './src/migration/SqlGraph.js';
 
 // Export migration diff engine
 export {
@@ -38,7 +38,7 @@ export {
   MigrationOperation,
   SchemaState,
   DiffEngine
-} from './lib/DiffEngine.js';
+} from './src/migration/DiffEngine.js';
 
 // Export execution plan compiler
 export {
@@ -46,7 +46,39 @@ export {
   ExecutionStep,
   ExecutionPlan,
   PlanCompiler
-} from './lib/PlanCompiler.js';
+} from './src/migration/PlanCompiler.js';
+
+// Export migration compiler
+export {
+  MigrationCompiler
+} from './src/migration/MigrationCompiler.js';
+
+// Export migration metadata
+export {
+  MigrationMetadata
+} from './src/domain/MigrationMetadata.js';
+
+// Export output configuration
+export { default as OutputConfig } from './src/config/OutputConfig.js';
+
+// Export testing domain types
+export { TEST_TYPES, TEST_PRIORITIES } from './src/domain/testingTypes.js';
+
+// Export test pattern library
+export { PATTERNS, getPatternsByCategory, getPatternById } from './src/testing/patterns/index.js';
+
+// Export pattern rendering
+export { 
+  renderPattern, 
+  getRecommendedPatterns, 
+  generateEnhancedTemplate 
+} from './src/testing/render/renderPattern.js';
+
+// Export test requirement analyzer
+export { 
+  makeAnalyzeTestRequirements,
+  AnalysisEvents 
+} from './src/application/makeAnalyzeTestRequirements.js';
 
 /**
  * Package version information
@@ -63,9 +95,9 @@ import {
 } from './ports/index.js';
 
 // Import core classes for DataCore
-import { SqlGraph } from './lib/SqlGraph.js';
-import { DiffEngine, SchemaState } from './lib/DiffEngine.js';
-import { PlanCompiler } from './lib/PlanCompiler.js';
+import { SqlGraph } from './src/migration/SqlGraph.js';
+import { DiffEngine, SchemaState } from './src/migration/DiffEngine.js';
+import { PlanCompiler } from './src/migration/PlanCompiler.js';
 
 /**
  * Core migration workflow orchestrator

@@ -30,10 +30,10 @@ class ResultParser {
     }
 
     const lines = tapOutput.split('\n');
-    
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
-      
+
       if (line.startsWith('1..')) {
         this._parsePlan(line);
       } else if (line.startsWith('ok ') || line.startsWith('not ok ')) {
@@ -45,7 +45,7 @@ class ResultParser {
 
     // Calculate totals
     this.results.total = this.results.passed + this.results.failed + this.results.skipped;
-    
+
     return this.results;
   }
 
@@ -67,11 +67,11 @@ class ResultParser {
   _parseTest(line) {
     const okMatch = line.match(/^ok (\d+)(.*)/);
     const notOkMatch = line.match(/^not ok (\d+)(.*)/);
-    
+
     if (okMatch) {
       const testNumber = parseInt(okMatch[1], 10);
       const description = okMatch[2].replace(/^[^\w]*/, '').trim();
-      
+
       // Check for SKIP directive
       if (description.includes('# SKIP')) {
         this.results.skipped++;
@@ -87,18 +87,18 @@ class ResultParser {
         this.results.tests.push({
           number: testNumber,
           status: 'pass',
-          description: description
+          description
         });
       }
     } else if (notOkMatch) {
       const testNumber = parseInt(notOkMatch[1], 10);
       const description = notOkMatch[2].replace(/^[^\w]*/, '').trim();
-      
+
       this.results.failed++;
       this.results.tests.push({
         number: testNumber,
         status: 'fail',
-        description: description
+        description
       });
     }
   }
@@ -144,23 +144,23 @@ class ResultParser {
       lines.push('');
       tests.forEach(test => {
         let symbol, color;
-        
+
         switch (test.status) {
-          case 'pass':
-            symbol = '✓';
-            color = chalk.green;
-            break;
-          case 'fail':
-            symbol = '✗';
-            color = chalk.red;
-            break;
-          case 'skip':
-            symbol = '○';
-            color = chalk.yellow;
-            break;
-          default:
-            symbol = '?';
-            color = chalk.gray;
+        case 'pass':
+          symbol = '✓';
+          color = chalk.green;
+          break;
+        case 'fail':
+          symbol = '✗';
+          color = chalk.red;
+          break;
+        case 'skip':
+          symbol = '○';
+          color = chalk.yellow;
+          break;
+        default:
+          symbol = '?';
+          color = chalk.gray;
         }
 
         let line = color(`  ${symbol} ${test.description}`);

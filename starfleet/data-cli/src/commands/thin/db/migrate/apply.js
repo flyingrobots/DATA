@@ -19,7 +19,7 @@ export async function run({ services }, flags) {
     };
 
     const safetyResult = await services.useCases.verifySafetyGates.execute(policy);
-    
+
     if (!safetyResult.passed) {
       services.ports.logger.error(
         { failures: safetyResult.failures },
@@ -30,14 +30,14 @@ export async function run({ services }, flags) {
   }
 
   // Generate the migration plan
-  const plan = await services.useCases.generateMigrationPlan.execute({ 
-    sqlRoot 
+  const plan = await services.useCases.generateMigrationPlan.execute({
+    sqlRoot
   });
 
   // Apply the migration
-  const result = await services.useCases.applyMigrationPlan.execute({ 
-    plan, 
-    dryRun 
+  const result = await services.useCases.applyMigrationPlan.execute({
+    plan,
+    dryRun
   });
 
   // Handle result

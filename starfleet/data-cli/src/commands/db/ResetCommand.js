@@ -28,16 +28,16 @@ class ResetCommand extends DatabaseCommand {
         'Run seed files (if any)'
       ]
     });
-    
+
     // First confirmation
     const confirm = await this.confirm(
       'Are you absolutely sure you want to reset the PRODUCTION database?'
     );
-    
+
     if (!confirm) {
       return false;
     }
-    
+
     // Double confirmation for production
     const doubleConfirm = await this.input(
       'Type "RESET PRODUCTION" to confirm:',
@@ -47,7 +47,7 @@ class ResetCommand extends DatabaseCommand {
         }
       }
     );
-    
+
     return doubleConfirm === 'RESET PRODUCTION';
   }
 
@@ -56,33 +56,33 @@ class ResetCommand extends DatabaseCommand {
    */
   async performExecute() {
     this.emit('start', { isProd: this.isProd });
-    
+
     try {
       this.progress('Resetting database...');
-      
+
       // Change to supabase directory
       const supabaseDir = this.outputConfig.supabaseDir;
-      
+
       // Run the reset command
       const { stdout, stderr } = await execAsync('npm run reset', {
         cwd: supabaseDir,
-        env: { 
+        env: {
           ...process.env,  // Use process.env if config.envVars is not available
           ...(this.config?.envVars || {}),
-          NODE_ENV: this.isProd ? 'production' : 'development' 
+          NODE_ENV: this.isProd ? 'production' : 'development'
         }
       });
-      
+
       // Process output
       if (stderr && !stderr.includes('warning')) {
         this.warn('Reset command produced stderr output', { stderr });
       }
-      
+
       if (stdout) {
         this.emit('output', { stdout });
         this.logger.debug({ stdout }, 'Reset command output');
       }
-      
+
       this.success('Database reset complete');
       this.emit('complete', { isProd: this.isProd });
     } catch (error) {

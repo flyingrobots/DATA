@@ -24,20 +24,20 @@ export function makeApplyMigrationPlan({ db, logger, clock, bus }) {
      */
     async execute({ plan, dryRun = false }) {
       const startTime = clock.nowMs();
-      
-      bus.emit(Events.MIGRATION_APPLY_STARTED, { 
-        at: clock.now(), 
-        dryRun, 
+
+      bus.emit(Events.MIGRATION_APPLY_STARTED, {
+        at: clock.now(),
+        dryRun,
         steps: plan.steps.length,
-        name: plan.name 
+        name: plan.name
       });
 
       if (dryRun) {
         logger.info({ steps: plan.steps.length }, 'Dry run - no changes will be applied');
-        return { 
-          applied: 0, 
+        return {
+          applied: 0,
           dryRun: true,
-          duration: clock.nowMs() - startTime 
+          duration: clock.nowMs() - startTime
         };
       }
 
@@ -48,8 +48,8 @@ export function makeApplyMigrationPlan({ db, logger, clock, bus }) {
         // Run all migrations in a transaction
         await db.withTransaction(async (tx) => {
           for (const step of plan.steps) {
-            bus.emit(Events.MIGRATION_APPLY_STEP, { 
-              id: step.id, 
+            bus.emit(Events.MIGRATION_APPLY_STEP, {
+              id: step.id,
               path: step.path,
               index: applied + 1,
               total: plan.steps.length
@@ -67,33 +67,33 @@ export function makeApplyMigrationPlan({ db, logger, clock, bus }) {
           }
         });
 
-        bus.emit(Events.MIGRATION_APPLY_DONE, { 
-          at: clock.now(), 
+        bus.emit(Events.MIGRATION_APPLY_DONE, {
+          at: clock.now(),
           applied,
-          duration: clock.nowMs() - startTime 
+          duration: clock.nowMs() - startTime
         });
 
-        return { 
-          applied, 
+        return {
+          applied,
           dryRun: false,
           duration: clock.nowMs() - startTime,
-          success: true 
+          success: true
         };
       } catch (error) {
-        bus.emit(Events.MIGRATION_APPLY_DONE, { 
-          at: clock.now(), 
+        bus.emit(Events.MIGRATION_APPLY_DONE, {
+          at: clock.now(),
           applied,
           failed: true,
           error: error.message,
-          duration: clock.nowMs() - startTime 
+          duration: clock.nowMs() - startTime
         });
 
-        return { 
-          applied, 
+        return {
+          applied,
           dryRun: false,
           duration: clock.nowMs() - startTime,
           success: false,
-          errors 
+          errors
         };
       }
     }

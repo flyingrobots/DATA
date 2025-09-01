@@ -18,7 +18,7 @@ class CompileCommand extends BuildCommand {
     isProd = false
   ) {
     super(testsDir, outputDir, logger, isProd);
-    
+
     // Validate paths are provided
     if (!this.inputDir || !this.outputDir) {
       throw new Error('CompileCommand requires test directory and output directory');
@@ -30,28 +30,28 @@ class CompileCommand extends BuildCommand {
    */
   async performExecute() {
     this.emit('compilation:start', { isProd: this.isProd, type: 'test' });
-    
+
     try {
       this.progress('Starting test compilation...');
-      
+
       // Validate test directory structure
       await this.validateTestDirectory();
-      
+
       // TODO: Implement native test compilation
       // The legacy build system has been removed. This command needs to be reimplemented
       // using a native test compiler approach
       throw new Error('Test compilation not yet implemented. Legacy build system has been removed.');
-      
+
       // Validate pgTAP function signatures
       await this.validatePgTapFunctions(result.outputFile);
-      
+
       this.success(`Test compilation completed: ${result.outputFile}`);
-      this.emit('compilation:complete', { 
+      this.emit('compilation:complete', {
         result,
         type: 'test',
-        testsCompiled: result.stats.filesProcessed 
+        testsCompiled: result.stats.filesProcessed
       });
-      
+
       return result;
     } catch (error) {
       this.error('Test compilation failed', error);
@@ -66,22 +66,22 @@ class CompileCommand extends BuildCommand {
   async validateTestDirectory() {
     // Get test directory from OutputConfig
     const testDir = this.inputDir;
-    
+
     try {
       const stat = await fs.stat(testDir);
       if (!stat.isDirectory()) {
         throw new Error(`Tests path is not a directory: ${testDir}`);
       }
-      
+
       // Use glob to recursively find SQL files
       const { glob } = require('glob');
       const pattern = path.join(testDir, '**/*.sql');
       const sqlFiles = await glob(pattern);
-      
+
       if (sqlFiles.length === 0) {
         throw new Error(`No SQL test files found in: ${testDir}`);
       }
-      
+
       this.progress(`Found ${sqlFiles.length} test files in ${testDir}`);
     } catch (error) {
       if (error.code === 'ENOENT') {
@@ -103,10 +103,10 @@ class CompileCommand extends BuildCommand {
         .replace(/\..+/, '')
         .replace(/-/g, '')
         .slice(0, 14);
-      
+
       return path.join(compiler.config.outputDir, `${timestamp}_compiled_tests.sql`);
     };
-    
+
     // Override the header to indicate this is a test compilation
     const originalWriteHeader = compiler.writeHeader.bind(compiler);
     compiler.writeHeader = async (outputFile) => {
@@ -125,10 +125,10 @@ class CompileCommand extends BuildCommand {
 -- =========================================================================
 
 `;
-      
+
       await fs.writeFile(outputFile, header);
       compiler.stats.linesWritten += header.split('\n').length;
-      
+
       compiler.emit('header:written', {
         outputFile,
         lines: header.split('\n').length
@@ -141,49 +141,49 @@ class CompileCommand extends BuildCommand {
    */
   async compileTestDirectory(compiler) {
     compiler.stats.startTime = new Date();
-    
+
     compiler.emit('start', {
       timestamp: compiler.stats.startTime,
       config: compiler.config,
       type: 'test'
     });
-    
+
     // Validate test directory exists
     const testDir = this.inputDir;
     await fs.stat(testDir);
-    
+
     // Ensure output directory exists
     await fs.mkdir(compiler.config.outputDir, { recursive: true });
-    
+
     // Generate output filename
     const outputFile = compiler.generateOutputFilename();
-    
+
     // Write header
     await compiler.writeHeader(outputFile);
-    
+
     // Get all SQL files in tests directory
     const files = await fs.readdir(testDir);
     const sqlFiles = files
       .filter(f => f.endsWith('.sql'))
       .sort(); // Sort for consistent ordering (important for test setup)
-    
-    this.emit('compilation:progress', { 
-      stage: 'processing_files', 
-      totalFiles: sqlFiles.length 
+
+    this.emit('compilation:progress', {
+      stage: 'processing_files',
+      totalFiles: sqlFiles.length
     });
-    
+
     // Process each test file
     for (const sqlFile of sqlFiles) {
       await this.processTestFile(testDir, sqlFile, outputFile, compiler);
     }
-    
+
     // Write footer with test-specific instructions
     await this.writeTestFooter(outputFile, compiler);
-    
+
     // Complete
     compiler.stats.endTime = new Date();
     const duration = compiler.stats.endTime - compiler.stats.startTime;
-    
+
     compiler.emit('complete', {
       outputFile,
       filesProcessed: compiler.stats.filesProcessed,
@@ -192,7 +192,7 @@ class CompileCommand extends BuildCommand {
       timestamp: compiler.stats.endTime,
       type: 'test'
     });
-    
+
     return {
       success: true,
       outputFile,
@@ -205,19 +205,19 @@ class CompileCommand extends BuildCommand {
    */
   async processTestFile(testDir, filename, outputFile, compiler) {
     const filePath = path.join(testDir, filename);
-    
+
     try {
       compiler.emit('file:start', {
         file: filename,
         path: filePath
       });
-      
+
       // Read file content
       const content = await fs.readFile(filePath, 'utf8');
-      
+
       // Validate pgTAP function structure
       await this.validateTestFileContent(content, filename);
-      
+
       // Write file section with test-specific formatting
       const fileSection = `-- =========================================================================
 -- TEST FILE: ${filename}
@@ -225,25 +225,25 @@ class CompileCommand extends BuildCommand {
 ${content}
 
 `;
-      
+
       await fs.appendFile(outputFile, fileSection);
-      
+
       const linesAdded = fileSection.split('\n').length;
       compiler.stats.linesWritten += linesAdded;
       compiler.stats.filesProcessed++;
-      
+
       compiler.emit('file:complete', {
         file: filename,
         lines: linesAdded,
         size: content.length
       });
-      
-      this.emit('compilation:progress', { 
-        stage: 'file_processed', 
+
+      this.emit('compilation:progress', {
+        stage: 'file_processed',
         file: filename,
         processedCount: compiler.stats.filesProcessed
       });
-      
+
     } catch (error) {
       compiler.emit('file:error', {
         file: filename,
@@ -259,16 +259,16 @@ ${content}
   async validateTestFileContent(content, filename) {
     // Check for required pgTAP function patterns
     const lines = content.split('\n');
-    
+
     // Look for test function definitions
     const testFunctionPattern = /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+test\.([a-zA-Z0-9_]+)\s*\(\s*\)/i;
     const tapPlanPattern = /tap\.plan\s*\(\s*(\d+)\s*\)/i;
     const tapFinishPattern = /tap\.finish\s*\(\s*\)/i;
-    
+
     let hasTestFunction = false;
     let hasTapPlan = false;
     let hasTapFinish = false;
-    
+
     for (const line of lines) {
       if (testFunctionPattern.test(line)) {
         hasTestFunction = true;
@@ -280,7 +280,7 @@ ${content}
         hasTapFinish = true;
       }
     }
-    
+
     // Emit warnings for missing pgTAP patterns (non-fatal)
     if (!hasTestFunction) {
       this.warn(`${filename}: No test functions found - may not be a pgTAP test file`);
@@ -314,10 +314,10 @@ ${content}
 -- 
 -- =========================================================================
 `;
-    
+
     await fs.appendFile(outputFile, footer);
     compiler.stats.linesWritten += footer.split('\n').length;
-    
+
     compiler.emit('footer:written', {
       lines: footer.split('\n').length
     });
@@ -328,30 +328,30 @@ ${content}
    */
   async validatePgTapFunctions(outputFile) {
     this.progress('Validating pgTAP function signatures...');
-    
+
     try {
       const content = await fs.readFile(outputFile, 'utf8');
-      
+
       // Look for all test function definitions
       const testFunctionPattern = /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+test\.([a-zA-Z0-9_]+)\s*\(\s*\)/gi;
       const functions = [];
       let match;
-      
+
       while ((match = testFunctionPattern.exec(content)) !== null) {
         functions.push(match[1]);
       }
-      
+
       if (functions.length === 0) {
         this.warn('No pgTAP test functions found in compiled output');
       } else {
         this.success(`Validated ${functions.length} pgTAP test functions: ${functions.join(', ')}`);
       }
-      
+
       // Validate that each function has proper pgTAP structure
       for (const func of functions) {
         const funcRegex = new RegExp(`CREATE\\s+OR\\s+REPLACE\\s+FUNCTION\\s+test\\.${func}[\\s\\S]*?\\$\\$;`, 'i');
         const funcMatch = content.match(funcRegex);
-        
+
         if (funcMatch) {
           const funcBody = funcMatch[0];
           if (!funcBody.includes('RETURNS SETOF TEXT')) {
@@ -362,7 +362,7 @@ ${content}
           }
         }
       }
-      
+
     } catch (error) {
       this.warn(`Could not validate pgTAP functions: ${error.message}`);
     }
@@ -375,23 +375,23 @@ ${content}
     compiler.on('start', ({ timestamp, type }) => {
       this.logger.debug({ timestamp, type }, 'Test compilation started');
     });
-    
+
     compiler.on('file:start', ({ file }) => {
       this.progress(`Processing test file: ${file}`);
     });
-    
+
     compiler.on('file:complete', ({ file, lines }) => {
       this.logger.debug({ file, lines }, 'Test file processed');
     });
-    
+
     compiler.on('file:error', ({ file, error }) => {
       this.error(`Error processing test file ${file}`, error);
     });
-    
+
     compiler.on('complete', ({ stats, type }) => {
       this.logger.info({ stats, type }, 'Test compilation complete');
     });
-    
+
     compiler.on('error', ({ error }) => {
       this.error('Test compiler error', error);
     });

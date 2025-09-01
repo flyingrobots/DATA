@@ -1,6 +1,6 @@
 /**
  * CI Run Command - CI-optimized test execution
- * 
+ *
  * Wraps RunCommand with machine-friendly output, JUnit XML generation,
  * and proper exit codes for CI/CD environments.
  */
@@ -13,7 +13,7 @@ const RunCommand = require('../RunCommand');
 class CIRunCommand extends RunCommand {
   constructor(databaseUrl, serviceRoleKey = null, testsDir, outputDir, logger = null, isProd = false) {
     super(databaseUrl, serviceRoleKey, testsDir, outputDir, logger, isProd);
-    
+
     // Force CI mode behavior
     this.ciMode = true;
     this.suppressProgress = true;
@@ -25,31 +25,31 @@ class CIRunCommand extends RunCommand {
   async performExecute(options = {}) {
     const startTime = Date.now();
     const isCI = process.env.CI !== 'false';
-    
+
     // Force machine-readable output by default in CI mode
     const ciOptions = {
       ...options,
       format: options.format || (isCI ? 'junit' : 'console'),
       output: options.output || (isCI ? 'test-results' : null)
     };
-    
+
     try {
       // Emit structured start event
-      this.emitCIEvent('test_run_started', { 
+      this.emitCIEvent('test_run_started', {
         testsDir: this.testsDir,
         options: ciOptions,
         timestamp: new Date().toISOString()
       });
-      
+
       // Execute tests using parent class logic
       const results = await super.performExecute(ciOptions);
-      
+
       // Calculate execution time
       const duration = Date.now() - startTime;
-      
+
       // Generate CI-friendly summary
       const ciSummary = this.generateCISummary(results, duration);
-      
+
       // Output summary for CI
       if (isCI) {
         // Always output summary to stdout for CI parsing
@@ -58,26 +58,26 @@ class CIRunCommand extends RunCommand {
         // Human-readable summary for local development
         this.displayCISummary(ciSummary);
       }
-      
+
       // Write additional CI artifacts
       await this.writeCIArtifacts(results, ciSummary, ciOptions);
-      
+
       // Emit structured completion event
       this.emitCIEvent('test_run_completed', {
         success: results.failed === 0,
         duration,
         summary: ciSummary.summary
       });
-      
+
       // Set proper exit code based on test results
       const exitCode = this.getExitCode(results);
       process.exitCode = exitCode;
-      
+
       return ciSummary;
-      
+
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       // Structured error output
       const errorReport = {
         status: 'error',
@@ -88,20 +88,20 @@ class CIRunCommand extends RunCommand {
         duration,
         timestamp: new Date().toISOString()
       };
-      
+
       if (isCI) {
         console.error(JSON.stringify(errorReport, null, 2));
       } else {
         console.error(`TEST_RUN_ERROR: ${error.message}`);
       }
-      
+
       this.emitCIEvent('test_run_failed', { error: error.message, duration });
-      
+
       process.exitCode = 1;
       throw error;
     }
   }
-  
+
   /**
    * Generate CI-friendly test summary
    * @param {Object} results - Test results from parent class
@@ -110,7 +110,7 @@ class CIRunCommand extends RunCommand {
    */
   generateCISummary(results, duration) {
     const { total, passed, failed, skipped, testFunctions } = results;
-    
+
     return {
       status: failed > 0 ? 'failed' : 'passed',
       summary: {
@@ -143,21 +143,21 @@ class CIRunCommand extends RunCommand {
       }
     };
   }
-  
+
   /**
    * Display CI summary in human-readable format (for local development)
    * @param {Object} summary - CI summary
    */
   displayCISummary(summary) {
     const { status, summary: stats, failedTests, execution } = summary;
-    
+
     console.log(`\nTEST_RUN_STATUS: ${status.toUpperCase()}`);
     console.log(`TOTAL_TESTS: ${stats.total}`);
     console.log(`PASSED: ${stats.passed}`);
     console.log(`FAILED: ${stats.failed}`);
     console.log(`SKIPPED: ${stats.skipped}`);
     console.log(`SUCCESS: ${stats.success}`);
-    
+
     if (failedTests.length > 0) {
       console.log('\nFAILED_TESTS:');
       failedTests.forEach(test => {
@@ -167,10 +167,10 @@ class CIRunCommand extends RunCommand {
         }
       });
     }
-    
+
     console.log(`\nEXECUTION_TIME: ${execution.duration}ms`);
   }
-  
+
   /**
    * Write CI artifacts (JUnit XML, JSON reports, etc.)
    * @param {Object} results - Full test results
@@ -182,22 +182,22 @@ class CIRunCommand extends RunCommand {
       // Always write JSON summary for CI consumption
       if (this.outputDir) {
         await this.writeJSONArtifact(summary, 'test-summary.json');
-        
+
         // Write detailed results if requested
         if (options.detailed !== false) {
           await this.writeJSONArtifact(results, 'test-results.json');
         }
       }
-      
+
       // JUnit XML is handled by parent class via format option
       // JSON format is handled by parent class via format option
-      
+
     } catch (error) {
       // Don't fail tests if we can't write artifacts
       console.error(`Warning: Could not write CI artifacts: ${error.message}`);
     }
   }
-  
+
   /**
    * Write JSON artifact to output directory
    * @param {Object} data - Data to write
@@ -212,7 +212,7 @@ class CIRunCommand extends RunCommand {
       throw new Error(`Failed to write ${filename}: ${error.message}`);
     }
   }
-  
+
   /**
    * Emit structured CI events
    * @param {string} eventType - Type of event
@@ -224,7 +224,7 @@ class CIRunCommand extends RunCommand {
       ...data
     });
   }
-  
+
   /**
    * Override _displayResults to suppress console output in CI mode
    */
@@ -235,7 +235,7 @@ class CIRunCommand extends RunCommand {
     }
     // In CI mode, output is handled by generateCISummary
   }
-  
+
   /**
    * Override progress method to suppress output in CI mode
    */
@@ -245,7 +245,7 @@ class CIRunCommand extends RunCommand {
       super.progress(message);
     }
   }
-  
+
   /**
    * Override warn method for structured CI output
    */
@@ -261,7 +261,7 @@ class CIRunCommand extends RunCommand {
       super.warn(message);
     }
   }
-  
+
   /**
    * Override error method for structured CI output
    */
@@ -278,7 +278,7 @@ class CIRunCommand extends RunCommand {
       super.error(message, error);
     }
   }
-  
+
   /**
    * Override success method for structured CI output
    */
@@ -294,7 +294,7 @@ class CIRunCommand extends RunCommand {
       super.success(message);
     }
   }
-  
+
   /**
    * Get detailed test metrics for CI reporting
    * @param {Object} results - Test results
@@ -306,7 +306,7 @@ class CIRunCommand extends RunCommand {
       averageTestTime: 0,
       testFunctionMetrics: []
     };
-    
+
     // Calculate per-function metrics if available
     if (results.testFunctions) {
       results.testFunctions.forEach(func => {
@@ -318,7 +318,7 @@ class CIRunCommand extends RunCommand {
         });
       });
     }
-    
+
     return metrics;
   }
 }

@@ -5,11 +5,10 @@
 import { Client } from 'pg';
 import chalk from 'chalk';
 import { promises as fs } from 'fs';
-import { extname, dirname, join } from 'path';
+import { extname, dirname } from 'path';
 import TestCommand from '../../lib/TestCommand.js';
 import ResultParser from '../../lib/test/ResultParser.js';
-import { JUnitFormatter, JSONFormatter } from '../../lib/test/formatters/index.js';
-import TestCache from '../../lib/test/TestCache.js';
+import { JUnitFormatter, JSONFormatter } from '../../reporters/test-formatters/index.js';
 import Config from '../../lib/config.js';
 
 /**
@@ -20,14 +19,10 @@ class RunCommand extends TestCommand {
     super(databaseUrl, serviceRoleKey, testsDir, outputDir, logger, isProd);
     this.parser = new ResultParser();
     this.config = config;
-    
-    // Initialize test cache for performance optimization
-    this.testCache = new TestCache('.data-cache/test-results', logger);
-    
+
     // Performance tracking
     this.performanceMetrics = {
       totalExecutionTime: 0,
-      cacheHits: 0,
       cacheMisses: 0,
       testsExecuted: 0,
       testsFromCache: 0
@@ -40,27 +35,27 @@ class RunCommand extends TestCommand {
   async performExecute(options = {}) {
     const startTime = Date.now();
     this.emit('start', { isProd: this.isProd, options });
-    
+
     // Enable/disable cache based on options
     const cacheEnabled = options.cache !== false; // Cache enabled by default
-    
+
     try {
       // Load and apply test configuration
       const testConfig = await this._getTestConfig();
       options = this._applyTestConfig(options, testConfig);
-      
+
       this.progress('Connecting to database...');
       const client = await this._createDatabaseClient();
-      
+
       // Set query timeout based on config
       if (testConfig.test_timeout && testConfig.test_timeout > 0) {
         client.query_timeout = testConfig.test_timeout * 1000; // Convert to milliseconds
       }
-      
+
       try {
         this.progress('Discovering test functions...');
         const testFunctions = await this._discoverTestFunctions(client);
-        
+
         if (testFunctions.length === 0) {
           this.warn('No test functions found in test schema');
           const emptyResults = {
@@ -75,7 +70,7 @@ class RunCommand extends TestCommand {
         }
 
         this.success(`Found ${testFunctions.length} test function(s)`);
-        
+
         // Determine which tests to run
         const testsToRun = this._filterTestFunctions(testFunctions, options);
 
@@ -94,73 +89,33 @@ class RunCommand extends TestCommand {
         }
 
         this.progress(`Running ${testsToRun.length} test function(s)...`);
-        
+
         // Determine if parallel execution is enabled (default: true for better performance)
         const runParallel = options.parallel !== false;
         const maxConcurrency = options.maxConcurrency || 5; // Limit concurrent database connections
-        
+
         // Execute tests with caching
         let allResults = [];
-        
+
         if (runParallel) {
           // Parallel execution for better performance
           const testPromises = testsToRun.map(async (testFunc) => {
             const funcStartTime = Date.now();
-            
-            // Try cache first if enabled
-            let tapOutput = null;
-            let fromCache = false;
-            
-            if (cacheEnabled) {
-              const hash = await this.testCache.calculateHash(testFunc, this.databaseUrl, options);
-              const cachedResult = await this.testCache.getCachedResult(hash);
-              
-              if (cachedResult && cachedResult.tapOutput) {
-                tapOutput = cachedResult.tapOutput;
-                fromCache = true;
-                this.performanceMetrics.cacheHits++;
-                this.performanceMetrics.testsFromCache++;
-                this.progress(`${chalk.blue('✓')} ${testFunc} (cached, saved ~${cachedResult.originalDuration || 0}ms)`);
-              } else {
-                this.performanceMetrics.cacheMisses++;
-              }
-            }
-            
-            // Execute test if not cached
-            if (!tapOutput) {
-              this.progress(`Running ${testFunc}...`);
-              const testStartTime = Date.now();
-              tapOutput = await this._executeTestFunction(client, testFunc);
-              const testDuration = Date.now() - testStartTime;
-              
-              // Cache the result if caching is enabled
-              if (cacheEnabled) {
-                try {
-                  const hash = await this.testCache.calculateHash(testFunc, this.databaseUrl, options);
-                  await this.testCache.storeResult(hash, {
-                    tapOutput: tapOutput,
-                    originalDuration: testDuration
-                  }, {
-                    testFunction: testFunc,
-                    duration: testDuration,
-                    databaseUrl: this.databaseUrl,
-                    options: options
-                  });
-                } catch (cacheError) {
-                  this.warn(`Failed to cache result for ${testFunc}: ${cacheError.message}`);
-                }
-              }
-            }
-            
+
+            // Execute test
+            this.progress(`Running ${testFunc}...`);
+            const testStartTime = Date.now();
+            const tapOutput = await this._executeTestFunction(client, testFunc);
+            const testDuration = Date.now() - testStartTime;
+
             this.performanceMetrics.testsExecuted++;
-            return { 
-              function: testFunc, 
-              output: tapOutput, 
-              fromCache: fromCache,
+            return {
+              function: testFunc,
+              output: tapOutput,
               duration: Date.now() - funcStartTime
             };
           });
-          
+
           // Process tests in batches to limit concurrent connections
           for (let i = 0; i < testPromises.length; i += maxConcurrency) {
             const batch = testPromises.slice(i, i + maxConcurrency);
@@ -171,88 +126,48 @@ class RunCommand extends TestCommand {
           // Sequential execution (fallback mode or when explicitly requested)
           for (const testFunc of testsToRun) {
             const funcStartTime = Date.now();
-            
-            // Try cache first if enabled
-            let tapOutput = null;
-            let fromCache = false;
-            
-            if (cacheEnabled) {
-              const hash = await this.testCache.calculateHash(testFunc, this.databaseUrl, options);
-              const cachedResult = await this.testCache.getCachedResult(hash);
-              
-              if (cachedResult && cachedResult.tapOutput) {
-                tapOutput = cachedResult.tapOutput;
-                fromCache = true;
-                this.performanceMetrics.cacheHits++;
-                this.performanceMetrics.testsFromCache++;
-                this.progress(`${chalk.blue('✓')} ${testFunc} (cached, saved ~${cachedResult.originalDuration || 0}ms)`);
-              } else {
-                this.performanceMetrics.cacheMisses++;
-              }
-            }
-            
-            // Execute test if not cached
-            if (!tapOutput) {
-              this.progress(`Running ${testFunc}...`);
-              const testStartTime = Date.now();
-              tapOutput = await this._executeTestFunction(client, testFunc);
-              const testDuration = Date.now() - testStartTime;
-              
-              // Cache the result if caching is enabled
-              if (cacheEnabled) {
-                try {
-                  const hash = await this.testCache.calculateHash(testFunc, this.databaseUrl, options);
-                  await this.testCache.storeResult(hash, {
-                    tapOutput: tapOutput,
-                    originalDuration: testDuration
-                  }, {
-                    testFunction: testFunc,
-                    duration: testDuration,
-                    databaseUrl: this.databaseUrl,
-                    options: options
-                  });
-                } catch (cacheError) {
-                  this.warn(`Failed to cache result for ${testFunc}: ${cacheError.message}`);
-                }
-              }
-            }
-            
+
+            // Execute test
+            this.progress(`Running ${testFunc}...`);
+            const testStartTime = Date.now();
+            const tapOutput = await this._executeTestFunction(client, testFunc);
+            const testDuration = Date.now() - testStartTime;
+
             this.performanceMetrics.testsExecuted++;
-            allResults.push({ 
-              function: testFunc, 
-              output: tapOutput, 
-              fromCache: fromCache,
+            allResults.push({
+              function: testFunc,
+              output: tapOutput,
+              fromCache,
               duration: Date.now() - funcStartTime
             });
           }
         }
-        
+
         // Parse all results and add performance metadata
         const combinedResults = this._combineResults(allResults);
-        
+
         // Add cache performance metrics
         const totalTime = Date.now() - startTime;
         combinedResults.performance = {
           totalExecutionTime: totalTime,
-          cacheEnabled: cacheEnabled,
-          cacheHits: this.performanceMetrics.cacheHits,
+          cacheEnabled,
           cacheMisses: this.performanceMetrics.cacheMisses,
           testsExecuted: this.performanceMetrics.testsExecuted,
           testsFromCache: this.performanceMetrics.testsFromCache,
-          cacheHitRate: this.performanceMetrics.testsExecuted > 0 
+          cacheHitRate: this.performanceMetrics.testsExecuted > 0
             ? (this.performanceMetrics.testsFromCache / this.performanceMetrics.testsExecuted * 100).toFixed(1)
             : '0.0',
           averageTestTime: this.performanceMetrics.testsExecuted > 0
             ? Math.round(totalTime / this.performanceMetrics.testsExecuted)
             : 0
         };
-        
+
         // Handle output formatting based on options
         await this._handleOutputFormat(combinedResults, options);
-        
+
         this.emit('complete', { results: combinedResults });
         return combinedResults;
-        
+
       } finally {
         await client.end();
       }
@@ -271,11 +186,11 @@ class RunCommand extends TestCommand {
     if (!this.databaseUrl) {
       throw new Error(`Database connection string not configured for ${this.isProd ? 'production' : 'local'} environment`);
     }
-    
+
     const client = new Client({
       connectionString: this.databaseUrl
     });
-    
+
     await client.connect();
     return client;
   }
@@ -294,7 +209,7 @@ class RunCommand extends TestCommand {
       AND proname LIKE 'run_%_tests'
       ORDER BY proname
     `;
-    
+
     const result = await client.query(query);
     return result.rows.map(row => row.proname);
   }
@@ -305,23 +220,23 @@ class RunCommand extends TestCommand {
    */
   _filterTestFunctions(testFunctions, options) {
     let filtered = [...testFunctions];
-    
+
     // Apply suite filter
     if (options.suite) {
       filtered = this._filterBySuite(filtered, options.suite);
     }
-    
+
     // Apply pattern filter (legacy support for options.function)
     const pattern = options.pattern || options.function;
     if (pattern) {
       filtered = this._filterByPattern(filtered, pattern);
     }
-    
+
     // Apply tag filter
     if (options.tag) {
       filtered = this._filterByTag(filtered, options.tag);
     }
-    
+
     return filtered;
   }
 
@@ -355,11 +270,11 @@ class RunCommand extends TestCommand {
    */
   _globToRegex(pattern) {
     // Escape special regex characters except * and ?
-    let regex = pattern
+    const regex = pattern
       .replace(/[.+^${}()|[\]\\]/g, '\\$&')  // Escape regex special chars
       .replace(/\*/g, '.*')                   // Convert * to .*
       .replace(/\?/g, '.');                   // Convert ? to .
-    
+
     // Anchor the pattern to match the whole string
     return `^${regex}$`;
   }
@@ -381,20 +296,20 @@ class RunCommand extends TestCommand {
    */
   _getFilterDescription(options) {
     const filters = [];
-    
+
     if (options.suite) {
       filters.push(`suite="${options.suite}"`);
     }
-    
+
     const pattern = options.pattern || options.function;
     if (pattern) {
       filters.push(`pattern="${pattern}"`);
     }
-    
+
     if (options.tag) {
       filters.push(`tag="${options.tag}"`);
     }
-    
+
     return filters.length > 0 ? filters.join(', ') : 'none';
   }
 
@@ -404,7 +319,7 @@ class RunCommand extends TestCommand {
    */
   async _executeTestFunction(client, functionName) {
     const query = `SELECT * FROM test.${functionName}()`;
-    
+
     try {
       const result = await client.query(query);
       // Join all result rows into TAP output
@@ -429,21 +344,21 @@ class RunCommand extends TestCommand {
 
     for (const { function: funcName, output } of allResults) {
       const funcResults = this.parser.parse(output);
-      
+
       totalPassed += funcResults.passed;
       totalFailed += funcResults.failed;
       totalSkipped += funcResults.skipped;
-      
+
       // Prefix test descriptions with function name
       const prefixedTests = funcResults.tests.map(test => ({
         ...test,
         description: `${funcName}: ${test.description}`,
         function: funcName
       }));
-      
+
       allTests = allTests.concat(prefixedTests);
       allDiagnostics = allDiagnostics.concat(funcResults.diagnostics);
-      
+
       testFunctions.push({
         name: funcName,
         passed: funcResults.passed,
@@ -474,16 +389,16 @@ class RunCommand extends TestCommand {
     const outputFile = options.output;
 
     switch (format.toLowerCase()) {
-      case 'junit':
-        await this._outputJUnit(results, outputFile);
-        break;
-      case 'json':
-        await this._outputJSON(results, outputFile);
-        break;
-      case 'console':
-      default:
-        this._displayResults(results);
-        break;
+    case 'junit':
+      await this._outputJUnit(results, outputFile);
+      break;
+    case 'json':
+      await this._outputJSON(results, outputFile);
+      break;
+    case 'console':
+    default:
+      this._displayResults(results);
+      break;
     }
   }
 
@@ -494,7 +409,7 @@ class RunCommand extends TestCommand {
   async _outputJUnit(results, outputFile) {
     const formatter = new JUnitFormatter();
     const xmlOutput = formatter.format(results);
-    
+
     if (outputFile) {
       await this._writeOutputFile(xmlOutput, outputFile, formatter.getFileExtension());
       this.success(`JUnit XML results written to: ${outputFile}`);
@@ -510,7 +425,7 @@ class RunCommand extends TestCommand {
   async _outputJSON(results, outputFile) {
     const formatter = new JSONFormatter();
     const jsonOutput = formatter.format(results);
-    
+
     if (outputFile) {
       await this._writeOutputFile(jsonOutput, outputFile, formatter.getFileExtension());
       this.success(`JSON results written to: ${outputFile}`);
@@ -525,16 +440,16 @@ class RunCommand extends TestCommand {
    */
   async _writeOutputFile(content, filePath, defaultExtension) {
     let fullPath = filePath;
-    
+
     // Add default extension if not present
     if (!extname(filePath)) {
       fullPath = filePath + defaultExtension;
     }
-    
+
     // Ensure directory exists
     const dir = dirname(fullPath);
     await fs.mkdir(dir, { recursive: true });
-    
+
     // Write file
     await fs.writeFile(fullPath, content, 'utf8');
   }
@@ -545,7 +460,7 @@ class RunCommand extends TestCommand {
    */
   _displayResults(results) {
     const { total, passed, failed, skipped, tests, diagnostics, testFunctions } = results;
-    
+
     console.log(''); // Empty line for spacing
 
     // Summary by function
@@ -595,15 +510,15 @@ class RunCommand extends TestCommand {
     if (results.performance) {
       console.log(''); // Empty line
       console.log(chalk.cyan.bold('Performance:'));
-      
+
       const perf = results.performance;
       console.log(chalk.cyan(`  Execution time: ${perf.totalExecutionTime}ms`));
       console.log(chalk.cyan(`  Average per test: ${perf.averageTestTime}ms`));
-      
+
       if (perf.cacheEnabled) {
         if (perf.testsFromCache > 0) {
           console.log(chalk.green(`  Cache performance: ${perf.cacheHitRate}% hit rate (${perf.testsFromCache}/${perf.testsExecuted} from cache)`));
-          
+
           // Calculate estimated time saved
           const avgExecutionTime = perf.averageTestTime;
           const estimatedTimeSaved = perf.testsFromCache * avgExecutionTime * 0.8; // Assume 80% time savings
@@ -611,10 +526,10 @@ class RunCommand extends TestCommand {
             console.log(chalk.green(`  Estimated time saved: ~${Math.round(estimatedTimeSaved)}ms`));
           }
         } else {
-          console.log(chalk.yellow(`  Cache performance: 0% hit rate (building cache...)`));
+          console.log(chalk.yellow('  Cache performance: 0% hit rate (building cache...)'));
         }
       } else {
-        console.log(chalk.gray(`  Cache: disabled`));
+        console.log(chalk.gray('  Cache: disabled'));
       }
     }
   }
@@ -636,7 +551,7 @@ class RunCommand extends TestCommand {
     if (this.config) {
       return this.config.getTestConfig();
     }
-    
+
     try {
       const config = await Config.load();
       return config.getTestConfig();
@@ -653,12 +568,12 @@ class RunCommand extends TestCommand {
    */
   _applyTestConfig(options, testConfig) {
     const mergedOptions = { ...options };
-    
+
     // Apply default output format if not specified
     if (!mergedOptions.format && testConfig.output_formats && testConfig.output_formats.length > 0) {
       mergedOptions.format = testConfig.output_formats[0];
     }
-    
+
     return mergedOptions;
   }
 }

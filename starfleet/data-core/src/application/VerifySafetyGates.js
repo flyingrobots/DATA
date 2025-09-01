@@ -26,7 +26,7 @@ export function makeVerifySafetyGates({ git, db, logger, bus }) {
      */
     async execute(policy) {
       bus.emit(Events.SAFETY_CHECKS_STARTED, { policy });
-      
+
       const failures = [];
       const details = {};
 
@@ -34,15 +34,15 @@ export function makeVerifySafetyGates({ git, db, logger, bus }) {
       if (policy.requireClean) {
         const { clean, modified, untracked } = await git.status();
         details.workingTree = { clean, modified, untracked };
-        
+
         if (!clean) {
           failures.push('working_tree_dirty');
           logger.warn({ modified, untracked }, 'Working tree is not clean');
         }
-        
-        bus.emit(Events.SAFETY_CHECK_ITEM, { 
-          check: 'working_tree', 
-          passed: clean 
+
+        bus.emit(Events.SAFETY_CHECK_ITEM, {
+          check: 'working_tree',
+          passed: clean
         });
       }
 
@@ -50,16 +50,16 @@ export function makeVerifySafetyGates({ git, db, logger, bus }) {
       if (policy.allowedBranches?.length > 0) {
         const { branch } = await git.status();
         details.branch = { current: branch, allowed: policy.allowedBranches };
-        
+
         const branchAllowed = policy.allowedBranches.includes(branch);
         if (!branchAllowed) {
           failures.push('branch_not_allowed');
           logger.warn({ branch, allowed: policy.allowedBranches }, 'Branch not in allowed list');
         }
-        
-        bus.emit(Events.SAFETY_CHECK_ITEM, { 
-          check: 'branch_policy', 
-          passed: branchAllowed 
+
+        bus.emit(Events.SAFETY_CHECK_ITEM, {
+          check: 'branch_policy',
+          passed: branchAllowed
         });
       }
 
@@ -67,16 +67,16 @@ export function makeVerifySafetyGates({ git, db, logger, bus }) {
       if (policy.requireUpToDate) {
         const { behind, ahead } = await git.status();
         details.remote = { behind, ahead };
-        
+
         const upToDate = behind === 0;
         if (!upToDate) {
           failures.push('branch_behind_remote');
           logger.warn({ behind, ahead }, 'Branch is behind remote');
         }
-        
-        bus.emit(Events.SAFETY_CHECK_ITEM, { 
-          check: 'up_to_date', 
-          passed: upToDate 
+
+        bus.emit(Events.SAFETY_CHECK_ITEM, {
+          check: 'up_to_date',
+          passed: upToDate
         });
       }
 
@@ -84,39 +84,39 @@ export function makeVerifySafetyGates({ git, db, logger, bus }) {
       if (policy.requireTests) {
         const testGlobs = policy.testGlobs || ['test/pgtap/**/*.sql'];
         logger.info({ patterns: testGlobs }, 'Running tests');
-        
+
         const testResult = await db.runPgTap(testGlobs);
         details.tests = testResult;
-        
+
         const testsPass = testResult.failed === 0;
         if (!testsPass) {
           failures.push('tests_failed');
-          logger.error({ 
-            failed: testResult.failed, 
+          logger.error({
+            failed: testResult.failed,
             total: testResult.total,
-            failures: testResult.failures 
+            failures: testResult.failures
           }, 'Tests failed');
         }
-        
-        bus.emit(Events.SAFETY_CHECK_ITEM, { 
-          check: 'tests', 
+
+        bus.emit(Events.SAFETY_CHECK_ITEM, {
+          check: 'tests',
           passed: testsPass,
-          details: testResult 
+          details: testResult
         });
       }
 
       const passed = failures.length === 0;
-      
-      bus.emit(Events.SAFETY_CHECKS_RESULT, { 
-        passed, 
+
+      bus.emit(Events.SAFETY_CHECKS_RESULT, {
+        passed,
         failures,
-        details 
+        details
       });
 
-      return { 
-        passed, 
+      return {
+        passed,
         failures,
-        details 
+        details
       };
     }
   };

@@ -31,39 +31,39 @@ import { attachCliReporter } from '../reporters/attachCliReporter.js';
  */
 export function buildServices(config = {}) {
   // Get database URL from config or environment
-  const databaseUrl = config.databaseUrl || 
-    process.env.DATABASE_URL || 
+  const databaseUrl = config.databaseUrl ||
+    process.env.DATABASE_URL ||
     process.env.DATA_DATABASE_URL;
 
   // Instantiate adapters with runtime validation
   const fs = ensurePort('FileSystemPort', FileSystemAdapter, [
     'readFile', 'writeFile', 'exists', 'mkdirp', 'rm', 'readdir', 'stat'
   ]);
-  
+
   const glob = ensurePort('GlobPort', GlobAdapter, ['find']);
-  
+
   const clock = ensurePort('ClockPort', ClockAdapter, ['now', 'nowMs']);
-  
+
   const env = ensurePort('EnvironmentPort', EnvironmentAdapter, ['get', 'has']);
-  
+
   const git = ensurePort('GitPort', new GitPortNodeAdapter(), [
     'status', 'tag', 'latestTag', 'revParse'
   ]);
-  
+
   const db = ensurePort('DbPort', new DbPortNodeAdapter(databaseUrl), [
     'apply', 'query', 'runPgTap', 'withTransaction'
   ]);
-  
+
   const proc = ensurePort('ProcessPort', new ProcessPortNodeAdapter(), [
     'spawn', 'exec', 'exit', 'cwd', 'chdir', 'which'
   ]);
-  
+
   const crypto = ensurePort('CryptoPort', new CryptoPortNodeAdapter(), [
     'hash', 'randomUUID', 'randomBytes', 'timingSafeEqual'
   ]);
 
   // Logger with context bindings
-  const logger = ensurePort('LoggerPort', new LoggerConsoleAdapter({ 
+  const logger = ensurePort('LoggerPort', new LoggerConsoleAdapter({
     service: 'data-cli',
     version: '1.0.0'
   }), ['info', 'warn', 'error', 'debug', 'child']);
@@ -72,16 +72,16 @@ export function buildServices(config = {}) {
   const bus = new EventBusNodeAdapter();
 
   // Wire up use-cases with dependencies
-  const generateMigrationPlan = makeGenerateMigrationPlan({ 
-    fs, glob, crypto, logger, clock, bus 
+  const generateMigrationPlan = makeGenerateMigrationPlan({
+    fs, glob, crypto, logger, clock, bus
   });
-  
-  const applyMigrationPlan = makeApplyMigrationPlan({ 
-    db, logger, clock, bus 
+
+  const applyMigrationPlan = makeApplyMigrationPlan({
+    db, logger, clock, bus
   });
-  
-  const verifySafetyGates = makeVerifySafetyGates({ 
-    git, db, logger, bus 
+
+  const verifySafetyGates = makeVerifySafetyGates({
+    git, db, logger, bus
   });
 
   // Attach CLI reporter for formatted output
@@ -90,17 +90,17 @@ export function buildServices(config = {}) {
   // Return service container
   return {
     // Ports for direct access when needed
-    ports: { 
-      fs, glob, clock, env, git, db, proc, crypto, logger, bus 
+    ports: {
+      fs, glob, clock, env, git, db, proc, crypto, logger, bus
     },
-    
+
     // Use-cases for business logic
-    useCases: { 
-      generateMigrationPlan, 
-      applyMigrationPlan, 
-      verifySafetyGates 
+    useCases: {
+      generateMigrationPlan,
+      applyMigrationPlan,
+      verifySafetyGates
     },
-    
+
     // Cleanup function
     async shutdown() {
       await db.close?.();

@@ -123,7 +123,7 @@ function mergeConfigs(baseConfig, overrides) {
   // Parse both configs to ensure they're valid
   const base = dataConfigSchema.parse(baseConfig || {});
   const over = dataConfigSchema.parse(overrides || {});
-  
+
   // Deep merge the configurations
   const merged = {
     ...base,
@@ -137,7 +137,7 @@ function mergeConfigs(baseConfig, overrides) {
     safety: { ...base.safety, ...over.safety },
     logging: { ...base.logging, ...over.logging }
   };
-  
+
   // Validate the merged result
   return dataConfigSchema.parse(merged);
 }

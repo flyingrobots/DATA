@@ -1,6 +1,6 @@
 /**
  * Test Dev-Cycle Command
- * 
+ *
  * Orchestrates the full development cycle: Compile → Reset → Test
  * Provides rapid feedback for database test development workflow
  */
@@ -25,10 +25,10 @@ class DevCycleCommand extends TestCommand {
     pathResolver = null
   ) {
     super(databaseUrl, serviceRoleKey, testsDir, outputDir, logger, isProd, pathResolver);
-    
+
     // Dev-cycle never requires production confirmation - it's a development tool
     this.requiresProductionConfirmation = false;
-    
+
     // Track timing for performance reporting
     this.timings = {};
   }
@@ -38,44 +38,44 @@ class DevCycleCommand extends TestCommand {
    */
   async performExecute(options = {}) {
     const startTime = new Date();
-    
-    this.emit('dev-cycle:start', { 
-      isProd: this.isProd, 
+
+    this.emit('dev-cycle:start', {
+      isProd: this.isProd,
       testsDir: this.testsDir,
       outputDir: this.outputDir,
       options
     });
-    
+
     try {
       // Load test configuration to respect settings
       const testConfig = await this._getTestConfig();
-      
+
       this.progress('Starting development cycle: Compile → Reset → Test');
-      
+
       // Step 1: Compile tests
       await this._executeCompileStep();
-      
-      // Step 2: Reset database  
+
+      // Step 2: Reset database
       await this._executeResetStep();
-      
+
       // Step 3: Run tests
       const testResults = await this._executeTestStep(options);
-      
+
       // Calculate total execution time
       const totalTime = new Date() - startTime;
       this.timings.total = totalTime;
-      
+
       // Report completion
       this._reportCycleCompletion(testResults, totalTime);
-      
+
       this.emit('dev-cycle:complete', {
         results: testResults,
         timings: this.timings,
         success: testResults.failed === 0
       });
-      
+
       return testResults;
-      
+
     } catch (error) {
       const totalTime = new Date() - startTime;
       this.error(`Development cycle failed after ${this._formatDuration(totalTime)}`, error);
@@ -92,7 +92,7 @@ class DevCycleCommand extends TestCommand {
     const stepStart = new Date();
     this.progress('Step 1/3: Compiling tests...');
     this.emit('dev-cycle:step', { step: 1, name: 'compile', status: 'running' });
-    
+
     try {
       // Create compile command using migration_output resource exclusively
       const compileCommand = new CompileCommand(
@@ -101,38 +101,38 @@ class DevCycleCommand extends TestCommand {
         this.logger,
         this.isProd
       );
-      
+
       // Attach progress listeners
       compileCommand.on('compilation:progress', (progress) => {
         this.emit('dev-cycle:compile-progress', progress);
       });
-      
+
       // Execute compilation
       const result = await compileCommand.execute();
-      
+
       const stepTime = new Date() - stepStart;
       this.timings.compile = stepTime;
-      
+
       this.success(`✓ Compilation complete (${this._formatDuration(stepTime)})`);
-      this.emit('dev-cycle:step', { 
-        step: 1, 
-        name: 'compile', 
+      this.emit('dev-cycle:step', {
+        step: 1,
+        name: 'compile',
         status: 'complete',
         duration: stepTime,
-        result 
+        result
       });
-      
+
       return result;
-      
+
     } catch (error) {
       const stepTime = new Date() - stepStart;
       this.timings.compile = stepTime;
-      this.emit('dev-cycle:step', { 
-        step: 1, 
-        name: 'compile', 
+      this.emit('dev-cycle:step', {
+        step: 1,
+        name: 'compile',
         status: 'failed',
         duration: stepTime,
-        error 
+        error
       });
       throw new Error(`Compilation failed: ${error.message}`);
     }
@@ -146,7 +146,7 @@ class DevCycleCommand extends TestCommand {
     const stepStart = new Date();
     this.progress('Step 2/3: Resetting database...');
     this.emit('dev-cycle:step', { step: 2, name: 'reset', status: 'running' });
-    
+
     try {
       // Create reset command - ResetCommand only takes specific parameters
       const resetCommand = new ResetCommand(
@@ -156,40 +156,40 @@ class DevCycleCommand extends TestCommand {
         this.logger,
         this.isProd
       );
-      
+
       // The ResetCommand needs access to outputConfig for supabase directory
       // We'll create a simple OutputConfig for this purpose
       const OutputConfig = require('../../lib/OutputConfig');
       resetCommand.outputConfig = new OutputConfig();
-      
+
       // Attach progress listeners
       resetCommand.on('output', (output) => {
         this.emit('dev-cycle:reset-output', output);
       });
-      
+
       // Execute reset
       await resetCommand.execute();
-      
+
       const stepTime = new Date() - stepStart;
       this.timings.reset = stepTime;
-      
+
       this.success(`✓ Database reset complete (${this._formatDuration(stepTime)})`);
-      this.emit('dev-cycle:step', { 
-        step: 2, 
-        name: 'reset', 
+      this.emit('dev-cycle:step', {
+        step: 2,
+        name: 'reset',
         status: 'complete',
-        duration: stepTime 
+        duration: stepTime
       });
-      
+
     } catch (error) {
       const stepTime = new Date() - stepStart;
       this.timings.reset = stepTime;
-      this.emit('dev-cycle:step', { 
-        step: 2, 
-        name: 'reset', 
+      this.emit('dev-cycle:step', {
+        step: 2,
+        name: 'reset',
         status: 'failed',
         duration: stepTime,
-        error 
+        error
       });
       throw new Error(`Database reset failed: ${error.message}`);
     }
@@ -203,7 +203,7 @@ class DevCycleCommand extends TestCommand {
     const stepStart = new Date();
     this.progress('Step 3/3: Running tests...');
     this.emit('dev-cycle:step', { step: 3, name: 'test', status: 'running' });
-    
+
     try {
       // Create run command
       const runCommand = new RunCommand(
@@ -214,48 +214,48 @@ class DevCycleCommand extends TestCommand {
         this.logger,
         this.isProd
       );
-      
+
       // Attach progress listeners
       runCommand.on('start', (event) => {
         this.emit('dev-cycle:test-start', event);
       });
-      
+
       runCommand.on('complete', (event) => {
         this.emit('dev-cycle:test-complete', event);
       });
-      
+
       // Execute tests with passed options
       const testResults = await runCommand.execute(options);
-      
+
       const stepTime = new Date() - stepStart;
       this.timings.test = stepTime;
-      
+
       // Success message depends on test results
       if (testResults.failed === 0) {
         this.success(`✓ All tests passed (${this._formatDuration(stepTime)})`);
       } else {
         this.warn(`✗ ${testResults.failed}/${testResults.total} tests failed (${this._formatDuration(stepTime)})`);
       }
-      
-      this.emit('dev-cycle:step', { 
-        step: 3, 
-        name: 'test', 
+
+      this.emit('dev-cycle:step', {
+        step: 3,
+        name: 'test',
         status: 'complete',
         duration: stepTime,
-        results: testResults 
+        results: testResults
       });
-      
+
       return testResults;
-      
+
     } catch (error) {
       const stepTime = new Date() - stepStart;
       this.timings.test = stepTime;
-      this.emit('dev-cycle:step', { 
-        step: 3, 
-        name: 'test', 
+      this.emit('dev-cycle:step', {
+        step: 3,
+        name: 'test',
         status: 'failed',
         duration: stepTime,
-        error 
+        error
       });
       throw new Error(`Test execution failed: ${error.message}`);
     }
@@ -270,14 +270,14 @@ class DevCycleCommand extends TestCommand {
     console.log('═'.repeat(60));
     console.log('🔄 DEV-CYCLE COMPLETE');
     console.log('═'.repeat(60));
-    
+
     // Step timing breakdown
     console.log('\nStep Timings:');
     console.log(`  Compile: ${this._formatDuration(this.timings.compile || 0)}`);
     console.log(`  Reset:   ${this._formatDuration(this.timings.reset || 0)}`);
     console.log(`  Test:    ${this._formatDuration(this.timings.test || 0)}`);
     console.log(`  Total:   ${this._formatDuration(totalTime)}`);
-    
+
     // Test results summary
     console.log('\nTest Results:');
     if (testResults.total === 0) {
@@ -290,7 +290,7 @@ class DevCycleCommand extends TestCommand {
         console.log(`  Skipped: ${testResults.skipped}`);
       }
     }
-    
+
     // Overall status
     if (testResults.failed === 0 && testResults.total > 0) {
       console.log('\n✅ Cycle successful - All tests passed!');
@@ -299,7 +299,7 @@ class DevCycleCommand extends TestCommand {
     } else {
       console.log('\n⚠️  Cycle completed - No tests found');
     }
-    
+
     console.log('═'.repeat(60));
   }
 

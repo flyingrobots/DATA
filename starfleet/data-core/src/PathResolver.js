@@ -27,7 +27,7 @@ class PathResolver {
    */
   async resolveDirectoryForRead(dirPath) {
     const absolutePath = path.resolve(dirPath);
-    
+
     try {
       await this.fsAccess(absolutePath, this.fs.constants.R_OK);
       const stats = await this.fsStat(absolutePath);
@@ -54,11 +54,11 @@ class PathResolver {
    */
   async resolveDirectoryForWrite(dirPath) {
     const absolutePath = path.resolve(dirPath);
-    
+
     try {
       // Try to create the directory (will succeed if it already exists)
       await this.fsMkdir(absolutePath, { recursive: true });
-      
+
       // Verify write access
       await this.fsAccess(absolutePath, this.fs.constants.W_OK);
       return absolutePath;
@@ -78,7 +78,7 @@ class PathResolver {
    */
   async resolveFileForRead(filePath) {
     const absolutePath = path.resolve(filePath);
-    
+
     try {
       await this.fsAccess(absolutePath, this.fs.constants.R_OK);
       const stats = await this.fsStat(absolutePath);
@@ -106,10 +106,10 @@ class PathResolver {
   async resolveFileForWrite(filePath) {
     const absolutePath = path.resolve(filePath);
     const parentDir = path.dirname(absolutePath);
-    
+
     // Ensure parent directory exists and is writable
     await this.resolveDirectoryForWrite(parentDir);
-    
+
     // Check if file exists and is writable, or if parent dir is writable for new file
     try {
       await this.fsAccess(absolutePath, this.fs.constants.W_OK);
@@ -123,7 +123,7 @@ class PathResolver {
         throw error;
       }
     }
-    
+
     return absolutePath;
   }
 

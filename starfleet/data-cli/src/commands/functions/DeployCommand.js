@@ -1,6 +1,6 @@
 /**
  * Edge Functions Deployment Command
- * 
+ *
  * Integrates Supabase Edge Functions deployment with data's event-driven architecture
  * Provides deployment validation, environment checking, and rollback capabilities
  */
@@ -31,7 +31,7 @@ class DeployCommand extends Command {
 
       // Get functions to deploy
       const functionsToDeploy = await this.resolveFunctionsList(functionNames);
-      
+
       if (functionsToDeploy.length === 0) {
         this.warn('No functions found to deploy');
         return;
@@ -52,10 +52,10 @@ class DeployCommand extends Command {
         try {
           const result = await this.deployFunction(functionName, options);
           results.push(result);
-          this.emit('function-deployed', { 
-            function: functionName, 
+          this.emit('function-deployed', {
+            function: functionName,
             success: true,
-            result 
+            result
           });
         } catch (error) {
           this.error(`Failed to deploy function: ${functionName}`, error);
@@ -64,8 +64,8 @@ class DeployCommand extends Command {
             success: false,
             error: error.message
           });
-          this.emit('function-deployed', { 
-            function: functionName, 
+          this.emit('function-deployed', {
+            function: functionName,
             success: false,
             error: error.message
           });
@@ -138,7 +138,7 @@ class DeployCommand extends Command {
 
     const requiredSecrets = [
       'STRIPE_PUBLISHABLE_KEY',
-      'STRIPE_SECRET_KEY', 
+      'STRIPE_SECRET_KEY',
       'STRIPE_WEBHOOK_SECRET',
       'SUPABASE_SERVICE_ROLE_KEY'
     ];
@@ -148,9 +148,9 @@ class DeployCommand extends Command {
     for (const secret of requiredSecrets) {
       try {
         // Check if secret exists in Supabase
-        const result = execSync(`supabase secrets list --json`, { stdio: 'pipe' });
+        const result = execSync('supabase secrets list --json', { stdio: 'pipe' });
         const secrets = JSON.parse(result.toString());
-        
+
         if (!secrets.find(s => s.name === secret)) {
           missingSecrets.push(secret);
         }
@@ -179,11 +179,11 @@ class DeployCommand extends Command {
           missing.push(name);
         }
       }
-      
+
       if (missing.length > 0) {
         throw new Error(`Functions not found: ${missing.join(', ')}`);
       }
-      
+
       return functionNames;
     }
 
@@ -202,7 +202,7 @@ class DeployCommand extends Command {
     this.progress(`🔍 Validating function: ${functionName}`);
 
     const functionPath = path.join(this.functionsPath, functionName);
-    
+
     // Check for required files
     const indexPath = path.join(functionPath, 'index.ts');
     if (!fs.existsSync(indexPath)) {
@@ -212,7 +212,7 @@ class DeployCommand extends Command {
     // Basic TypeScript syntax check
     try {
       const content = fs.readFileSync(indexPath, 'utf8');
-      
+
       // Check for basic Edge Function structure
       if (!content.includes('serve(') && !content.includes('Deno.serve(')) {
         this.warn(`Function ${functionName} may not have proper serve() handler`);
@@ -227,9 +227,9 @@ class DeployCommand extends Command {
       this.warn(`Could not validate ${functionName} syntax: ${error.message}`);
     }
 
-    this.emit('function-validated', { 
+    this.emit('function-validated', {
       function: functionName,
-      path: functionPath 
+      path: functionPath
     });
   }
 
@@ -240,7 +240,7 @@ class DeployCommand extends Command {
     this.progress(`🚀 Deploying function: ${functionName}`);
 
     const deployArgs = ['functions', 'deploy', functionName];
-    
+
     if (options.noVerifyJwt) {
       deployArgs.push('--no-verify-jwt');
     }
@@ -259,9 +259,9 @@ class DeployCommand extends Command {
 
     try {
       const startTime = Date.now();
-      
+
       this.progress(`Executing: supabase ${deployArgs.join(' ')}`);
-      
+
       const result = execSync(`supabase ${deployArgs.join(' ')}`, {
         stdio: 'pipe',
         encoding: 'utf8',
@@ -281,7 +281,7 @@ class DeployCommand extends Command {
 
     } catch (error) {
       this.error(`Failed to deploy ${functionName}`, error);
-      
+
       return {
         function: functionName,
         success: false,
@@ -299,15 +299,15 @@ class DeployCommand extends Command {
     this.progress('📊 Getting function deployment status');
 
     try {
-      const result = execSync('supabase functions list --json', { 
+      const result = execSync('supabase functions list --json', {
         stdio: 'pipe',
-        encoding: 'utf8' 
+        encoding: 'utf8'
       });
-      
+
       const functions = JSON.parse(result);
-      
+
       this.emit('deployment-status', { functions });
-      
+
       return functions;
 
     } catch (error) {

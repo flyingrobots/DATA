@@ -9,7 +9,7 @@ const {
 
 /**
  * BuildCommand - Base class for compilation/build operations
- * 
+ *
  * Commands that transform or compile files without database interaction.
  * Provides path resolution and file handling utilities.
  */
@@ -31,18 +31,18 @@ class BuildCommand extends Command {
   ) {
     // Call parent with minimal config
     super(null, logger, isProd, null);
-    
+
     // Store paths
     this.inputDir = inputDir;
     this.outputDir = outputDir;
-    
+
     // Path resolver for ensuring directories exist
     this.pathResolver = pathResolver || new PathResolver();
-    
+
     // Build operations typically don't need production confirmation
     this.requiresProductionConfirmation = false;
   }
-  
+
   /**
    * Ensure input directory exists and is readable
    * @returns {Promise<string>} Resolved input directory path
@@ -50,7 +50,7 @@ class BuildCommand extends Command {
   getInputDir() {
     return this.pathResolver.resolveDirectoryForRead(this.inputDir);
   }
-  
+
   /**
    * Ensure output directory exists and is writable
    * @returns {Promise<string>} Resolved output directory path
@@ -58,7 +58,7 @@ class BuildCommand extends Command {
   getOutputDir() {
     return this.pathResolver.resolveDirectoryForWrite(this.outputDir);
   }
-  
+
   /**
    * Get a specific input file path
    * @param {string} filename - The filename relative to input dir
@@ -69,7 +69,7 @@ class BuildCommand extends Command {
     const dir = await this.getInputDir();
     return this.pathResolver.resolveFileForRead(path.join(dir, filename));
   }
-  
+
   /**
    * Get a specific output file path
    * @param {string} filename - The filename relative to output dir
@@ -80,7 +80,7 @@ class BuildCommand extends Command {
     const dir = await this.getOutputDir();
     return this.pathResolver.resolveFileForWrite(path.join(dir, filename));
   }
-  
+
   /**
    * List files in input directory
    * @param {string} pattern - Glob pattern (optional)
@@ -90,7 +90,7 @@ class BuildCommand extends Command {
     const glob = require('glob');
     const path = require('path');
     const dir = await this.getInputDir();
-    
+
     return new Promise((resolve, reject) => {
       glob(path.join(dir, pattern), (err, files) => {
         if (err) reject(err);
@@ -98,7 +98,7 @@ class BuildCommand extends Command {
       });
     });
   }
-  
+
   /**
    * Read a file from input directory
    * @param {string} filename - The filename to read
@@ -109,7 +109,7 @@ class BuildCommand extends Command {
     const filePath = await this.getInputFile(filename);
     return fs.readFile(filePath, 'utf8');
   }
-  
+
   /**
    * Write a file to output directory
    * @param {string} filename - The filename to write
@@ -121,7 +121,7 @@ class BuildCommand extends Command {
     const filePath = await this.getOutputFile(filename);
     await fs.writeFile(filePath, content, 'utf8');
   }
-  
+
   /**
    * Emit build progress events
    * @param {string} stage - Current build stage
@@ -131,7 +131,7 @@ class BuildCommand extends Command {
     const event = new BuildProgressEvent(stage, this.inputDir, this.outputDir, details);
     this.emit('build:progress', event.toEventData());
   }
-  
+
   /**
    * Emit build start event
    * @param {string} type - Type of build operation
@@ -141,7 +141,7 @@ class BuildCommand extends Command {
     const event = new BuildStartEvent(type, this.inputDir, this.outputDir, details);
     this.emit('build:start', event.toEventData());
   }
-  
+
   /**
    * Emit build complete event
    * @param {Object} result - Build result details
@@ -151,7 +151,7 @@ class BuildCommand extends Command {
     const event = new BuildCompleteEvent(result, details);
     this.emit('build:complete', event.toEventData());
   }
-  
+
   /**
    * Emit build failure event
    * @param {Error} error - The error that caused the build to fail

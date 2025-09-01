@@ -1,6 +1,6 @@
 /**
  * CI Validate Command - CI-optimized test validation
- * 
+ *
  * Wraps ValidateCommand with machine-friendly output and proper exit codes
  * for CI/CD environments.
  */
@@ -21,7 +21,7 @@ class CIValidateCommand extends ValidateCommand {
     pathResolver = null
   ) {
     super(databaseUrl, serviceRoleKey, testsDir, outputDir, logger, isProd, pathResolver);
-    
+
     // Force CI mode behavior
     this.ciMode = true;
     this.suppressProgress = true;
@@ -32,26 +32,26 @@ class CIValidateCommand extends ValidateCommand {
    */
   async performExecute(options = {}) {
     const startTime = Date.now();
-    
+
     // Force silent mode unless explicitly disabled
     const isCI = process.env.CI !== 'false';
-    
+
     try {
       // Emit structured start event
-      this.emitCIEvent('validation_started', { 
+      this.emitCIEvent('validation_started', {
         testsDir: this.testsDir,
         timestamp: new Date().toISOString()
       });
-      
+
       // Execute validation (parent class handles the logic)
       const results = await super.performExecute(options);
-      
+
       // Calculate execution time
       const duration = Date.now() - startTime;
-      
+
       // Generate CI-friendly report
       const ciReport = this.generateCIReport(results, duration);
-      
+
       // Output report (structured for CI consumption)
       if (isCI) {
         // Machine-readable JSON output for CI
@@ -60,27 +60,27 @@ class CIValidateCommand extends ValidateCommand {
         // Human-readable for local development
         this.displayCIReport(ciReport);
       }
-      
+
       // Write results to file if outputDir provided
       if (this.outputDir) {
         await this.writeCIResults(ciReport, 'validation-results.json');
       }
-      
+
       // Emit structured completion event
       this.emitCIEvent('validation_completed', {
         success: !results.hasErrors,
         duration,
         summary: ciReport.summary
       });
-      
+
       // Set proper exit code
       process.exitCode = results.hasErrors ? 1 : 0;
-      
+
       return ciReport;
-      
+
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       // Structured error output
       const errorReport = {
         status: 'error',
@@ -91,20 +91,20 @@ class CIValidateCommand extends ValidateCommand {
         duration,
         timestamp: new Date().toISOString()
       };
-      
+
       if (isCI) {
         console.error(JSON.stringify(errorReport, null, 2));
       } else {
         console.error(`VALIDATION_ERROR: ${error.message}`);
       }
-      
+
       this.emitCIEvent('validation_failed', { error: error.message, duration });
-      
+
       process.exitCode = 1;
       throw error;
     }
   }
-  
+
   /**
    * Generate CI-friendly report
    * @param {Object} results - Validation results from parent class
@@ -113,7 +113,7 @@ class CIValidateCommand extends ValidateCommand {
    */
   generateCIReport(results, duration) {
     const { filesProcessed, syntaxErrors, pgTapIssues, structureWarnings, hasErrors } = results;
-    
+
     return {
       status: hasErrors ? 'failed' : 'passed',
       summary: {
@@ -153,44 +153,44 @@ class CIValidateCommand extends ValidateCommand {
       }
     };
   }
-  
+
   /**
    * Display CI report in human-readable format (for local development)
    * @param {Object} report - CI report
    */
   displayCIReport(report) {
     const { status, summary, details } = report;
-    
+
     console.log(`\nVALIDATION_STATUS: ${status.toUpperCase()}`);
     console.log(`FILES_PROCESSED: ${summary.filesProcessed}`);
     console.log(`TOTAL_ISSUES: ${summary.totalIssues}`);
     console.log(`ERRORS: ${summary.errors}`);
     console.log(`WARNINGS: ${summary.warnings}`);
-    
+
     if (details.syntaxErrors.length > 0) {
       console.log('\nSYNTAX_ERRORS:');
       details.syntaxErrors.forEach(error => {
         console.log(`  ${error.file}:${error.line} - ${error.message}`);
       });
     }
-    
+
     if (details.pgTapIssues.length > 0) {
       console.log('\nPGTAP_ISSUES:');
       details.pgTapIssues.forEach(issue => {
         console.log(`  ${issue.file}:${issue.line} - ${issue.message}`);
       });
     }
-    
+
     if (details.structureWarnings.length > 0) {
       console.log('\nSTRUCTURE_WARNINGS:');
       details.structureWarnings.forEach(warning => {
         console.log(`  ${warning.file}:${warning.line} - ${warning.message}`);
       });
     }
-    
+
     console.log(`\nEXECUTION_TIME: ${report.execution.duration}ms`);
   }
-  
+
   /**
    * Write CI results to file
    * @param {Object} report - CI report
@@ -206,7 +206,7 @@ class CIValidateCommand extends ValidateCommand {
       console.error(`Warning: Could not write validation results to file: ${error.message}`);
     }
   }
-  
+
   /**
    * Emit structured CI events
    * @param {string} eventType - Type of event
@@ -218,7 +218,7 @@ class CIValidateCommand extends ValidateCommand {
       ...data
     });
   }
-  
+
   /**
    * Override progress method to suppress output in CI mode
    */
@@ -228,7 +228,7 @@ class CIValidateCommand extends ValidateCommand {
       super.progress(message);
     }
   }
-  
+
   /**
    * Override warn method for structured CI output
    */
@@ -244,7 +244,7 @@ class CIValidateCommand extends ValidateCommand {
       super.warn(message);
     }
   }
-  
+
   /**
    * Override error method for structured CI output
    */
@@ -261,7 +261,7 @@ class CIValidateCommand extends ValidateCommand {
       super.error(message, error);
     }
   }
-  
+
   /**
    * Override success method for structured CI output
    */

@@ -3,7 +3,7 @@ import path from 'path';
 
 /**
  * dataOutputPaths - Manages all output/write destinations for data
- * 
+ *
  * This class handles all directories where data writes files.
  * It uses PathResolver to ensure directories exist and are writable.
  * All paths are resolved to absolute paths and cached.
@@ -25,7 +25,7 @@ class DataOutputPaths {
     pathResolver = null
   ) {
     this.pathResolver = pathResolver || new PathResolver();
-    
+
     // Store configuration
     this._config = {
       migrationsDir: migrationsDir || process.env.data_MIGRATIONS_DIR || './migrations',
@@ -33,7 +33,7 @@ class DataOutputPaths {
       reportsDir: reportsDir || process.env.data_REPORTS_DIR || './reports',
       tempDir: tempDir || process.env.data_TEMP_DIR || './tmp'
     };
-    
+
     // Cache for resolved paths
     this._resolvedPaths = {};
     this._resolving = {}; // Prevent duplicate resolution attempts

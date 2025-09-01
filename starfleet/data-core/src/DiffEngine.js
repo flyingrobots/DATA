@@ -3,7 +3,7 @@ const DatabaseUtils = require('./db-utils');
 
 /**
  * DiffEngine - Event-driven database schema difference generator
- * 
+ *
  * Emits events:
  * - 'start': When diff generation begins
  * - 'progress': During processing with step information
@@ -13,7 +13,7 @@ const DatabaseUtils = require('./db-utils');
 class DiffEngine extends EventEmitter {
   constructor(config = {}) {
     super();
-    
+
     // Configuration with defaults
     this.config = {
       // Diff generation options
@@ -37,7 +37,7 @@ class DiffEngine extends EventEmitter {
 
   /**
    * Generate schema differences between current and desired database states
-   * 
+   *
    * @param {Object} currentDb - Current database connection/state
    * @param {Object} desiredDb - Desired database connection/state
    * @param {Object} options - Override options for this diff operation
@@ -82,7 +82,7 @@ class DiffEngine extends EventEmitter {
 
       // TODO: Actual diff logic will be implemented in P1.T005
       // For now, return a placeholder result
-      
+
       this.emit('progress', {
         step: 'analysis_complete',
         message: 'Schema analysis completed',
@@ -117,7 +117,7 @@ class DiffEngine extends EventEmitter {
 
     } catch (error) {
       this.endTime = new Date();
-      
+
       // Emit error event
       this.emit('error', {
         error,
@@ -158,7 +158,7 @@ class DiffEngine extends EventEmitter {
     try {
       // Generate unique database name
       const dbName = this.dbUtils.generateTempDatabaseName(suffix);
-      
+
       this.emit('progress', {
         step: 'temp_db_creating',
         message: `Creating temporary database: ${dbName}`,
@@ -173,18 +173,18 @@ class DiffEngine extends EventEmitter {
 
       // Create the database
       const adminClient = this.dbUtils.createAdminClient();
-      
+
       try {
         await adminClient.connect();
-        
+
         // Use identifier to prevent SQL injection
         await adminClient.query(`CREATE DATABASE "${dbName}"`);
-        
+
         // Track the temp database for cleanup
         this.tempDatabases.add(dbName);
-        
+
         const connectionString = this.dbUtils.getConnectionString(dbName);
-        
+
         this.emit('progress', {
           step: 'temp_db_created',
           message: `Temporary database created: ${dbName}`,
@@ -194,11 +194,11 @@ class DiffEngine extends EventEmitter {
         });
 
         return connectionString;
-        
+
       } finally {
         await adminClient.end();
       }
-      
+
     } catch (error) {
       this.emit('error', {
         error,
@@ -206,7 +206,7 @@ class DiffEngine extends EventEmitter {
         operation: 'createTempDatabase',
         timestamp: new Date()
       });
-      
+
       throw error;
     }
   }
@@ -234,17 +234,17 @@ class DiffEngine extends EventEmitter {
           database: dbName,
           timestamp: new Date()
         });
-        
+
         // Remove from tracking set regardless
         this.tempDatabases.delete(dbName);
         return true;
       }
 
       const adminClient = this.dbUtils.createAdminClient();
-      
+
       try {
         await adminClient.connect();
-        
+
         // Terminate all connections to the database first
         await adminClient.query(`
           SELECT pg_terminate_backend(pid) 
@@ -254,10 +254,10 @@ class DiffEngine extends EventEmitter {
 
         // Drop the database
         await adminClient.query(`DROP DATABASE IF EXISTS "${dbName}"`);
-        
+
         // Remove from tracking set
         this.tempDatabases.delete(dbName);
-        
+
         this.emit('progress', {
           step: 'temp_db_cleaned',
           message: `Temporary database cleaned up: ${dbName}`,
@@ -266,11 +266,11 @@ class DiffEngine extends EventEmitter {
         });
 
         return true;
-        
+
       } finally {
         await adminClient.end();
       }
-      
+
     } catch (error) {
       this.emit('error', {
         error,
@@ -279,7 +279,7 @@ class DiffEngine extends EventEmitter {
         database: dbName,
         timestamp: new Date()
       });
-      
+
       // Don't throw - cleanup should be non-fatal
       return false;
     }
@@ -312,13 +312,13 @@ class DiffEngine extends EventEmitter {
       // Parse database URL to get connection parameters
       const url = new globalThis.URL(dbUrl);
       const client = this.dbUtils.createDatabaseClient(url.pathname.slice(1));
-      
+
       try {
         await client.connect();
-        
+
         // Apply the SQL schema using our utility method
         const result = await this.dbUtils.executeSql(client, sqlContent);
-        
+
         this.emit('progress', {
           step: 'schema_applied',
           message: `Schema applied successfully to: ${dbName}`,
@@ -333,11 +333,11 @@ class DiffEngine extends EventEmitter {
           statementsExecuted: result.statementCount,
           results: result.results
         };
-        
+
       } finally {
         await client.end();
       }
-      
+
     } catch (error) {
       this.emit('error', {
         error,
@@ -346,7 +346,7 @@ class DiffEngine extends EventEmitter {
         database: dbName,
         timestamp: new Date()
       });
-      
+
       throw error;
     }
   }
@@ -372,12 +372,12 @@ class DiffEngine extends EventEmitter {
 
     // Convert to array to avoid mutation during iteration
     const databasesToCleanup = Array.from(this.tempDatabases);
-    
+
     // Process all cleanup operations in parallel
     const cleanupPromises = databasesToCleanup.map(async (dbName) => {
       summary.attempted++;
       summary.databases.push(dbName);
-      
+
       try {
         const success = await this.cleanupTempDatabase(dbName);
         if (success) {
@@ -389,7 +389,7 @@ class DiffEngine extends EventEmitter {
         summary.failed++;
       }
     });
-    
+
     await Promise.all(cleanupPromises);
 
     this.emit('progress', {
@@ -418,7 +418,7 @@ class DiffEngine extends EventEmitter {
     if (!currentDb || typeof currentDb !== 'object') {
       throw new Error('currentDb parameter must be a valid database connection object');
     }
-    
+
     if (!desiredDb || typeof desiredDb !== 'object') {
       throw new Error('desiredDb parameter must be a valid database connection object');
     }
@@ -430,11 +430,11 @@ class DiffEngine extends EventEmitter {
    */
   _sanitizeDbInfo(dbInfo) {
     if (!dbInfo) return null;
-    
+
     return {
       host: dbInfo.host || 'unknown',
       port: dbInfo.port || 'unknown',
-      database: dbInfo.database || 'unknown',
+      database: dbInfo.database || 'unknown'
       // Never include passwords or sensitive connection info
     };
   }

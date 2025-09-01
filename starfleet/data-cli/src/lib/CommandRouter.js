@@ -1,10 +1,10 @@
 /**
  * CommandRouter - Fluent routing system with Zod schema validation
- * 
+ *
  * Example usage:
  *   const router = new CommandRouter();
  *   const { z } = require('zod');
- *   
+ *
  *   router
  *     .command("migrate")
  *     .subcommand("generate")
@@ -67,7 +67,7 @@ class CommandRouter extends EventEmitter {
    */
   async execute(commandPath, rawArgs = {}) {
     const route = this.findRoute(commandPath);
-    
+
     if (!route) {
       throw new Error(`No handler registered for command: ${commandPath}`);
     }
@@ -95,16 +95,16 @@ class CommandRouter extends EventEmitter {
       if (route.schema) {
         // Convert CLI args to match schema shape
         const argsToValidate = this.prepareArgsForSchema(rawArgs, route);
-        
+
         // Validate with Zod
         const result = await route.schema.safeParseAsync(argsToValidate);
-        
+
         if (!result.success) {
           const errors = result.error.format();
           this.showValidationErrors(commandPath, errors, route);
           throw new Error('Validation failed');
         }
-        
+
         parsedArgs = result.data;
       }
 
@@ -119,7 +119,7 @@ class CommandRouter extends EventEmitter {
       }
 
       return await route.handler(parsedArgs, context);
-      
+
     } catch (error) {
       this.emit('error', { path: commandPath, error });
       throw error;
@@ -133,14 +133,14 @@ class CommandRouter extends EventEmitter {
    */
   prepareArgsForSchema(rawArgs, route) {
     const prepared = {};
-    
+
     for (const [key, value] of Object.entries(rawArgs)) {
       // Skip special args
       if (key === '_' || key === '$0') continue;
-      
+
       // Convert --kebab-case to camelCase
       const propName = key.replace(/^-+/, '').replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-      
+
       // Handle boolean flags (presence = true)
       if (value === true || value === undefined) {
         prepared[propName] = true;
@@ -152,7 +152,7 @@ class CommandRouter extends EventEmitter {
         prepared[propName] = value;
       }
     }
-    
+
     // Apply any custom mappings from route config
     if (route.argMappings) {
       for (const [from, to] of Object.entries(route.argMappings)) {
@@ -161,7 +161,7 @@ class CommandRouter extends EventEmitter {
         }
       }
     }
-    
+
     return prepared;
   }
 
@@ -172,44 +172,44 @@ class CommandRouter extends EventEmitter {
   showHelp(commandPath, route) {
     const parts = commandPath.split('/');
     const commandName = parts.join(' ');
-    
+
     console.log(`\nUsage: data ${commandName} [OPTIONS]\n`);
-    
+
     if (route.description) {
       console.log(`${route.description}\n`);
     }
 
     if (route.schema) {
       console.log('Options:');
-      
+
       // Extract schema shape for help generation
       const shape = route.schema._def.shape || route.schema.shape || {};
-      
+
       for (const [key, field] of Object.entries(shape)) {
         let line = '  ';
-        
+
         // Convert camelCase to kebab-case for CLI
         const cliName = key.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
         line += `--${cliName}`;
-        
+
         // Get type from Zod schema
         const typeName = this.getZodTypeName(field);
         if (typeName !== 'boolean') {
           line += ` <${typeName}>`;
         }
-        
+
         // Add description if available
         const description = field.description || field._def?.description;
         if (description) {
           line = line.padEnd(30) + description;
         }
-        
+
         // Add constraints
         const constraints = this.getZodConstraints(field);
         if (constraints.length > 0) {
           line += ` (${constraints.join(', ')})`;
         }
-        
+
         console.log(line);
       }
     }
@@ -230,7 +230,7 @@ class CommandRouter extends EventEmitter {
    */
   getZodTypeName(schema) {
     const def = schema._def;
-    
+
     if (def.typeName === 'ZodString') return 'string';
     if (def.typeName === 'ZodNumber') return 'number';
     if (def.typeName === 'ZodBoolean') return 'boolean';
@@ -239,7 +239,7 @@ class CommandRouter extends EventEmitter {
     if (def.typeName === 'ZodOptional') return this.getZodTypeName(def.innerType);
     if (def.typeName === 'ZodDefault') return this.getZodTypeName(def.innerType);
     if (def.typeName === 'ZodNullable') return this.getZodTypeName(def.innerType);
-    
+
     return 'value';
   }
 
@@ -250,20 +250,20 @@ class CommandRouter extends EventEmitter {
   getZodConstraints(schema) {
     const constraints = [];
     const def = schema._def;
-    
+
     // Check if optional
     if (def.typeName === 'ZodOptional') {
       constraints.push('optional');
       return [...constraints, ...this.getZodConstraints(def.innerType)];
     }
-    
+
     // Check for default
     if (def.typeName === 'ZodDefault') {
       const defaultValue = def.defaultValue();
       constraints.push(`default: ${JSON.stringify(defaultValue)}`);
       return [...constraints, ...this.getZodConstraints(def.innerType)];
     }
-    
+
     // String constraints
     if (def.typeName === 'ZodString') {
       if (def.checks) {
@@ -274,7 +274,7 @@ class CommandRouter extends EventEmitter {
         }
       }
     }
-    
+
     // Number constraints
     if (def.typeName === 'ZodNumber') {
       if (def.checks) {
@@ -285,12 +285,12 @@ class CommandRouter extends EventEmitter {
         }
       }
     }
-    
+
     // Enum values
     if (def.typeName === 'ZodEnum') {
       constraints.push(`values: ${def.values.join(', ')}`);
     }
-    
+
     return constraints;
   }
 
@@ -300,17 +300,17 @@ class CommandRouter extends EventEmitter {
    */
   showValidationErrors(commandPath, errors, _route) {
     console.error(`\nValidation errors for command: ${commandPath}\n`);
-    
+
     // Remove the _errors property which is just metadata
     delete errors._errors;
-    
+
     for (const [field, fieldErrors] of Object.entries(errors)) {
       if (fieldErrors._errors && fieldErrors._errors.length > 0) {
         const cliName = field.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
         console.error(`  --${cliName}: ${fieldErrors._errors.join(', ')}`);
       }
     }
-    
+
     console.error('\nRun with --help for usage information\n');
   }
 
@@ -448,7 +448,7 @@ class CommandBuilder {
       // It's a class - wrap it
       this.config.handler = async (args, context) => {
         const instance = new handler(context.router.config, context.router.logger, args.prod);
-        
+
         // Forward events from subcommand to router
         if (instance.on) {
           ['start', 'progress', 'warning', 'error', 'success', 'complete', 'failed', 'cancelled', 'prompt']
@@ -456,13 +456,13 @@ class CommandBuilder {
               instance.on(event, (data) => context.router.emit(event, data));
             });
         }
-        
+
         return await instance.execute(args);
       };
     } else {
       this.config.handler = handler;
     }
-    
+
     this.router.registerRoute(this.path, this.config);
     return this.router;
   }
@@ -481,13 +481,13 @@ class CommandBuilder {
 CommandRouter.schemas = {
   // Common CLI argument types
   port: z.number().int().min(1).max(65535),
-  
+
   url: z.string().url(),
-  
+
   email: z.string().email(),
-  
+
   path: z.string(),
-  
+
   existingPath: z.string().refine(
     (val) => {
       const fs = require('fs');
@@ -498,9 +498,9 @@ CommandRouter.schemas = {
         return false;
       }
     },
-    { message: "Path does not exist" }
+    { message: 'Path does not exist' }
   ),
-  
+
   directory: z.string().refine(
     (val) => {
       const fs = require('fs');
@@ -511,9 +511,9 @@ CommandRouter.schemas = {
         return false;
       }
     },
-    { message: "Path must be a directory" }
+    { message: 'Path must be a directory' }
   ),
-  
+
   file: z.string().refine(
     (val) => {
       const fs = require('fs');
@@ -524,19 +524,19 @@ CommandRouter.schemas = {
         return false;
       }
     },
-    { message: "Path must be a file" }
+    { message: 'Path must be a file' }
   ),
-  
+
   // Common flag combinations
-  verbose: z.boolean().default(false).describe("Enable verbose output"),
-  
-  quiet: z.boolean().default(false).describe("Suppress output"),
-  
-  force: z.boolean().default(false).describe("Force operation without confirmation"),
-  
-  dryRun: z.boolean().default(false).describe("Preview changes without applying them"),
-  
-  prod: z.boolean().default(false).describe("Target production environment")
+  verbose: z.boolean().default(false).describe('Enable verbose output'),
+
+  quiet: z.boolean().default(false).describe('Suppress output'),
+
+  force: z.boolean().default(false).describe('Force operation without confirmation'),
+
+  dryRun: z.boolean().default(false).describe('Preview changes without applying them'),
+
+  prod: z.boolean().default(false).describe('Target production environment')
 };
 
 module.exports = CommandRouter;

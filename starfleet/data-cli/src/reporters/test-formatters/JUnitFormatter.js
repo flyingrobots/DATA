@@ -24,18 +24,18 @@ class JUnitFormatter {
     const xml = [];
     xml.push('<?xml version="1.0" encoding="UTF-8"?>');
     xml.push('<testsuites>');
-    
+
     // Create one testsuite containing all tests
     xml.push(`  <testsuite name="pgTAP Tests" tests="${total}" failures="${failed}" skipped="${skipped}" time="${duration.toFixed(3)}">`);
-    
+
     // Add individual test cases
     tests.forEach(test => {
       const testName = this._escapeXml(test.description);
       const testTime = this._calculateTestTime(test, duration, total);
-      
+
       if (test.status === 'fail') {
         xml.push(`    <testcase name="${testName}" time="${testTime.toFixed(3)}">`);
-        xml.push(`      <failure message="Test failed"/>`);
+        xml.push('      <failure message="Test failed"/>');
         xml.push('    </testcase>');
       } else if (test.status === 'skip') {
         xml.push(`    <testcase name="${testName}" time="${testTime.toFixed(3)}">`);
@@ -46,7 +46,7 @@ class JUnitFormatter {
         xml.push(`    <testcase name="${testName}" time="${testTime.toFixed(3)}"/>`);
       }
     });
-    
+
     // Add system-out with function-level summary
     if (testFunctions && testFunctions.length > 0) {
       xml.push('    <system-out><![CDATA[');
@@ -57,10 +57,10 @@ class JUnitFormatter {
       });
       xml.push(']]></system-out>');
     }
-    
+
     xml.push('  </testsuite>');
     xml.push('</testsuites>');
-    
+
     return xml.join('\n');
   }
 
@@ -104,4 +104,4 @@ class JUnitFormatter {
   }
 }
 
-module.exports = JUnitFormatter;
+export default JUnitFormatter;

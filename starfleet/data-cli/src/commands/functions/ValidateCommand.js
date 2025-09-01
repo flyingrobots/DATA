@@ -1,6 +1,6 @@
 /**
  * Edge Functions Validation Command
- * 
+ *
  * Validates Edge Functions syntax, structure, and dependencies
  * without deploying them
  */
@@ -32,7 +32,7 @@ class ValidateCommand extends Command {
 
       // Get functions to validate
       const functionsToValidate = await this.resolveFunctionsList(functionNames);
-      
+
       if (functionsToValidate.length === 0) {
         this.warn('No functions found to validate');
         return;
@@ -94,11 +94,11 @@ class ValidateCommand extends Command {
           missing.push(name);
         }
       }
-      
+
       if (missing.length > 0) {
         throw new Error(`Functions not found: ${missing.join(', ')}`);
       }
-      
+
       return functionNames;
     }
 
@@ -131,7 +131,7 @@ class ValidateCommand extends Command {
         const content = fs.readFileSync(indexPath, 'utf8');
         const contentIssues = this.validateFunctionContent(functionName, content);
         issues.push(...contentIssues);
-        
+
         if (contentIssues.length > 0) {
           isValid = false;
         }
@@ -148,7 +148,7 @@ class ValidateCommand extends Command {
         const denoConfig = JSON.parse(fs.readFileSync(denoJsonPath, 'utf8'));
         const denoIssues = this.validateDenoConfig(functionName, denoConfig);
         issues.push(...denoIssues);
-        
+
         if (denoIssues.length > 0) {
           isValid = false;
         }
@@ -225,7 +225,7 @@ class ValidateCommand extends Command {
     // Check for common Deno config issues
     if (denoConfig.imports) {
       const imports = denoConfig.imports;
-      
+
       // Validate import URLs
       for (const [key, url] of Object.entries(imports)) {
         if (!url.startsWith('https://')) {

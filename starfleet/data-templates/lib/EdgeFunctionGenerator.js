@@ -32,16 +32,16 @@ export class EdgeFunctionGenerator {
    * @param {string} [options.outputDir] - Output directory path
    * @returns {Promise<Object>} - Generation result with file paths
    */
-  async generate(options) {
+  generate(options) {
     const { name, type, config = {}, outputDir = '.' } = options;
-    
+
     if (!name || !type) {
       throw new Error('Function name and type are required');
     }
 
     const finalConfig = { ...this.defaultConfig, ...config };
     const templateVars = this._createTemplateVariables(name, finalConfig);
-    
+
     this.templateEngine
       .setVariables(templateVars)
       .setConditionals(this._createConditionals(finalConfig));
@@ -52,7 +52,7 @@ export class EdgeFunctionGenerator {
     for (const template of templates) {
       const content = this._getTemplateContent(template.name, type);
       const processedContent = this.templateEngine.process(content);
-      
+
       const outputPath = this._resolveOutputPath(outputDir, name, template.filename);
       generatedFiles.push({
         path: outputPath,
@@ -289,7 +289,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     {{/if}}
   }
 })`,
-        
+
         readme: `# {{functionName}}
 
 {{description}}

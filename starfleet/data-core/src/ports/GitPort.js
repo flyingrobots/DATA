@@ -8,7 +8,7 @@
  * @property {number} ahead - Commits ahead of remote
  * @property {string[]} modified - Modified files
  * @property {string[]} untracked - Untracked files
- * 
+ *
  * @typedef {Object} GitPort
  * @property {() => Promise<GitStatus>} status - Get repository status
  * @property {(name: string, message?: string) => Promise<void>} tag - Create annotated tag

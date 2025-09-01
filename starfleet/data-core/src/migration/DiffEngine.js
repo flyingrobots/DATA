@@ -2,7 +2,7 @@
  * Migration diff calculator for comparing database states and generating changes.
  * Analyzes differences between current database schema and desired SQL state,
  * producing minimal migration operations to transform the database.
- * 
+ *
  * @fileoverview Database schema diff calculation and migration planning
  */
 
@@ -207,22 +207,22 @@ export class DiffEngine {
 
     // Compare each object type
     const objectTypes = ['tables', 'views', 'functions', 'indexes'];
-    
+
     for (const objectType of objectTypes) {
       const currentObjects = currentState.objects[objectType] || new Map();
       const targetObjects = targetState.objects[objectType] || new Map();
-      
+
       // Find objects to drop (exist in current but not in target)
       for (const [name, definition] of currentObjects) {
         if (!targetObjects.has(name)) {
           operations.push(this._createDropOperation(objectType, name, definition));
         }
       }
-      
+
       // Find objects to create or alter
       for (const [name, targetDef] of targetObjects) {
         const currentDef = currentObjects.get(name);
-        
+
         if (!currentDef) {
           // Create new object
           operations.push(this._createCreateOperation(objectType, name, targetDef));
@@ -315,7 +315,7 @@ export class DiffEngine {
       OperationType.ALTER_TABLE, // Simplified - would be more specific in real implementation
       name,
       alterSql,
-      { 
+      {
         currentDefinition: currentDef,
         targetDefinition: targetDef,
         changeType: 'modify'
@@ -348,12 +348,12 @@ export class DiffEngine {
 
     for (const op of operations) {
       const key = `${op.type}:${op.objectName}`;
-      
+
       // Skip if we've already processed this object with the same operation
       if (processedObjects.has(key)) {
         continue;
       }
-      
+
       processedObjects.add(key);
       optimized.push(op);
     }

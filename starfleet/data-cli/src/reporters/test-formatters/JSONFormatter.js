@@ -26,13 +26,13 @@ class JSONFormatter {
         format: 'json',
         version: '1.0',
         timestamp: new Date().toISOString(),
-        duration: duration
+        duration
       },
       stats: {
-        total: total,
-        passed: passed,
-        failed: failed,
-        skipped: skipped,
+        total,
+        passed,
+        failed,
+        skipped,
         success: failed === 0
       },
       testFunctions: testFunctions.map(func => ({
@@ -115,4 +115,4 @@ class JSONFormatter {
   }
 }
 
-module.exports = JSONFormatter;
+export default JSONFormatter;

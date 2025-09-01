@@ -29,9 +29,9 @@ export function createEdgeFunctionGenerator() {
  * @param {Object} [options] - Additional options
  * @returns {Promise<Object>} - Generation result
  */
-export async function generateEdgeFunction(name, type, options = {}) {
+export function generateEdgeFunction(name, type, options = {}) {
   const generator = new EdgeFunctionGenerator();
-  return await generator.generate({ name, type, ...options });
+  return generator.generate({ name, type, ...options });
 }
 
 /**
@@ -72,35 +72,35 @@ export function getTemplateConfigSchema() {
 export function validateTemplateConfig(config) {
   const errors = [];
   const schema = getTemplateConfigSchema();
-  
+
   Object.entries(config).forEach(([key, value]) => {
     const fieldSchema = schema[key];
     if (!fieldSchema) {
       errors.push(`Unknown configuration option: ${key}`);
       return;
     }
-    
+
     if (fieldSchema.type === 'boolean' && typeof value !== 'boolean') {
       errors.push(`${key} must be a boolean, got ${typeof value}`);
     }
-    
+
     if (fieldSchema.type === 'string' && typeof value !== 'string') {
       errors.push(`${key} must be a string, got ${typeof value}`);
     }
-    
+
     if (fieldSchema.type === 'number' && typeof value !== 'number') {
       errors.push(`${key} must be a number, got ${typeof value}`);
     }
-    
+
     if (fieldSchema.type === 'array' && !Array.isArray(value)) {
       errors.push(`${key} must be an array, got ${typeof value}`);
     }
-    
+
     if (fieldSchema.options && !fieldSchema.options.includes(value)) {
       errors.push(`${key} must be one of: ${fieldSchema.options.join(', ')}`);
     }
   });
-  
+
   return errors;
 }
 

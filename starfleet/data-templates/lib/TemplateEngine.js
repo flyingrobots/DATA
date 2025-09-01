@@ -64,7 +64,7 @@ export class TemplateEngine {
    */
   _processConditionals(template) {
     const conditionalRegex = /\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g;
-    
+
     return template.replace(conditionalRegex, (match, condition, content) => {
       const shouldInclude = this.conditionals.get(condition) || false;
       return shouldInclude ? content : '';
@@ -78,22 +78,22 @@ export class TemplateEngine {
    */
   _processVariables(template) {
     const variableRegex = /\{\{(\w+)\}\}/g;
-    
+
     return template.replace(variableRegex, (match, varName) => {
       const value = this.variables.get(varName);
-      
+
       if (value === undefined || value === null) {
         return match; // Leave unresolved variables as-is
       }
-      
+
       if (typeof value === 'string') {
         return value;
       }
-      
+
       if (typeof value === 'object') {
         return JSON.stringify(value, null, 2);
       }
-      
+
       return String(value);
     });
   }
@@ -113,7 +113,7 @@ export class TemplateEngine {
    * @param {string} templatePath - Path to template file
    * @returns {Promise<string>} - Processed template content
    */
-  async loadAndProcess(templatePath) {
+  loadAndProcess(templatePath) {
     try {
       // This is a placeholder - actual implementation would depend on runtime
       // In Deno: const content = await Deno.readTextFile(templatePath);
@@ -131,21 +131,21 @@ export class TemplateEngine {
    */
   validate(template) {
     const errors = [];
-    
+
     // Check for unmatched conditional blocks
     const ifCount = (template.match(/\{\{#if\s+\w+\}\}/g) || []).length;
     const endifCount = (template.match(/\{\{\/if\}\}/g) || []).length;
-    
+
     if (ifCount !== endifCount) {
       errors.push(`Unmatched conditional blocks: ${ifCount} {{#if}} but ${endifCount} {{/if}}`);
     }
-    
+
     // Check for nested conditionals (not supported)
     const nestedRegex = /\{\{#if\s+\w+\}\}[\s\S]*?\{\{#if\s+\w+\}\}[\s\S]*?\{\{\/if\}\}[\s\S]*?\{\{\/if\}\}/;
     if (nestedRegex.test(template)) {
       errors.push('Nested conditional blocks are not supported');
     }
-    
+
     return errors;
   }
 }

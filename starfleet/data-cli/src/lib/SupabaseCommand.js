@@ -98,7 +98,7 @@ class SupabaseCommand extends Command {
    * @example
    * // Get admin client for DDL operations
    * const supabase = this.getSupabase(true);
-   * 
+   *
    * // Get read-only client for queries
    * const supabase = this.getSupabase(false);
    */
@@ -176,7 +176,7 @@ class SupabaseCommand extends Command {
    * @example
    * // Call a custom function with parameters
    * const result = await this.rpc('get_user_stats', { user_id: 123 });
-   * 
+   *
    * // Call admin function with service role
    * const result = await this.rpc('admin_cleanup', {}, true);
    */

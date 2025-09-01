@@ -1,21 +1,21 @@
 /**
  * MigrationCompiler - Compiles Golden SQL from numbered directories
- * 
+ *
  * Following Supa Fleet Directive 34.1 section 3 subsection 12:
  * SQL directories MUST follow strict numerical naming convention
  * to control compilation order (extensions first, etc.)
  */
 
-const { EventEmitter } = require('events');
-const fs = require('fs').promises;
-const path = require('path');
-const { glob } = require('glob');
+import { EventEmitter } from 'events';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { glob } from 'glob';
 
 /**
  * Expected directory structure with internal ordering:
  * /sql/
  *   extensions/   -- PostgreSQL extensions (processed first)
- *   schemas/      -- Schema definitions  
+ *   schemas/      -- Schema definitions
  *   types/        -- Custom types and enums
  *   tables/       -- Table definitions
  *   functions/    -- Stored procedures
@@ -42,7 +42,7 @@ const DIRECTORY_ORDER = [
 class MigrationCompiler extends EventEmitter {
   constructor(config = {}) {
     super();
-    
+
     this.config = {
       sqlDir: config.sqlDir || './sql',
       outputDir: config.outputDir || './migrations',
@@ -51,7 +51,7 @@ class MigrationCompiler extends EventEmitter {
       includeComments: config.includeComments !== false,
       timestamp: config.timestamp || new Date()
     };
-    
+
     // Statistics tracking
     this.stats = {
       filesProcessed: 0,
@@ -60,7 +60,7 @@ class MigrationCompiler extends EventEmitter {
       endTime: null,
       directories: []
     };
-    
+
     // State management
     this.isRunning = false;
     this.lastCompilation = null;
@@ -73,58 +73,58 @@ class MigrationCompiler extends EventEmitter {
     if (this.isRunning) {
       throw new Error('Compilation already in progress');
     }
-    
+
     this.isRunning = true;
     this.stats.startTime = new Date();
-    
+
     this.emit('start', {
       timestamp: this.stats.startTime,
       config: this.config
     });
-    
+
     try {
       // Validate SQL directory exists
       await this.validateSqlDirectory();
-      
+
       // Ensure output directory exists
       await fs.mkdir(this.config.outputDir, { recursive: true });
-      
+
       // Generate output filename
       const outputFile = this.generateOutputFilename();
-      
+
       // Write header
       await this.writeHeader(outputFile);
-      
+
       // Process directories in dependency-resolved order
       const directories = await this.getOrderedDirectories();
-      
+
       for (const dir of directories) {
         await this.processDirectory(dir, outputFile);
       }
-      
+
       // Write footer
       await this.writeFooter(outputFile);
-      
+
       // Complete
       this.stats.endTime = new Date();
       const duration = this.stats.endTime - this.stats.startTime;
-      
+
       const result = {
         success: true,
         outputFile,
         stats: this.stats,
         duration
       };
-      
+
       this.lastCompilation = result;
-      
+
       this.emit('complete', {
         result,
         timestamp: this.stats.endTime
       });
-      
+
       return result;
-      
+
     } catch (error) {
       this.emit('error', {
         error,
@@ -159,12 +159,12 @@ class MigrationCompiler extends EventEmitter {
    */
   async getOrderedDirectories() {
     const entries = await fs.readdir(this.config.sqlDir, { withFileTypes: true });
-    
+
     // Get all directories
     const availableDirs = entries
       .filter(entry => entry.isDirectory())
       .map(entry => entry.name);
-    
+
     // Order directories according to DIRECTORY_ORDER
     const orderedDirs = [];
     for (const dirName of DIRECTORY_ORDER) {
@@ -172,7 +172,7 @@ class MigrationCompiler extends EventEmitter {
         orderedDirs.push(dirName);
       }
     }
-    
+
     // Add any directories not in our standard list (for custom directories)
     const customDirs = availableDirs.filter(dir => !DIRECTORY_ORDER.includes(dir));
     if (customDirs.length > 0) {
@@ -182,7 +182,7 @@ class MigrationCompiler extends EventEmitter {
       });
       orderedDirs.push(...customDirs.sort());
     }
-    
+
     if (orderedDirs.length === 0) {
       this.emit('warning', {
         message: 'No directories found. Looking for SQL files in root.',
@@ -190,13 +190,13 @@ class MigrationCompiler extends EventEmitter {
       });
       return ['']; // Process root directory
     }
-    
+
     this.emit('progress', {
       message: `Processing ${orderedDirs.length} directories in order`,
       directories: orderedDirs,
       timestamp: new Date()
     });
-    
+
     return orderedDirs;
   }
 
@@ -205,17 +205,17 @@ class MigrationCompiler extends EventEmitter {
    */
   async processDirectory(dirName, outputFile) {
     const fullPath = path.join(this.config.sqlDir, dirName);
-    
+
     this.emit('directory:start', {
       directory: dirName || 'root',
       path: fullPath,
       timestamp: new Date()
     });
-    
+
     // Find all SQL files in directory
     const pattern = path.join(fullPath, '**/*.sql');
     const sqlFiles = await glob(pattern);
-    
+
     if (sqlFiles.length === 0) {
       this.emit('directory:skip', {
         directory: dirName,
@@ -224,10 +224,10 @@ class MigrationCompiler extends EventEmitter {
       });
       return;
     }
-    
+
     // Sort files for consistent ordering
     sqlFiles.sort();
-    
+
     // Write directory section header
     if (dirName) {
       const sectionHeader = `
@@ -239,14 +239,14 @@ class MigrationCompiler extends EventEmitter {
       await fs.appendFile(outputFile, sectionHeader);
       this.stats.linesWritten += sectionHeader.split('\n').length;
     }
-    
+
     // Process each SQL file
     for (const sqlFile of sqlFiles) {
       await this.processFile(sqlFile, outputFile);
     }
-    
+
     this.stats.directories.push(dirName);
-    
+
     this.emit('directory:complete', {
       directory: dirName,
       filesProcessed: sqlFiles.length,
@@ -259,16 +259,16 @@ class MigrationCompiler extends EventEmitter {
    */
   async processFile(filePath, outputFile) {
     const relativePath = path.relative(this.config.sqlDir, filePath);
-    
+
     this.emit('file:process', {
       file: relativePath,
       timestamp: new Date()
     });
-    
+
     try {
       const content = await fs.readFile(filePath, 'utf8');
       const lines = content.split('\n');
-      
+
       // Write file header comment
       if (this.config.includeComments) {
         const fileHeader = `-- ───────────────────────────────────────────────────────────────────────────
@@ -278,23 +278,23 @@ class MigrationCompiler extends EventEmitter {
         await fs.appendFile(outputFile, fileHeader);
         this.stats.linesWritten += fileHeader.split('\n').length;
       }
-      
+
       // Write file content
       await fs.appendFile(outputFile, content);
       if (!content.endsWith('\n')) {
         await fs.appendFile(outputFile, '\n');
       }
       await fs.appendFile(outputFile, '\n'); // Extra newline between files
-      
+
       this.stats.linesWritten += lines.length + 1;
       this.stats.filesProcessed++;
-      
+
       this.emit('file:complete', {
         file: relativePath,
         lineCount: lines.length,
         timestamp: new Date()
       });
-      
+
     } catch (error) {
       this.emit('file:error', {
         file: relativePath,
@@ -315,7 +315,7 @@ class MigrationCompiler extends EventEmitter {
       .replace(/\..+/, '')
       .replace(/-/g, '')
       .slice(0, 14);
-    
+
     return path.join(this.config.outputDir, `${timestamp}_compiled.sql`);
   }
 
@@ -338,10 +338,10 @@ class MigrationCompiler extends EventEmitter {
 -- ═══════════════════════════════════════════════════════════════════════════
 
 `;
-    
+
     await fs.writeFile(outputFile, header);
     this.stats.linesWritten += header.split('\n').length;
-    
+
     this.emit('header:written', {
       outputFile,
       timestamp: new Date()
@@ -365,10 +365,10 @@ class MigrationCompiler extends EventEmitter {
 -- "The compilation is complete, Captain." - Lt. Commander Data
 -- ═══════════════════════════════════════════════════════════════════════════
 `;
-    
+
     await fs.appendFile(outputFile, footer);
     this.stats.linesWritten += footer.split('\n').length;
-    
+
     this.emit('footer:written', {
       timestamp: new Date()
     });
@@ -389,4 +389,4 @@ class MigrationCompiler extends EventEmitter {
   }
 }
 
-module.exports = MigrationCompiler;
+export { MigrationCompiler };

@@ -1,6 +1,6 @@
 /**
  * CI Coverage Command - CI-optimized test coverage analysis
- * 
+ *
  * Wraps CoverageCommand with machine-friendly output, JSON reports,
  * and proper exit codes for CI/CD environments.
  */
@@ -13,7 +13,7 @@ const CoverageCommand = require('../CoverageCommand');
 class CICoverageCommand extends CoverageCommand {
   constructor(config = null, logger = null, isProd = false) {
     super(config, logger, isProd);
-    
+
     // Force CI mode behavior
     this.ciMode = true;
     this.suppressProgress = true;
@@ -25,7 +25,7 @@ class CICoverageCommand extends CoverageCommand {
   async performExecute(options = {}) {
     const startTime = Date.now();
     const isCI = process.env.CI !== 'false';
-    
+
     // Parse enforcement options with CI-friendly defaults
     const ciOptions = {
       enforce: options.enforce || false,
@@ -35,23 +35,23 @@ class CICoverageCommand extends CoverageCommand {
       format: options.format || 'json',
       output: options.output || (isCI ? 'coverage' : null)
     };
-    
+
     try {
       // Emit structured start event
-      this.emitCIEvent('coverage_analysis_started', { 
+      this.emitCIEvent('coverage_analysis_started', {
         options: ciOptions,
         timestamp: new Date().toISOString()
       });
-      
+
       // Execute coverage analysis using parent class logic
       const results = await super.performExecute(ciOptions);
-      
+
       // Calculate execution time
       const duration = Date.now() - startTime;
-      
+
       // Generate CI-friendly report
       const ciReport = this.generateCIReport(results, duration, ciOptions);
-      
+
       // Output report (structured for CI consumption)
       if (isCI) {
         // Machine-readable JSON output for CI
@@ -60,29 +60,29 @@ class CICoverageCommand extends CoverageCommand {
         // Human-readable for local development
         this.displayCIReport(ciReport);
       }
-      
+
       // Write CI artifacts
       await this.writeCIArtifacts(results, ciReport, ciOptions);
-      
+
       // Handle enforcement results
       const success = this.handleEnforcement(ciReport, ciOptions);
-      
+
       // Emit structured completion event
       this.emitCIEvent('coverage_analysis_completed', {
         success,
         duration,
         summary: ciReport.summary
       });
-      
+
       // Set proper exit code
       const exitCode = success ? 0 : 1;
       process.exitCode = exitCode;
-      
+
       return ciReport;
-      
+
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       // Structured error output
       const errorReport = {
         status: 'error',
@@ -93,20 +93,20 @@ class CICoverageCommand extends CoverageCommand {
         duration,
         timestamp: new Date().toISOString()
       };
-      
+
       if (isCI) {
         console.error(JSON.stringify(errorReport, null, 2));
       } else {
         console.error(`COVERAGE_ANALYSIS_ERROR: ${error.message}`);
       }
-      
+
       this.emitCIEvent('coverage_analysis_failed', { error: error.message, duration });
-      
+
       process.exitCode = 1;
       throw error;
     }
   }
-  
+
   /**
    * Generate CI-friendly coverage report
    * @param {Object} results - Coverage results from parent class
@@ -117,13 +117,13 @@ class CICoverageCommand extends CoverageCommand {
   generateCIReport(results, duration, options) {
     // Generate stats using parent class analyzer
     const stats = this.analyzer.generateCoverageStats(results.rpc, results.policies);
-    
+
     // Calculate enforcement status if enabled
     let enforcement = null;
     if (options.enforce) {
       enforcement = this.calculateEnforcement(stats, options);
     }
-    
+
     return {
       status: enforcement ? (enforcement.passed ? 'passed' : 'failed') : 'analyzed',
       summary: {
@@ -136,7 +136,7 @@ class CICoverageCommand extends CoverageCommand {
         uncoveredPolicies: this.extractUncoveredPolicies(results.policies),
         coverageBreakdown: this.generateBreakdown(results)
       },
-      enforcement: enforcement,
+      enforcement,
       execution: {
         duration,
         timestamp: new Date().toISOString(),
@@ -148,7 +148,7 @@ class CICoverageCommand extends CoverageCommand {
       }
     };
   }
-  
+
   /**
    * Calculate enforcement results
    * @param {Object} stats - Coverage statistics
@@ -158,7 +158,7 @@ class CICoverageCommand extends CoverageCommand {
   calculateEnforcement(stats, options) {
     const failures = [];
     let passed = true;
-    
+
     // Check overall coverage
     if (stats.overall && stats.overall.percentage < options.minCoverage) {
       failures.push({
@@ -169,7 +169,7 @@ class CICoverageCommand extends CoverageCommand {
       });
       passed = false;
     }
-    
+
     // Check RPC coverage
     if (stats.rpc && stats.rpc.percentage < options.minRpcCoverage) {
       failures.push({
@@ -180,7 +180,7 @@ class CICoverageCommand extends CoverageCommand {
       });
       passed = false;
     }
-    
+
     // Check RLS policy coverage
     if (stats.policies && stats.policies.percentage < options.minRlsCoverage) {
       failures.push({
@@ -191,7 +191,7 @@ class CICoverageCommand extends CoverageCommand {
       });
       passed = false;
     }
-    
+
     return {
       passed,
       failures,
@@ -202,7 +202,7 @@ class CICoverageCommand extends CoverageCommand {
       }
     };
   }
-  
+
   /**
    * Extract uncovered RPC functions
    * @param {Object} rpcResults - RPC analysis results
@@ -210,7 +210,7 @@ class CICoverageCommand extends CoverageCommand {
    */
   extractUncoveredRpc(rpcResults) {
     if (!rpcResults || !Array.isArray(rpcResults)) return [];
-    
+
     return rpcResults
       .filter(rpc => !rpc.has_tests || rpc.has_tests === false)
       .map(rpc => ({
@@ -219,7 +219,7 @@ class CICoverageCommand extends CoverageCommand {
         signature: rpc.function_signature || `${rpc.function_name}(...)`
       }));
   }
-  
+
   /**
    * Extract uncovered RLS policies
    * @param {Object} policyResults - Policy analysis results
@@ -227,7 +227,7 @@ class CICoverageCommand extends CoverageCommand {
    */
   extractUncoveredPolicies(policyResults) {
     if (!policyResults || !Array.isArray(policyResults)) return [];
-    
+
     return policyResults
       .filter(policy => !policy.has_tests || policy.has_tests === false)
       .map(policy => ({
@@ -237,7 +237,7 @@ class CICoverageCommand extends CoverageCommand {
         command: policy.command_type || 'unknown'
       }));
   }
-  
+
   /**
    * Generate detailed coverage breakdown
    * @param {Object} results - Coverage results
@@ -248,7 +248,7 @@ class CICoverageCommand extends CoverageCommand {
       schemas: {},
       tables: {}
     };
-    
+
     // Process RPC functions by schema
     if (results.rpc && Array.isArray(results.rpc)) {
       results.rpc.forEach(rpc => {
@@ -266,7 +266,7 @@ class CICoverageCommand extends CoverageCommand {
         });
       });
     }
-    
+
     // Process RLS policies by table
     if (results.policies && Array.isArray(results.policies)) {
       results.policies.forEach(policy => {
@@ -285,22 +285,22 @@ class CICoverageCommand extends CoverageCommand {
         });
       });
     }
-    
+
     return breakdown;
   }
-  
+
   /**
    * Display CI report in human-readable format (for local development)
    * @param {Object} report - CI report
    */
   displayCIReport(report) {
     const { status, summary, enforcement } = report;
-    
+
     console.log(`\nCOVERAGE_STATUS: ${status.toUpperCase()}`);
     console.log(`OVERALL_COVERAGE: ${summary.overall.percentage}% (${summary.overall.covered}/${summary.overall.total})`);
     console.log(`RPC_COVERAGE: ${summary.rpcFunctions.percentage}% (${summary.rpcFunctions.covered}/${summary.rpcFunctions.total})`);
     console.log(`RLS_COVERAGE: ${summary.rlsPolicies.percentage}% (${summary.rlsPolicies.covered}/${summary.rlsPolicies.total})`);
-    
+
     if (enforcement) {
       console.log(`\nENFORCEMENT: ${enforcement.passed ? 'PASSED' : 'FAILED'}`);
       if (enforcement.failures.length > 0) {
@@ -310,10 +310,10 @@ class CICoverageCommand extends CoverageCommand {
         });
       }
     }
-    
+
     console.log(`\nEXECUTION_TIME: ${report.execution.duration}ms`);
   }
-  
+
   /**
    * Write CI artifacts (JSON reports, coverage files)
    * @param {Object} results - Full coverage results
@@ -325,26 +325,26 @@ class CICoverageCommand extends CoverageCommand {
       if (this.outputDir) {
         // Write structured coverage report
         await this.writeJSONArtifact(report, 'coverage-report.json');
-        
+
         // Write detailed results for further analysis
         await this.writeJSONArtifact(results, 'coverage-details.json');
-        
+
         // Write enforcement results if enabled
         if (options.enforce && report.enforcement) {
           await this.writeJSONArtifact(report.enforcement, 'coverage-enforcement.json');
         }
-        
+
         // Write coverage badges data for README/CI
         const badges = this.generateBadgeData(report.summary);
         await this.writeJSONArtifact(badges, 'coverage-badges.json');
       }
-      
+
     } catch (error) {
       // Don't fail coverage analysis if we can't write artifacts
       console.error(`Warning: Could not write coverage artifacts: ${error.message}`);
     }
   }
-  
+
   /**
    * Generate badge data for shields.io or similar services
    * @param {Object} summary - Coverage summary
@@ -356,7 +356,7 @@ class CICoverageCommand extends CoverageCommand {
       if (percentage >= 60) return 'yellow';
       return 'red';
     };
-    
+
     return {
       overall: {
         label: 'coverage',
@@ -375,7 +375,7 @@ class CICoverageCommand extends CoverageCommand {
       }
     };
   }
-  
+
   /**
    * Write JSON artifact to output directory
    * @param {Object} data - Data to write
@@ -390,7 +390,7 @@ class CICoverageCommand extends CoverageCommand {
       throw new Error(`Failed to write ${filename}: ${error.message}`);
     }
   }
-  
+
   /**
    * Handle enforcement logic and exit codes
    * @param {Object} report - CI report
@@ -401,10 +401,10 @@ class CICoverageCommand extends CoverageCommand {
     if (!options.enforce || !report.enforcement) {
       return true; // No enforcement requested
     }
-    
+
     return report.enforcement.passed;
   }
-  
+
   /**
    * Emit structured CI events
    * @param {string} eventType - Type of event
@@ -416,7 +416,7 @@ class CICoverageCommand extends CoverageCommand {
       ...data
     });
   }
-  
+
   /**
    * Override progress method to suppress output in CI mode
    */
@@ -426,7 +426,7 @@ class CICoverageCommand extends CoverageCommand {
       super.progress(message);
     }
   }
-  
+
   /**
    * Override warn method for structured CI output
    */
@@ -442,7 +442,7 @@ class CICoverageCommand extends CoverageCommand {
       super.warn(message);
     }
   }
-  
+
   /**
    * Override error method for structured CI output
    */
@@ -459,7 +459,7 @@ class CICoverageCommand extends CoverageCommand {
       super.error(message, error);
     }
   }
-  
+
   /**
    * Override success method for structured CI output
    */

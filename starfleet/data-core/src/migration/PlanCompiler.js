@@ -2,7 +2,7 @@
  * Execution plan compiler for orchestrating migration operations.
  * Compiles migration operations into executable plans with dependency resolution,
  * rollback strategies, and execution phases.
- * 
+ *
  * @fileoverview Migration execution planning and compilation
  */
 
@@ -87,7 +87,7 @@ export class ExecutionStep {
       const tables = (statement.match(/\b(FROM|JOIN|INTO|TABLE)\s+\w+/gi) || []).length;
       return total + keywords * 500 + tables * 200;
     }, 0);
-    
+
     return baseTime + sqlComplexity;
   }
 }
@@ -115,13 +115,13 @@ export class ExecutionPlan {
    */
   addStep(step) {
     this.steps.push(step);
-    
+
     // Group by phase
     if (!this.phases.has(step.phase)) {
       this.phases.set(step.phase, []);
     }
     this.phases.get(step.phase).push(step);
-    
+
     this.compiled = false;
   }
 
@@ -131,19 +131,19 @@ export class ExecutionPlan {
    */
   getExecutionOrder() {
     const sortedSteps = [...this.steps];
-    
+
     // Sort by phase first, then by dependencies
     sortedSteps.sort((a, b) => {
       if (a.phase !== b.phase) {
         return a.phase - b.phase;
       }
-      
+
       // Within same phase, dependencies determine order
       if (a.dependencies.has(b)) return 1;
       if (b.dependencies.has(a)) return -1;
       return 0;
     });
-    
+
     return sortedSteps;
   }
 
@@ -162,11 +162,11 @@ export class ExecutionPlan {
   hasCircularDependencies() {
     const visited = new Set();
     const visiting = new Set();
-    
+
     const visit = (step) => {
       if (visiting.has(step)) return true;
       if (visited.has(step)) return false;
-      
+
       visiting.add(step);
       for (const dep of step.dependencies) {
         if (visit(dep)) return true;
@@ -175,7 +175,7 @@ export class ExecutionPlan {
       visited.add(step);
       return false;
     };
-    
+
     return this.steps.some(step => visit(step));
   }
 
@@ -185,11 +185,11 @@ export class ExecutionPlan {
    */
   generateRollbackPlan() {
     const rollbackPlan = new ExecutionPlan(`${this.id}_rollback`, `Rollback: ${this.name}`);
-    
+
     // Create rollback steps in reverse order
     const executedSteps = this.steps.filter(step => step.executed && step.options.canRollback);
     executedSteps.reverse();
-    
+
     for (const [index, step] of executedSteps.entries()) {
       if (step.rollbackSql.length > 0) {
         const rollbackStep = new ExecutionStep(
@@ -202,7 +202,7 @@ export class ExecutionPlan {
         rollbackPlan.addStep(rollbackStep);
       }
     }
-    
+
     return rollbackPlan;
   }
 }
@@ -235,24 +235,24 @@ export class PlanCompiler {
       enableRollback = true,
       parallelExecution = false
     } = options;
-    
+
     const plan = new ExecutionPlan(planId, planName);
     plan.metadata = { enableRollback, parallelExecution, createdAt: new Date().toISOString() };
-    
+
     // Group operations by phase
     const phaseGroups = this._groupOperationsByPhase(operations);
-    
+
     // Create execution steps for each phase
     for (const [phase, phaseOps] of phaseGroups) {
       this._createPhaseSteps(plan, phase, phaseOps, enableRollback);
     }
-    
+
     // Add validation steps
     this._addValidationSteps(plan, operations);
-    
+
     // Resolve dependencies
     this._resolveDependencies(plan);
-    
+
     plan.compiled = true;
     return plan;
   }
@@ -265,7 +265,7 @@ export class PlanCompiler {
    */
   _groupOperationsByPhase(operations) {
     const phaseMap = new Map();
-    
+
     for (const op of operations) {
       const phase = this._getOperationPhase(op);
       if (!phaseMap.has(phase)) {
@@ -273,7 +273,7 @@ export class PlanCompiler {
       }
       phaseMap.get(phase).push(op);
     }
-    
+
     return phaseMap;
   }
 
@@ -287,11 +287,11 @@ export class PlanCompiler {
     if (operation.isDestructive()) {
       return ExecutionPhase.SCHEMA_DROP;
     }
-    
+
     if (operation.type <= 8) { // Schema operations
       return ExecutionPhase.SCHEMA_CREATE;
     }
-    
+
     return ExecutionPhase.DATA_MIGRATION;
   }
 
@@ -316,11 +316,11 @@ export class PlanCompiler {
           continueOnError: false
         }
       );
-      
+
       if (enableRollback) {
         step.setRollbackSql(this._generateRollbackSql(op));
       }
-      
+
       plan.addStep(step);
     }
   }
@@ -399,7 +399,7 @@ export class PlanCompiler {
       ExecutionPhase.VALIDATION,
       { canRollback: false, continueOnError: true }
     );
-    
+
     plan.addStep(validationStep);
   }
 
@@ -411,12 +411,12 @@ export class PlanCompiler {
   _resolveDependencies(plan) {
     const stepsByPhase = plan.phases;
     const phaseOrder = Array.from(stepsByPhase.keys()).sort((a, b) => a - b);
-    
+
     // Add inter-phase dependencies
     for (let i = 1; i < phaseOrder.length; i++) {
       const currentPhaseSteps = stepsByPhase.get(phaseOrder[i]);
       const previousPhaseSteps = stepsByPhase.get(phaseOrder[i - 1]);
-      
+
       for (const currentStep of currentPhaseSteps) {
         for (const previousStep of previousPhaseSteps) {
           currentStep.addDependency(previousStep);
@@ -433,24 +433,24 @@ export class PlanCompiler {
   validatePlan(plan) {
     const issues = [];
     const warnings = [];
-    
+
     if (!plan.compiled) {
       issues.push('Plan has not been compiled');
     }
-    
+
     if (plan.hasCircularDependencies()) {
       issues.push('Plan contains circular dependencies');
     }
-    
+
     if (plan.steps.length === 0) {
       warnings.push('Plan contains no execution steps');
     }
-    
+
     const totalTime = plan.getTotalEstimatedTime();
     if (totalTime > 3600000) { // 1 hour
       warnings.push(`Plan has long estimated execution time: ${Math.round(totalTime / 60000)} minutes`);
     }
-    
+
     return {
       valid: issues.length === 0,
       issues,

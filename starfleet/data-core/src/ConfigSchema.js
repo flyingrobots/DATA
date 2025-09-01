@@ -57,8 +57,8 @@ export class ConfigSchema {
   validate(config) {
     const result = safeParsedataConfig(config);
     if (!result.success) {
-      return { 
-        valid: false, 
+      return {
+        valid: false,
         errors: result.error.errors.map(err => ({
           path: err.path.join('.'),
           message: err.message
@@ -80,17 +80,17 @@ export class ConfigSchema {
     }
 
     const result = { ...base };
-    
+
     for (const key in overrides) {
-      if (typeof overrides[key] === 'object' && 
-          !Array.isArray(overrides[key]) && 
+      if (typeof overrides[key] === 'object' &&
+          !Array.isArray(overrides[key]) &&
           overrides[key] !== null) {
         result[key] = this.merge(base[key] || {}, overrides[key]);
       } else {
         result[key] = overrides[key];
       }
     }
-    
+
     return result;
   }
 
@@ -102,10 +102,10 @@ export class ConfigSchema {
    */
   getValue(config, path) {
     if (!config || !path) return undefined;
-    
+
     const keys = path.split('.');
     let value = config;
-    
+
     for (const key of keys) {
       if (value && typeof value === 'object') {
         value = value[key];
@@ -113,7 +113,7 @@ export class ConfigSchema {
         return undefined;
       }
     }
-    
+
     return value;
   }
 
@@ -126,11 +126,11 @@ export class ConfigSchema {
    */
   setValue(config, path, value) {
     if (!config || !path) return config;
-    
+
     const keys = path.split('.');
     const lastKey = keys.pop();
     let target = config;
-    
+
     // Navigate to the parent object
     for (const key of keys) {
       if (!target[key] || typeof target[key] !== 'object') {
@@ -138,7 +138,7 @@ export class ConfigSchema {
       }
       target = target[key];
     }
-    
+
     target[lastKey] = value;
     return config;
   }

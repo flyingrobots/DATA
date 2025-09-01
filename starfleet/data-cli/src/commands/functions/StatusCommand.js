@@ -1,6 +1,6 @@
 /**
  * Edge Functions Status Command
- * 
+ *
  * Shows deployment status, health, and metrics for Edge Functions
  */
 
@@ -32,13 +32,13 @@ class StatusCommand extends Command {
 
       // Get local functions
       const localFunctions = await this.getLocalFunctions(functionNames);
-      
+
       // Get deployed functions
       const deployedFunctions = await this.getDeployedFunctions();
-      
+
       // Combine status information
       const statusMap = this.combineStatus(localFunctions, deployedFunctions);
-      
+
       this.emit('status-retrieved', {
         local: localFunctions.length,
         deployed: deployedFunctions.length,
@@ -61,7 +61,7 @@ class StatusCommand extends Command {
    */
   async getLocalFunctions(functionNames = null) {
     const functionsPath = this.outputConfig.functionsDir;
-    
+
     if (!fs.existsSync(functionsPath)) {
       return [];
     }
@@ -82,7 +82,7 @@ class StatusCommand extends Command {
     for (const functionName of functions) {
       const functionPath = path.join(functionsPath, functionName);
       const indexPath = path.join(functionPath, 'index.ts');
-      
+
       let size = 0;
       let lastModified = null;
       let hasConfig = false;
@@ -121,13 +121,13 @@ class StatusCommand extends Command {
     try {
       this.progress('🌐 Fetching deployed functions from Supabase');
 
-      const result = execSync('supabase functions list --json', { 
+      const result = execSync('supabase functions list --json', {
         stdio: 'pipe',
-        encoding: 'utf8' 
+        encoding: 'utf8'
       });
-      
+
       const deployedFunctions = JSON.parse(result);
-      
+
       return deployedFunctions.map(func => ({
         name: func.name,
         id: func.id,
@@ -138,8 +138,8 @@ class StatusCommand extends Command {
       }));
 
     } catch (error) {
-      this.warn('Could not retrieve deployed functions list', { 
-        error: error.message 
+      this.warn('Could not retrieve deployed functions list', {
+        error: error.message
       });
       return [];
     }
@@ -155,7 +155,7 @@ class StatusCommand extends Command {
     for (const local of localFunctions) {
       statusMap.set(local.name, {
         name: local.name,
-        local: local,
+        local,
         deployed: null,
         status: 'local-only'
       });
@@ -164,7 +164,7 @@ class StatusCommand extends Command {
     // Add deployed functions
     for (const deployed of deployedFunctions) {
       const existing = statusMap.get(deployed.name);
-      
+
       if (existing) {
         existing.deployed = deployed;
         existing.status = 'deployed';
@@ -172,7 +172,7 @@ class StatusCommand extends Command {
         statusMap.set(deployed.name, {
           name: deployed.name,
           local: null,
-          deployed: deployed,
+          deployed,
           status: 'deployed-only'
         });
       }
@@ -189,7 +189,7 @@ class StatusCommand extends Command {
     const deployed = statusMap.filter(f => f.status === 'deployed');
     const deployedOnly = statusMap.filter(f => f.status === 'deployed-only');
 
-    this.success(`📈 Functions Status Summary`, {
+    this.success('📈 Functions Status Summary', {
       total: statusMap.length,
       localOnly: localOnly.length,
       deployed: deployed.length,

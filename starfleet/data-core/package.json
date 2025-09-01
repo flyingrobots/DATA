@@ -6,10 +6,13 @@
   "main": "./src/index.js",
   "exports": {
     ".": "./src/index.js",
+    "./migration/*": "./src/migration/*",
+    "./domain/*": "./src/domain/*",
+    "./config/*": "./src/config/*",
+    "./testing/*": "./src/testing/*",
     "./application/*": "./src/application/*",
     "./events/*": "./src/events/*",
-    "./ports/*": "./src/ports/*",
-    "./domain/*": "./src/domain/*"
+    "./ports/*": "./src/ports/*"
   },
   "scripts": {
     "lint": "eslint \"src/**/*.{js,mjs,cjs,ts,tsx}\"",

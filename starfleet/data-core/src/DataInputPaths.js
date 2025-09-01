@@ -3,7 +3,7 @@ import path from 'path';
 
 /**
  * dataInputPaths - Manages all input/read sources for data
- * 
+ *
  * This class handles all directories where data reads files from.
  * It uses PathResolver to ensure directories exist and are readable.
  * All paths are resolved to absolute paths and cached.
@@ -27,7 +27,7 @@ class DataInputPaths {
     pathResolver = null
   ) {
     this.pathResolver = pathResolver || new PathResolver();
-    
+
     // Store configuration with defaults
     this._config = {
       sqlDir: sqlDir || process.env.data_SQL_DIR || './sql',
@@ -36,11 +36,11 @@ class DataInputPaths {
       schemasDir: schemasDir || process.env.data_SCHEMAS_DIR || './schemas',
       configDir: configDir || process.env.data_CONFIG_DIR || '.'
     };
-    
+
     // Cache for resolved paths
     this._resolvedPaths = {};
     this._resolving = {}; // Prevent duplicate resolution attempts
-    
+
     // Cache for file listings
     this._fileCache = {};
   }
@@ -143,7 +143,7 @@ class DataInputPaths {
     if (!Object.prototype.hasOwnProperty.call(this._config, key)) {
       throw new Error(`Unknown path configuration: ${key}`);
     }
-    
+
     try {
       await this.pathResolver.resolveDirectoryForRead(this._config[key]);
       return true;
@@ -164,7 +164,7 @@ class DataInputPaths {
       const exists = await this.hasDirectory(key);
       return exists ? { candidate, exists } : null;
     });
-    
+
     const results = await Promise.allSettled(checkPromises);
     for (const result of results) {
       if (result.status === 'fulfilled' && result.value) {

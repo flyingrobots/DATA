@@ -1,6 +1,6 @@
 /**
  * SafetyGates.js - Production Safety Gate Business Rules
- * 
+ *
  * Pure business logic for safety gate validation rules and policies.
  * No process, filesystem, or I/O dependencies - only validation rules.
  */
@@ -36,8 +36,8 @@ export class SafetyGateRules {
 
     // Coverage threshold validation
     if (config.coverageThreshold !== undefined) {
-      if (typeof config.coverageThreshold !== 'number' || 
-          config.coverageThreshold < 0 || 
+      if (typeof config.coverageThreshold !== 'number' ||
+          config.coverageThreshold < 0 ||
           config.coverageThreshold > 100) {
         errors.push('Coverage threshold must be a number between 0 and 100');
       }
@@ -321,25 +321,25 @@ export class SafetyGateRules {
 
     for (const entry of failedEntries) {
       switch (entry.gate) {
-        case 'git-clean-check':
-          actions.push('Commit or stash uncommitted changes in git working tree');
-          break;
-        case 'branch-validation':
-          actions.push(`Switch to the correct branch: ${entry.metadata.expectedBranch}`);
-          break;
-        case 'test-validation':
-          if (entry.issues.some(issue => issue.includes('failed'))) {
-            actions.push('Fix failing tests before proceeding');
-          }
-          if (entry.issues.some(issue => issue.includes('coverage'))) {
-            actions.push('Increase test coverage to meet minimum threshold');
-          }
-          break;
-        case 'production-confirmation':
-          actions.push('Type the exact confirmation text as requested');
-          break;
-        default:
-          actions.push(`Review and fix issues in ${entry.gate}`);
+      case 'git-clean-check':
+        actions.push('Commit or stash uncommitted changes in git working tree');
+        break;
+      case 'branch-validation':
+        actions.push(`Switch to the correct branch: ${entry.metadata.expectedBranch}`);
+        break;
+      case 'test-validation':
+        if (entry.issues.some(issue => issue.includes('failed'))) {
+          actions.push('Fix failing tests before proceeding');
+        }
+        if (entry.issues.some(issue => issue.includes('coverage'))) {
+          actions.push('Increase test coverage to meet minimum threshold');
+        }
+        break;
+      case 'production-confirmation':
+        actions.push('Type the exact confirmation text as requested');
+        break;
+      default:
+        actions.push(`Review and fix issues in ${entry.gate}`);
       }
     }
 

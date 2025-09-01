@@ -15,7 +15,7 @@ import { z } from 'zod';
  */
 class MigrateCommand extends Command {
   static description = 'Database migration management commands';
-  
+
   constructor(config = null, logger = null, isProd = false) {
     super(config, logger, isProd);
     this.requiresProductionConfirmation = false; // Subcommands handle their own confirmation
@@ -27,7 +27,7 @@ class MigrateCommand extends Command {
    */
   setupRouter() {
     const router = new CommandRouter();
-    
+
     // Forward router events to this command
     router.on('start', (data) => this.emit('start', data));
     router.on('progress', (data) => this.emit('progress', data));
@@ -38,11 +38,11 @@ class MigrateCommand extends Command {
     router.on('failed', (data) => this.emit('failed', data));
     router.on('cancelled', (data) => this.emit('cancelled', data));
     router.on('prompt', (data) => this.emit('prompt', data));
-    
+
     // Pass config and logger to all handlers
     router.config = this.config;
     router.logger = this.logger;
-    
+
     // Register generate command
     router
       .command('migrate')
@@ -64,8 +64,8 @@ class MigrateCommand extends Command {
         const { default: handler } = await import('./migrate/generate.js');
         return handler(...args);
       });
-    
-    // Register test command  
+
+    // Register test command
     router
       .command('migrate')
       .subcommand('test')
@@ -85,7 +85,7 @@ class MigrateCommand extends Command {
         const { default: handler } = await import('./migrate/test-v2.js');
         return handler(...args);
       });
-    
+
     // Register promote command
     router
       .command('migrate')
@@ -105,7 +105,7 @@ class MigrateCommand extends Command {
         const { default: handler } = await import('./migrate/promote.js');
         return handler(...args);
       });
-    
+
     // Register status command
     router
       .command('migrate')
@@ -125,7 +125,7 @@ class MigrateCommand extends Command {
         const { default: handler } = await import('./migrate/status.js');
         return handler(...args);
       });
-    
+
     // Register rollback command
     router
       .command('migrate')
@@ -147,7 +147,7 @@ class MigrateCommand extends Command {
         const { default: handler } = await import('./migrate/rollback.js');
         return handler(...args);
       });
-    
+
     // Register clean command
     router
       .command('migrate')
@@ -168,7 +168,7 @@ class MigrateCommand extends Command {
         const { default: handler } = await import('./migrate/clean.js');
         return handler(...args);
       });
-    
+
     // Register history command
     router
       .command('migrate')
@@ -190,7 +190,7 @@ class MigrateCommand extends Command {
         const { default: handler } = await import('./migrate/history.js');
         return handler(...args);
       });
-    
+
     // Register verify command
     router
       .command('migrate')
@@ -211,7 +211,7 @@ class MigrateCommand extends Command {
         const { default: handler } = await import('./migrate/verify.js');
         return handler(...args);
       });
-    
+
     // Register squash command
     router
       .command('migrate')
@@ -233,7 +233,7 @@ class MigrateCommand extends Command {
         const { default: handler } = await import('./migrate/squash.js');
         return handler(...args);
       });
-    
+
     return router;
   }
 
@@ -242,31 +242,31 @@ class MigrateCommand extends Command {
    */
   async performExecute(args = {}) {
     this.emit('start', { isProd: this.isProd });
-    
+
     try {
       // Get subcommand from arguments
       const subcommand = args._?.[0] || args.subcommand;
-      
+
       if (!subcommand) {
         this.showHelp();
         this.emit('complete', { action: 'help' });
         return;
       }
-      
+
       // Build the command path for the router
       const commandPath = `migrate/${subcommand}`;
-      
+
       // Let the router handle it
       this.progress(`Executing migration command: ${subcommand}`);
       const result = await this.router.execute(commandPath, args);
-      
+
       // Don't emit complete if help was shown
       if (!result?.help) {
         this.emit('complete', { subcommand });
       }
-      
+
       return result;
-      
+
     } catch (error) {
       // Check if it's an unknown command
       if (error.message.includes('No handler registered')) {
@@ -281,7 +281,7 @@ class MigrateCommand extends Command {
       throw error;
     }
   }
-  
+
   /**
    * Display help text for migration commands
    */
@@ -291,7 +291,7 @@ class MigrateCommand extends Command {
     console.log('Database migration management commands');
     console.log('');
     console.log('Commands:');
-    
+
     // Get all registered routes from the router
     const routes = this.router.getRoutes();
     for (const route of routes) {
@@ -299,7 +299,7 @@ class MigrateCommand extends Command {
       const description = route.description || '';
       console.log(`  ${subcommand.padEnd(10)} - ${description}`);
     }
-    
+
     console.log('');
     console.log('Run "data db migrate <command> --help" for command-specific help');
     console.log('');
@@ -309,19 +309,19 @@ class MigrateCommand extends Command {
     console.log('  data db migrate promote --migration 20250829_001');
     console.log('  data db migrate status');
   }
-  
+
   /**
    * Show available commands when invalid command provided
    */
   showAvailableCommands() {
     console.log('Available migration commands:');
-    
+
     const routes = this.router.getRoutes();
     for (const route of routes) {
       const [, subcommand] = route.path.split('/');
       console.log(`  ${subcommand}`);
     }
-    
+
     console.log('\nUse "data db migrate --help" for more information.');
   }
 }

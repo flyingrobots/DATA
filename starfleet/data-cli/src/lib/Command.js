@@ -1,10 +1,10 @@
 /**
  * @fileoverview Base Command Class for Event-Driven Architecture
- * 
+ *
  * Provides a common foundation for all CLI commands with event emission,
  * logging, production safety checks, and user interaction capabilities.
  * All commands in the D.A.T.A. system extend from this base class.
- * 
+ *
  * @module Command
  * @requires EventEmitter
  * @requires pino
@@ -26,10 +26,10 @@ import {
 
 /**
  * Base command class that all commands extend from.
- * 
+ *
  * Provides event-driven architecture with production safety features,
  * logging capabilities, and standardized user interaction patterns.
- * 
+ *
  * @class
  * @extends EventEmitter
  * @example
@@ -45,7 +45,7 @@ import {
 class Command extends EventEmitter {
   /**
    * Creates a new Command instance.
-   * 
+   *
    * @param {Object|null} legacyConfig - Legacy configuration object (Config class instance)
    * @param {Object|null} logger - Pino logger instance (optional, will create default if null)
    * @param {boolean} isProd - Whether running in production mode (affects confirmation behavior)
@@ -74,7 +74,7 @@ class Command extends EventEmitter {
 
   /**
    * Creates a default pino logger with development-friendly configuration.
-   * 
+   *
    * @returns {Object} Configured pino logger instance
    * @private
    */
@@ -96,14 +96,14 @@ class Command extends EventEmitter {
 
   /**
    * Executes the command with production safety checks and event emission.
-   * 
+   *
    * This is the main entry point for command execution. It handles:
    * - Start event emission
    * - Production confirmation (if required)
    * - Delegation to performExecute()
    * - Completion event emission
    * - Error handling and cleanup
-   * 
+   *
    * @param {...*} args - Arguments to pass to performExecute()
    * @returns {Promise<*>} Result from performExecute() or undefined if cancelled
    * @throws {Error} Any error thrown by performExecute()
@@ -162,10 +162,10 @@ class Command extends EventEmitter {
 
   /**
    * The actual execution logic that must be implemented by subclasses.
-   * 
+   *
    * This abstract method contains the core command logic. Subclasses must
    * override this method to provide their specific functionality.
-   * 
+   *
    * @abstract
    * @param {...*} args - Command-specific arguments
    * @returns {Promise<*>} Command execution result
@@ -178,10 +178,10 @@ class Command extends EventEmitter {
 
   /**
    * Prompts user to confirm production operation with safety warnings.
-   * 
+   *
    * Displays warning about production environment and requests explicit
    * user confirmation before proceeding with potentially dangerous operations.
-   * 
+   *
    * @returns {Promise<boolean>} True if user confirms, false otherwise
    * @private
    */
@@ -198,10 +198,10 @@ class Command extends EventEmitter {
 
   /**
    * Emits a progress event with optional data payload.
-   * 
+   *
    * Used to communicate ongoing operation status to event listeners,
    * typically for progress bars or status updates in CLI interfaces.
-   * 
+   *
    * @param {string} message - Progress description
    * @param {Object} [data={}] - Additional progress data
    * @emits progress - Progress event with message and data
@@ -221,10 +221,10 @@ class Command extends EventEmitter {
 
   /**
    * Emits a warning event for non-fatal issues.
-   * 
+   *
    * Used to communicate potential problems or important information
    * that doesn't prevent command execution from continuing.
-   * 
+   *
    * @param {string} message - Warning message
    * @param {Object} [data={}] - Additional warning context
    * @emits warning - Warning event with message and data
@@ -243,10 +243,10 @@ class Command extends EventEmitter {
 
   /**
    * Emits an error event for command failures.
-   * 
+   *
    * Used to communicate command execution errors with full context
    * including error objects and additional debugging information.
-   * 
+   *
    * @param {string} message - Error description
    * @param {Error|null} [error=null] - Error object with stack trace
    * @param {Object} [data={}] - Additional error context
@@ -269,10 +269,10 @@ class Command extends EventEmitter {
 
   /**
    * Emits a success event for completed operations.
-   * 
+   *
    * Used to communicate successful command execution with result data
    * for display in CLI interfaces or logging.
-   * 
+   *
    * @param {string} message - Success message
    * @param {Object} [data={}] - Additional success data
    * @emits success - Success event with message and data
@@ -291,10 +291,10 @@ class Command extends EventEmitter {
 
   /**
    * Emits a prompt event and waits for user response.
-   * 
+   *
    * Creates an interactive prompt that waits for user input through
    * the event system. Used by CLI interfaces for user interaction.
-   * 
+   *
    * @param {string} type - Type of prompt (confirm, input, select, etc.)
    * @param {Object} options - Prompt configuration options
    * @returns {Promise<*>} User response value
@@ -308,10 +308,10 @@ class Command extends EventEmitter {
 
   /**
    * Prompts user for yes/no confirmation.
-   * 
+   *
    * Convenience method for boolean confirmation prompts with
    * optional default value handling.
-   * 
+   *
    * @param {string} message - Confirmation question
    * @param {boolean} [defaultValue=false] - Default response if user presses enter
    * @returns {Promise<boolean>} True if confirmed, false otherwise
@@ -322,10 +322,10 @@ class Command extends EventEmitter {
 
   /**
    * Prompts user for text input.
-   * 
+   *
    * Convenience method for text input prompts with optional
    * validation and default value handling.
-   * 
+   *
    * @param {string} message - Input prompt message
    * @param {Object} [options={}] - Input options (default, validation, etc.)
    * @returns {Promise<string>} User input string
@@ -336,10 +336,10 @@ class Command extends EventEmitter {
 
   /**
    * Validates an event object against expected class type using instanceof checks.
-   * 
+   *
    * Provides runtime type validation for event objects to ensure they conform
    * to expected event class structures and contain required properties.
-   * 
+   *
    * @param {Object} event - The event object to validate
    * @param {Function|null} [expectedClass=null] - Expected event class constructor for instanceof validation
    * @returns {Object} Validation result object
@@ -370,11 +370,11 @@ class Command extends EventEmitter {
 
   /**
    * Emits a typed event with optional validation and automatic format conversion.
-   * 
+   *
    * Provides event emission with runtime validation against expected class types
    * and automatic conversion of CommandEvent instances to the standard event format
    * required by the CLI interface for backward compatibility.
-   * 
+   *
    * @param {string} eventName - The event name to emit
    * @param {Object} eventData - The event data or CommandEvent instance
    * @param {Function|null} [expectedClass=null] - Optional expected event class for instanceof validation

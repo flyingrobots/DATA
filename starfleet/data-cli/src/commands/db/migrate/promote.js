@@ -14,7 +14,7 @@ const path = require('path');
 class MigratePromoteCommand extends Command {
   static description = 'Promote tested migration to production';
   static requiresConfirmation = true;
-  
+
   constructor(config = null, logger = null, isProd = false) {
     super(config, logger, isProd);
     this.requiresProductionConfirmation = true;
@@ -25,35 +25,35 @@ class MigratePromoteCommand extends Command {
    */
   async performExecute(args = {}) {
     this.emit('start');
-    
+
     try {
       // Get migration path from arguments
       const migrationName = args.migration || args.m || 'current';
       const stagingPath = this.getStagingPath(migrationName);
-      
+
       this.progress(`Promoting migration: ${migrationName}`);
-      
+
       // 1. Verify tests passed in metadata
       await this.verifyTestsPassed(stagingPath);
-      
+
       // 2. Move from staging to production
       const productionPath = await this.promoteToProduction(stagingPath);
-      
+
       // 3. Update migration history
       await this.updateHistory(stagingPath, productionPath);
-      
+
       // 4. Optionally stage in Git
       if (args.git !== false) {
         await this.stageInGit(productionPath);
       }
-      
+
       this.success(`Migration promoted successfully: ${path.basename(productionPath)}`);
-      this.emit('complete', { 
-        staging: stagingPath, 
+      this.emit('complete', {
+        staging: stagingPath,
         production: productionPath,
         migration: migrationName
       });
-      
+
     } catch (error) {
       this.error('Migration promotion failed', error);
       this.emit('failed', { error, migration: args.migration });
@@ -66,11 +66,11 @@ class MigratePromoteCommand extends Command {
    */
   getStagingPath(migrationName) {
     const supabaseRoot = this.findSupabaseRoot();
-    
+
     if (migrationName === 'current') {
       return path.join(supabaseRoot, 'migrations-staging', 'current');
     }
-    
+
     return path.join(supabaseRoot, 'migrations-staging', migrationName);
   }
 
@@ -79,32 +79,32 @@ class MigratePromoteCommand extends Command {
    */
   async verifyTestsPassed(migrationPath) {
     this.progress('Verifying migration tests passed...');
-    
+
     try {
       // Check if migration directory exists
       const stats = await fs.stat(migrationPath);
       if (!stats.isDirectory()) {
         throw new Error(`Migration path is not a directory: ${migrationPath}`);
       }
-      
+
       // Load and check metadata
       const metadata = new MigrationMetadata(migrationPath);
       const data = metadata.read();
-      
+
       // Check if migration has been tested
       if (data.status !== 'tested') {
         throw new Error(`Migration must be tested before promotion. Current status: ${data.status}`);
       }
-      
+
       // Check if tests passed
       if (!data.testing || data.testing.tested_at === null) {
         throw new Error('No test results found in migration metadata');
       }
-      
+
       if (data.testing.tests_failed > 0) {
         throw new Error(`Migration has failing tests: ${data.testing.tests_failed} failed, ${data.testing.tests_passed} passed`);
       }
-      
+
       if (data.testing.tests_passed === 0) {
         this.warn('Warning: No tests were run for this migration');
         const proceed = await this.confirm('Proceed with promotion despite no tests?', false);
@@ -112,10 +112,10 @@ class MigratePromoteCommand extends Command {
           throw new Error('Promotion cancelled - no tests run');
         }
       }
-      
+
       this.progress(`Tests verified: ${data.testing.tests_passed} passed, ${data.testing.tests_failed} failed`);
       return data;
-      
+
     } catch (error) {
       if (error.code === 'ENOENT') {
         throw new Error(`Migration not found: ${migrationPath}`);
@@ -129,19 +129,19 @@ class MigratePromoteCommand extends Command {
    */
   async promoteToProduction(stagingPath) {
     this.progress('Moving migration to production directory...');
-    
+
     const supabaseRoot = this.findSupabaseRoot();
     const migrationFileName = await this.generateMigrationFileName(stagingPath);
     const productionDir = path.join(supabaseRoot, 'migrations');
     const productionPath = path.join(productionDir, migrationFileName);
-    
+
     // Ensure production directory exists
     try {
       await fs.mkdir(productionDir, { recursive: true });
     } catch (error) {
       // Directory already exists, continue
     }
-    
+
     // Check if production file already exists
     try {
       await fs.access(productionPath);
@@ -151,11 +151,11 @@ class MigratePromoteCommand extends Command {
         throw error;
       }
     }
-    
+
     // Copy migration SQL file
     const stagingSqlPath = path.join(stagingPath, 'migration.sql');
     await fs.copyFile(stagingSqlPath, productionPath);
-    
+
     this.progress(`Migration copied to: ${productionPath}`);
     return productionPath;
   }
@@ -167,7 +167,7 @@ class MigratePromoteCommand extends Command {
     // Load metadata to get the migration name
     const metadata = new MigrationMetadata(stagingPath);
     const data = metadata.read();
-    
+
     // Generate timestamp in YYYYMMDD_HHMMSS format
     const now = new Date();
     const year = now.getFullYear();
@@ -176,10 +176,10 @@ class MigratePromoteCommand extends Command {
     const hour = String(now.getHours()).padStart(2, '0');
     const minute = String(now.getMinutes()).padStart(2, '0');
     const second = String(now.getSeconds()).padStart(2, '0');
-    
+
     const timestamp = `${year}${month}${day}_${hour}${minute}${second}`;
     const safeName = data.name.toLowerCase().replace(/[^a-z0-9_]/g, '_');
-    
+
     return `${timestamp}_${safeName}.sql`;
   }
 
@@ -188,14 +188,14 @@ class MigratePromoteCommand extends Command {
    */
   async updateHistory(stagingPath, productionPath) {
     this.progress('Updating migration history...');
-    
+
     const supabaseRoot = this.findSupabaseRoot();
     const historyPath = path.join(supabaseRoot, 'migrations', 'history.json');
-    
+
     // Load metadata
     const metadata = new MigrationMetadata(stagingPath);
     const data = metadata.read();
-    
+
     // Create history entry
     const historyEntry = {
       id: data.id,
@@ -208,7 +208,7 @@ class MigratePromoteCommand extends Command {
       tests_passed: data.testing.tests_passed,
       tests_failed: data.testing.tests_failed
     };
-    
+
     // Load or create history file
     let history = [];
     try {
@@ -219,14 +219,14 @@ class MigratePromoteCommand extends Command {
         this.warn(`Could not read existing history: ${error.message}`);
       }
     }
-    
+
     // Add new entry and sort by promoted_at
     history.push(historyEntry);
     history.sort((a, b) => new Date(b.promoted_at) - new Date(a.promoted_at));
-    
+
     // Write updated history
     await fs.writeFile(historyPath, JSON.stringify(history, null, 2), 'utf8');
-    
+
     // Update staging metadata to promoted status
     metadata.update({
       status: 'promoted',
@@ -235,7 +235,7 @@ class MigratePromoteCommand extends Command {
         promoted_by: historyEntry.promoted_by
       }
     });
-    
+
     this.progress('Migration history updated');
   }
 
@@ -244,14 +244,14 @@ class MigratePromoteCommand extends Command {
    */
   async stageInGit(productionPath) {
     this.progress('Staging migration in Git...');
-    
+
     const { spawn } = require('child_process');
-    
+
     return new Promise((resolve, reject) => {
       const git = spawn('git', ['add', productionPath], {
         stdio: ['ignore', 'pipe', 'pipe']
       });
-      
+
       git.on('close', (code) => {
         if (code === 0) {
           this.progress('Migration staged in Git');
@@ -261,7 +261,7 @@ class MigratePromoteCommand extends Command {
           resolve(); // Don't fail promotion for Git issues
         }
       });
-      
+
       git.on('error', (error) => {
         this.warn(`Git staging failed: ${error.message}`);
         resolve(); // Don't fail promotion for Git issues
@@ -281,7 +281,7 @@ class MigratePromoteCommand extends Command {
    */
   findSupabaseRoot() {
     let currentDir = process.cwd();
-    
+
     while (currentDir !== path.dirname(currentDir)) {
       const supabasePath = path.join(currentDir, 'supabase');
       try {
@@ -291,7 +291,7 @@ class MigratePromoteCommand extends Command {
         currentDir = path.dirname(currentDir);
       }
     }
-    
+
     throw new Error('Could not find supabase directory. Run this command from within a Supabase project.');
   }
 

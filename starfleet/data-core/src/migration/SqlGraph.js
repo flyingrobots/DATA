@@ -2,7 +2,7 @@
  * SQL dependency graph builder for analyzing relationships between SQL files.
  * Builds a directed graph of dependencies by parsing SQL statements for references
  * to tables, views, functions, and other database objects.
- * 
+ *
  * @fileoverview SQL dependency analysis and topological sorting
  */
 
@@ -58,7 +58,7 @@ export class SqlNode {
     if (visited.has(this)) {
       return true;
     }
-    
+
     visited.add(this);
     for (const dep of this.dependencies) {
       if (dep.hasCircularDependency(visited)) {
@@ -127,7 +127,7 @@ export class SqlGraph {
     for (const match of createMatches) {
       const objectName = match[1].toLowerCase();
       const objectType = match[0].match(/(?:TABLE|VIEW|FUNCTION|PROCEDURE|TRIGGER|INDEX)/i)[0].toLowerCase();
-      
+
       const node = new SqlNode(objectName, objectType, filePath, content);
       this.nodes.set(objectName, node);
     }
@@ -147,7 +147,7 @@ export class SqlGraph {
    */
   _analyzeDependencies(node) {
     const content = node.content.toLowerCase();
-    
+
     // Find table/view references
     const references = [...content.matchAll(this.sqlPatterns.reference)];
     for (const match of references) {
@@ -183,18 +183,18 @@ export class SqlGraph {
       if (visiting.has(node)) {
         throw new Error(`Circular dependency detected involving: ${node.name}`);
       }
-      
+
       if (visited.has(node)) {
         return;
       }
 
       visiting.add(node);
-      
+
       // Visit dependencies first
       for (const dep of node.dependencies) {
         visit(dep);
       }
-      
+
       visiting.delete(node);
       visited.add(node);
       result.push(node);

@@ -1,6 +1,6 @@
 /**
  * Migration Commands Index
- * 
+ *
  * Exports all migration subcommands for the data CLI
  */
 

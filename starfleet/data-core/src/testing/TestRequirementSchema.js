@@ -1,10 +1,10 @@
 /**
  * Test Requirement Schema - JSDoc Type Definitions
- * 
+ *
  * This file defines comprehensive type schemas for test coverage enforcement
  * in the D.A.T.A. project. These types are used throughout the test coverage
  * analysis and enforcement system to ensure pgTAP test completeness.
- * 
+ *
  * @fileoverview JSDoc type definitions for test requirements and coverage analysis
  */
 
@@ -312,14 +312,14 @@
 // Export all types for use in other modules
 module.exports = {
   // Type validation helpers - these are runtime functions, not types
-  
+
   /**
    * Validate a test requirement object
    * @param {any} requirement - Object to validate
    * @returns {boolean} True if valid TestRequirement
    */
   isValidTestRequirement(requirement) {
-    return requirement && 
+    return requirement &&
            typeof requirement === 'object' &&
            typeof requirement.id === 'string' &&
            typeof requirement.objectType === 'string' &&
@@ -386,12 +386,12 @@ module.exports = {
       medium: 20,
       low: 10
     };
-    
+
     const baseScore = priorityWeights[gap.priority] || 10;
     const missingAssertionsWeight = Math.min(gap.missingAssertions.length * 5, 30);
     const typeWeight = gap.objectType === 'function' || gap.objectType === 'policy' ? 20 : 10;
     const criticalPathBonus = gap.metadata?.isCriticalPath ? 10 : 0;
-    
+
     return Math.min(baseScore + missingAssertionsWeight + typeWeight + criticalPathBonus, 100);
   },
 
@@ -405,7 +405,7 @@ module.exports = {
 
   DEFAULT_PRIORITY: 'medium',
   DEFAULT_SCHEMA: 'public',
-  
+
   PRIORITY_LEVELS: ['critical', 'high', 'medium', 'low'],
   OBJECT_TYPES: ['table', 'column', 'function', 'index', 'policy', 'trigger', 'schema', 'view', 'constraint']
 };

@@ -1,10 +1,10 @@
 /**
  * Test Pattern Library
- * 
+ *
  * Comprehensive library of reusable test patterns for pgTAP test generation.
  * Provides common patterns for each test type with best practices and examples.
  * Used by TestTemplateGenerator to ensure consistency across all generated tests.
- * 
+ *
  * @fileoverview Test Pattern Library for pgTAP test generation
  * @author D.A.T.A. Engineering Team
  * @version 1.0.0
@@ -27,7 +27,7 @@
 /**
  * @typedef {Object} PatternCategory
  * @property {string} name - Category name
- * @property {string} description - Category description  
+ * @property {string} description - Category description
  * @property {Array<TestPattern>} patterns - Patterns in this category
  * @property {Array<string>} commonUseCases - Common use cases for this category
  * @property {Array<string>} bestPractices - Category-level best practices
@@ -40,13 +40,13 @@ class TestPatternLibrary {
      * @private
      */
     this.categories = this.initializePatternCategories();
-    
+
     /**
-     * @type {Map<string, TestPattern>}  
+     * @type {Map<string, TestPattern>}
      * @private
      */
     this.patterns = this.initializePatterns();
-    
+
     /**
      * @type {Object<string, Array<string>>}
      * @private
@@ -96,7 +96,7 @@ class TestPatternLibrary {
     }
 
     let rendered = pattern.sqlTemplate;
-    
+
     // Replace placeholders with variables
     for (const [key, value] of Object.entries(variables)) {
       const placeholder = new RegExp(`\\$\\{${key}\\}`, 'g');
@@ -236,7 +236,7 @@ class TestPatternLibrary {
     // ===========================================================================
     // DATA VALIDATION PATTERNS
     // ===========================================================================
-    
+
     patterns.set('table_exists_basic', {
       name: 'table_exists_basic',
       category: 'data_validation',
@@ -968,7 +968,7 @@ END;`,
     // Add patterns to their respective categories
     const dataValidationPatterns = [
       patterns.get('table_exists_basic'),
-      patterns.get('column_structure_validation'), 
+      patterns.get('column_structure_validation'),
       patterns.get('foreign_key_relationship'),
       patterns.get('constraint_validation')
     ];
@@ -997,7 +997,7 @@ END;`,
 
     // Update category references
     this.categories.get('data_validation').patterns = dataValidationPatterns;
-    this.categories.get('security_testing').patterns = securityPatterns;  
+    this.categories.get('security_testing').patterns = securityPatterns;
     this.categories.get('performance_testing').patterns = performancePatterns;
     this.categories.get('error_handling').patterns = errorHandlingPatterns;
     this.categories.get('multi_user_scenarios').patterns = multiUserPatterns;
@@ -1021,7 +1021,7 @@ END;`,
         'privilege_escalation_test'
       ],
 
-      // Row Level Security tests  
+      // Row Level Security tests
       rls: [
         'rls_enablement_check',
         'policy_existence_check',
@@ -1047,7 +1047,7 @@ END;`,
 
       // Function tests (database functions)
       function: [
-        'function_exception_handling', 
+        'function_exception_handling',
         'function_performance_test',
         'constraint_violation_handling'
       ],
@@ -1084,11 +1084,11 @@ END;`,
   getBestPractices(testType) {
     const patterns = this.getRecommendedPatterns(testType);
     const practices = new Set();
-    
+
     patterns.forEach(pattern => {
       pattern.bestPractices.forEach(practice => practices.add(practice));
     });
-    
+
     return Array.from(practices);
   }
 
@@ -1100,13 +1100,13 @@ END;`,
   getUsageExamples(testType) {
     const patterns = this.getRecommendedPatterns(testType);
     const examples = [];
-    
+
     patterns.forEach(pattern => {
       if (pattern.examples && pattern.examples.length > 0) {
         examples.push(...pattern.examples);
       }
     });
-    
+
     return examples;
   }
 
@@ -1115,7 +1115,7 @@ END;`,
    * @returns {string} Formatted documentation
    */
   generateDocumentation() {
-    let doc = `# Test Pattern Library Documentation\n\n`;
+    let doc = '# Test Pattern Library Documentation\n\n';
     doc += `Generated on: ${new Date().toISOString()}\n\n`;
     doc += `Total Patterns: ${this.patterns.size}\n`;
     doc += `Categories: ${this.categories.size}\n\n`;
@@ -1124,34 +1124,34 @@ END;`,
     for (const [categoryName, category] of this.categories) {
       doc += `## ${category.name.toUpperCase().replace('_', ' ')}\n\n`;
       doc += `${category.description}\n\n`;
-      
-      doc += `### Common Use Cases\n`;
+
+      doc += '### Common Use Cases\n';
       category.commonUseCases.forEach(useCase => {
         doc += `- ${useCase}\n`;
       });
-      doc += `\n`;
+      doc += '\n';
 
-      doc += `### Best Practices\n`;
+      doc += '### Best Practices\n';
       category.bestPractices.forEach(practice => {
         doc += `- ${practice}\n`;
       });
-      doc += `\n`;
+      doc += '\n';
 
-      doc += `### Available Patterns\n`;
+      doc += '### Available Patterns\n';
       category.patterns.forEach(pattern => {
         doc += `#### ${pattern.name}\n`;
         doc += `**Difficulty:** ${pattern.difficulty}\n`;
         doc += `**Description:** ${pattern.description}\n\n`;
-        
+
         if (pattern.examples && pattern.examples.length > 0) {
-          doc += `**Examples:**\n`;
+          doc += '**Examples:**\n';
           pattern.examples.forEach(example => {
             doc += `- ${example}\n`;
           });
-          doc += `\n`;
+          doc += '\n';
         }
       });
-      doc += `\n`;
+      doc += '\n';
     }
 
     return doc;

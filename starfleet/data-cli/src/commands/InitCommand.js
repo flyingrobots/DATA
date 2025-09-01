@@ -10,8 +10,8 @@ class InitCommand extends Command {
   }
 
   async performExecute() {
-    this.emit('progress', { 
-      message: 'Initializing D.A.T.A. project structure. Resistance is futile.' 
+    this.emit('progress', {
+      message: 'Initializing D.A.T.A. project structure. Resistance is futile.'
     });
 
     try {
@@ -32,22 +32,22 @@ class InitCommand extends Command {
       for (const dir of dirs) {
         const dirPath = path.join(this.projectPath, dir);
         await fs.mkdir(dirPath, { recursive: true });
-        this.emit('progress', { 
-          message: `Created directory: ${dir}` 
+        this.emit('progress', {
+          message: `Created directory: ${dir}`
         });
       }
 
       // Create .datarc.json config file
       const config = {
-        "$schema": "https://raw.githubusercontent.com/supabase/cli/main/schemas/config.json",
-        "test": {
-          "minimum_coverage": 80,
-          "test_timeout": 300,
-          "output_formats": ["console", "json"]
+        '$schema': 'https://raw.githubusercontent.com/supabase/cli/main/schemas/config.json',
+        'test': {
+          'minimum_coverage': 80,
+          'test_timeout': 300,
+          'output_formats': ['console', 'json']
         },
-        "environments": {
-          "local": {
-            "db": "postgresql://postgres:postgres@localhost:54322/postgres"
+        'environments': {
+          'local': {
+            'db': 'postgresql://postgres:postgres@localhost:54322/postgres'
           }
         }
       };
@@ -60,8 +60,8 @@ class InitCommand extends Command {
       // Create example SQL files
       await this.createExampleFiles();
 
-      this.emit('success', { 
-        message: 'Project initialization complete. Make it so!' 
+      this.emit('success', {
+        message: 'Project initialization complete. Make it so!'
       });
 
       return {
@@ -127,8 +127,8 @@ CREATE POLICY "Allow public read" ON public.maintenance_mode
 `
     );
 
-    this.emit('progress', { 
-      message: 'Example SQL files created successfully' 
+    this.emit('progress', {
+      message: 'Example SQL files created successfully'
     });
   }
 }

@@ -1,6 +1,6 @@
 /**
  * Test Generate Command
- * 
+ *
  * Generate pgTAP test templates for RPC functions and RLS policies.
  * Creates properly structured test files in the correct directories.
  */
@@ -20,7 +20,7 @@ class GenerateCommand extends TestCommand {
     isProd = false
   ) {
     super(null, null, testsDir, outputDir, logger, isProd);
-    
+
     // Test generation doesn't require database access
     this.requiresProductionConfirmation = false;
   }
@@ -34,11 +34,11 @@ class GenerateCommand extends TestCommand {
    */
   async performExecute(options = {}) {
     this.emit('generation:start', { type: options.type, name: options.name });
-    
+
     try {
       // Validate options
       this.validateGenerationOptions(options);
-      
+
       // Determine template type and generate
       let result;
       if (options.type === 'rpc') {
@@ -48,12 +48,12 @@ class GenerateCommand extends TestCommand {
       } else {
         throw new Error(`Unsupported test type: ${options.type}`);
       }
-      
+
       this.success(`Test template generated: ${result.outputFile}`);
       this.emit('generation:complete', result);
-      
+
       return result;
-      
+
     } catch (error) {
       this.error('Test template generation failed', error);
       this.emit('generation:failed', { error, type: options.type, name: options.name });
@@ -69,15 +69,15 @@ class GenerateCommand extends TestCommand {
     if (!options.type) {
       throw new Error('Test type is required. Use --rpc or --rls');
     }
-    
+
     if (!options.name) {
       throw new Error('Function or table name is required');
     }
-    
+
     if (!['rpc', 'rls'].includes(options.type)) {
       throw new Error('Test type must be either "rpc" or "rls"');
     }
-    
+
     // Validate name format
     if (!/^[a-zA-Z0-9_]+$/.test(options.name)) {
       throw new Error('Name must contain only letters, numbers, and underscores');
@@ -93,18 +93,18 @@ class GenerateCommand extends TestCommand {
     const testDir = await this.getTestsDir();
     const rpcTestDir = path.join(testDir, '002_rpc_tests');
     const outputFile = path.join(rpcTestDir, `${functionName}.test.sql`);
-    
+
     // Ensure RPC test directory exists
     await fs.mkdir(rpcTestDir, { recursive: true });
-    
+
     // Generate template content
     const template = this.generateRpcTemplate(functionName);
-    
+
     // Write template file
     await fs.writeFile(outputFile, template, 'utf8');
-    
+
     this.progress(`Generated RPC test template: ${outputFile}`);
-    
+
     return {
       type: 'rpc',
       functionName,
@@ -123,18 +123,18 @@ class GenerateCommand extends TestCommand {
     const testDir = await this.getTestsDir();
     const rlsTestDir = path.join(testDir, '003_rls_tests');
     const outputFile = path.join(rlsTestDir, `${tableName}.test.sql`);
-    
+
     // Ensure RLS test directory exists
     await fs.mkdir(rlsTestDir, { recursive: true });
-    
+
     // Generate template content
     const template = this.generateRlsTemplate(tableName);
-    
+
     // Write template file
     await fs.writeFile(outputFile, template, 'utf8');
-    
+
     this.progress(`Generated RLS test template: ${outputFile}`);
-    
+
     return {
       type: 'rls',
       tableName,
@@ -151,7 +151,7 @@ class GenerateCommand extends TestCommand {
    */
   generateRpcTemplate(functionName) {
     const testFunctionName = `run_${functionName}_tests`;
-    
+
     return `-- =========================================================================
 -- RPC FUNCTION TESTS: ${functionName}
 -- =========================================================================
@@ -257,7 +257,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${functionName} RPC
    */
   generateRlsTemplate(tableName) {
     const testFunctionName = `run_${tableName}_rls_tests`;
-    
+
     return `-- =========================================================================
 -- RLS POLICY TESTS: ${tableName}
 -- =========================================================================
@@ -410,7 +410,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for Row Level Security 
     // For now, return common functions based on existing patterns
     return [
       'get_random_pets',
-      'get_pet_details', 
+      'get_pet_details',
       'search_adoptable_pets',
       'is_admin',
       'is_bootstrap_mode',

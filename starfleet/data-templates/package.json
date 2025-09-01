@@ -10,7 +10,7 @@
     "./lib/EdgeFunctionGenerator": "./lib/EdgeFunctionGenerator.js"
   },
   "scripts": {
-    "lint": "eslint \"src/**/*.{js,mjs,cjs,ts,tsx}\" \"lib/**/*.{js,mjs,cjs,ts,tsx}\"",
+    "lint": "eslint \"*.js\" \"lib/**/*.{js,mjs,cjs}\"",
     "test": "vitest --run --passWithNoTests",
     "build": "echo \"No build needed for pure JS\""
   },

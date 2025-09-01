@@ -23,39 +23,39 @@ class CoverageCommand extends TestCommand {
    */
   async performExecute(options = {}) {
     this.emit('start', { isProd: this.isProd, options });
-    
+
     // Load test configuration
     const testConfig = await this._getTestConfig();
-    
+
     // Parse enforcement options with config defaults
     const enforce = options.enforce !== undefined ? options.enforce : testConfig.coverage_enforcement;
     const minCoverage = parseInt(options.minCoverage || testConfig.minimum_coverage || '80', 10);
     const minRpcCoverage = parseInt(options.minRpcCoverage || testConfig.minimum_coverage || '75', 10);
     const minRlsCoverage = parseInt(options.minRlsCoverage || '70', 10);
-    
+
     let client = null;
-    
+
     try {
       this.progress('Connecting to database...');
-      
+
       // Connect to the main postgres database (default database name)
       client = this.dbUtils.createDatabaseClient('postgres');
       await client.connect();
-      
+
       this.progress('Analyzing RPC function coverage...');
-      
+
       // Query RPC coverage
       const rpcResult = await client.query('SELECT * FROM test.analyze_rpc_coverage()');
       const rpcAnalysis = this.analyzer.analyzeRpcCoverage(rpcResult.rows);
-      
+
       this.progress('Analyzing RLS policy coverage...');
-      
+
       // Query RLS policy coverage
       const policyResult = await client.query('SELECT * FROM test.analyze_policy_coverage()');
       const policyAnalysis = this.analyzer.analyzePolicyCoverage(policyResult.rows);
-      
+
       this.progress('Generating coverage summary...');
-      
+
       // Query overall summary
       let summaryResult = null;
       try {
@@ -65,28 +65,28 @@ class CoverageCommand extends TestCommand {
         // Summary function might not exist in some migrations
         this.warn('Could not retrieve coverage summary - function may not be available');
       }
-      
+
       this.progress('Formatting coverage report...');
-      
+
       // Generate formatted report
       const report = this.analyzer.formatCoverageReport(rpcAnalysis, policyAnalysis, summaryResult);
-      
+
       // Output the report
       console.log('\n' + report);
-      
+
       // Generate stats for return value
       const stats = this.analyzer.generateCoverageStats(rpcAnalysis, policyAnalysis);
-      
+
       // Enforce coverage thresholds if requested
       if (enforce) {
         this.progress('Enforcing coverage thresholds...');
         this.enforcementResult = this.enforceCoverageThresholds(
-          stats, 
-          minCoverage, 
-          minRpcCoverage, 
+          stats,
+          minCoverage,
+          minRpcCoverage,
           minRlsCoverage
         );
-        
+
         if (!this.enforcementResult.passed) {
           // Exit after emitting the event and returning result
           this.emit('failed', { error: new Error('Coverage enforcement failed'), thresholds: this.enforcementResult });
@@ -95,27 +95,27 @@ class CoverageCommand extends TestCommand {
           this.success('All coverage thresholds met!');
         }
       }
-      
-      this.emit('complete', { 
-        rpcAnalysis, 
-        policyAnalysis, 
+
+      this.emit('complete', {
+        rpcAnalysis,
+        policyAnalysis,
         summary: summaryResult,
         stats,
-        report 
+        report
       });
-      
+
       // Exit with non-zero code if enforcement failed
       if (enforce && this.enforcementResult && !this.enforcementResult.passed) {
         process.exit(1);
       }
-      
+
       return {
         rpc: rpcAnalysis,
         policies: policyAnalysis,
         summary: summaryResult,
         overall: stats.overall
       };
-      
+
     } catch (error) {
       // Handle common database connection errors with helpful messages
       if (error.code === 'ECONNREFUSED') {
@@ -131,7 +131,7 @@ class CoverageCommand extends TestCommand {
       } else {
         this.error('Failed to analyze test coverage', error);
       }
-      
+
       this.emit('failed', { error });
       throw error;
     } finally {
@@ -144,7 +144,7 @@ class CoverageCommand extends TestCommand {
       }
     }
   }
-  
+
   /**
    * Enforce coverage thresholds
    * @param {Object} stats - Coverage statistics
@@ -156,7 +156,7 @@ class CoverageCommand extends TestCommand {
   enforceCoverageThresholds(stats, minOverall, minRpc, minRls) {
     const failures = [];
     let passed = true;
-    
+
     // Check overall coverage
     if (stats.overall && stats.overall.percentage < minOverall) {
       const message = `Overall coverage ${stats.overall.percentage}% below threshold ${minOverall}%`;
@@ -166,7 +166,7 @@ class CoverageCommand extends TestCommand {
     } else if (stats.overall) {
       this.success(chalk.green(`✓ Overall coverage ${stats.overall.percentage}% meets threshold ${minOverall}%`));
     }
-    
+
     // Check RPC coverage
     if (stats.rpc && stats.rpc.percentage < minRpc) {
       const message = `RPC function coverage ${stats.rpc.percentage}% below threshold ${minRpc}%`;
@@ -176,7 +176,7 @@ class CoverageCommand extends TestCommand {
     } else if (stats.rpc) {
       this.success(chalk.green(`✓ RPC function coverage ${stats.rpc.percentage}% meets threshold ${minRpc}%`));
     }
-    
+
     // Check RLS policy coverage
     if (stats.policies && stats.policies.percentage < minRls) {
       const message = `RLS policy coverage ${stats.policies.percentage}% below threshold ${minRls}%`;
@@ -186,24 +186,24 @@ class CoverageCommand extends TestCommand {
     } else if (stats.policies) {
       this.success(chalk.green(`✓ RLS policy coverage ${stats.policies.percentage}% meets threshold ${minRls}%`));
     }
-    
+
     // Summary
     if (passed) {
       this.success(chalk.bold.green('🎉 All coverage thresholds met!'));
     } else {
       this.error(chalk.bold.red(`💥 Coverage enforcement failed - ${failures.length} threshold(s) not met`));
-      
+
       // Show details of failures
       failures.forEach(failure => {
         this.error(chalk.red(`  • ${failure.type}: ${failure.actual}% < ${failure.expected}%`));
       });
-      
+
       this.progress(chalk.yellow('\nTo fix coverage issues:'));
       this.progress(chalk.yellow('  1. Run: ./build/data test coverage (to see detailed coverage report)'));
       this.progress(chalk.yellow('  2. Add missing tests for uncovered RPC functions and RLS policies'));
       this.progress(chalk.yellow('  3. Re-run with --enforce to validate improvements'));
     }
-    
+
     return {
       passed,
       failures,
@@ -223,7 +223,7 @@ class CoverageCommand extends TestCommand {
     if (this.config) {
       return this.config.getTestConfig();
     }
-    
+
     try {
       const config = await Config.load();
       return config.getTestConfig();

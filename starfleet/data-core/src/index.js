@@ -1,6 +1,6 @@
 /**
  * @starfleet/core - Pure JavaScript Logic Core
- * 
+ *
  * This module exports all the pure business logic classes and utilities
  * that have zero I/O dependencies. Perfect for testing, server-side rendering,
  * or any environment where you need the core logic without file system access.

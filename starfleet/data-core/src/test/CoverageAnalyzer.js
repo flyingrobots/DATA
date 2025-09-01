@@ -2,7 +2,7 @@ const chalk = require('chalk');
 
 /**
  * Test Coverage Analyzer
- * 
+ *
  * Processes test coverage data from database queries and formats results
  * with color coding and statistics.
  */
@@ -148,14 +148,14 @@ class CoverageAnalyzer {
   colorizeByPercentage(text, percentage) {
     const colorClass = this.getColorClass(percentage);
     switch (colorClass) {
-      case 'good':
-        return chalk.green(text);
-      case 'medium':
-        return chalk.yellow(text);
-      case 'poor':
-        return chalk.red(text);
-      default:
-        return text;
+    case 'good':
+      return chalk.green(text);
+    case 'medium':
+      return chalk.yellow(text);
+    case 'poor':
+      return chalk.red(text);
+    default:
+      return text;
     }
   }
 
@@ -175,17 +175,17 @@ class CoverageAnalyzer {
     // Overall Summary
     if (summary && (summary.rpc || summary.policies)) {
       output.push(chalk.bold('📊 Overall Coverage Summary:'));
-      
+
       if (summary.rpc) {
         const rpcText = `RPC Functions: ${summary.rpc.percentage}% (${summary.rpc.tested}/${summary.rpc.total})`;
         output.push(`  ${this.colorizeByPercentage(rpcText, summary.rpc.percentage)}`);
       }
-      
+
       if (summary.policies) {
         const policyText = `RLS Policies: ${summary.policies.percentage}% (${summary.policies.tested}/${summary.policies.total})`;
         output.push(`  ${this.colorizeByPercentage(policyText, summary.policies.percentage)}`);
       }
-      
+
       output.push('');
     }
 
@@ -197,16 +197,16 @@ class CoverageAnalyzer {
       // Group by schema
       Object.keys(rpcAnalysis.bySchema).sort().forEach(schema => {
         output.push(chalk.cyan(`\n  ${schema} schema:`));
-        
+
         rpcAnalysis.bySchema[schema].forEach(func => {
           const status = func.has_test ? '✓' : '✗';
           const color = func.has_test ? chalk.green : chalk.red;
-          const testInfo = func.has_test ? 
-            `(${func.test_count} test${func.test_count !== 1 ? 's' : ''})` : 
+          const testInfo = func.has_test ?
+            `(${func.test_count} test${func.test_count !== 1 ? 's' : ''})` :
             '(0 tests)';
-          
+
           output.push(`    ${color(status)} ${func.function_name} ${chalk.gray(testInfo)}`);
-          
+
           // Show test function names if available
           if (func.has_test && func.test_function_names && func.test_function_names.length > 0) {
             func.test_function_names.forEach(testName => {
@@ -226,16 +226,16 @@ class CoverageAnalyzer {
       // Group by table
       Object.keys(policyAnalysis.byTable).sort().forEach(table => {
         output.push(chalk.cyan(`\n  ${table}:`));
-        
+
         policyAnalysis.byTable[table].forEach(policy => {
           const status = policy.has_test ? '✓' : '✗';
           const color = policy.has_test ? chalk.green : chalk.red;
-          const testInfo = policy.has_test && policy.test_evidence ? 
-            `(${policy.test_evidence.length} test${policy.test_evidence.length !== 1 ? 's' : ''})` : 
+          const testInfo = policy.has_test && policy.test_evidence ?
+            `(${policy.test_evidence.length} test${policy.test_evidence.length !== 1 ? 's' : ''})` :
             '(0 tests)';
-          
+
           output.push(`    ${color(status)} ${policy.policy_name} [${policy.policy_type}] ${chalk.gray(testInfo)}`);
-          
+
           // Show test evidence if available
           if (policy.has_test && policy.test_evidence && policy.test_evidence.length > 0) {
             policy.test_evidence.forEach(testName => {
