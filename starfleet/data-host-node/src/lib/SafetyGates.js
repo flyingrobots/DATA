@@ -1,6 +1,6 @@
 /**
  * SafetyGates.js - Production Safety Gate System
- * 
+ *
  * Implements safety checks to prevent accidental production damage during
  * migrations and deployments. Like D.A.T.A.'s positronic safety protocols,
  * these gates prevent harm to production systems.
@@ -45,7 +45,7 @@ export class SafetyGates {
       ...config
     };
 
-    this.log('info', 'Starting production safety gate validation', { 
+    this.log('info', 'Starting production safety gate validation', {
       operation: gateConfig.operation,
       force,
       timestamp: new Date().toISOString()
@@ -57,13 +57,13 @@ export class SafetyGates {
         timestamp: new Date().toISOString(),
         danger_level: 'CRITICAL'
       });
-      
+
       const confirmed = await this.requireForceConfirmation();
       if (!confirmed) {
         this.log('info', 'Force bypass cancelled by operator');
         return false;
       }
-      
+
       this.log('warn', 'All safety gates BYPASSED via force flag');
       return true;
     }
@@ -74,7 +74,7 @@ export class SafetyGates {
         await this.validateGitClean();
       }
 
-      // Gate 2: Branch verification  
+      // Gate 2: Branch verification
       if (this.options.branchValidation && gateConfig.expectedBranch) {
         await this.validateBranch(gateConfig.expectedBranch);
       }
@@ -90,7 +90,7 @@ export class SafetyGates {
           `Type "${gateConfig.confirmationMessage}" to proceed with ${gateConfig.operation}`,
           gateConfig.confirmationMessage
         );
-        
+
         if (!confirmed) {
           this.log('info', 'Production operation cancelled by operator');
           return false;
@@ -112,7 +112,7 @@ export class SafetyGates {
         gate: this.getCurrentGate(),
         timestamp: new Date().toISOString()
       });
-      
+
       throw error;
     }
   }
@@ -131,7 +131,7 @@ export class SafetyGates {
 
       // Check for uncommitted changes
       const statusOutput = await this.execGitCommand(['status', '--porcelain']);
-      
+
       if (statusOutput.trim()) {
         const files = statusOutput.split('\n').filter(line => line.trim());
         this.log('audit', 'Git repository has uncommitted changes', {
@@ -151,7 +151,7 @@ export class SafetyGates {
             unpushed_commits: commits,
             commit_count: commits.length
           });
-          
+
           // Warning only - don't fail the gate for unpushed commits
         }
       } catch (error) {
@@ -193,7 +193,7 @@ export class SafetyGates {
       }
 
       this.log('audit', 'Branch validation PASSED', {
-        branch: branch
+        branch
       });
 
     } catch (error) {
@@ -216,7 +216,7 @@ export class SafetyGates {
 
     try {
       // Check if we have a test command available
-      const hasVitestConfig = await this.fileExists('vitest.config.js') || 
+      const hasVitestConfig = await this.fileExists('vitest.config.js') ||
                                await this.fileExists('vite.config.js');
       const hasPackageJson = await this.fileExists('package.json');
 
@@ -291,7 +291,7 @@ export class SafetyGates {
       });
 
       const confirmed = userInput.trim() === expectedInput;
-      
+
       this.log('audit', 'Production confirmation attempted', {
         expected: expectedInput,
         provided_length: userInput.trim().length,
@@ -317,8 +317,8 @@ export class SafetyGates {
    */
   async requireForceConfirmation() {
     const message = 'FORCE MODE BYPASSES ALL SAFETY GATES!\n\nThis is EXTREMELY DANGEROUS and should only be used in emergencies.\nType "I UNDERSTAND THE RISKS" to continue';
-    
-    return await this.requireConfirmation(message, 'I UNDERSTAND THE RISKS');
+
+    return this.requireConfirmation(message, 'I UNDERSTAND THE RISKS');
   }
 
   /**
@@ -327,7 +327,7 @@ export class SafetyGates {
    * @returns {Promise<string>} Command output
    */
   async execGitCommand(args) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const git = spawn('git', args, {
         stdio: ['ignore', 'pipe', 'pipe'],
         cwd: process.cwd()
@@ -385,7 +385,7 @@ export class SafetyGates {
    * @returns {Promise<string>} Command output
    */
   async execCommand(command, args) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const proc = spawn(command, args, {
         stdio: ['ignore', 'pipe', 'pipe'],
         cwd: process.cwd()

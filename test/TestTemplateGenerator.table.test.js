@@ -150,7 +150,7 @@ describe('TestTemplateGenerator - Table Tests', () => {
       };
 
       const template = generator.generateTemplate(requirement);
-      
+
       // Base count (12) + columns (3*2=6) + constraints (2*2=4) + indexes (2*2=4) + RLS (3) = 29
       expect(template.content).toContain('tap.plan(29)');
     });

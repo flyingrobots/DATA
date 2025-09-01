@@ -247,7 +247,7 @@ class MigratePromoteCommand extends Command {
   async stageInGit(productionPath) {
     this.progress('Staging migration in Git...');
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const git = spawn('git', ['add', productionPath], {
         stdio: ['ignore', 'pipe', 'pipe']
       });
@@ -330,7 +330,7 @@ class MigratePromoteCommand extends Command {
  */
 export default async function promoteHandler(args, config, logger, isProd) {
   const command = new MigratePromoteCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigratePromoteCommand };

@@ -1,5 +1,5 @@
-const EventEmitter = require('events');
-const DatabaseUtils = require('./db-utils');
+import EventEmitter from 'events';
+import DatabaseUtils from './db-utils.js';
 
 /**
  * DiffEngine - Event-driven database schema difference generator
@@ -440,4 +440,4 @@ class DiffEngine extends EventEmitter {
   }
 }
 
-module.exports = DiffEngine;
+export default DiffEngine;

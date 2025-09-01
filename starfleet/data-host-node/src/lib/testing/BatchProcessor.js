@@ -1,9 +1,9 @@
 /**
  * Memory-aware batch processor for D.A.T.A. CLI
- * 
+ *
  * Processes large datasets in batches with memory monitoring
  * and cleanup to prevent OOM errors.
- * 
+ *
  * @class BatchProcessor
  * @author D.A.T.A. Engineering Team
  */
@@ -27,7 +27,7 @@ class BatchProcessor {
       enableGC: options.enableGC || true,
       ...options
     };
-    
+
     this.processedBatches = 0;
     this.totalItems = 0;
   }
@@ -44,10 +44,10 @@ class BatchProcessor {
 
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i];
-      
+
       // Check memory before processing batch
       const memBefore = MemoryMonitor.getMemoryUsage();
-      
+
       if (MemoryMonitor.shouldTriggerCleanup(memBefore.heapUsed, this.options.maxMemoryMB)) {
         await this.performCleanup();
       }
@@ -55,7 +55,7 @@ class BatchProcessor {
       // Process batch
       const batchResults = await processor(batch, i);
       results = results.concat(batchResults);
-      
+
       this.processedBatches++;
       this.totalItems += batch.length;
 

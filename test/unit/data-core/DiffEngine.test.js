@@ -1,6 +1,6 @@
 /**
  * Unit tests for DiffEngine schema comparison
- * 
+ *
  * Tests the DiffEngine functionality including:
  * - Schema state management and comparison
  * - Migration operation generation and prioritization
@@ -10,11 +10,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { 
-  DiffEngine, 
-  SchemaState, 
-  MigrationOperation, 
-  OperationType 
+import {
+  DiffEngine,
+  SchemaState,
+  MigrationOperation,
+  OperationType
 } from '../../../packages/data-core/lib/DiffEngine.js';
 import { CryptoPort } from '../../../packages/data-core/ports/index.js';
 
@@ -100,7 +100,7 @@ describe('MigrationOperation', () => {
       );
 
       const hash = op.generateHash(mockCrypto);
-      
+
       expect(hash).toBeTruthy();
       expect(op.hash).toBe(hash);
       expect(hash).toContain('mock_hash_');
@@ -109,10 +109,10 @@ describe('MigrationOperation', () => {
     it('should generate consistent hashes for same operation', () => {
       const op1 = new MigrationOperation(OperationType.CREATE_TABLE, 'test', 'CREATE TABLE test (id INT)');
       const op2 = new MigrationOperation(OperationType.CREATE_TABLE, 'test', 'CREATE TABLE test (id INT)');
-      
+
       const hash1 = op1.generateHash(mockCrypto);
       const hash2 = op2.generateHash(mockCrypto);
-      
+
       // Note: In a real crypto implementation, these would be identical
       // Our mock generates sequential hashes, so we just verify both are generated
       expect(hash1).toBeTruthy();
@@ -122,9 +122,9 @@ describe('MigrationOperation', () => {
     it('should include type, name, and SQL in hash data', () => {
       const op = new MigrationOperation(OperationType.ALTER_TABLE, 'users', 'ALTER TABLE users ADD COLUMN name VARCHAR(100)');
       const spy = vi.spyOn(mockCrypto, 'hash');
-      
+
       op.generateHash(mockCrypto);
-      
+
       expect(spy).toHaveBeenCalledWith('2:users:ALTER TABLE users ADD COLUMN name VARCHAR(100)');
     });
   });
@@ -180,7 +180,7 @@ describe('MigrationOperation', () => {
 
       const priorities = operations.map(op => op.getPriority());
       const expectedPriorities = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-      
+
       expect(priorities).toEqual(expectedPriorities);
     });
 
@@ -198,7 +198,7 @@ describe('MigrationOperation', () => {
       ];
 
       operations.sort((a, b) => a.getPriority() - b.getPriority());
-      
+
       expect(operations[0].type).toBe(OperationType.DROP_VIEW);
       expect(operations[1].type).toBe(OperationType.ALTER_TABLE);
       expect(operations[2].type).toBe(OperationType.CREATE_TABLE);
@@ -232,7 +232,7 @@ describe('SchemaState', () => {
       };
 
       const state = new SchemaState(initialObjects, 'test_checksum');
-      
+
       expect(state.objects.tables.get('users')).toEqual({ name: 'users', columns: ['id', 'name'] });
       expect(state.objects.customType.get('custom')).toEqual({ definition: 'test' });
       expect(state.checksum).toBe('test_checksum');
@@ -243,14 +243,14 @@ describe('SchemaState', () => {
     it('should add objects correctly', () => {
       const userTable = { name: 'users', columns: ['id', 'name', 'email'] };
       schemaState.addObject('tables', 'users', userTable);
-      
+
       expect(schemaState.objects.tables.get('users')).toBe(userTable);
     });
 
     it('should create new object type if needed', () => {
       const customDefinition = { type: 'custom', definition: 'test' };
       schemaState.addObject('customTypes', 'test_type', customDefinition);
-      
+
       expect(schemaState.objects.customTypes).toBeInstanceOf(Map);
       expect(schemaState.objects.customTypes.get('test_type')).toBe(customDefinition);
     });
@@ -258,7 +258,7 @@ describe('SchemaState', () => {
     it('should retrieve objects correctly', () => {
       const viewDef = { name: 'user_view', query: 'SELECT * FROM users' };
       schemaState.addObject('views', 'user_view', viewDef);
-      
+
       expect(schemaState.getObject('views', 'user_view')).toBe(viewDef);
       expect(schemaState.getObject('views', 'nonexistent')).toBeUndefined();
       expect(schemaState.getObject('nonexistent_type', 'test')).toBeUndefined();
@@ -266,7 +266,7 @@ describe('SchemaState', () => {
 
     it('should check object existence correctly', () => {
       schemaState.addObject('functions', 'get_user', { name: 'get_user' });
-      
+
       expect(schemaState.hasObject('functions', 'get_user')).toBe(true);
       expect(schemaState.hasObject('functions', 'nonexistent')).toBe(false);
       expect(schemaState.hasObject('nonexistent_type', 'test')).toBe(false);
@@ -275,7 +275,7 @@ describe('SchemaState', () => {
     it('should get object names correctly', () => {
       schemaState.addObject('indexes', 'idx_users_email', { name: 'idx_users_email' });
       schemaState.addObject('indexes', 'idx_users_name', { name: 'idx_users_name' });
-      
+
       const names = schemaState.getObjectNames('indexes');
       expect(names).toHaveLength(2);
       expect(names).toContain('idx_users_email');
@@ -290,7 +290,7 @@ describe('SchemaState', () => {
   describe('checksum generation', () => {
     it('should generate checksum for empty state', () => {
       const checksum = schemaState.generateChecksum(mockCrypto);
-      
+
       expect(checksum).toBeTruthy();
       expect(schemaState.checksum).toBe(checksum);
     });
@@ -298,22 +298,22 @@ describe('SchemaState', () => {
     it('should generate different checksums for different states', () => {
       const state1 = new SchemaState();
       const state2 = new SchemaState();
-      
+
       state1.addObject('tables', 'users', { name: 'users' });
       state2.addObject('tables', 'orders', { name: 'orders' });
-      
+
       const checksum1 = state1.generateChecksum(mockCrypto);
       const checksum2 = state2.generateChecksum(mockCrypto);
-      
+
       expect(checksum1).not.toBe(checksum2);
     });
 
     it('should handle Maps in JSON serialization', () => {
       schemaState.addObject('tables', 'users', { name: 'users', columns: ['id'] });
-      
+
       const spy = vi.spyOn(mockCrypto, 'hash');
       schemaState.generateChecksum(mockCrypto);
-      
+
       expect(spy).toHaveBeenCalled();
       const serializedData = spy.mock.calls[0][0];
       expect(serializedData).toContain('users');
@@ -343,7 +343,7 @@ describe('DiffEngine', () => {
 
     it('should throw error for invalid port', () => {
       const invalidPort = { hash: () => {} }; // Not instance of CryptoPort
-      
+
       expect(() => new DiffEngine(invalidPort)).toThrow('Port must be instance of CryptoPort');
     });
   });
@@ -352,19 +352,19 @@ describe('DiffEngine', () => {
     it('should return empty operations for identical states', () => {
       currentState.addObject('tables', 'users', { name: 'users', columns: ['id'] });
       targetState.addObject('tables', 'users', { name: 'users', columns: ['id'] });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
       expect(operations).toHaveLength(0);
     });
 
     it('should generate CREATE operations for new objects', () => {
-      targetState.addObject('tables', 'users', { 
-        name: 'users', 
-        sql: 'CREATE TABLE users (id SERIAL PRIMARY KEY)' 
+      targetState.addObject('tables', 'users', {
+        name: 'users',
+        sql: 'CREATE TABLE users (id SERIAL PRIMARY KEY)'
       });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(1);
       expect(operations[0].type).toBe(OperationType.CREATE_TABLE);
       expect(operations[0].objectName).toBe('users');
@@ -373,9 +373,9 @@ describe('DiffEngine', () => {
 
     it('should generate DROP operations for removed objects', () => {
       currentState.addObject('tables', 'old_table', { name: 'old_table' });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(1);
       expect(operations[0].type).toBe(OperationType.DROP_TABLE);
       expect(operations[0].objectName).toBe('old_table');
@@ -384,14 +384,14 @@ describe('DiffEngine', () => {
 
     it('should generate ALTER operations for modified objects', () => {
       currentState.addObject('tables', 'users', { name: 'users', version: 1 });
-      targetState.addObject('tables', 'users', { 
-        name: 'users', 
+      targetState.addObject('tables', 'users', {
+        name: 'users',
         version: 2,
-        sql: 'ALTER TABLE users ADD COLUMN email VARCHAR(255)' 
+        sql: 'ALTER TABLE users ADD COLUMN email VARCHAR(255)'
       });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(1);
       expect(operations[0].type).toBe(OperationType.ALTER_TABLE);
       expect(operations[0].objectName).toBe('users');
@@ -406,11 +406,11 @@ describe('DiffEngine', () => {
       targetState.addObject('views', 'user_view', { sql: 'CREATE VIEW user_view' });
       targetState.addObject('functions', 'get_user', { sql: 'CREATE FUNCTION get_user' });
       targetState.addObject('indexes', 'idx_users', { sql: 'CREATE INDEX idx_users' });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(4);
-      
+
       const types = operations.map(op => op.type).sort();
       const expectedTypes = [
         OperationType.CREATE_TABLE,
@@ -418,7 +418,7 @@ describe('DiffEngine', () => {
         OperationType.CREATE_FUNCTION,
         OperationType.CREATE_INDEX
       ].sort();
-      
+
       expect(types).toEqual(expectedTypes);
     });
 
@@ -427,30 +427,30 @@ describe('DiffEngine', () => {
       currentState.addObject('tables', 'old_table', { name: 'old_table' });
       currentState.addObject('views', 'shared_view', { name: 'shared_view', version: 1 });
       currentState.addObject('functions', 'old_function', { name: 'old_function' });
-      
+
       // Target state
       targetState.addObject('tables', 'new_table', { sql: 'CREATE TABLE new_table' });
       targetState.addObject('views', 'shared_view', { name: 'shared_view', version: 2, sql: 'ALTER VIEW' });
       targetState.addObject('indexes', 'new_index', { sql: 'CREATE INDEX new_index' });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
-      // Should have: DROP old_table, DROP old_function, CREATE new_table, 
+
+      // Should have: DROP old_table, DROP old_function, CREATE new_table,
       // ALTER shared_view, CREATE new_index
       expect(operations).toHaveLength(5);
-      
+
       const dropOps = operations.filter(op => [
-        OperationType.DROP_TABLE, 
+        OperationType.DROP_TABLE,
         OperationType.DROP_FUNCTION
       ].includes(op.type));
       expect(dropOps).toHaveLength(2);
-      
+
       const createOps = operations.filter(op => [
-        OperationType.CREATE_TABLE, 
+        OperationType.CREATE_TABLE,
         OperationType.CREATE_INDEX
       ].includes(op.type));
       expect(createOps).toHaveLength(2);
-      
+
       const alterOps = operations.filter(op => op.type === OperationType.ALTER_TABLE);
       expect(alterOps).toHaveLength(1);
     });
@@ -461,12 +461,12 @@ describe('DiffEngine', () => {
       // Add operations that will create mixed priorities
       currentState.addObject('views', 'old_view', { name: 'old_view' });
       currentState.addObject('tables', 'old_table', { name: 'old_table' });
-      
+
       targetState.addObject('tables', 'new_table', { sql: 'CREATE TABLE new_table' });
       targetState.addObject('indexes', 'new_index', { sql: 'CREATE INDEX new_index' });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       // Should be ordered: DROP_VIEW (0), DROP_TABLE (4), CREATE_TABLE (5), CREATE_INDEX (8)
       expect(operations[0].type).toBe(OperationType.DROP_VIEW);
       expect(operations[1].type).toBe(OperationType.DROP_TABLE);
@@ -476,9 +476,9 @@ describe('DiffEngine', () => {
 
     it('should generate hashes for all operations', () => {
       targetState.addObject('tables', 'users', { sql: 'CREATE TABLE users' });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(1);
       expect(operations[0].hash).toBeTruthy();
       expect(operations[0].hash).toContain('mock_hash_');
@@ -491,23 +491,23 @@ describe('DiffEngine', () => {
       currentState.addObject('views', 'drop_view', { name: 'drop_view' });
       currentState.addObject('functions', 'drop_function', { name: 'drop_function' });
       currentState.addObject('indexes', 'drop_index', { name: 'drop_index' });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(4);
-      
+
       const tableOp = operations.find(op => op.objectName === 'drop_table');
       expect(tableOp.type).toBe(OperationType.DROP_TABLE);
       expect(tableOp.sql).toBe('DROP TABLE IF EXISTS drop_table');
-      
+
       const viewOp = operations.find(op => op.objectName === 'drop_view');
       expect(viewOp.type).toBe(OperationType.DROP_VIEW);
       expect(viewOp.sql).toBe('DROP VIEW IF EXISTS drop_view');
-      
+
       const functionOp = operations.find(op => op.objectName === 'drop_function');
       expect(functionOp.type).toBe(OperationType.DROP_FUNCTION);
       expect(functionOp.sql).toBe('DROP FUNCTION IF EXISTS drop_function');
-      
+
       const indexOp = operations.find(op => op.objectName === 'drop_index');
       expect(indexOp.type).toBe(OperationType.DROP_INDEX);
       expect(indexOp.sql).toBe('DROP INDEX IF EXISTS drop_index');
@@ -516,9 +516,9 @@ describe('DiffEngine', () => {
     it('should include original definition in drop metadata', () => {
       const originalDef = { name: 'test_table', columns: ['id', 'name'] };
       currentState.addObject('tables', 'test_table', originalDef);
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(1);
       expect(operations[0].metadata.originalDefinition).toBe(originalDef);
     });
@@ -526,23 +526,23 @@ describe('DiffEngine', () => {
 
   describe('create operation generation', () => {
     it('should use provided SQL for create operations', () => {
-      const tableDef = { 
+      const tableDef = {
         name: 'users',
-        sql: 'CREATE TABLE users (id SERIAL PRIMARY KEY, name VARCHAR(100))' 
+        sql: 'CREATE TABLE users (id SERIAL PRIMARY KEY, name VARCHAR(100))'
       };
       targetState.addObject('tables', 'users', tableDef);
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(1);
       expect(operations[0].sql).toBe(tableDef.sql);
     });
 
     it('should generate default SQL when not provided', () => {
       targetState.addObject('tables', 'test_table', { name: 'test_table' });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(1);
       expect(operations[0].sql).toBe('CREATE TABLE test_table');
     });
@@ -550,9 +550,9 @@ describe('DiffEngine', () => {
     it('should include definition in create metadata', () => {
       const definition = { name: 'test_view', query: 'SELECT * FROM users' };
       targetState.addObject('views', 'test_view', definition);
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(1);
       expect(operations[0].metadata.definition).toBe(definition);
     });
@@ -561,18 +561,18 @@ describe('DiffEngine', () => {
   describe('alter operation generation', () => {
     it('should generate alter operations with both definitions', () => {
       const currentDef = { name: 'users', version: 1, columns: ['id'] };
-      const targetDef = { 
-        name: 'users', 
-        version: 2, 
+      const targetDef = {
+        name: 'users',
+        version: 2,
         columns: ['id', 'name'],
         sql: 'ALTER TABLE users ADD COLUMN name VARCHAR(100)'
       };
-      
+
       currentState.addObject('tables', 'users', currentDef);
       targetState.addObject('tables', 'users', targetDef);
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(1);
       expect(operations[0].type).toBe(OperationType.ALTER_TABLE);
       expect(operations[0].sql).toBe(targetDef.sql);
@@ -584,9 +584,9 @@ describe('DiffEngine', () => {
     it('should generate default alter SQL when not provided', () => {
       currentState.addObject('functions', 'test_func', { version: 1 });
       targetState.addObject('functions', 'test_func', { version: 2 });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
-      
+
       expect(operations).toHaveLength(1);
       expect(operations[0].sql).toBe('-- ALTER FUNCTION test_func');
     });
@@ -595,10 +595,10 @@ describe('DiffEngine', () => {
   describe('definition equality comparison', () => {
     it('should detect identical definitions', () => {
       const definition = { name: 'test', columns: ['id', 'name'] };
-      
+
       currentState.addObject('tables', 'test', definition);
       targetState.addObject('tables', 'test', definition);
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
       expect(operations).toHaveLength(0);
     });
@@ -606,7 +606,7 @@ describe('DiffEngine', () => {
     it('should detect different definitions', () => {
       currentState.addObject('tables', 'test', { name: 'test', version: 1 });
       targetState.addObject('tables', 'test', { name: 'test', version: 2 });
-      
+
       const operations = diffEngine.calculateDiff(currentState, targetState);
       expect(operations).toHaveLength(1);
       expect(operations[0].type).toBe(OperationType.ALTER_TABLE);
@@ -614,12 +614,12 @@ describe('DiffEngine', () => {
 
     it('should use hash-based comparison', () => {
       const spy = vi.spyOn(mockCrypto, 'hash');
-      
+
       currentState.addObject('tables', 'test', { complex: { nested: { data: true } } });
       targetState.addObject('tables', 'test', { complex: { nested: { data: false } } });
-      
+
       diffEngine.calculateDiff(currentState, targetState);
-      
+
       // Should call hash at least twice for comparison
       expect(spy.mock.calls.length).toBeGreaterThanOrEqual(2);
     });
@@ -633,9 +633,9 @@ describe('DiffEngine', () => {
         new MigrationOperation(OperationType.DROP_TABLE, 'old_table', 'DROP TABLE old_table'),
         new MigrationOperation(OperationType.DROP_TABLE, 'old_table', 'DROP TABLE old_table') // duplicate
       ];
-      
+
       const optimized = diffEngine.optimizeOperations(operations);
-      
+
       expect(optimized).toHaveLength(2);
       expect(optimized[0].objectName).toBe('users');
       expect(optimized[1].objectName).toBe('old_table');
@@ -648,9 +648,9 @@ describe('DiffEngine', () => {
         new MigrationOperation(OperationType.DROP_TABLE, 'first', ''), // duplicate
         new MigrationOperation(OperationType.ALTER_TABLE, 'third', '')
       ];
-      
+
       const optimized = diffEngine.optimizeOperations(operations);
-      
+
       expect(optimized).toHaveLength(3);
       expect(optimized[0].objectName).toBe('first');
       expect(optimized[1].objectName).toBe('second');
@@ -667,7 +667,7 @@ describe('DiffEngine', () => {
     it('should handle missing object types gracefully', () => {
       const stateWithUndefined = new SchemaState();
       stateWithUndefined.objects.tables = undefined;
-      
+
       expect(() => diffEngine.calculateDiff(stateWithUndefined, targetState)).not.toThrow();
     });
 
@@ -682,8 +682,8 @@ describe('DiffEngine', () => {
         currentState.addObject('tables', `table${i}`, { name: `table${i}`, id: i });
         if (i % 2 === 0) {
           // Keep half, modify quarter, remove quarter
-          targetState.addObject('tables', `table${i}`, { 
-            name: `table${i}`, 
+          targetState.addObject('tables', `table${i}`, {
+            name: `table${i}`,
             id: i,
             modified: true
           });
@@ -692,14 +692,14 @@ describe('DiffEngine', () => {
           targetState.addObject('tables', `new_table${i}`, { name: `new_table${i}` });
         }
       }
-      
+
       const startTime = Date.now();
       const operations = diffEngine.calculateDiff(currentState, targetState);
       const duration = Date.now() - startTime;
-      
+
       expect(duration).toBeLessThan(1000); // Should complete quickly
       expect(operations.length).toBeGreaterThan(0);
-      
+
       // Verify all operations have hashes
       operations.forEach(op => {
         expect(op.hash).toBeTruthy();

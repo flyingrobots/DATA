@@ -2,7 +2,7 @@
  * Dependency Injection Container for data-core package.
  * Manages service registration, resolution, and lifecycle.
  * Supports constructor injection with automatic wiring.
- * 
+ *
  * @fileoverview Lightweight DI container with circular dependency detection
  */
 
@@ -23,28 +23,28 @@ export class DIContainer {
   constructor() {
     /** @type {Map<string, ServiceConfig & {constructor: Function, instance?: any}>} */
     this._services = new Map();
-    
+
     /** @type {Set<string>} Currently resolving services for circular dependency detection */
     this._resolving = new Set();
-    
+
     /** @type {Map<string, any>} Singleton instances cache */
     this._singletons = new Map();
   }
 
   /**
    * Register a service with the container.
-   * 
+   *
    * @param {string} name - Service name/key
    * @param {Function} constructor - Service constructor function
    * @param {ServiceConfig} [config={}] - Registration configuration
    * @returns {DIContainer} This container for chaining
-   * 
+   *
    * @example
    * ```javascript
    * container
    *   .register('fileSystem', FileSystemAdapter, { singleton: true })
-   *   .register('dataCore', DataCore, { 
-   *     dependencies: ['fileSystem', 'crypto', 'process', 'environment'] 
+   *   .register('dataCore', DataCore, {
+   *     dependencies: ['fileSystem', 'crypto', 'process', 'environment']
    *   });
    * ```
    */
@@ -52,7 +52,7 @@ export class DIContainer {
     if (typeof name !== 'string' || !name.trim()) {
       throw new Error('Service name must be a non-empty string');
     }
-    
+
     // Allow null constructor if factory is provided
     if (!config.factory && typeof constructor !== 'function') {
       throw new Error('Service constructor must be a function');
@@ -71,7 +71,7 @@ export class DIContainer {
 
   /**
    * Register a singleton service (convenience method).
-   * 
+   *
    * @param {string} name - Service name
    * @param {Function} constructor - Service constructor
    * @param {Object} [config={}] - Additional configuration
@@ -83,12 +83,12 @@ export class DIContainer {
 
   /**
    * Register a factory function for creating services.
-   * 
+   *
    * @param {string} name - Service name
    * @param {Function} factory - Factory function that returns service instance
    * @param {Object} [config={}] - Additional configuration
    * @returns {DIContainer} This container for chaining
-   * 
+   *
    * @example
    * ```javascript
    * container.registerFactory('database', (container) => {
@@ -107,7 +107,7 @@ export class DIContainer {
 
   /**
    * Register an existing instance as a singleton.
-   * 
+   *
    * @param {string} name - Service name
    * @param {any} instance - Service instance
    * @returns {DIContainer} This container for chaining
@@ -119,11 +119,11 @@ export class DIContainer {
 
   /**
    * Resolve a service by name with automatic dependency injection.
-   * 
+   *
    * @param {string} name - Service name to resolve
    * @returns {any} Service instance
    * @throws {Error} If service not found or circular dependency detected
-   * 
+   *
    * @example
    * ```javascript
    * const dataCore = container.resolve('dataCore');
@@ -164,12 +164,12 @@ export class DIContainer {
       } else {
         // Resolve constructor dependencies
         const dependencies = this._resolveDependencies(service);
-        
+
         // Add config to dependencies if it exists and no explicit dependencies were specified
         if (service.config && Object.keys(service.config).length > 0 && dependencies.length === 0) {
           dependencies.push(service.config);
         }
-        
+
         // Create instance with dependencies
         instance = new service.constructor(...dependencies);
       }
@@ -188,10 +188,10 @@ export class DIContainer {
 
   /**
    * Resolve multiple services at once.
-   * 
+   *
    * @param {string[]} names - Service names to resolve
    * @returns {Object} Object with resolved services keyed by name
-   * 
+   *
    * @example
    * ```javascript
    * const { fileSystem, process, environment } = container.resolveMultiple([
@@ -213,7 +213,7 @@ export class DIContainer {
 
   /**
    * Check if a service is registered.
-   * 
+   *
    * @param {string} name - Service name
    * @returns {boolean} True if service is registered
    */
@@ -224,37 +224,37 @@ export class DIContainer {
   /**
    * Create a child container that inherits from this container.
    * Useful for scoping services or creating test containers.
-   * 
+   *
    * @returns {DIContainer} Child container
    */
   createChildContainer() {
     const child = new DIContainer();
-    
+
     // Copy parent services (not instances)
     for (const [name, service] of this._services) {
       child._services.set(name, { ...service });
     }
-    
+
     // Reference to parent for fallback resolution
     child._parent = this;
-    
+
     return child;
   }
 
   /**
    * Auto-wire a constructor by analyzing its parameter names.
    * This is a convenience method for simple dependency injection scenarios.
-   * 
+   *
    * @param {Function} constructor - Constructor to analyze and wire
    * @param {Object} [overrides={}] - Manual dependency overrides
    * @returns {any} New instance with dependencies injected
-   * 
+   *
    * @example
    * ```javascript
    * class MyService {
    *   constructor(fileSystem, process) { ... }
    * }
-   * 
+   *
    * const instance = container.autoWire(MyService);
    * // fileSystem and process automatically resolved and injected
    * ```
@@ -287,7 +287,7 @@ export class DIContainer {
 
   /**
    * Get container statistics for debugging.
-   * 
+   *
    * @returns {Object} Container statistics
    */
   getStats() {
@@ -302,7 +302,7 @@ export class DIContainer {
 
   /**
    * Resolve dependencies for a service based on its configuration.
-   * 
+   *
    * @private
    * @param {Object} service - Service configuration
    * @returns {Array} Resolved dependency instances
@@ -327,14 +327,14 @@ export class DIContainer {
   /**
    * Extract parameter names from a function for auto-wiring.
    * Uses function.toString() to parse parameter names.
-   * 
+   *
    * @private
    * @param {Function} func - Function to analyze
    * @returns {string[]} Parameter names
    */
   _extractParameterNames(func) {
     const funcStr = func.toString();
-    
+
     // Match constructor parameters
     const match = funcStr.match(/constructor\s*\(([^)]*)\)/);
     if (!match || !match[1].trim()) {

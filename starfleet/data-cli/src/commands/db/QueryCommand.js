@@ -35,7 +35,7 @@ class QueryCommand extends DatabaseCommand {
       query: sqlContent.substring(0, 200) + (sqlContent.length > 200 ? '...' : '')
     });
 
-    return await this.confirm(
+    return this.confirm(
       'Are you sure you want to execute this query in PRODUCTION?'
     );
   }
@@ -71,7 +71,7 @@ class QueryCommand extends DatabaseCommand {
   async getSqlContent(sql, isFile) {
     if (isFile) {
       this.progress(`Reading SQL from file: ${sql}`);
-      return await fs.readFile(sql, 'utf8');
+      return fs.readFile(sql, 'utf8');
     }
     return sql;
   }

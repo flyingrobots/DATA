@@ -1,10 +1,10 @@
 /**
  * pgTAP Test Scanner for D.A.T.A. CLI
- * 
+ *
  * This module provides functionality to scan pgTAP test files and extract test coverage
  * information. It identifies pgTAP assertions, builds coverage maps, and tracks what
  * database objects and functionality are being tested.
- * 
+ *
  * @fileoverview pgTAP test file scanner for coverage analysis
  * @author D.A.T.A. Engineering Team
  * @version 1.0.0
@@ -60,7 +60,7 @@ import BatchProcessor from './BatchProcessor.js';
  * @property {string} filePath - Absolute path to the test file
  * @property {string} fileName - Name of the test file
  * @property {TestAssertion[]} assertions - Array of pgTAP assertions found
- * @property {number} planCount - Expected number of tests from SELECT plan() 
+ * @property {number} planCount - Expected number of tests from SELECT plan()
  * @property {string[]} dependencies - Any dependencies or includes found
  * @property {Object} metadata - Additional file metadata
  */
@@ -79,17 +79,17 @@ import BatchProcessor from './BatchProcessor.js';
 
 /**
  * pgTAP Test Scanner Class
- * 
+ *
  * Scans directories of pgTAP test files (.sql) and extracts test coverage information.
  * Identifies pgTAP assertions, builds coverage maps, and provides insights into what
  * database objects are being tested.
- * 
+ *
  * @extends EventEmitter
  */
 class pgTAPTestScanner extends EventEmitter {
   /**
    * Create a new pgTAP test scanner
-   * 
+   *
    * @param {Object} [options={}] - Scanner configuration options
    * @param {boolean} [options.includeCommented=false] - Include commented-out tests
    * @param {string[]} [options.fileExtensions=['.sql']] - File extensions to scan
@@ -102,7 +102,7 @@ class pgTAPTestScanner extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     /**
      * @type {Object} Scanner configuration
      */
@@ -125,12 +125,12 @@ class pgTAPTestScanner extends EventEmitter {
       enableCompression: false, // Enable data compression (experimental)
       ...options
     };
-    
+
     /**
      * @type {TestFile[]} Array of scanned test files
      */
     this.testFiles = [];
-    
+
     /**
      * @type {CoverageMap} Coverage analysis results
      */
@@ -144,7 +144,7 @@ class pgTAPTestScanner extends EventEmitter {
       triggers: {},
       filesByTarget: {}
     };
-    
+
     /**
      * @type {Object} Memory management state
      */
@@ -157,90 +157,90 @@ class pgTAPTestScanner extends EventEmitter {
       objectsProcessed: 0,
       streamingMode: false
     };
-    
+
     /**
      * @type {WeakMap} Weak references for cleanup
      */
     this.weakRefs = new WeakMap();
-    
+
     /**
      * @type {AbortController} For cancelling operations
      */
     this.abortController = new AbortController();
-    
+
     /**
      * @type {StreamingCoverageDatabase} Memory-aware coverage database
      */
     this.streamingDB = null;
-    
+
     /**
      * @type {BatchProcessor} Batch processing utility
      */
     this.batchProcessor = null;
-    
+
     /**
      * @type {Map<string, RegExp>} pgTAP assertion patterns
      */
     this.assertionPatterns = this._initializeAssertionPatterns();
-    
+
     /**
      * @type {RegExp} Pattern for SELECT plan() statements
      */
     this.planPattern = /SELECT\s+plan\s*\(\s*(\d+)\s*\)\s*;?/gi;
-    
+
     /**
      * @type {RegExp} Pattern for SQL comments
      */
     this.commentPattern = /--.*$/gm;
-    
+
     /**
      * @type {number} Total files processed
      */
     this.filesProcessed = 0;
-    
+
     /**
      * @type {number} Total assertions found
      */
     this.totalAssertions = 0;
-    
+
     // Initialize memory monitoring
     this._initializeMemoryMonitoring();
   }
-  
+
   /**
    * Initialize pgTAP assertion patterns
-   * 
+   *
    * @returns {Map<string, RegExp>} Map of assertion types to regex patterns
    * @private
    */
   _initializeAssertionPatterns() {
     const patterns = new Map();
-    
+
     // Schema testing
     patterns.set('has_schema', /SELECT\s+has_schema\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/gi);
     patterns.set('hasnt_schema', /SELECT\s+hasnt_schema\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    
+
     // Table testing - Enhanced patterns to handle more variations
     // Pattern for SELECT has_table(...) with optional schema, table name, and description
     patterns.set('has_table_select', /SELECT\s+has_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
     patterns.set('hasnt_table_select', /SELECT\s+hasnt_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // Pattern for ok(has_table(...), 'description') format
     patterns.set('has_table_ok', /ok\s*\(\s*has_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)\s*(?:,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
     patterns.set('hasnt_table_ok', /ok\s*\(\s*hasnt_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)\s*(?:,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // Table privilege testing
     // table_privs_are('table', 'role', ARRAY['privs']) or table_privs_are('schema', 'table', 'role', ARRAY['privs'])
     patterns.set('table_privs_are', /SELECT\s+table_privs_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\s*\[\s*(.*?)\s*\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // Table ownership testing
     // table_owner_is('table', 'owner') or table_owner_is('schema', 'table', 'owner')
     patterns.set('table_owner_is', /SELECT\s+table_owner_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // Table enumeration testing
     // tables_are('schema', ARRAY['table1', 'table2']) or tables_are(ARRAY['table1', 'table2'])
     patterns.set('tables_are', /SELECT\s+tables_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?ARRAY\s*\[\s*(.*?)\s*\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // Column testing
     patterns.set('has_column', /SELECT\s+has_column\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
     patterns.set('hasnt_column', /SELECT\s+hasnt_column\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
@@ -252,33 +252,33 @@ class pgTAPTestScanner extends EventEmitter {
     patterns.set('col_default_is', /SELECT\s+col_default_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*((?:[^'"`(),]|['"`][^'"`]*['"`]|\([^)]*\))+)\s*\)/gi);
     patterns.set('col_is_pk', /SELECT\s+col_is_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
     patterns.set('col_isnt_pk', /SELECT\s+col_isnt_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    
+
     // Primary key testing
     patterns.set('has_pk', /SELECT\s+has_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
     patterns.set('hasnt_pk', /SELECT\s+hasnt_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
-    
+
     // Foreign key testing
     patterns.set('has_fk', /SELECT\s+has_fk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
     patterns.set('hasnt_fk', /SELECT\s+hasnt_fk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
-    
+
     // Index testing - Enhanced patterns for comprehensive index coverage
     // has_index('table', 'index_name') or has_index('schema', 'table', 'index_name')
     patterns.set('has_index', /SELECT\s+has_index\s*\(\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
     patterns.set('hasnt_index', /SELECT\s+hasnt_index\s*\(\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
-    
+
     // index_is_on('table', 'index', ARRAY['column']) - tests what columns an index covers
     patterns.set('index_is_on', /SELECT\s+index_is_on\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\s*\[\s*(.*?)\s*\]\s*\)/gi);
-    
+
     // index_is_type('table', 'index', 'type') - tests index type (btree, gin, etc.)
     patterns.set('index_is_type', /SELECT\s+index_is_type\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    
+
     // has_unique('table', 'constraint_name') - tests unique constraints
     patterns.set('has_unique', /SELECT\s+has_unique\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
     patterns.set('hasnt_unique', /SELECT\s+hasnt_unique\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
-    
+
     // index_is_primary('table', 'index') - tests if index is primary key
     patterns.set('index_is_primary', /SELECT\s+index_is_primary\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
-    
+
     // Function testing
     patterns.set('has_function', /SELECT\s+has_function\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
     patterns.set('hasnt_function', /SELECT\s+hasnt_function\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
@@ -288,60 +288,60 @@ class pgTAPTestScanner extends EventEmitter {
     patterns.set('isnt_definer', /SELECT\s+isnt_definer\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
     patterns.set('volatility_is', /SELECT\s+volatility_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
     patterns.set('function_privs_are', /SELECT\s+function_privs_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\[(.*?)\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // View testing
     patterns.set('has_view', /SELECT\s+has_view\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
     patterns.set('hasnt_view', /SELECT\s+hasnt_view\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
-    
+
     // Type testing
     patterns.set('has_type', /SELECT\s+has_type\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
     patterns.set('hasnt_type', /SELECT\s+hasnt_type\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
-    
+
     // Result testing
     patterns.set('results_eq', /SELECT\s+results_eq\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
     patterns.set('results_ne', /SELECT\s+results_ne\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
-    
+
     // RLS (Row Level Security) policy testing
     patterns.set('is_rls_enabled', /SELECT\s+is_rls_enabled\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
     patterns.set('policy_exists', /SELECT\s+policy_exists\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
     patterns.set('policy_cmd_is', /SELECT\s+policy_cmd_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
     patterns.set('policy_roles_are', /SELECT\s+policy_roles_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\[(.*?)\]\s*\)/gi);
     patterns.set('policies_are', /SELECT\s+policies_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*ARRAY\[(.*?)\](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
-    
+
     // Trigger testing
     // has_trigger('table', 'trigger_name') or has_trigger('schema', 'table', 'trigger_name')
     // Also supports optional description: has_trigger('table', 'trigger', 'description')
     patterns.set('has_trigger', /SELECT\s+has_trigger\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
     patterns.set('hasnt_trigger', /SELECT\s+hasnt_trigger\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // trigger_is('table', 'trigger', 'function') or trigger_is('schema', 'table', 'trigger', 'func_schema', 'function')
     patterns.set('trigger_is', /SELECT\s+trigger_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // is_trigger_on('table', 'trigger', 'events') - tests trigger events (INSERT, UPDATE, DELETE)
     patterns.set('is_trigger_on', /SELECT\s+is_trigger_on\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // trigger_fires_on('table', 'trigger', 'timing') - tests trigger timing (BEFORE, AFTER, INSTEAD OF)
     patterns.set('trigger_fires_on', /SELECT\s+trigger_fires_on\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // trigger_is_for('table', 'trigger', 'level') - tests trigger level (ROW, STATEMENT)
     patterns.set('trigger_is_for', /SELECT\s+trigger_is_for\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     // triggers_are('table', ARRAY['trigger_names']) - tests all triggers on a table
     patterns.set('triggers_are', /SELECT\s+triggers_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*ARRAY\s*\[\s*(.*?)\s*\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    
+
     return patterns;
   }
-  
+
   /**
    * Scan a directory for pgTAP test files
-   * 
+   *
    * @param {string} testsDir - Directory to scan for test files
    * @returns {Promise<TestFile[]>} Array of parsed test files
    * @throws {Error} If directory doesn't exist or is not accessible
    */
   async scanDirectory(testsDir) {
     const startTime = Date.now();
-    
+
     try {
       // Emit directory scanning event
       const dirEvent = DirectoryEvent.scan(testsDir);
@@ -351,16 +351,16 @@ class pgTAPTestScanner extends EventEmitter {
         timestamp: dirEvent.timestamp,
         type: dirEvent.type
       });
-      
+
       // Check if directory exists
       const stat = await fs.stat(testsDir);
       if (!stat.isDirectory()) {
         throw new Error(`Path is not a directory: ${testsDir}`);
       }
-      
+
       // Find all test files
       const testFiles = await this._findTestFiles(testsDir);
-      
+
       if (testFiles.length === 0) {
         this.emit('warning', {
           message: 'No test files found',
@@ -370,18 +370,18 @@ class pgTAPTestScanner extends EventEmitter {
         });
         return [];
       }
-      
+
       // Process each test file
       this.testFiles = [];
       this.filesProcessed = 0;
       this.totalAssertions = 0;
-      
+
       for (let i = 0; i < testFiles.length; i++) {
         const filePath = testFiles[i];
-        
+
         this.emit('progress', {
           message: `Parsing test file: ${path.basename(filePath)}`,
-          data: { 
+          data: {
             filePath,
             filesProcessed: i,
             totalFiles: testFiles.length
@@ -390,7 +390,7 @@ class pgTAPTestScanner extends EventEmitter {
           type: 'progress',
           percentage: Math.round((i / testFiles.length) * 100)
         });
-        
+
         try {
           const testFile = await this.parseTestFile(filePath);
           this.testFiles.push(testFile);
@@ -406,26 +406,26 @@ class pgTAPTestScanner extends EventEmitter {
           });
         }
       }
-      
+
       // Build coverage map
       this._buildCoverageMap();
-      
+
       const duration = Date.now() - startTime;
       const successEvent = new SuccessEvent(
         `Scanned ${this.filesProcessed} test files and found ${this.totalAssertions} assertions`,
         { testsDir, filesProcessed: this.filesProcessed, totalAssertions: this.totalAssertions },
         duration
       );
-      
+
       this.emit('success', {
         message: successEvent.message,
         data: successEvent.details,
         timestamp: successEvent.timestamp,
         type: successEvent.type
       });
-      
+
       return this.testFiles;
-      
+
     } catch (error) {
       const errorEvent = ErrorEvent.fromError(error, `Failed to scan tests directory: ${testsDir}`);
       this.emit('error', {
@@ -438,10 +438,10 @@ class pgTAPTestScanner extends EventEmitter {
       throw error;
     }
   }
-  
+
   /**
    * Parse an individual test file
-   * 
+   *
    * @param {string} filePath - Path to the test file to parse
    * @returns {Promise<TestFile>} Parsed test file information
    * @throws {Error} If file cannot be read or parsed
@@ -450,32 +450,32 @@ class pgTAPTestScanner extends EventEmitter {
     try {
       // Read file content
       const content = await fs.readFile(filePath, 'utf8');
-      
+
       // Extract test plan
       const planCount = this._extractPlan(content);
-      
+
       // Extract assertions
       const assertions = this.extractAssertions(content);
-      
+
       // Extract dependencies (basic implementation)
       const dependencies = this._extractDependencies(content);
-      
+
       // Validate plan count if enabled
       if (this.options.validatePlans && planCount !== null && planCount !== assertions.length) {
         this.emit('warning', {
           message: `Plan count mismatch in ${path.basename(filePath)}`,
-          data: { 
-            filePath, 
-            plannedTests: planCount, 
-            foundAssertions: assertions.length 
+          data: {
+            filePath,
+            plannedTests: planCount,
+            foundAssertions: assertions.length
           },
           timestamp: new Date(),
           type: 'warning'
         });
       }
-      
+
       this.filesProcessed++;
-      
+
       const testFile = {
         filePath,
         fileName: path.basename(filePath),
@@ -488,53 +488,53 @@ class pgTAPTestScanner extends EventEmitter {
           parsed: new Date()
         }
       };
-      
+
       return testFile;
-      
+
     } catch (error) {
       throw new Error(`Failed to parse test file ${filePath}: ${error.message}`);
     }
   }
-  
+
   /**
    * Extract pgTAP assertions from SQL content
-   * 
+   *
    * @param {string} sql - SQL content to analyze
    * @returns {TestAssertion[]} Array of extracted assertions
    */
   extractAssertions(sql) {
     const assertions = [];
-    
+
     // Remove comments if not including commented tests
     let processedSql = sql;
     if (!this.options.includeCommented) {
       processedSql = sql.replace(this.commentPattern, '');
     }
-    
+
     // Split into lines for line number tracking
     const lines = processedSql.split('\n');
-    
+
     // Search for each assertion pattern
     for (const [assertionType, pattern] of this.assertionPatterns) {
       let match;
-      
+
       // Reset regex state
       pattern.lastIndex = 0;
-      
+
       while ((match = pattern.exec(processedSql)) !== null) {
         // Find line number
         const beforeMatch = processedSql.substring(0, match.index);
         const lineNumber = beforeMatch.split('\n').length;
-        
+
         // Extract parameters (filter out undefined captures)
         const parameters = match.slice(1).filter(param => param !== undefined);
-        
+
         // Clean parameters for specific assertion types
         this._cleanParameters(assertionType, parameters);
-        
+
         // Determine target based on assertion type
         const target = this._determineTarget(assertionType, parameters);
-        
+
         const assertion = {
           type: assertionType,
           target,
@@ -542,42 +542,42 @@ class pgTAPTestScanner extends EventEmitter {
           lineNumber,
           rawSql: match[0].trim()
         };
-        
+
         // Add function metadata for function-related assertions
         if (assertionType.includes('function') || assertionType.includes('definer') || assertionType === 'volatility_is') {
           assertion.functionMetadata = this._extractFunctionMetadata(assertionType, parameters);
         }
-        
+
         // Add table metadata for table-related assertions
         if (assertionType.includes('table')) {
           const metadata = this._extractAssertionMetadata(assertionType, parameters);
           Object.assign(assertion, metadata);
         }
-        
+
         // Add RLS policy metadata for policy-related assertions
         if (assertionType.includes('policy') || assertionType.includes('policies') || assertionType === 'is_rls_enabled') {
           assertion.policyMetadata = this._extractPolicyMetadata(assertionType, parameters);
         }
-        
+
         assertions.push(assertion);
       }
     }
-    
+
     return assertions.sort((a, b) => a.lineNumber - b.lineNumber);
   }
-  
+
   /**
    * Get the current coverage map
-   * 
+   *
    * @returns {CoverageMap} Coverage analysis results
    */
   getCoverageMap() {
     return { ...this.coverageMap };
   }
-  
+
   /**
    * Get statistics about the scanned tests
-   * 
+   *
    * @returns {Object} Test statistics
    */
   getStatistics() {
@@ -588,7 +588,7 @@ class pgTAPTestScanner extends EventEmitter {
       coverageStats: this._getCoverageStats()
     };
   }
-  
+
   /**
    * Reset scanner state
    */
@@ -607,12 +607,12 @@ class pgTAPTestScanner extends EventEmitter {
     this.filesProcessed = 0;
     this.totalAssertions = 0;
   }
-  
+
   // Private methods
-  
+
   /**
    * Find all test files in directory recursively
-   * 
+   *
    * @param {string} dir - Directory to search
    * @param {number} [depth=0] - Current recursion depth
    * @returns {Promise<string[]>} Array of test file paths
@@ -621,7 +621,7 @@ class pgTAPTestScanner extends EventEmitter {
   async _findTestFiles(dir, depth = 0) {
     const files = [];
     const startTime = Date.now();
-    
+
     // Check depth limit
     if (depth > this.options.maxDepth) {
       this.emit('warning', {
@@ -632,7 +632,7 @@ class pgTAPTestScanner extends EventEmitter {
       });
       return files;
     }
-    
+
     try {
       // Emit progress for directory scanning
       this.emit('progress', {
@@ -641,9 +641,9 @@ class pgTAPTestScanner extends EventEmitter {
         timestamp: new Date(),
         type: 'progress'
       });
-      
+
       const entries = await fs.readdir(dir, { withFileTypes: true });
-      
+
       // Process entries in sorted order for consistency
       const sortedEntries = entries.sort((a, b) => {
         // Directories first, then files, alphabetically within each group
@@ -651,40 +651,40 @@ class pgTAPTestScanner extends EventEmitter {
         if (!a.isDirectory() && b.isDirectory()) return 1;
         return a.name.localeCompare(b.name);
       });
-      
+
       for (const entry of sortedEntries) {
         const fullPath = path.join(dir, entry.name);
         // Use relative path from the original tests directory being scanned
         const testsRootDir = arguments.length > 1 ? arguments[2] : dir; // Pass root as 3rd param in recursion
         const relativePath = path.relative(testsRootDir, fullPath);
-        
+
         try {
           // Skip hidden files and directories unless explicitly included
           if (entry.name.startsWith('.') && !this._shouldIncludeHidden(relativePath)) {
             continue;
           }
-          
+
           // Check exclude patterns first (more efficient)
           if (this._isExcluded(relativePath)) {
             continue;
           }
-          
+
           if (entry.isDirectory()) {
             // Recursively search subdirectories, passing the root directory
             const subFiles = await this._findTestFiles(fullPath, depth + 1, testsRootDir);
             files.push(...subFiles);
-            
+
           } else if (entry.isFile()) {
             // Check if file should be included
             if (await this._shouldIncludeFile(fullPath, relativePath)) {
               files.push(fullPath);
             }
-            
+
           } else if (entry.isSymbolicLink() && this.options.followSymlinks) {
             // Handle symbolic links if enabled
             await this._handleSymlink(fullPath, relativePath, files, depth, testsRootDir);
           }
-          
+
         } catch (error) {
           // Handle permission errors gracefully
           if (error.code === 'EACCES' || error.code === 'EPERM') {
@@ -700,7 +700,7 @@ class pgTAPTestScanner extends EventEmitter {
           }
         }
       }
-      
+
       // Emit progress for completed directory
       const duration = Date.now() - startTime;
       this.emit('progress', {
@@ -709,7 +709,7 @@ class pgTAPTestScanner extends EventEmitter {
         timestamp: new Date(),
         type: 'progress'
       });
-      
+
     } catch (error) {
       if (error.code === 'EACCES' || error.code === 'EPERM') {
         this.emit('warning', {
@@ -722,13 +722,13 @@ class pgTAPTestScanner extends EventEmitter {
         throw new Error(`Failed to read directory ${dir}: ${error.message}`);
       }
     }
-    
+
     return files.sort(); // Ensure consistent ordering
   }
-  
+
   /**
    * Check if a file should be included based on patterns and extensions
-   * 
+   *
    * @param {string} fullPath - Full file path
    * @param {string} relativePath - Relative file path
    * @returns {Promise<boolean>} True if file should be included
@@ -740,40 +740,40 @@ class pgTAPTestScanner extends EventEmitter {
     if (!this.options.fileExtensions.includes(ext)) {
       return false;
     }
-    
+
     // Check include patterns using minimatch for consistency
-    const matchesInclude = this.options.includePatterns.some(pattern => 
+    const matchesInclude = this.options.includePatterns.some(pattern =>
       minimatch(relativePath, pattern, { dot: true })
     );
-    
+
     if (!matchesInclude) {
       return false;
     }
-    
+
     // Check legacy RegExp patterns
     if (this.options.ignorePatterns.some(pattern => pattern.test(fullPath))) {
       return false;
     }
-    
+
     return true;
   }
-  
+
   /**
    * Check if a path should be excluded based on exclude patterns
-   * 
+   *
    * @param {string} relativePath - Relative path to check
    * @returns {boolean} True if path should be excluded
    * @private
    */
   _isExcluded(relativePath) {
-    return this.options.excludePatterns.some(pattern => 
+    return this.options.excludePatterns.some(pattern =>
       minimatch(relativePath, pattern, { dot: true })
     );
   }
-  
+
   /**
    * Check if hidden files should be included for this specific path
-   * 
+   *
    * @param {string} relativePath - Relative path to check
    * @returns {boolean} True if hidden file should be included
    * @private
@@ -785,10 +785,10 @@ class pgTAPTestScanner extends EventEmitter {
       return pattern.includes('.') && this._matchesPattern(relativePath, pattern);
     });
   }
-  
+
   /**
    * Handle symbolic links during file discovery
-   * 
+   *
    * @param {string} fullPath - Full path to the symlink
    * @param {string} relativePath - Relative path to the symlink
    * @param {string[]} files - Array to collect file paths
@@ -801,11 +801,11 @@ class pgTAPTestScanner extends EventEmitter {
     try {
       const realPath = await fs.realpath(fullPath);
       const stat = await fs.stat(realPath);
-      
+
       // Prevent infinite loops by checking if we've seen this real path before
       // This is a simple check - a more robust solution would track visited inodes
       const realpathRelative = path.relative(testsRootDir, realPath);
-      
+
       if (stat.isDirectory()) {
         // Recursively process symlinked directory
         this.emit('progress', {
@@ -814,17 +814,17 @@ class pgTAPTestScanner extends EventEmitter {
           timestamp: new Date(),
           type: 'progress'
         });
-        
+
         const subFiles = await this._findTestFiles(realPath, depth + 1, testsRootDir);
         files.push(...subFiles);
-        
+
       } else if (stat.isFile()) {
         // Process symlinked file
         if (await this._shouldIncludeFile(realPath, realpathRelative)) {
           files.push(realPath); // Use the real path, not the symlink path
         }
       }
-      
+
     } catch (error) {
       if (error.code === 'ENOENT') {
         this.emit('warning', {
@@ -845,11 +845,11 @@ class pgTAPTestScanner extends EventEmitter {
       }
     }
   }
-  
+
   /**
    * Simple glob pattern matching without external dependencies
    * Supports basic patterns like *, **, and literal strings
-   * 
+   *
    * @param {string} filePath - File path to test
    * @param {string} pattern - Glob pattern
    * @returns {boolean} True if path matches pattern
@@ -859,52 +859,52 @@ class pgTAPTestScanner extends EventEmitter {
     // Normalize paths to use forward slashes
     const normalizedPath = filePath.replace(/\\/g, '/');
     const normalizedPattern = pattern.replace(/\\/g, '/');
-    
+
     // Handle exact matches
     if (normalizedPattern === normalizedPath) {
       return true;
     }
-    
+
     // Handle universal wildcard patterns
     if (normalizedPattern === '**/*' || normalizedPattern === '**') {
       return true;
     }
-    
+
     // Convert glob pattern to regex with special handling for leading **
     let regexPattern = normalizedPattern;
-    
+
     // Handle leading ** patterns specially
     if (regexPattern.startsWith('**/')) {
       regexPattern = regexPattern.substring(3); // Remove leading **/
       // Add optional prefix matcher - either nothing or any path with /
       regexPattern = '(?:.*/)?' + regexPattern;
     }
-    
+
     // Handle glob patterns BEFORE escaping special regex chars
     regexPattern = regexPattern
       .replace(/\*\*/g, '__DOUBLESTAR__')    // Temporarily mark **
       .replace(/\*/g, '__SINGLESTAR__')      // Temporarily mark *
       .replace(/\?/g, '__QUESTION__');       // Temporarily mark ?
-    
+
     // Now escape special regex characters
     regexPattern = regexPattern.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-    
+
     // Convert back to regex patterns
     regexPattern = regexPattern
       .replace(/__LEADINGMATCH__/g, '')      // Remove the leading match marker
       .replace(/__DOUBLESTAR__/g, '.*')      // ** matches any chars including /
       .replace(/__SINGLESTAR__/g, '[^/]*')   // * matches any chars except /
       .replace(/__QUESTION__/g, '[^/]');     // ? matches single char except /
-    
+
     try {
       const regex = new RegExp('^' + regexPattern + '$');
       const result = regex.test(normalizedPath);
-      
+
       // Debug logging (enable when needed)
       if (process.env.DEBUG_PATTERNS) {
         console.log(`Pattern: '${normalizedPattern}' => Regex: '^${regexPattern}$', Path: '${normalizedPath}', Result: ${result}`);
       }
-      
+
       return result;
     } catch (error) {
       // If regex is invalid, fall back to simple string matching
@@ -915,7 +915,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Extract test plan count from SQL
-   * 
+   *
    * @param {string} sql - SQL content
    * @returns {number|null} Plan count or null if not found
    * @private
@@ -924,31 +924,31 @@ class pgTAPTestScanner extends EventEmitter {
     const match = this.planPattern.exec(sql);
     return match ? parseInt(match[1], 10) : null;
   }
-  
+
   /**
    * Extract dependencies from SQL content
-   * 
+   *
    * @param {string} sql - SQL content
    * @returns {string[]} Array of dependencies found
    * @private
    */
   _extractDependencies(sql) {
     const dependencies = [];
-    
+
     // Look for common dependency patterns
     const includePattern = /\\i\s+['"`]([^'"`]+)['"`]/gi;
     let match;
-    
+
     while ((match = includePattern.exec(sql)) !== null) {
       dependencies.push(match[1]);
     }
-    
+
     return dependencies;
   }
-  
+
   /**
    * Determine target object from assertion parameters
-   * 
+   *
    * @param {string} assertionType - Type of assertion
    * @param {string[]} parameters - Assertion parameters
    * @returns {string} Target object identifier
@@ -957,12 +957,12 @@ class pgTAPTestScanner extends EventEmitter {
   _determineTarget(assertionType, parameters) {
     // Default logic - can be extended for specific assertion types
     if (parameters.length === 0) return '';
-    
+
     // For schema assertions, first parameter is schema name
     if (assertionType.includes('schema')) {
       return parameters[0];
     }
-    
+
     // For table assertions - Enhanced logic for new patterns
     if (assertionType.includes('table')) {
       if (assertionType.includes('_select')) {
@@ -1044,7 +1044,7 @@ class pgTAPTestScanner extends EventEmitter {
         return parameters.length > 1 ? `${parameters[0]}.${parameters[1]}` : `public.${parameters[0]}`;
       }
     }
-    
+
     // For column assertions, handle different patterns
     if (assertionType.includes('column') || assertionType.startsWith('col_')) {
       // col_type_is, col_default_is have schema, table, column, type/value
@@ -1068,14 +1068,14 @@ class pgTAPTestScanner extends EventEmitter {
         }
       }
     }
-    
+
     // For function assertions - handle specific function testing patterns
     if (assertionType.includes('function') || assertionType.includes('definer') || assertionType === 'volatility_is') {
       // Extract function name and schema for different assertion patterns
-      
+
       // Handle has_function, hasnt_function patterns:
       // has_function('function_name')
-      // has_function('schema', 'function_name') 
+      // has_function('schema', 'function_name')
       // has_function('function_name', ARRAY['type1', 'type2'])
       // has_function('schema', 'function_name', ARRAY['type1', 'type2'])
       if (assertionType === 'has_function' || assertionType === 'hasnt_function') {
@@ -1087,7 +1087,7 @@ class pgTAPTestScanner extends EventEmitter {
           return parameters[0];
         }
       }
-      
+
       // Handle function_returns patterns:
       // function_returns('function_name', 'return_type')
       // function_returns('schema', 'function_name', 'return_type')
@@ -1106,7 +1106,7 @@ class pgTAPTestScanner extends EventEmitter {
             // function, args, return_type pattern
             return parameters[0];
           } else {
-            // schema, function, return_type pattern  
+            // schema, function, return_type pattern
             return `${parameters[0]}.${parameters[1]}`;
           }
         } else if (parameters.length === 2) {
@@ -1114,7 +1114,7 @@ class pgTAPTestScanner extends EventEmitter {
           return parameters[0];
         }
       }
-      
+
       // Handle function_lang_is patterns:
       // function_lang_is('function_name', 'language')
       // function_lang_is('schema', 'function_name', 'language')
@@ -1128,7 +1128,7 @@ class pgTAPTestScanner extends EventEmitter {
           return parameters[0];
         }
       }
-      
+
       // Handle is_definer, isnt_definer patterns:
       // is_definer('function_name')
       // is_definer('schema', 'function_name')
@@ -1142,7 +1142,7 @@ class pgTAPTestScanner extends EventEmitter {
           return parameters[0];
         }
       }
-      
+
       // Handle volatility_is patterns:
       // volatility_is('function_name', 'volatility')
       // volatility_is('schema', 'function_name', 'volatility')
@@ -1156,7 +1156,7 @@ class pgTAPTestScanner extends EventEmitter {
           return parameters[0];
         }
       }
-      
+
       // Handle function_privs_are patterns:
       // function_privs_are('schema', 'function', ARRAY['type1'], 'role', ARRAY['privs'])
       // function_privs_are('function', ARRAY['type1'], 'role', ARRAY['privs'])
@@ -1169,13 +1169,13 @@ class pgTAPTestScanner extends EventEmitter {
           return parameters[0];
         }
       }
-      
+
       // Fallback for any other function assertions
       else {
         return parameters.length > 1 ? `${parameters[0]}.${parameters[1]}` : parameters[0];
       }
     }
-    
+
     // For index-related assertions
     if (assertionType.includes('index') || assertionType.includes('unique')) {
       // Handle different index assertion patterns
@@ -1226,7 +1226,7 @@ class pgTAPTestScanner extends EventEmitter {
         }
       }
     }
-    
+
     // For RLS policy assertions
     if (assertionType.includes('policy') || assertionType.includes('policies') || assertionType === 'is_rls_enabled') {
       if (assertionType === 'is_rls_enabled') {
@@ -1257,7 +1257,7 @@ class pgTAPTestScanner extends EventEmitter {
         // policies_are('table', ARRAY['policy1', 'policy2']) or policies_are('schema', 'table', ARRAY['policy1', 'policy2'])
         // The ARRAY[...] parameter is captured as a single parameter, so:
         // ['users', "'policy1', 'policy2'"] has length 2 -> target should be 'users'
-        // ['public', 'users', "'policy1', 'policy2'"] has length 3 -> target should be 'public.users'  
+        // ['public', 'users', "'policy1', 'policy2'"] has length 3 -> target should be 'public.users'
         // ['public', 'users', "'policy1', 'policy2'", 'description'] has length 4 -> target should be 'public.users'
         if (parameters.length >= 4) {
           return `${parameters[0]}.${parameters[1]}`;
@@ -1268,7 +1268,7 @@ class pgTAPTestScanner extends EventEmitter {
         }
       }
     }
-    
+
     // For trigger assertions
     if (assertionType.includes('trigger')) {
       if (assertionType === 'has_trigger' || assertionType === 'hasnt_trigger') {
@@ -1280,7 +1280,7 @@ class pgTAPTestScanner extends EventEmitter {
         } else if (parameters.length === 3) {
           // Could be: schema, table, trigger OR table, trigger, description
           // Heuristic: if 3rd param looks like a description (contains spaces, is very long, or contains descriptive words), treat as table, trigger, description
-          if (parameters[2].length > 50 || parameters[2].includes(' ') || 
+          if (parameters[2].length > 50 || parameters[2].includes(' ') ||
               (parameters[2].toLowerCase().includes('trigger') && parameters[2].length > 20)) {
             // Table, trigger, description
             return `public.${parameters[0]}.${parameters[1]}`;
@@ -1329,14 +1329,14 @@ class pgTAPTestScanner extends EventEmitter {
         }
       }
     }
-    
+
     // Default: join non-empty parameters
     return parameters.filter(p => p).join('.');
   }
-  
+
   /**
    * Clean parameters for specific assertion types
-   * 
+   *
    * @param {string} assertionType - Type of assertion
    * @param {string[]} parameters - Parameters array to clean in-place
    * @private
@@ -1346,11 +1346,11 @@ class pgTAPTestScanner extends EventEmitter {
     if (assertionType === 'col_default_is' && parameters.length > 0) {
       const lastIndex = parameters.length - 1;
       let value = parameters[lastIndex];
-      
+
       // Remove surrounding quotes if present, but preserve inner content
       if (value && typeof value === 'string') {
         value = value.trim();
-        
+
         // Handle single quotes
         if (value.startsWith("'") && value.endsWith("'") && value.length > 1) {
           parameters[lastIndex] = value.slice(1, -1);
@@ -1360,7 +1360,7 @@ class pgTAPTestScanner extends EventEmitter {
           parameters[lastIndex] = value.slice(1, -1);
         }
         // Handle backticks
-        else if (value.startsWith("`") && value.endsWith("`") && value.length > 1) {
+        else if (value.startsWith('`') && value.endsWith('`') && value.length > 1) {
           parameters[lastIndex] = value.slice(1, -1);
         }
       }
@@ -1369,7 +1369,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Extract additional metadata from assertion parameters
-   * 
+   *
    * @param {string} assertionType - Type of assertion
    * @param {string[]} parameters - Assertion parameters
    * @returns {Object} Additional metadata for the assertion
@@ -1377,7 +1377,7 @@ class pgTAPTestScanner extends EventEmitter {
    */
   _extractAssertionMetadata(assertionType, parameters) {
     const metadata = {};
-    
+
     // Extract metadata for table assertions
     if (assertionType.includes('table')) {
       if (assertionType.includes('_select')) {
@@ -1498,13 +1498,13 @@ class pgTAPTestScanner extends EventEmitter {
         }
       }
     }
-    
+
     return metadata;
   }
-  
+
   /**
    * Build coverage map from parsed test files
-   * 
+   *
    * @private
    */
   _buildCoverageMap() {
@@ -1519,11 +1519,11 @@ class pgTAPTestScanner extends EventEmitter {
       triggers: {},
       filesByTarget: {}
     };
-    
+
     for (const testFile of this.testFiles) {
       for (const assertion of testFile.assertions) {
         const { type, target } = assertion;
-        
+
         // Categorize by assertion type
         if (type.includes('schema')) {
           this._addToCoverageMap('schemas', target, type, testFile);
@@ -1540,22 +1540,22 @@ class pgTAPTestScanner extends EventEmitter {
         } else if (type.includes('trigger')) {
           this._addToCoverageMap('triggers', target, type, testFile);
         }
-        
+
         // Track files by target
         if (!this.coverageMap.filesByTarget[target]) {
           this.coverageMap.filesByTarget[target] = [];
         }
-        
+
         if (!this.coverageMap.filesByTarget[target].includes(testFile)) {
           this.coverageMap.filesByTarget[target].push(testFile);
         }
       }
     }
   }
-  
+
   /**
    * Add entry to coverage map
-   * 
+   *
    * @param {string} category - Coverage category
    * @param {string} target - Target object
    * @param {string} assertionType - Type of assertion
@@ -1579,7 +1579,7 @@ class pgTAPTestScanner extends EventEmitter {
         this.coverageMap[category][target] = [];
       }
     }
-    
+
     if (category === 'tables' && assertion) {
       // Enhanced table coverage handling
       const tableInfo = this.coverageMap[category][target];
@@ -1600,38 +1600,38 @@ class pgTAPTestScanner extends EventEmitter {
       }
     }
   }
-  
+
   /**
    * Get assertion type statistics
-   * 
+   *
    * @returns {Object.<string, number>} Count by assertion type
    * @private
    */
   _getAssertionTypeStats() {
     const stats = {};
-    
+
     for (const testFile of this.testFiles) {
       for (const assertion of testFile.assertions) {
         stats[assertion.type] = (stats[assertion.type] || 0) + 1;
       }
     }
-    
+
     return stats;
   }
-  
+
   /**
    * Get coverage statistics
-   * 
+   *
    * @returns {Object} Coverage statistics
    * @private
    */
   _getCoverageStats() {
     // Calculate enhanced table statistics
     const tableStats = Object.values(this.coverageMap.tables);
-    const tablesWithDescriptions = tableStats.filter(table => 
+    const tablesWithDescriptions = tableStats.filter(table =>
       typeof table === 'object' && table.descriptions && table.descriptions.length > 0
     ).length;
-    
+
     return {
       schemasWithTests: Object.keys(this.coverageMap.schemas).length,
       tablesWithTests: Object.keys(this.coverageMap.tables).length,
@@ -1644,10 +1644,10 @@ class pgTAPTestScanner extends EventEmitter {
       uniqueTargets: Object.keys(this.coverageMap.filesByTarget).length
     };
   }
-  
+
   /**
    * Parse ARRAY['item1', 'item2'] parameter into array of strings
-   * 
+   *
    * @param {string} arrayStr - Array parameter string like "'item1', 'item2'"
    * @returns {string[]} Array of parsed items
    * @private
@@ -1661,7 +1661,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Extract function metadata from assertion parameters
-   * 
+   *
    * @param {string} assertionType - Type of assertion
    * @param {string[]} parameters - Assertion parameters
    * @returns {Object} Function metadata object
@@ -1669,7 +1669,7 @@ class pgTAPTestScanner extends EventEmitter {
    */
   _extractFunctionMetadata(assertionType, parameters) {
     const metadata = {};
-    
+
     // Helper function to determine if a parameter is likely a schema vs function name
     const isLikelySchema = (param, nextParam) => {
       if (!nextParam) return false;
@@ -1677,188 +1677,188 @@ class pgTAPTestScanner extends EventEmitter {
       const commonSchemas = ['public', 'auth', 'storage', 'extensions', 'pg_catalog', 'information_schema'];
       return commonSchemas.includes(param.toLowerCase()) || param.includes('_schema') || param.includes('_db');
     };
-    
+
     if (parameters.length === 0) return metadata;
-    
+
     switch (assertionType) {
-      case 'has_function':
-      case 'hasnt_function':
-        // Patterns:
-        // has_function('function_name')
-        // has_function('schema', 'function_name') 
-        // has_function('function_name', ARRAY['type1', 'type2'])
-        // has_function('schema', 'function_name', ARRAY['type1', 'type2'])
-        
-        if (parameters.length >= 2 && !parameters[1].includes("'")) {
-          // Schema and function name provided (parameters[1] doesn't contain quotes)
-          metadata.schema = parameters[0];
-          metadata.name = parameters[1];
-          
-          if (parameters.length >= 3) {
-            metadata.parameters = this._parseArrayParameter(parameters[2]);
-          }
-        } else {
-          // Only function name provided, or function name with parameters
-          metadata.name = parameters[0];
-          
-          if (parameters.length >= 2) {
-            metadata.parameters = this._parseArrayParameter(parameters[1]);
-          }
-        }
-        break;
-        
-      case 'function_returns':
-        // Patterns:
-        // function_returns('function_name', 'return_type')
-        // function_returns('schema', 'function_name', 'return_type')
-        // function_returns('function_name', ARRAY['type1', 'type2'], 'return_type')
-        // function_returns('schema', 'function_name', ARRAY['type1', 'type2'], 'return_type')
-        
-        if (parameters.length >= 4) {
-          // Four parameters: schema, function, args, return_type
-          metadata.schema = parameters[0];
-          metadata.name = parameters[1];
+    case 'has_function':
+    case 'hasnt_function':
+      // Patterns:
+      // has_function('function_name')
+      // has_function('schema', 'function_name')
+      // has_function('function_name', ARRAY['type1', 'type2'])
+      // has_function('schema', 'function_name', ARRAY['type1', 'type2'])
+
+      if (parameters.length >= 2 && !parameters[1].includes("'")) {
+        // Schema and function name provided (parameters[1] doesn't contain quotes)
+        metadata.schema = parameters[0];
+        metadata.name = parameters[1];
+
+        if (parameters.length >= 3) {
           metadata.parameters = this._parseArrayParameter(parameters[2]);
-          metadata.returnType = parameters[3];
-        } else if (parameters.length === 3) {
-          // Three parameters could be:
-          // 1. function, args, return_type (parameters[1] contains quotes from ARRAY)
-          // 2. schema, function, return_type (no ARRAY parameter)
-          if (parameters[1] && parameters[1].includes("'")) {
-            // function, args, return_type pattern
-            metadata.name = parameters[0];
-            metadata.parameters = this._parseArrayParameter(parameters[1]);
-            metadata.returnType = parameters[2];
-          } else {
-            // schema, function, return_type pattern  
-            metadata.schema = parameters[0];
-            metadata.name = parameters[1];
-            metadata.returnType = parameters[2];
-          }
-        } else if (parameters.length >= 2) {
-          // Function, return_type pattern
-          metadata.name = parameters[0];
-          metadata.returnType = parameters[1];
         }
-        break;
-        
-      case 'function_lang_is':
-        // Patterns similar to function_returns but last param is language
-        if (parameters.length >= 3 && !parameters[1].startsWith('ARRAY') && !parameters[2].startsWith('ARRAY')) {
-          // Schema, function, language pattern
-          metadata.schema = parameters[0];
-          metadata.name = parameters[1];
-          metadata.language = parameters[2];
-        } else if (parameters.length >= 4 && parameters[2].startsWith('ARRAY')) {
-          // Schema, function, args, language pattern
-          metadata.schema = parameters[0];
-          metadata.name = parameters[1];
-          metadata.parameters = this._parseArrayParameter(parameters[2]);
-          metadata.language = parameters[3];
-        } else if (parameters.length >= 3 && parameters[1].startsWith('ARRAY')) {
-          // Function, args, language pattern
+      } else {
+        // Only function name provided, or function name with parameters
+        metadata.name = parameters[0];
+
+        if (parameters.length >= 2) {
+          metadata.parameters = this._parseArrayParameter(parameters[1]);
+        }
+      }
+      break;
+
+    case 'function_returns':
+      // Patterns:
+      // function_returns('function_name', 'return_type')
+      // function_returns('schema', 'function_name', 'return_type')
+      // function_returns('function_name', ARRAY['type1', 'type2'], 'return_type')
+      // function_returns('schema', 'function_name', ARRAY['type1', 'type2'], 'return_type')
+
+      if (parameters.length >= 4) {
+        // Four parameters: schema, function, args, return_type
+        metadata.schema = parameters[0];
+        metadata.name = parameters[1];
+        metadata.parameters = this._parseArrayParameter(parameters[2]);
+        metadata.returnType = parameters[3];
+      } else if (parameters.length === 3) {
+        // Three parameters could be:
+        // 1. function, args, return_type (parameters[1] contains quotes from ARRAY)
+        // 2. schema, function, return_type (no ARRAY parameter)
+        if (parameters[1] && parameters[1].includes("'")) {
+          // function, args, return_type pattern
           metadata.name = parameters[0];
           metadata.parameters = this._parseArrayParameter(parameters[1]);
-          metadata.language = parameters[2];
-        } else if (parameters.length >= 2) {
-          // Function, language pattern
-          metadata.name = parameters[0];
-          metadata.language = parameters[1];
-        }
-        break;
-        
-      case 'is_definer':
-      case 'isnt_definer':
-        // Similar patterns to has_function
-        if (parameters.length >= 2 && !parameters[1].includes("'") && !parameters[1].startsWith('ARRAY')) {
-          metadata.schema = parameters[0];
-          metadata.name = parameters[1];
-          
-          if (parameters.length >= 3 && parameters[2].startsWith('ARRAY')) {
-            metadata.parameters = this._parseArrayParameter(parameters[2]);
-          }
+          metadata.returnType = parameters[2];
         } else {
-          metadata.name = parameters[0];
-          
-          if (parameters.length >= 2 && parameters[1].startsWith('ARRAY')) {
-            metadata.parameters = this._parseArrayParameter(parameters[1]);
-          }
+          // schema, function, return_type pattern
+          metadata.schema = parameters[0];
+          metadata.name = parameters[1];
+          metadata.returnType = parameters[2];
         }
-        
-        metadata.isSecurityDefiner = assertionType === 'is_definer';
-        break;
-        
-      case 'volatility_is':
-        // Similar patterns to function_lang_is but last param is volatility
-        if (parameters.length >= 3 && !parameters[1].startsWith('ARRAY') && !parameters[2].startsWith('ARRAY')) {
-          // Schema, function, volatility pattern
-          metadata.schema = parameters[0];
-          metadata.name = parameters[1];
-          metadata.volatility = parameters[2];
-        } else if (parameters.length >= 4 && parameters[2].startsWith('ARRAY')) {
-          // Schema, function, args, volatility pattern
-          metadata.schema = parameters[0];
-          metadata.name = parameters[1];
+      } else if (parameters.length >= 2) {
+        // Function, return_type pattern
+        metadata.name = parameters[0];
+        metadata.returnType = parameters[1];
+      }
+      break;
+
+    case 'function_lang_is':
+      // Patterns similar to function_returns but last param is language
+      if (parameters.length >= 3 && !parameters[1].startsWith('ARRAY') && !parameters[2].startsWith('ARRAY')) {
+        // Schema, function, language pattern
+        metadata.schema = parameters[0];
+        metadata.name = parameters[1];
+        metadata.language = parameters[2];
+      } else if (parameters.length >= 4 && parameters[2].startsWith('ARRAY')) {
+        // Schema, function, args, language pattern
+        metadata.schema = parameters[0];
+        metadata.name = parameters[1];
+        metadata.parameters = this._parseArrayParameter(parameters[2]);
+        metadata.language = parameters[3];
+      } else if (parameters.length >= 3 && parameters[1].startsWith('ARRAY')) {
+        // Function, args, language pattern
+        metadata.name = parameters[0];
+        metadata.parameters = this._parseArrayParameter(parameters[1]);
+        metadata.language = parameters[2];
+      } else if (parameters.length >= 2) {
+        // Function, language pattern
+        metadata.name = parameters[0];
+        metadata.language = parameters[1];
+      }
+      break;
+
+    case 'is_definer':
+    case 'isnt_definer':
+      // Similar patterns to has_function
+      if (parameters.length >= 2 && !parameters[1].includes("'") && !parameters[1].startsWith('ARRAY')) {
+        metadata.schema = parameters[0];
+        metadata.name = parameters[1];
+
+        if (parameters.length >= 3 && parameters[2].startsWith('ARRAY')) {
           metadata.parameters = this._parseArrayParameter(parameters[2]);
-          metadata.volatility = parameters[3];
-        } else if (parameters.length >= 3 && parameters[1].startsWith('ARRAY')) {
-          // Function, args, volatility pattern
+        }
+      } else {
+        metadata.name = parameters[0];
+
+        if (parameters.length >= 2 && parameters[1].startsWith('ARRAY')) {
+          metadata.parameters = this._parseArrayParameter(parameters[1]);
+        }
+      }
+
+      metadata.isSecurityDefiner = assertionType === 'is_definer';
+      break;
+
+    case 'volatility_is':
+      // Similar patterns to function_lang_is but last param is volatility
+      if (parameters.length >= 3 && !parameters[1].startsWith('ARRAY') && !parameters[2].startsWith('ARRAY')) {
+        // Schema, function, volatility pattern
+        metadata.schema = parameters[0];
+        metadata.name = parameters[1];
+        metadata.volatility = parameters[2];
+      } else if (parameters.length >= 4 && parameters[2].startsWith('ARRAY')) {
+        // Schema, function, args, volatility pattern
+        metadata.schema = parameters[0];
+        metadata.name = parameters[1];
+        metadata.parameters = this._parseArrayParameter(parameters[2]);
+        metadata.volatility = parameters[3];
+      } else if (parameters.length >= 3 && parameters[1].startsWith('ARRAY')) {
+        // Function, args, volatility pattern
+        metadata.name = parameters[0];
+        metadata.parameters = this._parseArrayParameter(parameters[1]);
+        metadata.volatility = parameters[2];
+      } else if (parameters.length >= 2) {
+        // Function, volatility pattern
+        metadata.name = parameters[0];
+        metadata.volatility = parameters[1];
+      }
+      break;
+
+    case 'function_privs_are':
+      // Patterns:
+      // function_privs_are('schema', 'function', ARRAY['type1'], 'role', ARRAY['privs'])
+      // function_privs_are('function', ARRAY['type1'], 'role', ARRAY['privs'])
+      // function_privs_are('schema', 'function', 'role', ARRAY['privs'])
+      // function_privs_are('function', 'role', ARRAY['privs'])
+
+      if (parameters.length >= 5) {
+        // Full pattern with schema, function, args, role, privs
+        metadata.schema = parameters[0];
+        metadata.name = parameters[1];
+        if (parameters[2].startsWith('ARRAY')) {
+          metadata.parameters = this._parseArrayParameter(parameters[2]);
+          metadata.role = parameters[3];
+          metadata.privileges = this._parseArrayParameter(parameters[4]);
+        }
+      } else if (parameters.length >= 4) {
+        // Could be: schema, function, role, privs OR function, args, role, privs
+        if (parameters[1].startsWith('ARRAY')) {
+          // Function, args, role, privs
           metadata.name = parameters[0];
           metadata.parameters = this._parseArrayParameter(parameters[1]);
-          metadata.volatility = parameters[2];
-        } else if (parameters.length >= 2) {
-          // Function, volatility pattern
-          metadata.name = parameters[0];
-          metadata.volatility = parameters[1];
-        }
-        break;
-        
-      case 'function_privs_are':
-        // Patterns:
-        // function_privs_are('schema', 'function', ARRAY['type1'], 'role', ARRAY['privs'])
-        // function_privs_are('function', ARRAY['type1'], 'role', ARRAY['privs'])
-        // function_privs_are('schema', 'function', 'role', ARRAY['privs'])
-        // function_privs_are('function', 'role', ARRAY['privs'])
-        
-        if (parameters.length >= 5) {
-          // Full pattern with schema, function, args, role, privs
+          metadata.role = parameters[2];
+          metadata.privileges = this._parseArrayParameter(parameters[3]);
+        } else {
+          // Schema, function, role, privs
           metadata.schema = parameters[0];
           metadata.name = parameters[1];
-          if (parameters[2].startsWith('ARRAY')) {
-            metadata.parameters = this._parseArrayParameter(parameters[2]);
-            metadata.role = parameters[3];
-            metadata.privileges = this._parseArrayParameter(parameters[4]);
-          }
-        } else if (parameters.length >= 4) {
-          // Could be: schema, function, role, privs OR function, args, role, privs
-          if (parameters[1].startsWith('ARRAY')) {
-            // Function, args, role, privs
-            metadata.name = parameters[0];
-            metadata.parameters = this._parseArrayParameter(parameters[1]);
-            metadata.role = parameters[2];
-            metadata.privileges = this._parseArrayParameter(parameters[3]);
-          } else {
-            // Schema, function, role, privs
-            metadata.schema = parameters[0];
-            metadata.name = parameters[1];
-            metadata.role = parameters[2];
-            metadata.privileges = this._parseArrayParameter(parameters[3]);
-          }
-        } else if (parameters.length >= 3) {
-          // Function, role, privs
-          metadata.name = parameters[0];
-          metadata.role = parameters[1];
-          metadata.privileges = this._parseArrayParameter(parameters[2]);
+          metadata.role = parameters[2];
+          metadata.privileges = this._parseArrayParameter(parameters[3]);
         }
-        break;
+      } else if (parameters.length >= 3) {
+        // Function, role, privs
+        metadata.name = parameters[0];
+        metadata.role = parameters[1];
+        metadata.privileges = this._parseArrayParameter(parameters[2]);
+      }
+      break;
     }
-    
+
     return metadata;
   }
 
   /**
    * Extract RLS policy metadata from assertion parameters
-   * 
+   *
    * @param {string} assertionType - Type of assertion
    * @param {string[]} parameters - Assertion parameters
    * @returns {Object} Policy metadata object
@@ -1866,7 +1866,7 @@ class pgTAPTestScanner extends EventEmitter {
    */
   _extractPolicyMetadata(assertionType, parameters) {
     const metadata = {};
-    
+
     // Helper function to parse array parameters like ARRAY['role1', 'role2'] or ARRAY['policy1', 'policy2']
     const parseArrayParameter = (arrayStr) => {
       if (!arrayStr || !arrayStr.includes("'")) return [];
@@ -1874,108 +1874,108 @@ class pgTAPTestScanner extends EventEmitter {
       const matches = arrayStr.match(/'([^']*)'/g);
       return matches ? matches.map(m => m.slice(1, -1)) : [];
     };
-    
+
     if (parameters.length === 0) return metadata;
-    
+
     switch (assertionType) {
-      case 'is_rls_enabled':
-        // is_rls_enabled('table') or is_rls_enabled('schema', 'table')
-        if (parameters.length >= 2) {
-          metadata.schema = parameters[0];
-          metadata.tableName = parameters[1];
-        } else {
-          metadata.schema = 'public'; // Default schema
-          metadata.tableName = parameters[0];
-        }
-        break;
-        
-      case 'policy_exists':
-        // policy_exists('table', 'policy_name') or policy_exists('schema', 'table', 'policy_name')
-        if (parameters.length >= 3) {
-          metadata.schema = parameters[0];
-          metadata.tableName = parameters[1];
-          metadata.policyName = parameters[2];
-        } else if (parameters.length === 2) {
-          metadata.schema = 'public';
-          metadata.tableName = parameters[0];
-          metadata.policyName = parameters[1];
-        }
-        break;
-        
-      case 'policy_cmd_is':
-        // policy_cmd_is('table', 'policy', 'SELECT') or policy_cmd_is('schema', 'table', 'policy', 'SELECT')
+    case 'is_rls_enabled':
+      // is_rls_enabled('table') or is_rls_enabled('schema', 'table')
+      if (parameters.length >= 2) {
+        metadata.schema = parameters[0];
+        metadata.tableName = parameters[1];
+      } else {
+        metadata.schema = 'public'; // Default schema
+        metadata.tableName = parameters[0];
+      }
+      break;
+
+    case 'policy_exists':
+      // policy_exists('table', 'policy_name') or policy_exists('schema', 'table', 'policy_name')
+      if (parameters.length >= 3) {
+        metadata.schema = parameters[0];
+        metadata.tableName = parameters[1];
+        metadata.policyName = parameters[2];
+      } else if (parameters.length === 2) {
+        metadata.schema = 'public';
+        metadata.tableName = parameters[0];
+        metadata.policyName = parameters[1];
+      }
+      break;
+
+    case 'policy_cmd_is':
+      // policy_cmd_is('table', 'policy', 'SELECT') or policy_cmd_is('schema', 'table', 'policy', 'SELECT')
+      if (parameters.length >= 4) {
+        metadata.schema = parameters[0];
+        metadata.tableName = parameters[1];
+        metadata.policyName = parameters[2];
+        metadata.command = parameters[3];
+      } else if (parameters.length >= 3) {
+        metadata.schema = 'public';
+        metadata.tableName = parameters[0];
+        metadata.policyName = parameters[1];
+        metadata.command = parameters[2];
+      }
+      break;
+
+    case 'policy_roles_are':
+      // policy_roles_are('table', 'policy', ARRAY['role']) or policy_roles_are('schema', 'table', 'policy', ARRAY['role'])
+      if (parameters.length >= 4) {
+        metadata.schema = parameters[0];
+        metadata.tableName = parameters[1];
+        metadata.policyName = parameters[2];
+        metadata.roles = parseArrayParameter(parameters[3]);
+      } else if (parameters.length >= 3) {
+        metadata.schema = 'public';
+        metadata.tableName = parameters[0];
+        metadata.policyName = parameters[1];
+        metadata.roles = parseArrayParameter(parameters[2]);
+      }
+      break;
+
+    case 'policies_are':
+      // policies_are('table', ARRAY['policy1', 'policy2']) or policies_are('schema', 'table', ARRAY['policy1', 'policy2'])
+      if (parameters.length >= 3) {
+        metadata.schema = parameters[0];
+        metadata.tableName = parameters[1];
+        metadata.policies = parseArrayParameter(parameters[2]);
         if (parameters.length >= 4) {
-          metadata.schema = parameters[0];
-          metadata.tableName = parameters[1];
-          metadata.policyName = parameters[2];
-          metadata.command = parameters[3];
-        } else if (parameters.length >= 3) {
-          metadata.schema = 'public';
-          metadata.tableName = parameters[0];
-          metadata.policyName = parameters[1];
-          metadata.command = parameters[2];
+          metadata.description = parameters[3];
         }
-        break;
-        
-      case 'policy_roles_are':
-        // policy_roles_are('table', 'policy', ARRAY['role']) or policy_roles_are('schema', 'table', 'policy', ARRAY['role'])
-        if (parameters.length >= 4) {
-          metadata.schema = parameters[0];
-          metadata.tableName = parameters[1];
-          metadata.policyName = parameters[2];
-          metadata.roles = parseArrayParameter(parameters[3]);
-        } else if (parameters.length >= 3) {
-          metadata.schema = 'public';
-          metadata.tableName = parameters[0];
-          metadata.policyName = parameters[1];
-          metadata.roles = parseArrayParameter(parameters[2]);
-        }
-        break;
-        
-      case 'policies_are':
-        // policies_are('table', ARRAY['policy1', 'policy2']) or policies_are('schema', 'table', ARRAY['policy1', 'policy2'])
+      } else if (parameters.length >= 2) {
+        metadata.schema = 'public';
+        metadata.tableName = parameters[0];
+        metadata.policies = parseArrayParameter(parameters[1]);
         if (parameters.length >= 3) {
-          metadata.schema = parameters[0];
-          metadata.tableName = parameters[1];
-          metadata.policies = parseArrayParameter(parameters[2]);
-          if (parameters.length >= 4) {
-            metadata.description = parameters[3];
-          }
-        } else if (parameters.length >= 2) {
-          metadata.schema = 'public';
-          metadata.tableName = parameters[0];
-          metadata.policies = parseArrayParameter(parameters[1]);
-          if (parameters.length >= 3) {
-            metadata.description = parameters[2];
-          }
+          metadata.description = parameters[2];
         }
-        break;
+      }
+      break;
     }
-    
+
     return metadata;
   }
 
   /**
    * Build a comprehensive coverage database from all scanned test files
-   * 
+   *
    * This method processes all test files and builds an enhanced coverage database
    * that indexes coverage by object type and name, tracks assertion counts,
    * and enables efficient querying for coverage analysis.
-   * 
+   *
    * @returns {Object} Enhanced coverage database
    * @public
    */
   async buildCoverageDatabase() {
     this.emit('progress', new ProgressEvent('Building coverage database with memory management...'));
-    
+
     // Check if we should use streaming mode based on file count and memory
     const initialMemory = MemoryMonitor.getMemoryUsage();
-    const shouldStream = this.options.enableStreaming && 
-                        (this.testFiles.length > this.options.batchSize || 
+    const shouldStream = this.options.enableStreaming &&
+                        (this.testFiles.length > this.options.batchSize ||
                          initialMemory.heapUsed > (this.options.maxMemoryMB * 0.5));
-    
+
     if (shouldStream) {
-      return await this._buildCoverageDatabaseBatched();
+      return this._buildCoverageDatabaseBatched();
     } else {
       return this._buildCoverageDatabaseStandard();
     }
@@ -1987,11 +1987,11 @@ class pgTAPTestScanner extends EventEmitter {
    */
   _buildCoverageDatabaseStandard() {
     const database = this._createEmptyDatabase();
-    
+
     // Process files with periodic memory checks
     for (let i = 0; i < this.testFiles.length; i++) {
       const testFile = this.testFiles[i];
-      
+
       // Check memory every 10 files
       if (i % 10 === 0) {
         const memUsage = MemoryMonitor.getMemoryUsage();
@@ -2005,7 +2005,7 @@ class pgTAPTestScanner extends EventEmitter {
 
     this._identifyCoverageGaps(database);
     this.coverageDatabase = database;
-    
+
     this.emit('success', new SuccessEvent('Coverage database built successfully', {
       totalObjects: this._getTotalIndexedObjects(database),
       totalAssertions: database.assertionCounts.total,
@@ -2023,7 +2023,7 @@ class pgTAPTestScanner extends EventEmitter {
   async _buildCoverageDatabaseBatched() {
     this.memoryState.streamingMode = true;
     const database = this._createEmptyDatabase();
-    
+
     // Use BatchProcessor for memory-managed processing
     await this.batchProcessor.processBatches(
       this.testFiles,
@@ -2040,21 +2040,21 @@ class pgTAPTestScanner extends EventEmitter {
             }
           }
         }
-        
+
         // Process batch files
         for (const testFile of batch) {
           this._processFileForDatabase(testFile, database);
         }
-        
+
         this.memoryState.batchesProcessed++;
-        
+
         return batch.map(f => f.filePath);
       }
     );
 
     this._identifyCoverageGaps(database);
     this.coverageDatabase = database;
-    
+
     this.emit('success', new SuccessEvent('Batched coverage database built successfully', {
       totalObjects: this._getTotalIndexedObjects(database),
       totalAssertions: database.assertionCounts.total,
@@ -2126,7 +2126,7 @@ class pgTAPTestScanner extends EventEmitter {
     for (const assertion of testFile.assertions) {
       database.assertionCounts.total++;
       this.memoryState.objectsProcessed++;
-      
+
       // Track assertion types
       const typeCount = database.assertionCounts.byType.get(assertion.type) || 0;
       database.assertionCounts.byType.set(assertion.type, typeCount + 1);
@@ -2138,7 +2138,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Get coverage information for a specific database object
-   * 
+   *
    * @param {string} objectType - Type of object (table, column, function, etc.)
    * @param {string} objectName - Name/identifier of the object
    * @returns {Object|null} Coverage information for the object
@@ -2151,16 +2151,16 @@ class pgTAPTestScanner extends EventEmitter {
 
     const normalizedType = objectType.toLowerCase();
     const objectMap = this.coverageDatabase.objects[normalizedType];
-    
+
     if (!objectMap || !objectMap.has(objectName)) {
       return null;
     }
 
     const objectCoverage = objectMap.get(objectName);
-    
+
     // Calculate coverage percentage for this object
     const totalPossibleAssertions = this._estimateMaxAssertions(normalizedType, objectName);
-    const coveragePercentage = totalPossibleAssertions > 0 
+    const coveragePercentage = totalPossibleAssertions > 0
       ? Math.round((objectCoverage.assertions.length / totalPossibleAssertions) * 100)
       : 100;
 
@@ -2184,7 +2184,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Get comprehensive coverage statistics with percentages and analysis
-   * 
+   *
    * @returns {Object} Detailed coverage statistics
    * @public
    */
@@ -2250,7 +2250,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Export coverage report in various formats
-   * 
+   *
    * @param {Object} [options={}] - Export options
    * @param {string} [options.format='json'] - Export format (json, csv, html, markdown)
    * @param {boolean} [options.includeGaps=true] - Include coverage gaps in report
@@ -2294,20 +2294,20 @@ class pgTAPTestScanner extends EventEmitter {
 
     // Format the report based on requested format
     switch (format.toLowerCase()) {
-      case 'json':
-        return JSON.stringify(report, null, 2);
-      
-      case 'csv':
-        return this._formatReportAsCsv(report);
-        
-      case 'html':
-        return this._formatReportAsHtml(report);
-        
-      case 'markdown':
-        return this._formatReportAsMarkdown(report);
-        
-      default:
-        throw new Error(`Unsupported export format: ${format}`);
+    case 'json':
+      return JSON.stringify(report, null, 2);
+
+    case 'csv':
+      return this._formatReportAsCsv(report);
+
+    case 'html':
+      return this._formatReportAsHtml(report);
+
+    case 'markdown':
+      return this._formatReportAsMarkdown(report);
+
+    default:
+      throw new Error(`Unsupported export format: ${format}`);
     }
   }
 
@@ -2315,7 +2315,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Index a single assertion in the coverage database
-   * 
+   *
    * @param {Object} database - Coverage database being built
    * @param {TestAssertion} assertion - Assertion to index
    * @param {TestFile} testFile - Test file containing the assertion
@@ -2323,14 +2323,14 @@ class pgTAPTestScanner extends EventEmitter {
    */
   _indexAssertionInDatabase(database, assertion, testFile) {
     const { type, target } = assertion;
-    
+
     // Determine object type and name from assertion
     const objectInfo = this._parseObjectFromTarget(type, target);
     if (!objectInfo) return;
 
     const { objectType, objectName } = objectInfo;
     const objectMap = database.objects[objectType];
-    
+
     if (!objectMap) return;
 
     // Get or create object entry
@@ -2345,7 +2345,7 @@ class pgTAPTestScanner extends EventEmitter {
     }
 
     const objectEntry = objectMap.get(objectName);
-    
+
     // Add assertion to object entry
     objectEntry.assertions.push({
       type,
@@ -2355,11 +2355,11 @@ class pgTAPTestScanner extends EventEmitter {
       description: assertion.description,
       parameters: assertion.parameters
     });
-    
+
     objectEntry.assertionTypes.add(type);
     objectEntry.testFiles.add(testFile);
     objectEntry.lastTested = new Date().toISOString();
-    
+
     // Store additional metadata based on assertion type
     if (assertion.functionMetadata) {
       objectEntry.metadata.function = { ...objectEntry.metadata.function, ...assertion.functionMetadata };
@@ -2376,7 +2376,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Parse object type and name from assertion target
-   * 
+   *
    * @param {string} assertionType - Type of assertion
    * @param {string} target - Target string from assertion
    * @returns {Object|null} Object type and name
@@ -2421,18 +2421,18 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Identify coverage gaps in the database
-   * 
+   *
    * @param {Object} database - Coverage database
    * @private
    */
   _identifyCoverageGaps(database) {
-    // This is a simplified implementation - in practice, you'd want to 
+    // This is a simplified implementation - in practice, you'd want to
     // compare against actual database schema to find truly uncovered objects
-    
+
     for (const [objectType, objectMap] of Object.entries(database.objects)) {
       for (const [objectName, objectData] of objectMap.entries()) {
         const assertionCount = objectData.assertions.length;
-        
+
         // Consider objects with very few assertions as having coverage gaps
         if (assertionCount === 0) {
           database.gaps.uncoveredObjects.add(`${objectType}:${objectName}`);
@@ -2445,7 +2445,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Calculate overall coverage percentage
-   * 
+   *
    * @param {Object} database - Coverage database
    * @returns {number} Coverage percentage
    * @private
@@ -2453,16 +2453,16 @@ class pgTAPTestScanner extends EventEmitter {
   _calculateOverallCoverage(database) {
     const totalObjects = this._getTotalIndexedObjects(database);
     const uncoveredObjects = database.gaps.uncoveredObjects.size;
-    
+
     if (totalObjects === 0) return 100;
-    
+
     const coveredObjects = totalObjects - uncoveredObjects;
     return Math.round((coveredObjects / totalObjects) * 100);
   }
 
   /**
    * Get total number of indexed objects across all types
-   * 
+   *
    * @param {Object} database - Coverage database
    * @returns {number} Total object count
    * @private
@@ -2474,30 +2474,30 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Calculate coverage percentage for a specific object type
-   * 
+   *
    * @param {string} objectType - Type of object
    * @returns {number} Coverage percentage
    * @private
    */
   _calculateTypesCoverage(objectType) {
     if (!this.coverageDatabase) return 0;
-    
+
     const objectMap = this.coverageDatabase.objects[objectType];
     if (!objectMap || objectMap.size === 0) return 0;
-    
+
     let coveredCount = 0;
     for (const [, objectData] of objectMap.entries()) {
       if (objectData.assertions.length > 0) {
         coveredCount++;
       }
     }
-    
+
     return Math.round((coveredCount / objectMap.size) * 100);
   }
 
   /**
    * Estimate maximum possible assertions for an object type
-   * 
+   *
    * @param {string} objectType - Type of object
    * @param {string} objectName - Name of object
    * @returns {number} Estimated maximum assertions
@@ -2506,74 +2506,74 @@ class pgTAPTestScanner extends EventEmitter {
   _estimateMaxAssertions(objectType, objectName) {
     // These are rough estimates - could be enhanced with actual schema introspection
     switch (objectType) {
-      case 'tables':
-        return 8; // has_table, table_privs, columns, constraints, etc.
-      case 'columns': 
-        return 4; // has_column, col_type_is, col_default_is, col_not_null
-      case 'functions':
-        return 6; // has_function, function_returns, function_lang, etc.
-      case 'indexes':
-        return 3; // has_index, index_is_unique, index_is_primary
-      case 'triggers':
-        return 4; // has_trigger, trigger_is, etc.
-      case 'policies':
-        return 3; // policy_is, policy_cmd, etc.
-      case 'schemas':
-        return 2; // has_schema, schema_owner
-      default:
-        return 3;
+    case 'tables':
+      return 8; // has_table, table_privs, columns, constraints, etc.
+    case 'columns':
+      return 4; // has_column, col_type_is, col_default_is, col_not_null
+    case 'functions':
+      return 6; // has_function, function_returns, function_lang, etc.
+    case 'indexes':
+      return 3; // has_index, index_is_unique, index_is_primary
+    case 'triggers':
+      return 4; // has_trigger, trigger_is, etc.
+    case 'policies':
+      return 3; // policy_is, policy_cmd, etc.
+    case 'schemas':
+      return 2; // has_schema, schema_owner
+    default:
+      return 3;
     }
   }
 
   /**
    * Get minimum assertion threshold for object type
-   * 
+   *
    * @param {string} objectType - Type of object
    * @returns {number} Minimum assertion threshold
    * @private
    */
   _getMinimumAssertionThreshold(objectType) {
     switch (objectType) {
-      case 'tables':
-        return 2; // At minimum should test existence and basic properties
-      case 'functions':
-        return 2; // Should test existence and return type
-      case 'columns':
-        return 1; // At minimum test type
-      default:
-        return 1;
+    case 'tables':
+      return 2; // At minimum should test existence and basic properties
+    case 'functions':
+      return 2; // Should test existence and return type
+    case 'columns':
+      return 1; // At minimum test type
+    default:
+      return 1;
     }
   }
 
   /**
    * Count files with high coverage (multiple assertions per object)
-   * 
+   *
    * @returns {number} Count of high coverage files
    * @private
    */
   _countHighCoverageFiles() {
     let highCoverageCount = 0;
-    
+
     for (const testFile of this.testFiles) {
       if (testFile.assertions.length >= 5) { // Arbitrary threshold
         highCoverageCount++;
       }
     }
-    
+
     return highCoverageCount;
   }
 
   /**
    * Count objects that have multiple test types
-   * 
+   *
    * @returns {number} Count of multi-tested objects
    * @private
    */
   _countMultiTestedObjects() {
     if (!this.coverageDatabase) return 0;
-    
+
     let multiTestedCount = 0;
-    
+
     for (const objectMap of Object.values(this.coverageDatabase.objects)) {
       for (const [, objectData] of objectMap.entries()) {
         if (objectData.assertionTypes.size >= 3) { // Multiple assertion types
@@ -2581,21 +2581,21 @@ class pgTAPTestScanner extends EventEmitter {
         }
       }
     }
-    
+
     return multiTestedCount;
   }
 
   /**
    * Categorize uncovered objects by type
-   * 
+   *
    * @returns {Object} Uncovered objects by category
    * @private
    */
   _categorizeUncoveredObjects() {
     if (!this.coverageDatabase) return {};
-    
+
     const categorized = {};
-    
+
     for (const objectRef of this.coverageDatabase.gaps.uncoveredObjects) {
       const [objectType] = objectRef.split(':');
       if (!categorized[objectType]) {
@@ -2603,55 +2603,55 @@ class pgTAPTestScanner extends EventEmitter {
       }
       categorized[objectType].push(objectRef);
     }
-    
+
     return categorized;
   }
 
   /**
    * Generate test recommendations based on coverage gaps
-   * 
+   *
    * @returns {string[]} Array of test recommendations
    * @private
    */
   _generateTestRecommendations() {
     const recommendations = [];
-    
+
     if (!this.coverageDatabase) return recommendations;
-    
+
     // Analyze gaps and suggest specific tests
     for (const objectRef of this.coverageDatabase.gaps.uncoveredObjects) {
       const [objectType, objectName] = objectRef.split(':', 2);
-      
+
       switch (objectType) {
-        case 'tables':
-          recommendations.push(`Add has_table test for ${objectName}`);
-          break;
-        case 'functions':
-          recommendations.push(`Add has_function test for ${objectName}`);
-          break;
-        case 'columns':
-          recommendations.push(`Add column type test for ${objectName}`);
-          break;
-        default:
-          recommendations.push(`Add test coverage for ${objectType}: ${objectName}`);
+      case 'tables':
+        recommendations.push(`Add has_table test for ${objectName}`);
+        break;
+      case 'functions':
+        recommendations.push(`Add has_function test for ${objectName}`);
+        break;
+      case 'columns':
+        recommendations.push(`Add column type test for ${objectName}`);
+        break;
+      default:
+        recommendations.push(`Add test coverage for ${objectType}: ${objectName}`);
       }
     }
-    
+
     return recommendations.slice(0, 20); // Limit recommendations
   }
 
   /**
    * Get top tested objects
-   * 
+   *
    * @param {number} limit - Maximum number to return
    * @returns {Array} Array of top tested objects
    * @private
    */
   _getTopTestedObjects(limit = 10) {
     if (!this.coverageDatabase) return [];
-    
+
     const objectStats = [];
-    
+
     for (const [objectType, objectMap] of Object.entries(this.coverageDatabase.objects)) {
       for (const [objectName, objectData] of objectMap.entries()) {
         objectStats.push({
@@ -2663,7 +2663,7 @@ class pgTAPTestScanner extends EventEmitter {
         });
       }
     }
-    
+
     return objectStats
       .sort((a, b) => b.assertionCount - a.assertionCount)
       .slice(0, limit);
@@ -2671,7 +2671,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Build detailed coverage report data
-   * 
+   *
    * @param {string[]} objectTypes - Object types to include
    * @param {boolean} includeDetails - Include detailed assertion info
    * @returns {Object} Coverage report data
@@ -2679,17 +2679,17 @@ class pgTAPTestScanner extends EventEmitter {
    */
   _buildCoverageReport(objectTypes, includeDetails) {
     const report = {};
-    
+
     if (!this.coverageDatabase) return report;
-    
+
     const typesToInclude = objectTypes || Object.keys(this.coverageDatabase.objects);
-    
+
     for (const objectType of typesToInclude) {
       const objectMap = this.coverageDatabase.objects[objectType];
       if (!objectMap) continue;
-      
+
       report[objectType] = {};
-      
+
       for (const [objectName, objectData] of objectMap.entries()) {
         const objectReport = {
           assertionCount: objectData.assertions.length,
@@ -2697,7 +2697,7 @@ class pgTAPTestScanner extends EventEmitter {
           testFileCount: objectData.testFiles.size,
           lastTested: objectData.lastTested
         };
-        
+
         if (includeDetails) {
           objectReport.assertions = objectData.assertions.map(a => ({
             type: a.type,
@@ -2706,31 +2706,31 @@ class pgTAPTestScanner extends EventEmitter {
             description: a.description
           }));
         }
-        
+
         report[objectType][objectName] = objectReport;
       }
     }
-    
+
     return report;
   }
 
   /**
    * Format report as CSV
-   * 
+   *
    * @param {Object} report - Report data
    * @returns {string} CSV formatted report
    * @private
    */
   _formatReportAsCsv(report) {
     const lines = ['Object Type,Object Name,Assertion Count,Assertion Types,Test Files,Coverage %'];
-    
+
     for (const [objectType, objects] of Object.entries(report.coverage)) {
       for (const [objectName, data] of Object.entries(objects)) {
         const maxAssertions = this._estimateMaxAssertions(objectType, objectName);
-        const coverage = maxAssertions > 0 
+        const coverage = maxAssertions > 0
           ? Math.round((data.assertionCount / maxAssertions) * 100)
           : 100;
-        
+
         lines.push([
           objectType,
           objectName,
@@ -2741,13 +2741,13 @@ class pgTAPTestScanner extends EventEmitter {
         ].join(','));
       }
     }
-    
+
     return lines.join('\n');
   }
 
   /**
    * Format report as HTML
-   * 
+   *
    * @param {Object} report - Report data
    * @returns {string} HTML formatted report
    * @private
@@ -2797,7 +2797,7 @@ class pgTAPTestScanner extends EventEmitter {
 
   /**
    * Format report as Markdown
-   * 
+   *
    * @param {Object} report - Report data
    * @returns {string} Markdown formatted report
    * @private
@@ -2817,48 +2817,48 @@ class pgTAPTestScanner extends EventEmitter {
       '## Coverage by Object Type',
       ''
     ];
-    
+
     for (const [objectType, objects] of Object.entries(report.coverage)) {
       lines.push(`### ${objectType.charAt(0).toUpperCase() + objectType.slice(1)}`);
       lines.push('');
       lines.push('| Object Name | Assertions | Types | Files | Coverage |');
       lines.push('|-------------|------------|-------|-------|----------|');
-      
+
       for (const [objectName, data] of Object.entries(objects)) {
         const maxAssertions = this._estimateMaxAssertions(objectType, objectName);
-        const coverage = maxAssertions > 0 
+        const coverage = maxAssertions > 0
           ? Math.round((data.assertionCount / maxAssertions) * 100)
           : 100;
-        
+
         lines.push(`| ${objectName} | ${data.assertionCount} | ${data.assertionTypes.length} | ${data.testFileCount} | ${coverage}% |`);
       }
-      
+
       lines.push('');
     }
-    
+
     return lines.join('\n');
   }
 
   /**
    * Generate HTML table rows for coverage report
-   * 
+   *
    * @param {Object} coverage - Coverage data
    * @returns {string} HTML table rows
    * @private
    */
   _generateHtmlTableRows(coverage) {
     const rows = [];
-    
+
     for (const [objectType, objects] of Object.entries(coverage)) {
       for (const [objectName, data] of Object.entries(objects)) {
         const maxAssertions = this._estimateMaxAssertions(objectType, objectName);
-        const coverage = maxAssertions > 0 
+        const coverage = maxAssertions > 0
           ? Math.round((data.assertionCount / maxAssertions) * 100)
           : 100;
-        
-        const coverageClass = coverage >= 80 ? 'high-coverage' : 
-                             coverage >= 50 ? 'medium-coverage' : 'low-coverage';
-        
+
+        const coverageClass = coverage >= 80 ? 'high-coverage' :
+          coverage >= 50 ? 'medium-coverage' : 'low-coverage';
+
         rows.push(`    <tr class="${coverageClass}">
       <td>${objectType}</td>
       <td>${objectName}</td>
@@ -2869,12 +2869,12 @@ class pgTAPTestScanner extends EventEmitter {
     </tr>`);
       }
     }
-    
+
     return rows.join('\n');
   }
-  
+
   // Memory Management Methods
-  
+
   /**
    * Initialize memory monitoring and management
    * @private
@@ -2883,14 +2883,14 @@ class pgTAPTestScanner extends EventEmitter {
     // Initialize streaming database and batch processor
     this.streamingDB = new StreamingCoverageDatabase(this.options);
     this.batchProcessor = new BatchProcessor(this, this.options);
-    
+
     // Set up periodic memory monitoring
     if (this.options.cleanupInterval > 0) {
       this.memoryMonitoringInterval = setInterval(() => {
         this._checkMemoryUsage();
       }, this.options.cleanupInterval);
     }
-    
+
     // Listen for process events
     process.once('exit', () => this._cleanup());
     process.once('SIGINT', () => this._cleanup());
@@ -2949,7 +2949,7 @@ class pgTAPTestScanner extends EventEmitter {
     }
 
     this.memoryState.lastCleanup = Date.now();
-    
+
     this.emit('cleanup', {
       type: 'memory_cleanup',
       memoryUsage: MemoryMonitor.getMemoryUsage(),
@@ -2965,21 +2965,21 @@ class pgTAPTestScanner extends EventEmitter {
     // Limit coverage map sizes
     Object.keys(this.coverageMap).forEach(type => {
       if (type === 'filesByTarget') return;
-      
+
       const objects = this.coverageMap[type];
       const objectKeys = Object.keys(objects);
-      
+
       if (objectKeys.length > this.options.maxObjectsPerType) {
         // Keep only the most recent objects
         const toKeep = objectKeys.slice(-Math.floor(this.options.maxObjectsPerType * 0.8));
         const newObjects = {};
-        
+
         toKeep.forEach(key => {
           newObjects[key] = objects[key];
         });
-        
+
         this.coverageMap[type] = newObjects;
-        
+
         this.emit('warning', {
           type: 'object_limit',
           message: `Limited ${type} objects to ${toKeep.length} items`
@@ -2998,7 +2998,7 @@ class pgTAPTestScanner extends EventEmitter {
       clearInterval(this.memoryMonitoringInterval);
       this.memoryMonitoringInterval = null;
     }
-    
+
     if (this.abortController) {
       this.abortController.abort();
     }

@@ -1,4 +1,4 @@
-const chalk = require('chalk');
+import chalk from 'chalk';
 
 /**
  * Test Coverage Analyzer
@@ -317,4 +317,4 @@ class CoverageAnalyzer {
   }
 }
 
-module.exports = CoverageAnalyzer;
+export default CoverageAnalyzer;

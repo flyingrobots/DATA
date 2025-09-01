@@ -1,6 +1,6 @@
 /**
  * pgTAPTestScanner File Discovery Tests
- * 
+ *
  * Tests the file discovery capabilities of pgTAPTestScanner
  */
 
@@ -46,7 +46,7 @@ describe('pgTAPTestScanner File Discovery', () => {
       // Create nested directory structure
       const subDir = join(tempDir, 'subdirectory');
       await mkdir(subDir);
-      
+
       await writeFile(join(tempDir, 'root.sql'), 'SELECT has_table(\'root\');');
       await writeFile(join(subDir, 'nested.sql'), 'SELECT has_table(\'nested\');');
 
@@ -145,7 +145,7 @@ describe('pgTAPTestScanner File Discovery', () => {
       const level1 = join(tempDir, 'level1');
       const level2 = join(level1, 'level2');
       const level3 = join(level2, 'level3');
-      
+
       await mkdir(level1);
       await mkdir(level2, { recursive: true });
       await mkdir(level3, { recursive: true });
@@ -165,7 +165,7 @@ describe('pgTAPTestScanner File Discovery', () => {
   describe('Error handling', () => {
     it('should throw error for non-existent directory', async () => {
       const nonExistentDir = join(tempDir, 'does-not-exist');
-      
+
       await expect(scanner.scanDirectory(nonExistentDir))
         .rejects
         .toThrow('ENOENT');
@@ -174,7 +174,7 @@ describe('pgTAPTestScanner File Discovery', () => {
     it('should throw error for file instead of directory', async () => {
       const testFile = join(tempDir, 'test.sql');
       await writeFile(testFile, 'SELECT has_table(\'users\');');
-      
+
       await expect(scanner.scanDirectory(testFile))
         .rejects
         .toThrow('Path is not a directory');
@@ -184,7 +184,7 @@ describe('pgTAPTestScanner File Discovery', () => {
   describe('Event emission', () => {
     it('should emit progress events during scanning', async () => {
       const events = [];
-      
+
       scanner.on('progress', (event) => {
         events.push(event);
       });
@@ -205,7 +205,7 @@ describe('pgTAPTestScanner File Discovery', () => {
 
     it('should emit success event on completion', async () => {
       let successEvent = null;
-      
+
       scanner.on('success', (event) => {
         successEvent = event;
       });
@@ -220,7 +220,7 @@ describe('pgTAPTestScanner File Discovery', () => {
 
     it('should emit warning for empty directory', async () => {
       let warningEvent = null;
-      
+
       scanner.on('warning', (event) => {
         warningEvent = event;
       });
@@ -240,7 +240,7 @@ describe('pgTAPTestScanner File Discovery', () => {
         SELECT has_table('users');
         SELECT has_column('users', 'id');
       `);
-      
+
       await writeFile(join(tempDir, 'test2.sql'), `
         SELECT plan(1);
         SELECT has_function('get_user');
@@ -249,14 +249,14 @@ describe('pgTAPTestScanner File Discovery', () => {
       const testFiles = await scanner.scanDirectory(tempDir);
 
       expect(testFiles).toHaveLength(2);
-      
+
       // Check that files were parsed correctly
       expect(testFiles[0].assertions).toBeDefined();
       expect(testFiles[1].assertions).toBeDefined();
-      
+
       const totalAssertions = testFiles.reduce((sum, file) => sum + file.assertions.length, 0);
       expect(totalAssertions).toBe(3); // 2 from test1 + 1 from test2
-      
+
       // Check that coverage map was built
       const coverageMap = scanner.getCoverageMap();
       expect(Object.keys(coverageMap.tables)).toContain('public.users');
@@ -266,7 +266,7 @@ describe('pgTAPTestScanner File Discovery', () => {
     it('should handle files with parsing errors gracefully', async () => {
       // Create a valid file
       await writeFile(join(tempDir, 'valid.sql'), 'SELECT has_table(\'users\');');
-      
+
       // Create an invalid file that will cause fs.readFile to fail (permission denied)
       await writeFile(join(tempDir, 'invalid.sql'), 'SELECT has_table(\'test\');');
       // Make the file unreadable to cause a parsing error
@@ -279,7 +279,7 @@ describe('pgTAPTestScanner File Discovery', () => {
         await writeFile(join(tempDir, 'invalid.sql'), Buffer.from([0xFF, 0xFE, 0x00, 0x01]));
       }
 
-      let errorEvents = [];
+      const errorEvents = [];
       scanner.on('error', (event) => {
         errorEvents.push(event);
       });
@@ -289,7 +289,7 @@ describe('pgTAPTestScanner File Discovery', () => {
       // Should return at least the valid file, possibly both if the invalid one doesn't error
       expect(testFiles.length).toBeGreaterThanOrEqual(1);
       expect(testFiles.map(f => f.fileName)).toContain('valid.sql');
-      
+
       // For this test, we'll just check that either we got an error event OR the scanner handled it gracefully
       // The exact behavior may vary by system
       expect(true).toBe(true); // This test mainly ensures the scanner doesn't crash
@@ -301,7 +301,7 @@ describe('pgTAPTestScanner File Discovery', () => {
       // Create a reasonable number of test files
       const fileCount = 20;
       const promises = [];
-      
+
       for (let i = 0; i < fileCount; i++) {
         promises.push(
           writeFile(
@@ -310,7 +310,7 @@ describe('pgTAPTestScanner File Discovery', () => {
           )
         );
       }
-      
+
       await Promise.all(promises);
 
       const startTime = Date.now();
@@ -319,7 +319,7 @@ describe('pgTAPTestScanner File Discovery', () => {
 
       expect(testFiles).toHaveLength(fileCount);
       expect(duration).toBeLessThan(5000); // Should complete within 5 seconds
-      
+
       // Check that all files were processed
       const fileNames = testFiles.map(f => f.fileName).sort();
       const expectedNames = Array.from({ length: fileCount }, (_, i) => `test${i}.sql`).sort();

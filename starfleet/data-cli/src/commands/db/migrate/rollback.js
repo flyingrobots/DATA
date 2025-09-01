@@ -116,7 +116,7 @@ class MigrateRollbackCommand extends DatabaseCommand {
     console.log('⚠️  Make sure you have a backup before proceeding!');
     console.log('');
 
-    return await this.confirm('Are you absolutely sure you want to rollback?', false);
+    return this.confirm('Are you absolutely sure you want to rollback?', false);
   }
 
   /**
@@ -195,7 +195,7 @@ class MigrateRollbackCommand extends DatabaseCommand {
  */
 export default async function rollbackHandler(args, config, logger, isProd) {
   const command = new MigrateRollbackCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateRollbackCommand };

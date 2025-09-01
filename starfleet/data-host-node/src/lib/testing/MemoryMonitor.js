@@ -1,9 +1,9 @@
 /**
  * Memory monitoring utilities for D.A.T.A. CLI
- * 
+ *
  * Provides static methods for monitoring and managing memory usage
  * to prevent OOM errors when processing large datasets.
- * 
+ *
  * @class MemoryMonitor
  * @author D.A.T.A. Engineering Team
  */
@@ -19,7 +19,7 @@ class MemoryMonitor {
       rss: Math.round(usage.rss / 1024 / 1024), // MB
       heapUsed: Math.round(usage.heapUsed / 1024 / 1024), // MB
       heapTotal: Math.round(usage.heapTotal / 1024 / 1024), // MB
-      external: Math.round(usage.external / 1024 / 1024), // MB
+      external: Math.round(usage.external / 1024 / 1024) // MB
     };
   }
 

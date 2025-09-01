@@ -296,7 +296,7 @@ class MigrateCleanCommand extends Command {
  */
 export default async function cleanHandler(args, config, logger, isProd) {
   const command = new MigrateCleanCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateCleanCommand };

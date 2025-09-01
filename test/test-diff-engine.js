@@ -1,6 +1,6 @@
-const test = require('node:test');
-const assert = require('node:assert');
-const DiffEngine = require('../build/lib/DiffEngine');
+import test from 'node:test';
+import assert from 'node:assert';
+import DiffEngine from '../build/lib/DiffEngine.js';
 
 test('DiffEngine - Class Structure and Instantiation', async (t) => {
   await t.test('should instantiate DiffEngine successfully', () => {
@@ -18,7 +18,7 @@ test('DiffEngine - Class Structure and Instantiation', async (t) => {
       customOption: 'test'
     };
     const engine = new DiffEngine(config);
-    
+
     assert(engine.config.includeData === true, 'Should accept includeData config');
     assert(Array.isArray(engine.config.excludeSchemas), 'Should have excludeSchemas array');
     assert(engine.config.excludeSchemas.includes('test_schema'), 'Should include custom schema');
@@ -27,7 +27,7 @@ test('DiffEngine - Class Structure and Instantiation', async (t) => {
 
   await t.test('should have default configuration values', () => {
     const engine = new DiffEngine();
-    
+
     assert(engine.config.includeData === false, 'Default includeData should be false');
     assert(Array.isArray(engine.config.excludeSchemas), 'Should have default excludeSchemas');
     assert(engine.config.includeDropStatements === true, 'Default includeDropStatements should be true');
@@ -76,7 +76,7 @@ test('DiffEngine - EventEmitter Functionality', async (t) => {
     await engine.generateDiff(mockCurrentDb, mockDesiredDb);
 
     assert(progressEvents.length > 0, 'Should emit at least one progress event');
-    
+
     const initEvent = progressEvents.find(e => e.step === 'initializing');
     assert(initEvent !== undefined, 'Should emit initializing progress event');
     assert(typeof initEvent.message === 'string', 'Progress event should include message');
@@ -131,30 +131,30 @@ test('DiffEngine - EventEmitter Functionality', async (t) => {
 test('DiffEngine - State Management', async (t) => {
   await t.test('should track running state correctly', async () => {
     const engine = new DiffEngine();
-    
+
     assert(engine.isGenerating() === false, 'Should not be running initially');
-    
+
     const mockCurrentDb = { host: 'localhost', database: 'test_current' };
     const mockDesiredDb = { host: 'localhost', database: 'test_desired' };
 
     const diffPromise = engine.generateDiff(mockCurrentDb, mockDesiredDb);
-    
+
     // Note: Due to async nature, we can't reliably test isRunning === true
     // in the middle of execution, but we can test the final state
-    
+
     await diffPromise;
     assert(engine.isGenerating() === false, 'Should not be running after completion');
   });
 
   await t.test('should prevent concurrent diff generation', async () => {
     const engine = new DiffEngine();
-    
+
     const mockCurrentDb = { host: 'localhost', database: 'test_current' };
     const mockDesiredDb = { host: 'localhost', database: 'test_desired' };
 
     // Manually set isRunning to simulate a running diff
     engine.isRunning = true;
-    
+
     let secondDiffError = null;
     try {
       await engine.generateDiff(mockCurrentDb, mockDesiredDb);
@@ -173,14 +173,14 @@ test('DiffEngine - State Management', async (t) => {
 
   await t.test('should store and return last diff result', async () => {
     const engine = new DiffEngine();
-    
+
     assert(engine.getLastDiff() === null, 'Should return null initially');
-    
+
     const mockCurrentDb = { host: 'localhost', database: 'test_current' };
     const mockDesiredDb = { host: 'localhost', database: 'test_desired' };
 
     const result = await engine.generateDiff(mockCurrentDb, mockDesiredDb);
-    
+
     assert(engine.getLastDiff() !== null, 'Should store last diff result');
     assert.deepStrictEqual(engine.getLastDiff(), result, 'Should return the same result object');
   });

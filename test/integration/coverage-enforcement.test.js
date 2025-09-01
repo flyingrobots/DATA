@@ -6,15 +6,15 @@
  * together correctly.
  */
 
-const { describe, it, expect, beforeEach, afterEach } = require('vitest');
-const MigrationOrchestrator = require('../../src/lib/migration/MigrationOrchestrator');
-const TestCoverageOrchestrator = require('../../src/lib/testing/TestCoverageOrchestrator');
-const TestRequirementAnalyzer = require('../../src/lib/testing/TestRequirementAnalyzer');
-const pgTAPTestScanner = require('../../src/lib/testing/pgTAPTestScanner');
-const TestTemplateGenerator = require('../../src/lib/testing/TestTemplateGenerator');
-const fs = require('fs').promises;
-const path = require('path');
-const os = require('os');
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import MigrationOrchestrator from '../../src/lib/migration/MigrationOrchestrator.js';
+import TestCoverageOrchestrator from '../../src/lib/testing/TestCoverageOrchestrator.js';
+import TestRequirementAnalyzer from '../../src/lib/testing/TestRequirementAnalyzer.js';
+import pgTAPTestScanner from '../../src/lib/testing/pgTAPTestScanner.js';
+import TestTemplateGenerator from '../../src/lib/testing/TestTemplateGenerator.js';
+import fs from 'fs'.promises;
+import path from 'path';
+import os from 'os';
 
 describe('Test Coverage Enforcement - End-to-End Integration', () => {
   let tempDir;
@@ -295,7 +295,7 @@ describe('Test Coverage Enforcement - End-to-End Integration', () => {
   
   describe('Coverage Key Generation with Fix', () => {
     it('should handle edge cases in coverage keys', async () => {
-      const enforcer = require('../../src/lib/testing/CoverageEnforcer');
+      import enforcer from '../../src/lib/testing/CoverageEnforcer.js';
       const instance = new enforcer();
       
       // Test null schema normalization

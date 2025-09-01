@@ -1158,4 +1158,4 @@ END;`,
   }
 }
 
-module.exports = TestPatternLibrary;
+export default TestPatternLibrary;

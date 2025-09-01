@@ -370,7 +370,7 @@ INSERT INTO example_table (name) VALUES ('test_data');
  */
 export default async function generateHandler(args, config, logger, isProd) {
   const command = new MigrateGenerateCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateGenerateCommand };

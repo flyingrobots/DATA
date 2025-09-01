@@ -7,7 +7,7 @@
  * @module SchemaDiffAnalyzer
  */
 
-const { EventEmitter } = require('events');
+import { EventEmitter } from 'events';
 
 /**
  * Risk levels for migration operations
@@ -522,7 +522,7 @@ class SchemaDiffAnalyzer extends EventEmitter {
   }
 }
 
-module.exports = {
+export {
   SchemaDiffAnalyzer,
   RISK_LEVELS,
   PERFORMANCE_IMPACT

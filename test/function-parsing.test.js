@@ -17,7 +17,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse has_function with just function name', () => {
       const sql = "SELECT has_function('user_count');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('has_function');
       expect(assertions[0].target).toBe('user_count');
@@ -29,7 +29,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse has_function with schema and function name', () => {
       const sql = "SELECT has_function('public', 'user_count');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('has_function');
       expect(assertions[0].target).toBe('public.user_count');
@@ -42,7 +42,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse has_function with parameters', () => {
       const sql = "SELECT has_function('user_count', ARRAY['integer', 'text']);";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('has_function');
       expect(assertions[0].target).toBe('user_count');
@@ -55,7 +55,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse has_function with schema, function name and parameters', () => {
       const sql = "SELECT has_function('public', 'user_count', ARRAY['integer', 'text']);";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('has_function');
       expect(assertions[0].target).toBe('public.user_count');
@@ -71,7 +71,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse function_returns with function name and return type', () => {
       const sql = "SELECT function_returns('user_count', 'integer');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('function_returns');
       expect(assertions[0].target).toBe('user_count');
@@ -84,7 +84,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse function_returns with schema, function name and return type', () => {
       const sql = "SELECT function_returns('public', 'user_count', 'integer');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('function_returns');
       expect(assertions[0].target).toBe('public.user_count');
@@ -98,7 +98,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse function_returns with parameters', () => {
       const sql = "SELECT function_returns('user_count', ARRAY['text', 'integer'], 'boolean');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('function_returns');
       expect(assertions[0].target).toBe('user_count');
@@ -114,7 +114,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse function_lang_is', () => {
       const sql = "SELECT function_lang_is('user_count', 'plpgsql');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('function_lang_is');
       expect(assertions[0].target).toBe('user_count');
@@ -129,7 +129,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse is_definer', () => {
       const sql = "SELECT is_definer('secure_function');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('is_definer');
       expect(assertions[0].target).toBe('secure_function');
@@ -142,7 +142,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse isnt_definer', () => {
       const sql = "SELECT isnt_definer('normal_function');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('isnt_definer');
       expect(assertions[0].target).toBe('normal_function');
@@ -157,7 +157,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse volatility_is', () => {
       const sql = "SELECT volatility_is('pure_function', 'immutable');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('volatility_is');
       expect(assertions[0].target).toBe('pure_function');
@@ -172,7 +172,7 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
     it('should parse function_privs_are with basic pattern', () => {
       const sql = "SELECT function_privs_are('calc_func', 'app_user', ARRAY['EXECUTE']);";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('function_privs_are');
       expect(assertions[0].target).toBe('calc_func');
@@ -192,22 +192,22 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
         SELECT function_lang_is('public', 'user_count', 'sql');
         SELECT is_definer('public', 'admin_func');
       `;
-      
+
       const assertions = scanner.extractAssertions(sql);
       expect(assertions).toHaveLength(4);
-      
+
       // Mock test file structure for coverage map building
       scanner.testFiles = [{
         filePath: '/test/functions.sql',
         fileName: 'functions.sql',
-        assertions: assertions,
+        assertions,
         planCount: 4,
         dependencies: [],
         metadata: {}
       }];
-      
+
       scanner._buildCoverageMap();
-      
+
       const coverage = scanner.getCoverageMap();
       expect(coverage.functions).toHaveProperty('public.user_count');
       expect(coverage.functions).toHaveProperty('public.admin_func');

@@ -13,11 +13,11 @@ describe('MigrateCommand', () => {
   beforeEach(async () => {
     // Reset modules to ensure clean mocks
     vi.resetModules();
-    
+
     // Mock console to prevent output during tests
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+
     // Mock all subcommand modules before importing MigrateCommand
     vi.doMock('../src/commands/db/migrate/generate.js', () => {
       return {
@@ -104,7 +104,7 @@ describe('MigrateCommand', () => {
     it('should initialize router with all subcommands', () => {
       const routes = command.router.getRoutes();
       const subcommands = routes.map(r => r.path.split('/')[1]);
-      
+
       expect(subcommands).toContain('generate');
       expect(subcommands).toContain('test');
       expect(subcommands).toContain('status');
@@ -118,7 +118,7 @@ describe('MigrateCommand', () => {
 
     it('should have schemas for all subcommands', () => {
       const routes = command.router.getRoutes();
-      
+
       routes.forEach(route => {
         expect(route.hasSchema).toBe(true);
         expect(route.description).toBeTruthy();
@@ -159,7 +159,7 @@ describe('MigrateCommand', () => {
   describe('Help System', () => {
     it('should show general help when no subcommand provided', async () => {
       await command.execute({});
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Usage: data db migrate <command>')
       );

@@ -1,4 +1,4 @@
-const { z } = require('zod');
+import { z } from 'zod';
 
 /**
  * Zod schema for data configuration validation
@@ -142,7 +142,7 @@ function mergeConfigs(baseConfig, overrides) {
   return dataConfigSchema.parse(merged);
 }
 
-module.exports = {
+export {
   DataConfigSchema,
   parsedataConfig,
   safeParsedataConfig,

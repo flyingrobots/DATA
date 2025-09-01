@@ -228,7 +228,7 @@ class SupabaseCommand extends Command {
    */
   async execute(...args) {
     try {
-      return await super.execute(...args);
+      return super.execute(...args);
     } finally {
       await this.cleanup();
     }

@@ -230,7 +230,7 @@ class DataInputPaths {
         delete this._resolving[key];
         return resolved;
       })
-      .catch(error => {
+      .catch(_error => {
         delete this._resolving[key];
         throw new Error(`Failed to resolve input path ${key}: ${error.message}`);
       });

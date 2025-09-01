@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const { promisify } = require('util');
+import path from 'path';
+import fs from 'fs';
+import { promisify } from 'util';
 
 /**
  * A utility class for resolving and ensuring the existence of file and directory paths.
@@ -158,4 +158,4 @@ class PathResolver {
   }
 }
 
-module.exports = PathResolver;
+export default PathResolver;

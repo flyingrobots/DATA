@@ -1,9 +1,9 @@
-const path = require('path');
+import path from 'path';
 
 // Test basic functionality
 try {
   console.log('Loading scanner...');
-  const pgTAPTestScanner = require('./src/lib/testing/pgTAPTestScanner.js');
+  import pgTAPTestScanner from './src/lib/testing/pgTAPTestScanner.js';
   
   console.log('Creating scanner instance...');
   const scanner = new pgTAPTestScanner({ validatePlans: false });

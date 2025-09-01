@@ -232,7 +232,7 @@ class MigrateHistoryCommand extends Command {
  */
 export default async function historyHandler(args, config, logger, isProd) {
   const command = new MigrateHistoryCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateHistoryCommand };

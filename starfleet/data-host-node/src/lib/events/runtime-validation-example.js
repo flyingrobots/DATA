@@ -10,8 +10,8 @@
  * Run with: node src/lib/events/runtime-validation-example.js
  */
 
-const { EventEmitter } = require('events');
-const {
+import { EventEmitter } from 'events';
+import {
   CommandEvent,
   ProgressEvent,
   ErrorEvent,
@@ -22,7 +22,7 @@ const {
   createCommandEvent,
   createValidatedListener,
   EventTypeGuards
-} = require('./index.cjs');
+} from './index.js';
 
 /**
  * Example Command class that demonstrates event system usage
@@ -161,7 +161,7 @@ class ExampleCommand extends EventEmitter {
     console.log('\n=== Command Class Integration Example ===\n');
 
     // Show how the event system integrates with existing Command patterns
-    const Command = require('../Command');
+    import Command from '../Command.js';
     
     // Create a mock command to show integration
     class MockCommand extends Command {
@@ -228,4 +228,4 @@ if (require.main === module) {
   runDemo().catch(console.error);
 }
 
-module.exports = { ExampleCommand, runDemo };
+export default { ExampleCommand, runDemo };

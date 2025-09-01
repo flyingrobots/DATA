@@ -14,15 +14,15 @@
  * @module MigrationOrchestrator
  */
 
-const { EventEmitter } = require('events');
-const SupabaseCommand = require('../../../data-cli/src/lib/SupabaseCommand');
-const ASTMigrationEngine = require('../../../data-core/src/migration/ASTMigrationEngine');
-const GitDeploymentTracker = require('./GitDeploymentTracker');
-const SchemaDiffAnalyzer = require('../../../data-core/src/migration/SchemaDiffAnalyzer');
-const ChildProcessWrapper = require('../ChildProcessWrapper.js');
-const TestCoverageOrchestrator = require('../testing/TestCoverageOrchestrator');
-const path = require('path');
-const fs = require('fs').promises;
+import { EventEmitter } from 'events';
+import SupabaseCommand from '../../../data-cli/src/lib/SupabaseCommand.js';
+import ASTMigrationEngine from '../../../data-core/src/migration/ASTMigrationEngine.js';
+import GitDeploymentTracker from './GitDeploymentTracker';
+import SchemaDiffAnalyzer from '../../../data-core/src/migration/SchemaDiffAnalyzer.js';
+import ChildProcessWrapper from '../ChildProcessWrapper.js';
+import TestCoverageOrchestrator from '../testing/TestCoverageOrchestrator.js';
+import path from 'path';
+import fs from 'fs'.promises;
 
 /**
  * Orchestrator workflow phases
@@ -713,7 +713,7 @@ class MigrationOrchestrator extends SupabaseCommand {
 }
 
 // Export classes and constants
-module.exports = {
+export {
   MigrationOrchestrator,
   PHASES,
   OPERATIONS

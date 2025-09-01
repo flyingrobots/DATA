@@ -47,20 +47,20 @@ async function testMemoryManagement() {
     // Test memory stats
     console.log('Initial memory stats:');
     console.log(JSON.stringify(scanner.getMemoryStats(), null, 2));
-    
+
     // Simulate scanning some test files (you can point this to actual test directory)
     const testDir = path.join(__dirname, 'test/fixtures'); // Adjust path as needed
-    
+
     console.log(`\nScanning directory: ${testDir}`);
-    
+
     if (await scanner.scanDirectory(testDir).catch(() => null)) {
       // Build coverage database with memory management
       console.log('\nBuilding coverage database...');
       const database = await scanner.buildCoverageDatabase();
-      
+
       console.log('\nFinal memory stats:');
       console.log(JSON.stringify(scanner.getMemoryStats(), null, 2));
-      
+
       console.log('\nDatabase summary:');
       console.log(`- Total objects indexed: ${scanner._getTotalIndexedObjects(database)}`);
       console.log(`- Total assertions: ${database.assertionCounts.total}`);
@@ -69,7 +69,7 @@ async function testMemoryManagement() {
     } else {
       // Test with mock data if no test directory exists
       console.log('No test directory found, testing with mock data...');
-      
+
       // Create some mock test files
       for (let i = 0; i < 150; i++) {
         scanner.testFiles.push({
@@ -87,15 +87,15 @@ async function testMemoryManagement() {
           metadata: {}
         });
       }
-      
+
       scanner.totalAssertions = 150 * 10;
-      
+
       console.log('Building coverage database with 150 mock files...');
       const database = await scanner.buildCoverageDatabase();
-      
+
       console.log('\nFinal memory stats:');
       console.log(JSON.stringify(scanner.getMemoryStats(), null, 2));
-      
+
       console.log('\nDatabase summary:');
       console.log(`- Total objects indexed: ${scanner._getTotalIndexedObjects(database)}`);
       console.log(`- Total assertions: ${database.assertionCounts.total}`);

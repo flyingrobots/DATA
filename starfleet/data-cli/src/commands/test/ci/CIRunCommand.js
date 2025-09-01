@@ -5,7 +5,7 @@
  * and proper exit codes for CI/CD environments.
  */
 
-const RunCommand = require('../RunCommand');
+import RunCommand from '../RunCommand.js';
 
 /**
  * CI-friendly test execution with structured output
@@ -206,7 +206,7 @@ class CIRunCommand extends RunCommand {
   async writeJSONArtifact(data, filename) {
     try {
       const filePath = await this.getOutputFile(filename);
-      const fs = require('fs').promises;
+      import fs from 'fs'.promises;
       await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
     } catch (error) {
       throw new Error(`Failed to write ${filename}: ${error.message}`);
@@ -323,4 +323,4 @@ class CIRunCommand extends RunCommand {
   }
 }
 
-module.exports = CIRunCommand;
+export default CIRunCommand;

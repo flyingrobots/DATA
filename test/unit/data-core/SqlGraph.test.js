@@ -1,6 +1,6 @@
 /**
  * Unit tests for SqlGraph dependency resolution
- * 
+ *
  * Tests the SqlGraph class functionality including:
  * - SQL object parsing and identification
  * - Dependency resolution between SQL objects
@@ -63,7 +63,7 @@ describe('SqlNode', () => {
 
   it('should add dependencies correctly', () => {
     node2.addDependency(node1);
-    
+
     expect(node2.dependencies.has(node1)).toBe(true);
     expect(node1.dependents.has(node2)).toBe(true);
     expect(node2.dependencies.size).toBe(1);
@@ -73,7 +73,7 @@ describe('SqlNode', () => {
   it('should remove dependencies correctly', () => {
     node2.addDependency(node1);
     node2.removeDependency(node1);
-    
+
     expect(node2.dependencies.has(node1)).toBe(false);
     expect(node1.dependents.has(node2)).toBe(false);
     expect(node2.dependencies.size).toBe(0);
@@ -104,7 +104,7 @@ describe('SqlNode', () => {
   it('should handle self-dependency detection', () => {
     const visited = new Set();
     expect(node1.hasCircularDependency(visited)).toBe(false);
-    
+
     // Add self-dependency
     node1.addDependency(node1);
     expect(node1.hasCircularDependency()).toBe(true);
@@ -128,7 +128,7 @@ describe('SqlGraph', () => {
 
     it('should throw error for invalid port', () => {
       const invalidPort = { readFile: () => {} }; // Not instance of FileSystemPort
-      
+
       expect(() => new SqlGraph(invalidPort)).toThrow('Port must be instance of FileSystemPort');
     });
 
@@ -151,7 +151,7 @@ describe('SqlGraph', () => {
           email VARCHAR(255) UNIQUE
         );
       `);
-      
+
       mockFileSystem.setFile('/sql/orders.sql', `
         CREATE TABLE orders (
           id SERIAL PRIMARY KEY,
@@ -159,7 +159,7 @@ describe('SqlGraph', () => {
           total DECIMAL(10,2)
         );
       `);
-      
+
       mockFileSystem.setFile('/sql/functions.sql', `
         CREATE OR REPLACE FUNCTION get_user_orders(user_id INT)
         RETURNS TABLE(order_id INT, total DECIMAL) AS $$
@@ -186,7 +186,7 @@ describe('SqlGraph', () => {
 
     it('should identify CREATE TABLE statements', async () => {
       await sqlGraph.buildGraph(['/sql/users.sql']);
-      
+
       expect(sqlGraph.nodes.has('users')).toBe(true);
       const userNode = sqlGraph.nodes.get('users');
       expect(userNode.type).toBe('table');
@@ -196,7 +196,7 @@ describe('SqlGraph', () => {
 
     it('should identify CREATE FUNCTION statements', async () => {
       await sqlGraph.buildGraph(['/sql/functions.sql']);
-      
+
       expect(sqlGraph.nodes.has('get_user_orders')).toBe(true);
       const functionNode = sqlGraph.nodes.get('get_user_orders');
       expect(functionNode.type).toBe('function');
@@ -205,7 +205,7 @@ describe('SqlGraph', () => {
 
     it('should identify CREATE VIEW statements', async () => {
       await sqlGraph.buildGraph(['/sql/views.sql']);
-      
+
       expect(sqlGraph.nodes.has('user_order_summary')).toBe(true);
       const viewNode = sqlGraph.nodes.get('user_order_summary');
       expect(viewNode.type).toBe('view');
@@ -214,7 +214,7 @@ describe('SqlGraph', () => {
 
     it('should handle files without CREATE statements as migration scripts', async () => {
       await sqlGraph.buildGraph(['/sql/migration.sql']);
-      
+
       expect(sqlGraph.nodes.has('migration')).toBe(true);
       const scriptNode = sqlGraph.nodes.get('migration');
       expect(scriptNode.type).toBe('script');
@@ -224,7 +224,7 @@ describe('SqlGraph', () => {
     it('should handle OR REPLACE syntax', async () => {
       mockFileSystem.setFile('/sql/replace.sql', 'CREATE OR REPLACE VIEW test_view AS SELECT 1;');
       await sqlGraph.buildGraph(['/sql/replace.sql']);
-      
+
       expect(sqlGraph.nodes.has('test_view')).toBe(true);
       const node = sqlGraph.nodes.get('test_view');
       expect(node.type).toBe('view');
@@ -233,7 +233,7 @@ describe('SqlGraph', () => {
     it('should handle IF NOT EXISTS syntax', async () => {
       mockFileSystem.setFile('/sql/conditional.sql', 'CREATE TABLE IF NOT EXISTS test_table (id INT);');
       await sqlGraph.buildGraph(['/sql/conditional.sql']);
-      
+
       expect(sqlGraph.nodes.has('test_table')).toBe(true);
       const node = sqlGraph.nodes.get('test_table');
       expect(node.type).toBe('table');
@@ -268,7 +268,7 @@ describe('SqlGraph', () => {
 
       await sqlGraph.buildGraph([
         '/sql/users.sql',
-        '/sql/orders.sql', 
+        '/sql/orders.sql',
         '/sql/products.sql',
         '/sql/order_items.sql',
         '/sql/functions.sql',
@@ -279,7 +279,7 @@ describe('SqlGraph', () => {
     it('should identify REFERENCES dependencies', () => {
       const ordersNode = sqlGraph.nodes.get('orders');
       const usersNode = sqlGraph.nodes.get('users');
-      
+
       expect(ordersNode.dependencies.has(usersNode)).toBe(true);
       expect(usersNode.dependents.has(ordersNode)).toBe(true);
     });
@@ -288,7 +288,7 @@ describe('SqlGraph', () => {
       const viewNode = sqlGraph.nodes.get('order_summary');
       const ordersNode = sqlGraph.nodes.get('orders');
       const usersNode = sqlGraph.nodes.get('users');
-      
+
       expect(viewNode.dependencies.has(ordersNode)).toBe(true);
       expect(viewNode.dependencies.has(usersNode)).toBe(true);
     });
@@ -296,7 +296,7 @@ describe('SqlGraph', () => {
     it('should identify function call dependencies', () => {
       const viewNode = sqlGraph.nodes.get('order_summary');
       const functionNode = sqlGraph.nodes.get('get_order_total');
-      
+
       expect(viewNode.dependencies.has(functionNode)).toBe(true);
     });
 
@@ -304,7 +304,7 @@ describe('SqlGraph', () => {
       const orderItemsNode = sqlGraph.nodes.get('order_items');
       const ordersNode = sqlGraph.nodes.get('orders');
       const productsNode = sqlGraph.nodes.get('products');
-      
+
       expect(orderItemsNode.dependencies.size).toBe(2);
       expect(orderItemsNode.dependencies.has(ordersNode)).toBe(true);
       expect(orderItemsNode.dependencies.has(productsNode)).toBe(true);
@@ -322,10 +322,10 @@ describe('SqlGraph', () => {
       mockFileSystem.setFile('/sql/a.sql', 'CREATE TABLE a (id INT);');
       mockFileSystem.setFile('/sql/b.sql', 'CREATE TABLE b (a_id INT REFERENCES a(id));');
       mockFileSystem.setFile('/sql/c.sql', 'CREATE TABLE c (b_id INT REFERENCES b(id));');
-      
+
       await sqlGraph.buildGraph(['/sql/a.sql', '/sql/b.sql', '/sql/c.sql']);
       const executionOrder = sqlGraph.getExecutionOrder();
-      
+
       expect(executionOrder.length).toBe(3);
       expect(executionOrder[0].name).toBe('a');
       expect(executionOrder[1].name).toBe('b');
@@ -342,10 +342,10 @@ describe('SqlGraph', () => {
           right_id INT REFERENCES right_table(id)
         );
       `);
-      
+
       await sqlGraph.buildGraph(['/sql/base.sql', '/sql/left.sql', '/sql/right.sql', '/sql/top.sql']);
       const executionOrder = sqlGraph.getExecutionOrder();
-      
+
       expect(executionOrder.length).toBe(4);
       expect(executionOrder[0].name).toBe('base');
       expect(executionOrder[3].name).toBe('top_table');
@@ -358,9 +358,9 @@ describe('SqlGraph', () => {
       mockFileSystem.setFile('/sql/a.sql', 'CREATE TABLE a (b_id INT REFERENCES b(id));');
       mockFileSystem.setFile('/sql/b.sql', 'CREATE TABLE b (c_id INT REFERENCES c(id));');
       mockFileSystem.setFile('/sql/c.sql', 'CREATE TABLE c (a_id INT REFERENCES a(id));');
-      
+
       await sqlGraph.buildGraph(['/sql/a.sql', '/sql/b.sql', '/sql/c.sql']);
-      
+
       expect(() => sqlGraph.getExecutionOrder()).toThrow('Circular dependency detected involving:');
     });
 
@@ -373,10 +373,10 @@ describe('SqlGraph', () => {
           id2 INT REFERENCES independent2(id)
         );
       `);
-      
+
       await sqlGraph.buildGraph(['/sql/independent1.sql', '/sql/independent2.sql', '/sql/dependent.sql']);
       const executionOrder = sqlGraph.getExecutionOrder();
-      
+
       expect(executionOrder.length).toBe(3);
       expect(executionOrder[2].name).toBe('dependent');
       // First two can be in any order
@@ -397,10 +397,10 @@ describe('SqlGraph', () => {
           child2_id INT REFERENCES child2(id)
         );
       `);
-      
+
       await sqlGraph.buildGraph([
         '/sql/root1.sql',
-        '/sql/root2.sql', 
+        '/sql/root2.sql',
         '/sql/child1.sql',
         '/sql/child2.sql',
         '/sql/leaf.sql'
@@ -409,7 +409,7 @@ describe('SqlGraph', () => {
 
     it('should identify independent nodes (no dependencies)', () => {
       const independentNodes = sqlGraph.getIndependentNodes();
-      
+
       expect(independentNodes.length).toBe(2);
       const names = independentNodes.map(node => node.name).sort();
       expect(names).toEqual(['root1', 'root2']);
@@ -417,14 +417,14 @@ describe('SqlGraph', () => {
 
     it('should identify terminal nodes (no dependents)', () => {
       const terminalNodes = sqlGraph.getTerminalNodes();
-      
+
       expect(terminalNodes.length).toBe(1);
       expect(terminalNodes[0].name).toBe('leaf');
     });
 
     it('should return all nodes', () => {
       const allNodes = sqlGraph.getAllNodes();
-      
+
       expect(allNodes.length).toBe(5);
       const names = allNodes.map(node => node.name).sort();
       expect(names).toEqual(['child1', 'child2', 'leaf', 'root1', 'root2']);
@@ -440,11 +440,11 @@ describe('SqlGraph', () => {
       const leafNode = sqlGraph.nodes.get('leaf');
       const circularNode = new SqlNode('circular', 'table', '/sql/circular.sql', 'CREATE TABLE...');
       sqlGraph.nodes.set('circular', circularNode);
-      
+
       // Create circular dependency: leaf -> circular -> leaf
       circularNode.addDependency(leafNode);
       leafNode.addDependency(circularNode);
-      
+
       expect(sqlGraph.hasCircularDependencies()).toBe(true);
     });
   });
@@ -453,7 +453,7 @@ describe('SqlGraph', () => {
     it('should handle file read errors gracefully', async () => {
       const fileSystem = new MockFileSystemAdapter();
       const graph = new SqlGraph(fileSystem);
-      
+
       await expect(graph.buildGraph(['/nonexistent.sql'])).rejects.toThrow('File not found');
     });
 
@@ -461,7 +461,7 @@ describe('SqlGraph', () => {
       mockFileSystem.setFile('/sql/test1.sql', 'CREATE TABLE test1 (id INT);');
       await sqlGraph.buildGraph(['/sql/test1.sql']);
       expect(sqlGraph.nodes.size).toBe(1);
-      
+
       mockFileSystem.setFile('/sql/test2.sql', 'CREATE TABLE test2 (id INT);');
       await sqlGraph.buildGraph(['/sql/test2.sql']);
       expect(sqlGraph.nodes.size).toBe(1);
@@ -472,7 +472,7 @@ describe('SqlGraph', () => {
     it('should handle empty SQL files', async () => {
       mockFileSystem.setFile('/sql/empty.sql', '   \n\n  ');
       await sqlGraph.buildGraph(['/sql/empty.sql']);
-      
+
       expect(sqlGraph.nodes.has('empty')).toBe(true);
       const node = sqlGraph.nodes.get('empty');
       expect(node.type).toBe('script');
@@ -488,7 +488,7 @@ describe('SqlGraph', () => {
           /* inline comment */ name VARCHAR(100)
         );
       `);
-      
+
       await sqlGraph.buildGraph(['/sql/commented.sql']);
       expect(sqlGraph.nodes.has('commented_table')).toBe(true);
     });
@@ -498,7 +498,7 @@ describe('SqlGraph', () => {
     it('should handle large number of nodes efficiently', async () => {
       const nodeCount = 100;
       const files = [];
-      
+
       // Create chain of dependencies
       for (let i = 0; i < nodeCount; i++) {
         const fileName = `/sql/table${i}.sql`;
@@ -507,22 +507,22 @@ describe('SqlGraph', () => {
           sql += `, ref INT REFERENCES table${i-1}(id)`;
         }
         sql += ');';
-        
+
         mockFileSystem.setFile(fileName, sql);
         files.push(fileName);
       }
-      
+
       const startTime = Date.now();
       await sqlGraph.buildGraph(files);
       const buildTime = Date.now() - startTime;
-      
+
       expect(buildTime).toBeLessThan(5000); // Should complete within 5 seconds
       expect(sqlGraph.nodes.size).toBe(nodeCount);
-      
+
       const execOrderStartTime = Date.now();
       const executionOrder = sqlGraph.getExecutionOrder();
       const execOrderTime = Date.now() - execOrderStartTime;
-      
+
       expect(execOrderTime).toBeLessThan(1000); // Topological sort should be fast
       expect(executionOrder.length).toBe(nodeCount);
     });
@@ -533,9 +533,9 @@ describe('SqlGraph', () => {
         CREATE TABLE user_stats (id INT);
         CREATE VIEW user_stats AS SELECT * FROM user_stats;
       `);
-      
+
       await sqlGraph.buildGraph(['/sql/same_name.sql']);
-      
+
       // Last one wins in our simple implementation
       expect(sqlGraph.nodes.size).toBe(1);
       expect(sqlGraph.nodes.get('user_stats').type).toBe('view');
@@ -544,7 +544,7 @@ describe('SqlGraph', () => {
     it('should handle complex schema names with dots', async () => {
       mockFileSystem.setFile('/sql/schema.sql', 'CREATE TABLE public.users (id INT);');
       await sqlGraph.buildGraph(['/sql/schema.sql']);
-      
+
       expect(sqlGraph.nodes.has('public.users')).toBe(true);
     });
   });

@@ -3,7 +3,7 @@
  * Simple test script to verify function parsing works correctly
  */
 
-const pgTAPTestScanner = require('./src/lib/testing/pgTAPTestScanner.js');
+import pgTAPTestScanner from './src/lib/testing/pgTAPTestScanner.js';
 
 function runTest(name, testFn) {
   try {
@@ -27,7 +27,7 @@ const scanner = new pgTAPTestScanner({ validatePlans: false });
 runTest('has_function with function name only', () => {
   const sql = "SELECT has_function('user_count');";
   const assertions = scanner.extractAssertions(sql);
-  
+
   assertEquals(assertions.length, 1, 'Should have 1 assertion');
   assertEquals(assertions[0].type, 'has_function', 'Should be has_function type');
   assertEquals(assertions[0].target, 'user_count', 'Should have correct target');
@@ -38,7 +38,7 @@ runTest('has_function with function name only', () => {
 runTest('has_function with schema and function name', () => {
   const sql = "SELECT has_function('public', 'user_count');";
   const assertions = scanner.extractAssertions(sql);
-  
+
   assertEquals(assertions.length, 1, 'Should have 1 assertion');
   assertEquals(assertions[0].type, 'has_function', 'Should be has_function type');
   assertEquals(assertions[0].target, 'public.user_count', 'Should have correct target');
@@ -50,10 +50,10 @@ runTest('has_function with schema and function name', () => {
 runTest('has_function with parameters', () => {
   const sql = "SELECT has_function('user_count', ARRAY['integer', 'text']);";
   const assertions = scanner.extractAssertions(sql);
-  
+
   console.log('DEBUG - Parameters:', assertions[0].parameters);
   console.log('DEBUG - Function metadata:', assertions[0].functionMetadata);
-  
+
   assertEquals(assertions.length, 1, 'Should have 1 assertion');
   assertEquals(assertions[0].type, 'has_function', 'Should be has_function type');
   assertEquals(assertions[0].target, 'user_count', 'Should have correct target');
@@ -65,7 +65,7 @@ runTest('has_function with parameters', () => {
 runTest('function_returns parsing', () => {
   const sql = "SELECT function_returns('user_count', 'integer');";
   const assertions = scanner.extractAssertions(sql);
-  
+
   assertEquals(assertions.length, 1, 'Should have 1 assertion');
   assertEquals(assertions[0].type, 'function_returns', 'Should be function_returns type');
   assertEquals(assertions[0].target, 'user_count', 'Should have correct target');
@@ -77,7 +77,7 @@ runTest('function_returns parsing', () => {
 runTest('function_lang_is parsing', () => {
   const sql = "SELECT function_lang_is('user_count', 'plpgsql');";
   const assertions = scanner.extractAssertions(sql);
-  
+
   assertEquals(assertions.length, 1, 'Should have 1 assertion');
   assertEquals(assertions[0].type, 'function_lang_is', 'Should be function_lang_is type');
   assertEquals(assertions[0].target, 'user_count', 'Should have correct target');
@@ -89,7 +89,7 @@ runTest('function_lang_is parsing', () => {
 runTest('is_definer parsing', () => {
   const sql = "SELECT is_definer('secure_function');";
   const assertions = scanner.extractAssertions(sql);
-  
+
   assertEquals(assertions.length, 1, 'Should have 1 assertion');
   assertEquals(assertions[0].type, 'is_definer', 'Should be is_definer type');
   assertEquals(assertions[0].target, 'secure_function', 'Should have correct target');
@@ -101,7 +101,7 @@ runTest('is_definer parsing', () => {
 runTest('volatility_is parsing', () => {
   const sql = "SELECT volatility_is('pure_function', 'immutable');";
   const assertions = scanner.extractAssertions(sql);
-  
+
   assertEquals(assertions.length, 1, 'Should have 1 assertion');
   assertEquals(assertions[0].type, 'volatility_is', 'Should be volatility_is type');
   assertEquals(assertions[0].target, 'pure_function', 'Should have correct target');
@@ -113,7 +113,7 @@ runTest('volatility_is parsing', () => {
 runTest('function_privs_are parsing', () => {
   const sql = "SELECT function_privs_are('calc_func', 'app_user', ARRAY['EXECUTE']);";
   const assertions = scanner.extractAssertions(sql);
-  
+
   assertEquals(assertions.length, 1, 'Should have 1 assertion');
   assertEquals(assertions[0].type, 'function_privs_are', 'Should be function_privs_are type');
   assertEquals(assertions[0].target, 'calc_func', 'Should have correct target');
@@ -126,7 +126,7 @@ runTest('function_privs_are parsing', () => {
 runTest('complex function parsing', () => {
   const sql = "SELECT function_returns('public', 'complex_func', ARRAY['text', 'integer'], 'boolean');";
   const assertions = scanner.extractAssertions(sql);
-  
+
   assertEquals(assertions.length, 1, 'Should have 1 assertion');
   assertEquals(assertions[0].type, 'function_returns', 'Should be function_returns type');
   assertEquals(assertions[0].target, 'public.complex_func', 'Should have correct target');

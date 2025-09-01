@@ -176,7 +176,7 @@ class MigrateStatusCommand extends Command {
  */
 export default async function statusHandler(args, config, logger, isProd) {
   const command = new MigrateStatusCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateStatusCommand };

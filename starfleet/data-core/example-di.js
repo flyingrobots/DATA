@@ -3,7 +3,7 @@
 /**
  * Example demonstrating the dependency injection system.
  * Shows how to wire data-core with data-host-node adapters using DI.
- * 
+ *
  * Run with: node packages/data-core/example-di.js
  */
 
@@ -12,11 +12,11 @@ import { PortFactory, wireDataCore } from './ports/PortFactory.js';
 import { DataCore } from './index.js';
 
 // Import Node.js adapters
-import { 
-  FileSystemAdapter, 
-  CryptoAdapter, 
-  ProcessAdapter, 
-  EnvironmentAdapter 
+import {
+  FileSystemAdapter,
+  CryptoAdapter,
+  ProcessAdapter,
+  EnvironmentAdapter
 } from '../data-host-node/index.js';
 
 console.log('🔗 Dependency Injection System Demo\n');
@@ -28,8 +28,8 @@ const container = new DIContainer();
 
 // Register all adapters as singletons
 container
-  .registerSingleton('fileSystem', FileSystemAdapter, { 
-    config: { encoding: 'utf8' } 
+  .registerSingleton('fileSystem', FileSystemAdapter, {
+    config: { encoding: 'utf8' }
   })
   .registerSingleton('crypto', CryptoAdapter, {
     config: { defaultAlgorithm: 'sha256' }
@@ -47,7 +47,7 @@ container.register('dataCore', DataCore);
 // Resolve DataCore - all dependencies automatically injected
 const dataCore1 = container.resolve('dataCore');
 console.log(`✅ DataCore resolved with ports: ${Object.keys(dataCore1).filter(k => k.endsWith('Port')).join(', ')}`);
-console.log(`📊 Container stats:`, container.getStats());
+console.log('📊 Container stats:', container.getStats());
 
 console.log('\n---\n');
 
@@ -79,8 +79,8 @@ const dataCore2 = new DataCore(
   ports.environment
 );
 
-console.log(`✅ DataCore created with factory-generated ports`);
-console.log(`📊 Factory info:`, factory.getPortInfo());
+console.log('✅ DataCore created with factory-generated ports');
+console.log('📊 Factory info:', factory.getPortInfo());
 
 console.log('\n---\n');
 
@@ -103,8 +103,8 @@ const { ports: wirePorts, dataCore: dataCore3, factory: wireFactory } = wireData
   }
 );
 
-console.log(`✅ DataCore wired using convenience function`);
-console.log(`🔌 Wired ports:`, Object.keys(wirePorts));
+console.log('✅ DataCore wired using convenience function');
+console.log('🔌 Wired ports:', Object.keys(wirePorts));
 
 console.log('\n---\n');
 
@@ -134,7 +134,7 @@ integratedContainer.registerSingleton('dataCore', DataCore);
 
 // Resolve everything
 const integratedDataCore = integratedContainer.resolve('dataCore');
-console.log(`✅ DataCore resolved from integrated Factory + Container`);
+console.log('✅ DataCore resolved from integrated Factory + Container');
 
 console.log('\n---\n');
 
@@ -150,17 +150,17 @@ try {
 
   // Test sample schema creation
   const sampleSchema = dataCore1.createSampleSchema('demo');
-  console.log(`📊 Sample schema created with checksum capability`);
+  console.log('📊 Sample schema created with checksum capability');
 
   console.log('\n✅ All dependency injection methods working correctly!');
   console.log('\n🎯 Key Benefits:');
   console.log('  • Automatic dependency resolution');
-  console.log('  • Circular dependency detection');  
+  console.log('  • Circular dependency detection');
   console.log('  • Singleton lifecycle management');
   console.log('  • Configuration injection');
   console.log('  • Factory pattern for reusability');
   console.log('  • Multiple integration approaches');
-  
+
 } catch (error) {
   console.error('❌ Error testing DataCore:', error.message);
   process.exit(1);

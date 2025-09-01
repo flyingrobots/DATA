@@ -1,31 +1,7 @@
-# Dependencies
 node_modules/
-
-# Build outputs
-build/
-dist/
-coverage/
-reports/
-
-# Cache
-.data-cache/
-
-# Migrations (generated files)
-migrations/*.sql
-
-# Test fixtures
-test/test-migrations/
-
-# Minified files
+.obsidian/
 *.min.js
-
-# Vendor files
-vendor/
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
+dist/
+build/
+coverage/
+.git/

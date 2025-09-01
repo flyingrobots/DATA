@@ -1,11 +1,11 @@
 /**
  * Unit tests for RLS policy test mapping in TestRequirementAnalyzer
- * 
+ *
  * Tests the specific RLS functionality implemented for task T007
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TestRequirementAnalyzer, TEST_TYPES, TEST_PRIORITIES } from '../src/lib/testing/TestRequirementAnalyzer.js';
+import { TestRequirementAnalyzer, TEST_TYPES, TEST_PRIORITIES } from '../starfleet/data-core/src/testing/TestRequirementAnalyzer.js';
 
 describe('TestRequirementAnalyzer - RLS Policy Mapping', () => {
   let analyzer;
@@ -38,8 +38,8 @@ describe('TestRequirementAnalyzer - RLS Policy Mapping', () => {
       });
 
       // Should test multiple user roles
-      const userRoleTests = requirements.filter(req => 
-        req.description.includes('role anon') || 
+      const userRoleTests = requirements.filter(req =>
+        req.description.includes('role anon') ||
         req.description.includes('role authenticated') ||
         req.description.includes('role service_role')
       );
@@ -78,7 +78,7 @@ describe('TestRequirementAnalyzer - RLS Policy Mapping', () => {
       expect(requirements.length).toBeGreaterThan(2);
 
       // Should include altered security boundary tests
-      const alteredTests = requirements.filter(req => 
+      const alteredTests = requirements.filter(req =>
         req.metadata?.testType === 'altered_security_boundary'
       );
       expect(alteredTests.length).toBeGreaterThan(0);
@@ -97,13 +97,13 @@ describe('TestRequirementAnalyzer - RLS Policy Mapping', () => {
       expect(requirements.length).toBeGreaterThan(1);
 
       // Should include policy removal tests
-      const removalTests = requirements.filter(req => 
+      const removalTests = requirements.filter(req =>
         req.metadata?.testType === 'policy_removal'
       );
       expect(removalTests.length).toBe(1);
 
       // Should include post-drop security tests
-      const postDropTests = requirements.filter(req => 
+      const postDropTests = requirements.filter(req =>
         req.metadata?.testType === 'post_drop_security'
       );
       expect(postDropTests.length).toBe(1);
@@ -122,13 +122,13 @@ describe('TestRequirementAnalyzer - RLS Policy Mapping', () => {
       expect(requirements.length).toBeGreaterThan(1);
 
       // Should include is_rls_enabled test
-      const rlsEnabledTests = requirements.filter(req => 
+      const rlsEnabledTests = requirements.filter(req =>
         req.testCases.some(tc => tc.includes('is_rls_enabled'))
       );
       expect(rlsEnabledTests.length).toBe(1);
 
       // Should test security impact
-      const securityTests = requirements.filter(req => 
+      const securityTests = requirements.filter(req =>
         req.metadata?.testType === 'rls_security_impact'
       );
       expect(securityTests.length).toBe(1);
@@ -147,13 +147,13 @@ describe('TestRequirementAnalyzer - RLS Policy Mapping', () => {
       expect(requirements.length).toBe(2);
 
       // Should include RLS disablement test
-      const disablementTests = requirements.filter(req => 
+      const disablementTests = requirements.filter(req =>
         req.metadata?.testType === 'rls_disablement'
       );
       expect(disablementTests.length).toBe(1);
 
       // Should test security impact with HIGH priority (potential security risk)
-      const securityTests = requirements.filter(req => 
+      const securityTests = requirements.filter(req =>
         req.metadata?.testType === 'rls_disable_security_impact'
       );
       expect(securityTests.length).toBe(1);

@@ -64,7 +64,7 @@ describe('Test Result Formatters', () => {
     it('should format results as valid JUnit XML', () => {
       const formatter = new JUnitFormatter();
       const xml = formatter.format(mockResults);
-      
+
       expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
       expect(xml).toContain('<testsuites>');
       expect(xml).toContain('<testsuite name="pgTAP Tests" tests="3" failures="1" skipped="0"');
@@ -89,10 +89,10 @@ describe('Test Result Formatters', () => {
         failed: 0,
         testFunctions: []
       };
-      
+
       const formatter = new JUnitFormatter();
       const xml = formatter.format(resultsWithSpecialChars);
-      
+
       expect(xml).toContain('&lt;special&gt; &amp; &quot;characters&quot;');
     });
 
@@ -106,9 +106,9 @@ describe('Test Result Formatters', () => {
     it('should format results as valid JSON', () => {
       const formatter = new JSONFormatter();
       const jsonString = formatter.format(mockResults);
-      
+
       const parsed = JSON.parse(jsonString);
-      
+
       expect(parsed.stats.total).toBe(3);
       expect(parsed.stats.passed).toBe(2);
       expect(parsed.stats.failed).toBe(1);
@@ -121,7 +121,7 @@ describe('Test Result Formatters', () => {
       const formatter = new JSONFormatter();
       const jsonString = formatter.format(mockResults);
       const parsed = JSON.parse(jsonString);
-      
+
       expect(parsed.metadata).toBeDefined();
       expect(parsed.metadata.format).toBe('json');
       expect(parsed.metadata.version).toBe('1.0');
@@ -133,7 +133,7 @@ describe('Test Result Formatters', () => {
       const formatter = new JSONFormatter();
       const jsonString = formatter.format(mockResults);
       const parsed = JSON.parse(jsonString);
-      
+
       expect(parsed.summary.passRate).toBe('66.7'); // 2/3 * 100
       expect(parsed.summary.failRate).toBe('33.3'); // 1/3 * 100
       expect(parsed.summary.skipRate).toBe('0.0');  // 0/3 * 100

@@ -7,10 +7,10 @@
  * @module GitDeploymentTracker
  */
 
-const { EventEmitter } = require('events');
-const ChildProcessWrapper = require('../ChildProcessWrapper.js');
-const path = require('path');
-const fs = require('fs').promises;
+import { EventEmitter } from 'events';
+import ChildProcessWrapper from '../ChildProcessWrapper.js';
+import path from 'path';
+import fs from 'fs'.promises;
 
 /**
  * Git deployment tag prefix for D.A.T.A. deployments
@@ -602,4 +602,4 @@ class GitDeploymentTracker extends EventEmitter {
   }
 }
 
-module.exports = GitDeploymentTracker;
+export default GitDeploymentTracker;

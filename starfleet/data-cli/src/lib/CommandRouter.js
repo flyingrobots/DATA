@@ -131,7 +131,7 @@ class CommandRouter extends EventEmitter {
         throw new Error(`No handler defined for command: ${commandPath}`);
       }
 
-      return await route.handler(parsedArgs, context);
+      return route.handler(parsedArgs, context);
 
     } catch (error) {
       this.emit('error', { path: commandPath, error });
@@ -470,7 +470,7 @@ class CommandBuilder {
             });
         }
 
-        return await instance.execute(args);
+        return instance.execute(args);
       };
     } else {
       this.config.handler = handler;

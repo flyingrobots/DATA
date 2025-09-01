@@ -45,12 +45,12 @@ module.exports = {
         '@starfleet/data-cli/*'        // Core cannot import from CLI layer
       ]
     }],
-    
+
     // Forbid console usage - use LoggerPort
     'no-console': ['error', {
       allow: [] // No console methods allowed
     }],
-    
+
     // Forbid process global
     'no-restricted-globals': ['error', {
       name: 'process',
@@ -68,15 +68,15 @@ module.exports = {
       name: 'Buffer',
       message: 'Core should not use Buffer directly'
     }],
-    
+
     // Async/await best practices
     'require-await': 'error',
     'no-return-await': 'error',
-    
+
     // General code quality
-    'no-unused-vars': ['error', { 
+    'no-unused-vars': ['error', {
       argsIgnorePattern: '^_',
-      varsIgnorePattern: '^_' 
+      varsIgnorePattern: '^_'
     }],
     'prefer-const': 'error',
     'no-var': 'error'

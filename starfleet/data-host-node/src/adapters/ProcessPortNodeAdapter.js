@@ -9,9 +9,9 @@ const execPromise = promisify(execCallback);
 
 export class ProcessPortNodeAdapter {
   async spawn(command, args = [], options = {}) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const { cwd, env, shell, timeout } = options;
-      
+
       const child = spawn(command, args, {
         cwd,
         env: env || process.env,
@@ -42,14 +42,14 @@ export class ProcessPortNodeAdapter {
 
   async exec(command, options = {}) {
     const { cwd, env, timeout } = options;
-    
+
     try {
       const { stdout, stderr } = await execPromise(command, {
         cwd,
         env: env || process.env,
         timeout
       });
-      
+
       return { stdout, stderr, code: 0, signal: null };
     } catch (error) {
       return {
@@ -76,7 +76,7 @@ export class ProcessPortNodeAdapter {
   async which(command) {
     const isWindows = process.platform === 'win32';
     const checkCommand = isWindows ? `where ${command}` : `command -v ${command}`;
-    
+
     try {
       const { stdout } = await execPromise(checkCommand, { shell: true });
       const paths = stdout.trim().split(/\r?\n/);

@@ -1,6 +1,6 @@
 /**
  * Unit tests for Node.js adapters (port/adapter pattern)
- * 
+ *
  * Tests the adapter implementations including:
  * - FileSystemAdapter implementation and error handling
  * - CryptoAdapter implementation and algorithms
@@ -19,10 +19,10 @@ import { join } from 'path';
 import { FileSystemAdapter } from '../../../packages/data-host-node/adapters/FileSystemAdapter.js';
 import { CryptoAdapter } from '../../../packages/data-host-node/adapters/CryptoAdapter.js';
 import { EnvironmentAdapter } from '../../../packages/data-host-node/adapters/EnvironmentAdapter.js';
-import { 
-  FileSystemPort, 
-  CryptoPort, 
-  EnvironmentPort 
+import {
+  FileSystemPort,
+  CryptoPort,
+  EnvironmentPort
 } from '../../../packages/data-core/ports/index.js';
 
 // Test utilities
@@ -97,7 +97,7 @@ describe('FileSystemAdapter', () => {
       const filePath = join(tempDir, 'test.txt');
       const content = 'Hello, World!';
       await fs.writeFile(filePath, content);
-      
+
       const result = await adapter.readFile(filePath);
       expect(result).toBe(content);
     });
@@ -106,7 +106,7 @@ describe('FileSystemAdapter', () => {
       const filePath = join(tempDir, 'encoded.txt');
       const content = 'Test content';
       await fs.writeFile(filePath, content);
-      
+
       const result = await adapter.readFile(filePath, { encoding: 'utf8' });
       expect(result).toBe(content);
     });
@@ -115,7 +115,7 @@ describe('FileSystemAdapter', () => {
       const filePath = join(tempDir, 'relative.txt');
       const content = 'Relative path test';
       await fs.writeFile(filePath, content);
-      
+
       // Test with relative path
       const result = await adapter.readFile(filePath);
       expect(result).toBe(content);
@@ -123,9 +123,9 @@ describe('FileSystemAdapter', () => {
 
     it('should throw FileSystemError for nonexistent file', async () => {
       const nonexistentPath = join(tempDir, 'nonexistent.txt');
-      
+
       await expect(adapter.readFile(nonexistentPath)).rejects.toThrow('FileSystemError');
-      
+
       try {
         await adapter.readFile(nonexistentPath);
       } catch (error) {
@@ -141,7 +141,7 @@ describe('FileSystemAdapter', () => {
       // Create a file and remove read permissions (Unix-like systems)
       const restrictedPath = join(tempDir, 'restricted.txt');
       await fs.writeFile(restrictedPath, 'restricted content');
-      
+
       try {
         await fs.chmod(restrictedPath, 0o000); // Remove all permissions
         await expect(adapter.readFile(restrictedPath)).rejects.toThrow('FileSystemError');
@@ -156,9 +156,9 @@ describe('FileSystemAdapter', () => {
     it('should write file with content', async () => {
       const filePath = join(tempDir, 'output.txt');
       const content = 'Written content';
-      
+
       await adapter.writeFile(filePath, content);
-      
+
       const result = await fs.readFile(filePath, 'utf8');
       expect(result).toBe(content);
     });
@@ -166,9 +166,9 @@ describe('FileSystemAdapter', () => {
     it('should create directory if needed', async () => {
       const nestedPath = join(tempDir, 'nested', 'deep', 'file.txt');
       const content = 'Nested file content';
-      
+
       await adapter.writeFile(nestedPath, content);
-      
+
       const result = await fs.readFile(nestedPath, 'utf8');
       expect(result).toBe(content);
     });
@@ -176,22 +176,22 @@ describe('FileSystemAdapter', () => {
     it('should handle custom encoding and mode', async () => {
       const filePath = join(tempDir, 'custom.txt');
       const content = 'Custom encoding';
-      
-      await adapter.writeFile(filePath, content, { 
-        encoding: 'utf8', 
-        mode: 0o755 
+
+      await adapter.writeFile(filePath, content, {
+        encoding: 'utf8',
+        mode: 0o755
       });
-      
+
       const stats = await fs.stat(filePath);
       expect(stats.mode & parseInt('777', 8)).toBe(0o755);
     });
 
     it('should overwrite existing files', async () => {
       const filePath = join(tempDir, 'overwrite.txt');
-      
+
       await adapter.writeFile(filePath, 'First content');
       await adapter.writeFile(filePath, 'Second content');
-      
+
       const result = await fs.readFile(filePath, 'utf8');
       expect(result).toBe('Second content');
     });
@@ -199,7 +199,7 @@ describe('FileSystemAdapter', () => {
     it('should throw FileSystemError for invalid paths', async () => {
       // Try to write to a path that can't be created
       const invalidPath = '/root/cannot/create/this/path/file.txt'; // Assuming no root permissions
-      
+
       await expect(adapter.writeFile(invalidPath, 'content')).rejects.toThrow('FileSystemError');
     });
   });
@@ -208,7 +208,7 @@ describe('FileSystemAdapter', () => {
     it('should return true for existing files', async () => {
       const filePath = join(tempDir, 'exists.txt');
       await fs.writeFile(filePath, 'content');
-      
+
       const result = await adapter.exists(filePath);
       expect(result).toBe(true);
     });
@@ -216,14 +216,14 @@ describe('FileSystemAdapter', () => {
     it('should return true for existing directories', async () => {
       const dirPath = join(tempDir, 'existing-dir');
       await fs.mkdir(dirPath);
-      
+
       const result = await adapter.exists(dirPath);
       expect(result).toBe(true);
     });
 
     it('should return false for nonexistent paths', async () => {
       const nonexistentPath = join(tempDir, 'nonexistent');
-      
+
       const result = await adapter.exists(nonexistentPath);
       expect(result).toBe(false);
     });
@@ -240,9 +240,9 @@ describe('FileSystemAdapter', () => {
       const filePath = join(tempDir, 'stat-test.txt');
       const content = 'test content';
       await fs.writeFile(filePath, content);
-      
+
       const stats = await adapter.stat(filePath);
-      
+
       expect(stats.isFile).toBe(true);
       expect(stats.isDirectory).toBe(false);
       expect(stats.size).toBe(content.length);
@@ -254,9 +254,9 @@ describe('FileSystemAdapter', () => {
     it('should return directory stats', async () => {
       const dirPath = join(tempDir, 'stat-dir');
       await fs.mkdir(dirPath);
-      
+
       const stats = await adapter.stat(dirPath);
-      
+
       expect(stats.isFile).toBe(false);
       expect(stats.isDirectory).toBe(true);
       expect(stats.mtime).toBeInstanceOf(Date);
@@ -265,9 +265,9 @@ describe('FileSystemAdapter', () => {
 
     it('should throw FileSystemError for nonexistent path', async () => {
       const nonexistentPath = join(tempDir, 'nonexistent');
-      
+
       await expect(adapter.stat(nonexistentPath)).rejects.toThrow('FileSystemError');
-      
+
       try {
         await adapter.stat(nonexistentPath);
       } catch (error) {
@@ -281,18 +281,18 @@ describe('FileSystemAdapter', () => {
   describe('ensureDir', () => {
     it('should create single directory', async () => {
       const dirPath = join(tempDir, 'new-dir');
-      
+
       await adapter.ensureDir(dirPath);
-      
+
       const stats = await fs.stat(dirPath);
       expect(stats.isDirectory()).toBe(true);
     });
 
     it('should create nested directories', async () => {
       const nestedPath = join(tempDir, 'deeply', 'nested', 'directory');
-      
+
       await adapter.ensureDir(nestedPath);
-      
+
       const stats = await fs.stat(nestedPath);
       expect(stats.isDirectory()).toBe(true);
     });
@@ -300,22 +300,22 @@ describe('FileSystemAdapter', () => {
     it('should not fail if directory exists', async () => {
       const existingDir = join(tempDir, 'existing');
       await fs.mkdir(existingDir);
-      
+
       await expect(adapter.ensureDir(existingDir)).resolves.not.toThrow();
     });
 
     it('should handle custom mode', async () => {
       const dirPath = join(tempDir, 'custom-mode-dir');
-      
+
       await adapter.ensureDir(dirPath, { mode: 0o700 });
-      
+
       const stats = await fs.stat(dirPath);
       expect(stats.mode & parseInt('777', 8)).toBe(0o700);
     });
 
     it('should throw FileSystemError for invalid paths', async () => {
       const invalidPath = '/root/cannot/create/directory'; // Assuming no root permissions
-      
+
       await expect(adapter.ensureDir(invalidPath)).rejects.toThrow('FileSystemError');
     });
   });
@@ -324,18 +324,18 @@ describe('FileSystemAdapter', () => {
     it('should remove files', async () => {
       const filePath = join(tempDir, 'to-remove.txt');
       await fs.writeFile(filePath, 'content');
-      
+
       await adapter.remove(filePath);
-      
+
       expect(await adapter.exists(filePath)).toBe(false);
     });
 
     it('should remove empty directories', async () => {
       const dirPath = join(tempDir, 'empty-dir');
       await fs.mkdir(dirPath);
-      
+
       await adapter.remove(dirPath);
-      
+
       expect(await adapter.exists(dirPath)).toBe(false);
     });
 
@@ -343,29 +343,29 @@ describe('FileSystemAdapter', () => {
       const basePath = join(tempDir, 'recursive');
       const nestedPath = join(basePath, 'nested');
       const filePath = join(nestedPath, 'file.txt');
-      
+
       await fs.mkdir(basePath);
       await fs.mkdir(nestedPath);
       await fs.writeFile(filePath, 'content');
-      
+
       await adapter.remove(basePath, { recursive: true });
-      
+
       expect(await adapter.exists(basePath)).toBe(false);
     });
 
     it('should throw error for non-empty directories without recursive option', async () => {
       const basePath = join(tempDir, 'non-empty');
       const filePath = join(basePath, 'file.txt');
-      
+
       await fs.mkdir(basePath);
       await fs.writeFile(filePath, 'content');
-      
+
       await expect(adapter.remove(basePath)).rejects.toThrow('FileSystemError');
     });
 
     it('should throw FileSystemError for nonexistent path', async () => {
       const nonexistentPath = join(tempDir, 'nonexistent');
-      
+
       await expect(adapter.remove(nonexistentPath)).rejects.toThrow('FileSystemError');
     });
   });
@@ -380,7 +380,7 @@ describe('FileSystemAdapter', () => {
 
     it('should list directory contents', async () => {
       const entries = await adapter.readDir(tempDir);
-      
+
       expect(entries).toHaveLength(3);
       expect(entries).toContain('test-subdir');
       expect(entries).toContain('file1.txt');
@@ -389,13 +389,13 @@ describe('FileSystemAdapter', () => {
 
     it('should return file type information when requested', async () => {
       const entries = await adapter.readDir(tempDir, { withFileTypes: true });
-      
+
       expect(entries).toHaveLength(3);
-      
+
       const subdir = entries.find(e => e.name === 'test-subdir');
       expect(subdir.isDirectory).toBe(true);
       expect(subdir.isFile).toBe(false);
-      
+
       const file = entries.find(e => e.name === 'file1.txt');
       expect(file.isFile).toBe(true);
       expect(file.isDirectory).toBe(false);
@@ -404,20 +404,20 @@ describe('FileSystemAdapter', () => {
     it('should handle empty directories', async () => {
       const emptyDir = join(tempDir, 'empty');
       await fs.mkdir(emptyDir);
-      
+
       const entries = await adapter.readDir(emptyDir);
       expect(entries).toHaveLength(0);
     });
 
     it('should throw FileSystemError for nonexistent directory', async () => {
       const nonexistentDir = join(tempDir, 'nonexistent');
-      
+
       await expect(adapter.readDir(nonexistentDir)).rejects.toThrow('FileSystemError');
     });
 
     it('should throw FileSystemError when trying to read a file as directory', async () => {
       const filePath = join(tempDir, 'file1.txt');
-      
+
       await expect(adapter.readDir(filePath)).rejects.toThrow('FileSystemError');
     });
   });
@@ -427,10 +427,10 @@ describe('FileSystemAdapter', () => {
       const sourcePath = join(tempDir, 'source.txt');
       const destPath = join(tempDir, 'destination.txt');
       const content = 'Copy test content';
-      
+
       await fs.writeFile(sourcePath, content);
       await adapter.copy(sourcePath, destPath);
-      
+
       const result = await fs.readFile(destPath, 'utf8');
       expect(result).toBe(content);
     });
@@ -440,12 +440,12 @@ describe('FileSystemAdapter', () => {
       const destDir = join(tempDir, 'dest-dir');
       const filePath = join(sourceDir, 'file.txt');
       const content = 'Directory copy test';
-      
+
       await fs.mkdir(sourceDir);
       await fs.writeFile(filePath, content);
-      
+
       await adapter.copy(sourceDir, destDir, { recursive: true });
-      
+
       const copiedFile = join(destDir, 'file.txt');
       const result = await fs.readFile(copiedFile, 'utf8');
       expect(result).toBe(content);
@@ -454,12 +454,12 @@ describe('FileSystemAdapter', () => {
     it('should preserve timestamps', async () => {
       const sourcePath = join(tempDir, 'timestamp-source.txt');
       const destPath = join(tempDir, 'timestamp-dest.txt');
-      
+
       await fs.writeFile(sourcePath, 'timestamp test');
       const originalStats = await fs.stat(sourcePath);
-      
+
       await adapter.copy(sourcePath, destPath);
-      
+
       const copiedStats = await fs.stat(destPath);
       expect(copiedStats.mtime.getTime()).toBe(originalStats.mtime.getTime());
     });
@@ -467,12 +467,12 @@ describe('FileSystemAdapter', () => {
     it('should overwrite existing files', async () => {
       const sourcePath = join(tempDir, 'overwrite-source.txt');
       const destPath = join(tempDir, 'overwrite-dest.txt');
-      
+
       await fs.writeFile(sourcePath, 'new content');
       await fs.writeFile(destPath, 'old content');
-      
+
       await adapter.copy(sourcePath, destPath);
-      
+
       const result = await fs.readFile(destPath, 'utf8');
       expect(result).toBe('new content');
     });
@@ -480,7 +480,7 @@ describe('FileSystemAdapter', () => {
     it('should throw FileSystemError for nonexistent source', async () => {
       const nonexistentSource = join(tempDir, 'nonexistent');
       const destPath = join(tempDir, 'dest.txt');
-      
+
       await expect(adapter.copy(nonexistentSource, destPath)).rejects.toThrow('FileSystemError');
     });
   });
@@ -488,7 +488,7 @@ describe('FileSystemAdapter', () => {
   describe('error normalization', () => {
     it('should normalize errors with consistent format', async () => {
       const nonexistentPath = join(tempDir, 'nonexistent.txt');
-      
+
       try {
         await adapter.readFile(nonexistentPath);
         expect.fail('Should have thrown error');
@@ -508,7 +508,7 @@ describe('FileSystemAdapter', () => {
         { method: 'stat', path: join(tempDir, 'nonexistent1') },
         { method: 'remove', path: join(tempDir, 'nonexistent2') }
       ];
-      
+
       for (const testCase of testCases) {
         try {
           await adapter[testCase.method](testCase.path);
@@ -549,7 +549,7 @@ describe('CryptoAdapter', () => {
     it('should generate SHA-256 hash by default', () => {
       const input = 'test data';
       const hash = adapter.hash(input);
-      
+
       expect(hash).toBeTruthy();
       expect(typeof hash).toBe('string');
       expect(hash.length).toBe(64); // SHA-256 hex length
@@ -560,14 +560,14 @@ describe('CryptoAdapter', () => {
       const input = 'consistent test data';
       const hash1 = adapter.hash(input);
       const hash2 = adapter.hash(input);
-      
+
       expect(hash1).toBe(hash2);
     });
 
     it('should generate different hashes for different inputs', () => {
       const hash1 = adapter.hash('input1');
       const hash2 = adapter.hash('input2');
-      
+
       expect(hash1).not.toBe(hash2);
     });
 
@@ -575,7 +575,7 @@ describe('CryptoAdapter', () => {
       const stringHash = adapter.hash('string data');
       const bufferHash = adapter.hash(Buffer.from('buffer data'));
       const uint8ArrayHash = adapter.hash(new Uint8Array([1, 2, 3, 4]));
-      
+
       expect(stringHash).toBeTruthy();
       expect(bufferHash).toBeTruthy();
       expect(uint8ArrayHash).toBeTruthy();
@@ -587,11 +587,11 @@ describe('CryptoAdapter', () => {
       const sha256Hash = adapter.hash(input, 'sha256');
       const sha1Hash = adapter.hash(input, 'sha1');
       const md5Hash = adapter.hash(input, 'md5');
-      
+
       expect(sha256Hash.length).toBe(64);  // SHA-256
       expect(sha1Hash.length).toBe(40);    // SHA-1
       expect(md5Hash.length).toBe(32);     // MD5
-      
+
       expect(sha256Hash).not.toBe(sha1Hash);
       expect(sha256Hash).not.toBe(md5Hash);
     });
@@ -607,7 +607,7 @@ describe('CryptoAdapter', () => {
       const startTime = Date.now();
       const hash = adapter.hash(largeInput);
       const duration = Date.now() - startTime;
-      
+
       expect(hash).toBeTruthy();
       expect(duration).toBeLessThan(1000); // Should be fast
     });
@@ -619,7 +619,7 @@ describe('CryptoAdapter', () => {
     it('should handle special characters and unicode', () => {
       const unicodeInput = 'test 🚀 unicode ñáéíóú 中文';
       const hash = adapter.hash(unicodeInput);
-      
+
       expect(hash).toBeTruthy();
       expect(hash.length).toBe(64);
     });
@@ -631,9 +631,9 @@ describe('CryptoAdapter', () => {
       for (let i = 0; i < 100; i++) {
         promises.push(Promise.resolve(adapter.hash(`concurrent test ${i}`)));
       }
-      
+
       const hashes = await Promise.all(promises);
-      
+
       expect(hashes).toHaveLength(100);
       expect(new Set(hashes).size).toBe(100); // All should be unique
     });
@@ -641,13 +641,13 @@ describe('CryptoAdapter', () => {
     it('should maintain consistent performance', () => {
       const input = 'performance test data';
       const iterations = 1000;
-      
+
       const startTime = Date.now();
       for (let i = 0; i < iterations; i++) {
         adapter.hash(`${input} ${i}`);
       }
       const duration = Date.now() - startTime;
-      
+
       expect(duration).toBeLessThan(5000); // Should complete within reasonable time
     });
   });
@@ -685,7 +685,7 @@ describe('EnvironmentAdapter', () => {
   describe('environment variable access', () => {
     it('should get existing environment variables', () => {
       process.env.TEST_VAR = 'test_value';
-      
+
       const result = adapter.get('TEST_VAR');
       expect(result).toBe('test_value');
     });
@@ -702,28 +702,28 @@ describe('EnvironmentAdapter', () => {
 
     it('should not return default value when variable exists', () => {
       process.env.EXISTING_VAR = 'actual_value';
-      
+
       const result = adapter.get('EXISTING_VAR', 'default_value');
       expect(result).toBe('actual_value');
     });
 
     it('should handle empty string values', () => {
       process.env.EMPTY_VAR = '';
-      
+
       const result = adapter.get('EMPTY_VAR', 'default');
       expect(result).toBe(''); // Empty string, not default
     });
 
     it('should handle variables with special characters', () => {
       process.env.SPECIAL_VAR = 'value with spaces and symbols: !@#$%^&*()';
-      
+
       const result = adapter.get('SPECIAL_VAR');
       expect(result).toBe('value with spaces and symbols: !@#$%^&*()');
     });
 
     it('should handle variables with newlines and escapes', () => {
       process.env.MULTILINE_VAR = 'line1\\nline2\\ttabbed';
-      
+
       const result = adapter.get('MULTILINE_VAR');
       expect(result).toBe('line1\\nline2\\ttabbed');
     });
@@ -732,7 +732,7 @@ describe('EnvironmentAdapter', () => {
   describe('environment variable existence checks', () => {
     it('should return true for existing variables', () => {
       process.env.EXISTS_VAR = 'some_value';
-      
+
       const result = adapter.has('EXISTS_VAR');
       expect(result).toBe(true);
     });
@@ -744,14 +744,14 @@ describe('EnvironmentAdapter', () => {
 
     it('should return true for empty string variables', () => {
       process.env.EMPTY_EXISTS = '';
-      
+
       const result = adapter.has('EMPTY_EXISTS');
       expect(result).toBe(true);
     });
 
     it('should handle case-sensitive variable names', () => {
       process.env.CaseSensitive = 'value';
-      
+
       expect(adapter.has('CaseSensitive')).toBe(true);
       expect(adapter.has('casesensitive')).toBe(false);
       expect(adapter.has('CASESENSITIVE')).toBe(false);
@@ -761,7 +761,7 @@ describe('EnvironmentAdapter', () => {
   describe('common environment patterns', () => {
     it('should handle NODE_ENV pattern', () => {
       process.env.NODE_ENV = 'test';
-      
+
       expect(adapter.get('NODE_ENV')).toBe('test');
       expect(adapter.has('NODE_ENV')).toBe(true);
       expect(adapter.get('NODE_ENV', 'development')).toBe('test');
@@ -770,14 +770,14 @@ describe('EnvironmentAdapter', () => {
     it('should handle database URL pattern', () => {
       const dbUrl = 'postgresql://user:password@localhost:5432/testdb';
       process.env.DATABASE_URL = dbUrl;
-      
+
       expect(adapter.get('DATABASE_URL')).toBe(dbUrl);
       expect(adapter.has('DATABASE_URL')).toBe(true);
     });
 
     it('should handle port number pattern', () => {
       process.env.PORT = '3000';
-      
+
       expect(adapter.get('PORT')).toBe('3000'); // Note: always returns string
       expect(adapter.get('PORT', '8080')).toBe('3000');
     });
@@ -787,7 +787,7 @@ describe('EnvironmentAdapter', () => {
       process.env.PRODUCTION = 'false';
       process.env.ENABLED = '1';
       process.env.DISABLED = '0';
-      
+
       // Note: Environment adapter returns strings, interpretation is up to caller
       expect(adapter.get('DEBUG')).toBe('true');
       expect(adapter.get('PRODUCTION')).toBe('false');
@@ -800,7 +800,7 @@ describe('EnvironmentAdapter', () => {
     it('should handle very long variable names', () => {
       const longName = 'A'.repeat(1000);
       process.env[longName] = 'long_name_value';
-      
+
       expect(adapter.get(longName)).toBe('long_name_value');
       expect(adapter.has(longName)).toBe(true);
     });
@@ -808,13 +808,13 @@ describe('EnvironmentAdapter', () => {
     it('should handle very long variable values', () => {
       const longValue = 'x'.repeat(100000);
       process.env.LONG_VALUE = longValue;
-      
+
       expect(adapter.get('LONG_VALUE')).toBe(longValue);
     });
 
     it('should handle numeric variable names (though unusual)', () => {
       process.env['123'] = 'numeric_name';
-      
+
       expect(adapter.get('123')).toBe('numeric_name');
       expect(adapter.has('123')).toBe(true);
     });
@@ -823,30 +823,30 @@ describe('EnvironmentAdapter', () => {
       // Some systems allow these characters in env var names
       process.env['VAR_WITH.DOT'] = 'dot_value';
       process.env['VAR-WITH-DASH'] = 'dash_value';
-      
+
       expect(adapter.get('VAR_WITH.DOT')).toBe('dot_value');
       expect(adapter.get('VAR-WITH-DASH')).toBe('dash_value');
     });
 
     it('should maintain consistency across multiple calls', () => {
       process.env.CONSISTENT_VAR = 'consistent_value';
-      
+
       const calls = [];
       for (let i = 0; i < 100; i++) {
         calls.push(adapter.get('CONSISTENT_VAR'));
       }
-      
+
       expect(calls.every(value => value === 'consistent_value')).toBe(true);
     });
 
     it('should handle concurrent access', async () => {
       process.env.CONCURRENT_VAR = 'concurrent_value';
-      
+
       const promises = [];
       for (let i = 0; i < 100; i++) {
         promises.push(Promise.resolve(adapter.get('CONCURRENT_VAR')));
       }
-      
+
       const results = await Promise.all(promises);
       expect(results.every(value => value === 'concurrent_value')).toBe(true);
     });
@@ -866,11 +866,11 @@ describe('EnvironmentAdapter', () => {
     it('should handle common CI environment variables', () => {
       // Test some common CI environment variables that might exist
       const ciVars = ['CI', 'GITHUB_ACTIONS', 'TRAVIS', 'CIRCLECI', 'BUILD_NUMBER'];
-      
+
       ciVars.forEach(varName => {
         const value = adapter.get(varName);
         const exists = adapter.has(varName);
-        
+
         if (exists) {
           expect(typeof value).toBe('string');
         } else {

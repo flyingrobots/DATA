@@ -200,4 +200,4 @@ class ResultParser {
   }
 }
 
-module.exports = ResultParser;
+export default ResultParser;

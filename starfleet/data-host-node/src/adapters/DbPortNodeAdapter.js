@@ -32,7 +32,7 @@ export class DbPortNodeAdapter {
       ...process.env,
       DATABASE_URL: this.connectionString
     };
-    
+
     await exec('psql', [
       '--no-psqlrc',
       '-v', 'ON_ERROR_STOP=1',
@@ -130,15 +130,15 @@ export class DbPortNodeAdapter {
   async withTransaction(fn) {
     const pool = await this._getPool();
     const client = await pool.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       const txApi = {
         apply: (sql) => client.query(sql).then(() => undefined),
         query: (sql, params) => client.query(sql, params).then(r => r.rows)
       };
-      
+
       const result = await fn(txApi);
       await client.query('COMMIT');
       return result;

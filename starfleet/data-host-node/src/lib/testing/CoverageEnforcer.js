@@ -1,13 +1,13 @@
 /**
  * Coverage Enforcer for D.A.T.A.
- * 
- * Main enforcement engine that compares required vs actual coverage and 
+ *
+ * Main enforcement engine that compares required vs actual coverage and
  * enforces coverage policies to prevent deployment of untested database changes.
- * 
+ *
  * @module CoverageEnforcer
  */
 
-const { EventEmitter } = require('events');
+import { EventEmitter } from 'events';
 
 /**
  * Coverage enforcement levels
@@ -91,7 +91,7 @@ const GAP_SEVERITY = {
 class CoverageEnforcer extends EventEmitter {
   constructor(options = {}) {
     super();
-    
+
     // Default enforcement configuration
     this.config = {
       level: options.level || ENFORCEMENT_LEVELS.NORMAL,
@@ -108,7 +108,7 @@ class CoverageEnforcer extends EventEmitter {
       bypassReason: options.bypassReason || null,
       ...options
     };
-    
+
     // Severity mapping for different operations
     this.operationSeverity = {
       'DROP_TABLE': GAP_SEVERITY.CRITICAL,
@@ -123,7 +123,7 @@ class CoverageEnforcer extends EventEmitter {
       'DROP_POLICY': GAP_SEVERITY.CRITICAL,
       'DEFAULT': GAP_SEVERITY.LOW
     };
-    
+
     // Test suggestions by object type
     this.testSuggestions = {
       table: ['has_table', 'table_privs_are', 'tables_are'],
@@ -134,7 +134,7 @@ class CoverageEnforcer extends EventEmitter {
       trigger: ['has_trigger', 'trigger_is']
     };
   }
-  
+
   /**
    * Main enforcement method - compares requirements vs coverage
    * @param {Array<TestRequirement>} requirements - Test requirements from analyzer
@@ -144,45 +144,45 @@ class CoverageEnforcer extends EventEmitter {
    */
   async enforce(requirements, coverage, options = {}) {
     this.emit('progress', { message: 'Starting coverage enforcement analysis...' });
-    
+
     // Merge options with config
     const config = { ...this.config, ...options };
-    
+
     // Filter ignored items
     const filteredRequirements = this.filterRequirements(requirements, config);
     const filteredCoverage = this.filterCoverage(coverage, config);
-    
-    this.emit('progress', { 
-      message: `Analyzing ${filteredRequirements.length} requirements against ${filteredCoverage.length} coverage items` 
+
+    this.emit('progress', {
+      message: `Analyzing ${filteredRequirements.length} requirements against ${filteredCoverage.length} coverage items`
     });
-    
+
     // Compare coverage
     const comparison = await this.compareCoverage(filteredRequirements, filteredCoverage);
-    
+
     // Analyze gaps
     const gaps = this.analyzeGaps(comparison.unmetRequirements, config);
-    
+
     // Determine if deployment should be blocked
     const shouldBlock = this.shouldBlock(gaps, config);
-    
+
     // Generate recommendations
     const recommendations = this.generateRecommendations(gaps, comparison, config);
-    
+
     // Calculate statistics
     const statistics = this.calculateStatistics(filteredRequirements, filteredCoverage, gaps);
-    
+
     const report = {
       enforcementLevel: config.level,
       totalRequirements: filteredRequirements.length,
       metRequirements: comparison.metRequirements.length,
       coveragePercentage: Math.round((comparison.metRequirements.length / filteredRequirements.length) * 100) || 0,
-      gaps: gaps,
-      shouldBlock: shouldBlock,
-      recommendations: recommendations,
-      statistics: statistics,
+      gaps,
+      shouldBlock,
+      recommendations,
+      statistics,
       bypassReason: config.bypassReason || null
     };
-    
+
     // Emit appropriate events
     if (shouldBlock) {
       this.emit('enforcement_failed', {
@@ -197,17 +197,17 @@ class CoverageEnforcer extends EventEmitter {
         gaps: gaps.length
       });
     }
-    
+
     this.emit('complete', {
       message: 'Coverage enforcement analysis complete',
-      shouldBlock: shouldBlock,
+      shouldBlock,
       gaps: gaps.length,
       coverage: report.coveragePercentage
     });
-    
+
     return report;
   }
-  
+
   /**
    * Generate normalized coverage key for consistent lookups
    * @param {Object} item - Item with schema, name, and type
@@ -217,27 +217,27 @@ class CoverageEnforcer extends EventEmitter {
   _generateCoverageKey(item) {
     // Normalize schema (default to 'public' per PostgreSQL convention)
     const schema = (item.schema || 'public').toLowerCase().trim();
-    
+
     // Normalize name and type
     const name = (item.name || '').toLowerCase().trim();
     const type = (item.type || '').toLowerCase().trim();
-    
+
     // Validate components
     if (!name) {
-      throw new Error(`Invalid coverage item: missing name property`);
+      throw new Error('Invalid coverage item: missing name property');
     }
     if (!type) {
-      throw new Error(`Invalid coverage item: missing type property`);
+      throw new Error('Invalid coverage item: missing type property');
     }
-    
+
     // Use separator that won't appear in PostgreSQL identifiers
     const separator = '::';
-    
+
     // Escape any separator sequences in the components (shouldn't happen in valid identifiers)
     const escapedSchema = schema.replace(/::/g, '\\:\\:');
     const escapedName = name.replace(/::/g, '\\:\\:');
     const escapedType = type.replace(/::/g, '\\:\\:');
-    
+
     return `${escapedSchema}${separator}${escapedName}${separator}${escapedType}`;
   }
 
@@ -249,7 +249,7 @@ class CoverageEnforcer extends EventEmitter {
    */
   compareCoverage(requirements, coverage) {
     this.emit('progress', { message: 'Comparing requirements against actual coverage...' });
-    
+
     // Build coverage lookup for efficient matching
     const coverageLookup = new Map();
     coverage.forEach(item => {
@@ -260,53 +260,53 @@ class CoverageEnforcer extends EventEmitter {
         }
         coverageLookup.get(key).push(item);
       } catch (error) {
-        this.emit('warning', { 
+        this.emit('warning', {
           message: `Skipping invalid coverage item: ${error.message}`,
-          item: item 
+          item
         });
       }
     });
-    
+
     const metRequirements = [];
     const unmetRequirements = [];
-    
+
     for (const requirement of requirements) {
       try {
         const key = this._generateCoverageKey(requirement);
         const matchingCoverage = coverageLookup.get(key) || [];
-      
+
         if (this.isRequirementMet(requirement, matchingCoverage)) {
           metRequirements.push({
-            requirement: requirement,
+            requirement,
             coverage: matchingCoverage
           });
         } else {
           unmetRequirements.push({
-            requirement: requirement,
+            requirement,
             coverage: matchingCoverage
           });
         }
       } catch (error) {
         this.emit('warning', {
           message: `Error processing requirement: ${error.message}`,
-          requirement: requirement
+          requirement
         });
         // Treat as unmet if we can't process it
         unmetRequirements.push({
-          requirement: requirement,
+          requirement,
           coverage: [],
           error: error.message
         });
       }
     }
-    
+
     return {
-      metRequirements: metRequirements,
-      unmetRequirements: unmetRequirements,
-      coverageLookup: coverageLookup
+      metRequirements,
+      unmetRequirements,
+      coverageLookup
     };
   }
-  
+
   /**
    * Check if a requirement is met by available coverage
    * @param {TestRequirement} requirement - The requirement to check
@@ -317,12 +317,12 @@ class CoverageEnforcer extends EventEmitter {
     if (!coverage || coverage.length === 0) {
       return false;
     }
-    
+
     // For basic requirements, any coverage is sufficient
     if (!requirement.requiredTests || requirement.requiredTests.length === 0) {
       return true;
     }
-    
+
     // Check for specific required tests
     const availableTests = new Set();
     coverage.forEach(item => {
@@ -330,13 +330,13 @@ class CoverageEnforcer extends EventEmitter {
         item.tests.forEach(test => availableTests.add(test));
       }
     });
-    
+
     // All required tests must be present
-    return requirement.requiredTests.every(requiredTest => 
+    return requirement.requiredTests.every(requiredTest =>
       availableTests.has(requiredTest)
     );
   }
-  
+
   /**
    * Analyze coverage gaps for severity and blocking status
    * @param {Array} unmetRequirements - Requirements without coverage
@@ -345,32 +345,32 @@ class CoverageEnforcer extends EventEmitter {
    */
   analyzeGaps(unmetRequirements, config) {
     this.emit('progress', { message: 'Analyzing coverage gaps...' });
-    
+
     const gaps = [];
-    
+
     for (const unmet of unmetRequirements) {
       const requirement = unmet.requirement;
       const severity = this.assessGapSeverity(requirement);
       const isBlocking = this.isGapBlocking(severity, config);
-      
+
       const gap = {
-        requirement: requirement,
-        severity: severity,
+        requirement,
+        severity,
         message: this.generateGapMessage(requirement),
         suggestions: this.generateTestSuggestions(requirement),
-        isBlocking: isBlocking,
+        isBlocking,
         availableCoverage: unmet.coverage || []
       };
-      
+
       gaps.push(gap);
     }
-    
+
     // Sort gaps by severity (most severe first)
     gaps.sort((a, b) => this.compareSeverity(b.severity, a.severity));
-    
+
     return gaps;
   }
-  
+
   /**
    * Assess the severity of a coverage gap
    * @param {TestRequirement} requirement - The requirement
@@ -382,11 +382,11 @@ class CoverageEnforcer extends EventEmitter {
     if (operationSeverity) {
       return operationSeverity;
     }
-    
+
     // Fall back to requirement severity or default
     return requirement.severity || this.operationSeverity.DEFAULT;
   }
-  
+
   /**
    * Determine if a gap should block deployment
    * @param {string} severity - Gap severity
@@ -395,20 +395,20 @@ class CoverageEnforcer extends EventEmitter {
    */
   isGapBlocking(severity, config) {
     switch (config.level) {
-      case ENFORCEMENT_LEVELS.STRICT:
-        return true; // Block all gaps
-      
-      case ENFORCEMENT_LEVELS.NORMAL:
-        return severity === GAP_SEVERITY.CRITICAL || severity === GAP_SEVERITY.HIGH;
-      
-      case ENFORCEMENT_LEVELS.LENIENT:
-        return severity === GAP_SEVERITY.CRITICAL;
-      
-      default:
-        return false;
+    case ENFORCEMENT_LEVELS.STRICT:
+      return true; // Block all gaps
+
+    case ENFORCEMENT_LEVELS.NORMAL:
+      return severity === GAP_SEVERITY.CRITICAL || severity === GAP_SEVERITY.HIGH;
+
+    case ENFORCEMENT_LEVELS.LENIENT:
+      return severity === GAP_SEVERITY.CRITICAL;
+
+    default:
+      return false;
     }
   }
-  
+
   /**
    * Determine if deployment should be blocked based on gaps
    * @param {Array<CoverageGap>} gaps - Coverage gaps
@@ -425,11 +425,11 @@ class CoverageEnforcer extends EventEmitter {
       });
       return false;
     }
-    
+
     // Check if any gaps are blocking
     return gaps.some(gap => gap.isBlocking);
   }
-  
+
   /**
    * Generate coverage gap report
    * @param {Array<CoverageGap>} gaps - Coverage gaps
@@ -439,41 +439,41 @@ class CoverageEnforcer extends EventEmitter {
     if (!gaps || gaps.length === 0) {
       return '✅ No coverage gaps found - all requirements satisfied!';
     }
-    
+
     const lines = [];
     lines.push(`📊 Coverage Gap Report (${gaps.length} gaps found)\n`);
-    
+
     // Group by severity
     const bySeverity = gaps.reduce((acc, gap) => {
       if (!acc[gap.severity]) acc[gap.severity] = [];
       acc[gap.severity].push(gap);
       return acc;
     }, {});
-    
+
     // Report each severity level
     for (const severity of [GAP_SEVERITY.CRITICAL, GAP_SEVERITY.HIGH, GAP_SEVERITY.MEDIUM, GAP_SEVERITY.LOW]) {
       const severityGaps = bySeverity[severity];
       if (!severityGaps || severityGaps.length === 0) continue;
-      
+
       const icon = this.getSeverityIcon(severity);
       const blockingCount = severityGaps.filter(g => g.isBlocking).length;
-      
+
       lines.push(`${icon} ${severity} (${severityGaps.length} gaps${blockingCount > 0 ? `, ${blockingCount} blocking` : ''})`);
-      
+
       severityGaps.forEach(gap => {
         const blocking = gap.isBlocking ? ' 🚫' : '';
         lines.push(`  • ${gap.message}${blocking}`);
-        
+
         if (gap.suggestions && gap.suggestions.length > 0) {
           lines.push(`    Suggested tests: ${gap.suggestions.join(', ')}`);
         }
       });
       lines.push('');
     }
-    
+
     return lines.join('\n');
   }
-  
+
   /**
    * Generate human-readable message for a coverage gap
    * @param {TestRequirement} requirement - The requirement
@@ -482,25 +482,25 @@ class CoverageEnforcer extends EventEmitter {
   generateGapMessage(requirement) {
     const objectDesc = `${requirement.schema}.${requirement.name}`;
     const operation = requirement.operation?.toLowerCase() || 'change';
-    
+
     switch (requirement.type) {
-      case 'table':
-        return `Table ${objectDesc} (${operation}) lacks test coverage`;
-      case 'column':
-        return `Column ${objectDesc} (${operation}) lacks test coverage`;
-      case 'function':
-        return `Function ${objectDesc} (${operation}) lacks test coverage`;
-      case 'policy':
-        return `RLS Policy ${objectDesc} (${operation}) lacks test coverage`;
-      case 'index':
-        return `Index ${objectDesc} (${operation}) lacks test coverage`;
-      case 'trigger':
-        return `Trigger ${objectDesc} (${operation}) lacks test coverage`;
-      default:
-        return `${requirement.type} ${objectDesc} (${operation}) lacks test coverage`;
+    case 'table':
+      return `Table ${objectDesc} (${operation}) lacks test coverage`;
+    case 'column':
+      return `Column ${objectDesc} (${operation}) lacks test coverage`;
+    case 'function':
+      return `Function ${objectDesc} (${operation}) lacks test coverage`;
+    case 'policy':
+      return `RLS Policy ${objectDesc} (${operation}) lacks test coverage`;
+    case 'index':
+      return `Index ${objectDesc} (${operation}) lacks test coverage`;
+    case 'trigger':
+      return `Trigger ${objectDesc} (${operation}) lacks test coverage`;
+    default:
+      return `${requirement.type} ${objectDesc} (${operation}) lacks test coverage`;
     }
   }
-  
+
   /**
    * Generate test suggestions for a requirement
    * @param {TestRequirement} requirement - The requirement
@@ -508,7 +508,7 @@ class CoverageEnforcer extends EventEmitter {
    */
   generateTestSuggestions(requirement) {
     const suggestions = this.testSuggestions[requirement.type] || [];
-    
+
     // Add operation-specific suggestions
     if (requirement.operation === 'CREATE') {
       if (requirement.type === 'table') {
@@ -517,10 +517,10 @@ class CoverageEnforcer extends EventEmitter {
         suggestions.unshift('has_function');
       }
     }
-    
+
     return [...new Set(suggestions)]; // Remove duplicates
   }
-  
+
   /**
    * Generate recommendations for improving coverage
    * @param {Array<CoverageGap>} gaps - Coverage gaps
@@ -530,7 +530,7 @@ class CoverageEnforcer extends EventEmitter {
    */
   generateRecommendations(gaps, comparison, config) {
     const recommendations = [];
-    
+
     // Critical gaps recommendation
     const criticalGaps = gaps.filter(g => g.severity === GAP_SEVERITY.CRITICAL);
     if (criticalGaps.length > 0) {
@@ -541,7 +541,7 @@ class CoverageEnforcer extends EventEmitter {
         gaps: criticalGaps.length
       });
     }
-    
+
     // High-priority gaps
     const highGaps = gaps.filter(g => g.severity === GAP_SEVERITY.HIGH);
     if (highGaps.length > 0) {
@@ -552,7 +552,7 @@ class CoverageEnforcer extends EventEmitter {
         gaps: highGaps.length
       });
     }
-    
+
     // Coverage threshold recommendations
     const coveragePercentage = Math.round((comparison.metRequirements.length / (comparison.metRequirements.length + comparison.unmetRequirements.length)) * 100) || 0;
     if (coveragePercentage < config.thresholds.overall) {
@@ -564,7 +564,7 @@ class CoverageEnforcer extends EventEmitter {
         required: config.thresholds.overall
       });
     }
-    
+
     // Test organization recommendations
     if (gaps.length > 10) {
       recommendations.push({
@@ -574,7 +574,7 @@ class CoverageEnforcer extends EventEmitter {
         gaps: gaps.length
       });
     }
-    
+
     // Enforcement level recommendations
     if (config.level === ENFORCEMENT_LEVELS.LENIENT && criticalGaps.length > 0) {
       recommendations.push({
@@ -584,10 +584,10 @@ class CoverageEnforcer extends EventEmitter {
         currentLevel: config.level
       });
     }
-    
+
     return recommendations.sort((a, b) => this.comparePriority(a.priority, b.priority));
   }
-  
+
   /**
    * Calculate detailed coverage statistics
    * @param {Array<TestRequirement>} requirements - All requirements
@@ -618,17 +618,17 @@ class CoverageEnforcer extends EventEmitter {
         byType: {}
       }
     };
-    
+
     // Calculate coverage percentages by type
     Object.keys(stats.requirements.byType).forEach(type => {
       const totalByType = stats.requirements.byType[type];
       const gapsByType = gaps.filter(g => g.requirement.type === type).length;
       stats.percentages.byType[type] = Math.round(((totalByType - gapsByType) / totalByType) * 100) || 0;
     });
-    
+
     return stats;
   }
-  
+
   /**
    * Filter requirements based on configuration
    * @param {Array<TestRequirement>} requirements - Requirements to filter
@@ -641,16 +641,16 @@ class CoverageEnforcer extends EventEmitter {
       if (config.ignoredSchemas.includes(req.schema)) {
         return false;
       }
-      
+
       // Filter ignored tables
       if (req.type === 'table' && config.ignoredTables.includes(req.name)) {
         return false;
       }
-      
+
       return true;
     });
   }
-  
+
   /**
    * Filter coverage based on configuration
    * @param {Array<CoverageResult>} coverage - Coverage to filter
@@ -663,15 +663,15 @@ class CoverageEnforcer extends EventEmitter {
       if (config.ignoredSchemas.includes(cov.schema)) {
         return false;
       }
-      
+
       return true;
     });
   }
-  
+
   /**
    * Helper methods
    */
-  
+
   groupBy(array, property) {
     return array.reduce((acc, item) => {
       const key = item[property] || 'unknown';
@@ -679,29 +679,29 @@ class CoverageEnforcer extends EventEmitter {
       return acc;
     }, {});
   }
-  
+
   getSeverityIcon(severity) {
     switch (severity) {
-      case GAP_SEVERITY.CRITICAL: return '🔴';
-      case GAP_SEVERITY.HIGH: return '🟠';
-      case GAP_SEVERITY.MEDIUM: return '🟡';
-      case GAP_SEVERITY.LOW: return '🟢';
-      default: return '⚪';
+    case GAP_SEVERITY.CRITICAL: return '🔴';
+    case GAP_SEVERITY.HIGH: return '🟠';
+    case GAP_SEVERITY.MEDIUM: return '🟡';
+    case GAP_SEVERITY.LOW: return '🟢';
+    default: return '⚪';
     }
   }
-  
+
   compareSeverity(severity1, severity2) {
     const levels = [GAP_SEVERITY.LOW, GAP_SEVERITY.MEDIUM, GAP_SEVERITY.HIGH, GAP_SEVERITY.CRITICAL];
     return levels.indexOf(severity1) - levels.indexOf(severity2);
   }
-  
+
   comparePriority(priority1, priority2) {
     const priorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
     return priorities.indexOf(priority2) - priorities.indexOf(priority1); // Reverse order (highest first)
   }
 }
 
-module.exports = {
+export {
   CoverageEnforcer,
   ENFORCEMENT_LEVELS,
   GAP_SEVERITY

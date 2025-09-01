@@ -164,7 +164,7 @@ class DataOutputPaths {
         delete this._resolving[key];
         return resolved;
       })
-      .catch(error => {
+      .catch(_error => {
         delete this._resolving[key];
         throw new Error(`Failed to resolve output path ${key}: ${error.message}`);
       });

@@ -191,7 +191,7 @@ class Command extends EventEmitter {
       command: this.constructor.name
     });
 
-    return await this.confirm(
+    return this.confirm(
       'Are you sure you want to perform this operation in PRODUCTION?'
     );
   }
@@ -317,7 +317,7 @@ class Command extends EventEmitter {
    * @returns {Promise<boolean>} True if confirmed, false otherwise
    */
   async confirm(message, defaultValue = false) {
-    return await this.prompt('confirm', { message, default: defaultValue });
+    return this.prompt('confirm', { message, default: defaultValue });
   }
 
   /**
@@ -331,7 +331,7 @@ class Command extends EventEmitter {
    * @returns {Promise<string>} User input string
    */
   async input(message, options = {}) {
-    return await this.prompt('input', { message, ...options });
+    return this.prompt('input', { message, ...options });
   }
 
   /**

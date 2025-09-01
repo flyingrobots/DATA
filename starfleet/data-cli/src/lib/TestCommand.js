@@ -50,7 +50,7 @@ class TestCommand extends DatabaseCommand {
    * @returns {Promise<string>} Resolved tests directory path
    */
   async getTestsDir() {
-    return await this.pathResolver.resolveDirectoryForRead(this.testsDir);
+    return this.pathResolver.resolveDirectoryForRead(this.testsDir);
   }
 
   /**
@@ -58,7 +58,7 @@ class TestCommand extends DatabaseCommand {
    * @returns {Promise<string>} Resolved output directory path
    */
   async getOutputDir() {
-    return await this.pathResolver.resolveDirectoryForWrite(this.outputDir);
+    return this.pathResolver.resolveDirectoryForWrite(this.outputDir);
   }
 
   /**
@@ -69,7 +69,7 @@ class TestCommand extends DatabaseCommand {
   async getTestFile(filename) {
     const { join } = await import('path');
     const dir = await this.getTestsDir();
-    return await this.pathResolver.resolveFileForRead(join(dir, filename));
+    return this.pathResolver.resolveFileForRead(join(dir, filename));
   }
 
   /**
@@ -80,7 +80,7 @@ class TestCommand extends DatabaseCommand {
   async getOutputFile(filename) {
     const { join } = await import('path');
     const dir = await this.getOutputDir();
-    return await this.pathResolver.resolveFileForWrite(join(dir, filename));
+    return this.pathResolver.resolveFileForWrite(join(dir, filename));
   }
 
   /**

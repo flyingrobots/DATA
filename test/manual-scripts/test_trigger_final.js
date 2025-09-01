@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const pgTAPTestScanner = require('./src/lib/testing/pgTAPTestScanner.js');
+import pgTAPTestScanner from './src/lib/testing/pgTAPTestScanner.js';
 
 console.log('✅ Testing trigger assertion parsing functionality...\n');
 
@@ -58,10 +58,10 @@ let failed = 0;
 testCases.forEach((testCase, index) => {
   try {
     const assertions = scanner.extractAssertions(testCase.sql);
-    
+
     if (assertions.length === 1) {
       const assertion = assertions[0];
-      
+
       if (assertion.type === testCase.expectedType && assertion.target === testCase.expectedTarget) {
         console.log(`✅ Test ${index + 1}: ${testCase.name} - PASSED`);
         console.log(`   Target: ${assertion.target}`);

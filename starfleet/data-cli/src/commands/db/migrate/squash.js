@@ -281,7 +281,7 @@ class MigrateSquashCommand extends Command {
     console.log('⚠️  Make sure you have backed up your migrations!');
     console.log('');
 
-    return await this.confirm('Proceed with migration squash?', false);
+    return this.confirm('Proceed with migration squash?', false);
   }
 
   /**
@@ -361,7 +361,7 @@ class MigrateSquashCommand extends Command {
  */
 export default async function squashHandler(args, config, logger, isProd) {
   const command = new MigrateSquashCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateSquashCommand };

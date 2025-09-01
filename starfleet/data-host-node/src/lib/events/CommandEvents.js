@@ -1,10 +1,10 @@
 /**
  * Command Event System for D.A.T.A. CLI
- * 
+ *
  * This module provides a comprehensive event class hierarchy for the event-driven
- * architecture used throughout the D.A.T.A. (Database Automation, Testing, and 
+ * architecture used throughout the D.A.T.A. (Database Automation, Testing, and
  * Alignment) CLI tool. All events support instanceof checks for runtime type safety.
- * 
+ *
  * @fileoverview Event classes for robust event-driven command architecture
  * @author Supa Base 12 Engineering Team
  * @version 1.0.0
@@ -26,17 +26,17 @@
 
 /**
  * Base class for all command events in the D.A.T.A. system
- * 
+ *
  * Provides the foundational structure for all events emitted by commands.
  * All events include a timestamp and support structured data through the
  * details property.
- * 
+ *
  * @class
  */
 class CommandEvent {
   /**
    * Create a new command event
-   * 
+   *
    * @param {string} type - Event type identifier (e.g., 'progress', 'error')
    * @param {string} message - Human-readable message describing the event
    * @param {EventDetails} [details={}] - Additional structured data
@@ -46,17 +46,17 @@ class CommandEvent {
      * @type {string} Event type identifier
      */
     this.type = type;
-    
+
     /**
      * @type {string} Human-readable message
      */
     this.message = message;
-    
+
     /**
      * @type {EventDetails} Additional structured event data
      */
     this.details = details;
-    
+
     /**
      * @type {Date} Timestamp when event was created
      */
@@ -65,7 +65,7 @@ class CommandEvent {
 
   /**
    * Convert event to JSON-serializable object
-   * 
+   *
    * @returns {Object} JSON representation of the event
    */
   toJSON() {
@@ -79,7 +79,7 @@ class CommandEvent {
 
   /**
    * Get a string representation of the event
-   * 
+   *
    * @returns {string} String representation
    */
   toString() {
@@ -89,28 +89,28 @@ class CommandEvent {
 
 /**
  * Progress event for long-running operations
- * 
+ *
  * Used to indicate progress during operations that may take significant time,
  * such as database migrations, file processing, or compilation tasks.
- * 
+ *
  * @extends CommandEvent
  */
 class ProgressEvent extends CommandEvent {
   /**
    * Create a new progress event
-   * 
+   *
    * @param {string} message - Progress message describing current operation
    * @param {number|null} [percentage=null] - Completion percentage (0-100), null if unknown
    * @param {EventDetails} [details={}] - Additional progress details
    */
   constructor(message, percentage = null, details = {}) {
     super('progress', message, details);
-    
+
     /**
      * @type {number|null} Completion percentage (0-100) or null if indeterminate
      */
     this.percentage = percentage;
-    
+
     // Validate percentage if provided
     if (percentage !== null && (typeof percentage !== 'number' || percentage < 0 || percentage > 100)) {
       throw new Error('Percentage must be a number between 0 and 100, or null');
@@ -119,7 +119,7 @@ class ProgressEvent extends CommandEvent {
 
   /**
    * Create a progress event with percentage
-   * 
+   *
    * @param {string} message - Progress message
    * @param {number} completed - Number of items completed
    * @param {number} total - Total number of items
@@ -137,7 +137,7 @@ class ProgressEvent extends CommandEvent {
 
   /**
    * Create an indeterminate progress event
-   * 
+   *
    * @param {string} message - Progress message
    * @param {EventDetails} [details={}] - Additional details
    * @returns {ProgressEvent} New indeterminate progress event
@@ -149,16 +149,16 @@ class ProgressEvent extends CommandEvent {
 
 /**
  * Error event for operation failures
- * 
+ *
  * Represents errors, failures, or exceptions that occur during command execution.
  * Includes the original error object and optional error categorization.
- * 
+ *
  * @extends CommandEvent
  */
 class ErrorEvent extends CommandEvent {
   /**
    * Create a new error event
-   * 
+   *
    * @param {string} message - Error message describing what went wrong
    * @param {Error} error - The actual error object that was thrown
    * @param {string|null} [code=null] - Error code for categorization
@@ -166,12 +166,12 @@ class ErrorEvent extends CommandEvent {
    */
   constructor(message, error, code = null, details = {}) {
     super('error', message, { ...details, error, code });
-    
+
     /**
      * @type {Error} The original error object
      */
     this.error = error;
-    
+
     /**
      * @type {string|null} Error code for categorization
      */
@@ -180,7 +180,7 @@ class ErrorEvent extends CommandEvent {
 
   /**
    * Create an error event from an exception
-   * 
+   *
    * @param {Error} error - The error object
    * @param {string} [context='Operation failed'] - Context message
    * @param {EventDetails} [details={}] - Additional details
@@ -197,7 +197,7 @@ class ErrorEvent extends CommandEvent {
 
   /**
    * Get the full error stack trace
-   * 
+   *
    * @returns {string} Stack trace string
    */
   getStackTrace() {
@@ -207,16 +207,16 @@ class ErrorEvent extends CommandEvent {
 
 /**
  * Directory operation event for filesystem operations
- * 
+ *
  * Represents events related to directory processing, creation, scanning,
  * or other filesystem operations on directories.
- * 
+ *
  * @extends CommandEvent
  */
 class DirectoryEvent extends CommandEvent {
   /**
    * Create a new directory event
-   * 
+   *
    * @param {string} message - Message describing the directory operation
    * @param {string} directoryPath - Path to the directory being processed
    * @param {string} [operation='process'] - Type of operation (process, create, scan, etc.)
@@ -224,12 +224,12 @@ class DirectoryEvent extends CommandEvent {
    */
   constructor(message, directoryPath, operation = 'process', details = {}) {
     super('directory', message, { ...details, directoryPath, operation });
-    
+
     /**
      * @type {string} Path to the directory
      */
     this.directoryPath = directoryPath;
-    
+
     /**
      * @type {string} Type of directory operation
      */
@@ -238,7 +238,7 @@ class DirectoryEvent extends CommandEvent {
 
   /**
    * Create a directory scanning event
-   * 
+   *
    * @param {string} directoryPath - Directory being scanned
    * @param {number} [fileCount=0] - Number of files found
    * @param {EventDetails} [details={}] - Additional details
@@ -255,7 +255,7 @@ class DirectoryEvent extends CommandEvent {
 
   /**
    * Create a directory creation event
-   * 
+   *
    * @param {string} directoryPath - Directory being created
    * @param {EventDetails} [details={}] - Additional details
    * @returns {DirectoryEvent} New directory creation event
@@ -272,23 +272,23 @@ class DirectoryEvent extends CommandEvent {
 
 /**
  * Success event for successful operations
- * 
+ *
  * Indicates successful completion of operations, commands, or tasks.
  * Often the final event emitted by a command.
- * 
+ *
  * @extends CommandEvent
  */
 class SuccessEvent extends CommandEvent {
   /**
    * Create a new success event
-   * 
+   *
    * @param {string} message - Success message describing what was accomplished
    * @param {EventDetails} [details={}] - Additional success details
    * @param {number|null} [duration=null] - Operation duration in milliseconds
    */
   constructor(message, details = {}, duration = null) {
     super('success', message, { ...details, duration });
-    
+
     /**
      * @type {number|null} Duration of the operation in milliseconds
      */
@@ -297,7 +297,7 @@ class SuccessEvent extends CommandEvent {
 
   /**
    * Create a success event with timing information
-   * 
+   *
    * @param {string} message - Success message
    * @param {Date} startTime - When the operation started
    * @param {EventDetails} [details={}] - Additional details
@@ -310,16 +310,16 @@ class SuccessEvent extends CommandEvent {
 
   /**
    * Get formatted duration string
-   * 
+   *
    * @returns {string|null} Formatted duration or null if no duration set
    */
   getFormattedDuration() {
     if (this.duration === null) return null;
-    
+
     if (this.duration < 1000) {
       return `${this.duration}ms`;
     }
-    
+
     const seconds = Math.round(this.duration / 1000 * 100) / 100;
     return `${seconds}s`;
   }
@@ -327,23 +327,23 @@ class SuccessEvent extends CommandEvent {
 
 /**
  * Warning event for non-fatal issues
- * 
+ *
  * Represents warnings, non-critical issues, or situations that require
  * attention but don't prevent operation completion.
- * 
+ *
  * @extends CommandEvent
  */
 class WarningEvent extends CommandEvent {
   /**
    * Create a new warning event
-   * 
+   *
    * @param {string} message - Warning message
    * @param {EventDetails} [details={}] - Additional warning details
    * @param {string|null} [code=null] - Warning code for categorization
    */
   constructor(message, details = {}, code = null) {
     super('warning', message, { ...details, code });
-    
+
     /**
      * @type {string|null} Warning code for categorization
      */
@@ -353,16 +353,16 @@ class WarningEvent extends CommandEvent {
 
 /**
  * Start event for operation initiation
- * 
+ *
  * Indicates the beginning of a command or operation. Often includes
  * configuration or context information.
- * 
+ *
  * @extends CommandEvent
  */
 class StartEvent extends CommandEvent {
   /**
    * Create a new start event
-   * 
+   *
    * @param {string} message - Start message describing what's beginning
    * @param {EventDetails} [details={}] - Additional start details
    */
@@ -372,7 +372,7 @@ class StartEvent extends CommandEvent {
 
   /**
    * Create a start event for production operations
-   * 
+   *
    * @param {string} message - Start message
    * @param {EventDetails} [details={}] - Additional details
    * @returns {StartEvent} New production start event
@@ -384,23 +384,23 @@ class StartEvent extends CommandEvent {
 
 /**
  * Status event for system state information
- * 
+ *
  * Represents status checks, health reports, or system state information
  * that doesn't fit into other event categories.
- * 
+ *
  * @extends CommandEvent
  */
 class StatusEvent extends CommandEvent {
   /**
    * Create a new status event
-   * 
+   *
    * @param {string} message - Status message
    * @param {string} status - Status value (healthy, degraded, error, etc.)
    * @param {EventDetails} [details={}] - Additional status details
    */
   constructor(message, status, details = {}) {
     super('status', message, { ...details, status });
-    
+
     /**
      * @type {string} Current status value
      */
@@ -409,7 +409,7 @@ class StatusEvent extends CommandEvent {
 
   /**
    * Check if status indicates a healthy state
-   * 
+   *
    * @returns {boolean} True if status is healthy
    */
   isHealthy() {
@@ -420,23 +420,23 @@ class StatusEvent extends CommandEvent {
 
 /**
  * Complete event for successful operation completion
- * 
+ *
  * Indicates that an operation has completed successfully with optional result data.
  * Similar to SuccessEvent but specifically for completion of multi-step operations.
- * 
+ *
  * @extends CommandEvent
  */
 class CompleteEvent extends CommandEvent {
   /**
    * Create a new complete event
-   * 
+   *
    * @param {string} message - Completion message
    * @param {*} [result=null] - Operation result data
    * @param {EventDetails} [details={}] - Additional completion details
    */
   constructor(message, result = null, details = {}) {
     super('complete', message, { ...details, result });
-    
+
     /**
      * @type {*} The result of the completed operation
      */
@@ -446,22 +446,22 @@ class CompleteEvent extends CommandEvent {
 
 /**
  * Cancelled event for operations that were cancelled
- * 
+ *
  * Indicates that an operation was cancelled by the user or system before completion.
- * 
+ *
  * @extends CommandEvent
  */
 class CancelledEvent extends CommandEvent {
   /**
    * Create a new cancelled event
-   * 
+   *
    * @param {string} [message='Operation cancelled'] - Cancellation message
    * @param {string|null} [reason=null] - Reason for cancellation
    * @param {EventDetails} [details={}] - Additional cancellation details
    */
   constructor(message = 'Operation cancelled', reason = null, details = {}) {
     super('cancelled', message, { ...details, reason });
-    
+
     /**
      * @type {string|null} Reason for the cancellation
      */
@@ -627,11 +627,11 @@ class BuildFailedEvent extends CommandEvent {
 
 /**
  * Utility function to validate event types at runtime
- * 
+ *
  * Provides runtime type checking for events, ensuring they are instances
  * of the expected event class. This is the runtime equivalent of TypeScript
  * type checking, using JavaScript's native instanceof operator.
- * 
+ *
  * @param {*} event - The event to validate
  * @param {Function} expectedClass - The expected event class constructor
  * @throws {TypeError} If event is not an instance of expectedClass
@@ -650,10 +650,10 @@ function validateCommandEvent(event, expectedClass) {
 
 /**
  * Factory function to create typed events with validation
- * 
+ *
  * Creates events using a type string, providing a convenient way to
  * instantiate events while maintaining type safety through the class system.
- * 
+ *
  * @param {string} type - Event type string
  * @param {...*} args - Arguments to pass to the event constructor
  * @returns {CommandEvent} New event instance of the appropriate type
@@ -688,7 +688,7 @@ function createCommandEvent(type, ...args) {
 export {
   // Base class
   CommandEvent,
-  
+
   // Core event classes
   ProgressEvent,
   ErrorEvent,
@@ -699,13 +699,13 @@ export {
   StatusEvent,
   CompleteEvent,
   CancelledEvent,
-  
+
   // Build-specific event classes
   BuildProgressEvent,
   BuildStartEvent,
   BuildCompleteEvent,
   BuildFailedEvent,
-  
+
   // Utilities
   validateCommandEvent,
   createCommandEvent

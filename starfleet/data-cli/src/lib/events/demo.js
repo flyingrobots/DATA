@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
  * @fileoverview Runtime Type Safety Demonstration - JavaScript Event Classes
- * 
+ *
  * This demonstration shows off the power of runtime instanceof validation
  * in pure JavaScript without TypeScript compilation overhead. Watch as we
  * create, validate, and manipulate events with complete type safety.
- * 
+ *
  * Run with: node src/lib/events/demo.js
- * 
+ *
  * @author JavaScript Pro (via Claude Code)
  */
 
@@ -57,12 +57,12 @@ function demonstrateBasicEvents() {
     // Create an error event with full context
     const dbError = new Error('Connection timeout');
     dbError.code = 'ETIMEDOUT';
-    
+
     const error = new ErrorEvent(
       'Database connection failed during migration',
       dbError,
       'DB_CONNECTION_FAILED',
-      { 
+      {
         host: 'localhost',
         port: 5432,
         database: 'test_migrations',
@@ -145,7 +145,7 @@ function demonstrateTestEvents() {
     console.log('🎯 Test completed:', testResults.toString());
     console.log('📈 Success rate:', `${testResults.getSuccessRate()}%`);
     console.log('✅ All tests passed:', testResults.allTestsPassed());
-    
+
     const metrics = testResults.getMetrics();
     console.log('📊 Test metrics:', {
       total: metrics.total,
@@ -240,9 +240,9 @@ function demonstrateAdvancedValidation() {
     console.log('✅ Factory created valid event:', validEvent.constructor.name);
 
     // Validate with strict mode
-    const strictResult = validateEvent(validEvent, ProgressEvent, { 
-      strict: true, 
-      throwOnError: false 
+    const strictResult = validateEvent(validEvent, ProgressEvent, {
+      strict: true,
+      throwOnError: false
     });
     console.log('🔍 Strict validation result:', strictResult.valid ? 'PASSED' : 'FAILED');
 
@@ -262,7 +262,7 @@ function demonstrateAdvancedValidation() {
     // Event immutability test
     const immutableEvent = new ProgressEvent('Immutable test', 25);
     console.log('🔒 Event is frozen (immutable):', Object.isFrozen(immutableEvent));
-    
+
     try {
       immutableEvent.message = 'Try to change this'; // Should fail silently or throw
       console.log('🛡️ Immutability preserved - message unchanged:', immutableEvent.message);
@@ -336,7 +336,7 @@ function runDemonstration() {
   console.log('⚡ This is the power of PHENOMENAL JavaScript!\n');
 }
 
-// Run demo if this file is executed directly  
+// Run demo if this file is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   runDemonstration();
 }

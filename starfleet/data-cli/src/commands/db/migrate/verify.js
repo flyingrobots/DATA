@@ -473,7 +473,7 @@ class MigrateVerifyCommand extends Command {
  */
 export default async function verifyHandler(args, config, logger, isProd) {
   const command = new MigrateVerifyCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateVerifyCommand };

@@ -189,7 +189,7 @@ class MigrateTestCommand extends Command {
 
       if (testFunctions.length === 0) {
         this.warn('No test functions found, creating basic validation test');
-        return await this.runBasicValidationTest(testDbUrl);
+        return this.runBasicValidationTest(testDbUrl);
       }
 
       // Run all available test functions
@@ -416,7 +416,7 @@ class MigrateTestCommand extends Command {
  */
 export default async function testHandler(args, config, logger, isProd) {
   const command = new MigrateTestCommand(config, logger, isProd);
-  return await command.performExecute(args);
+  return command.performExecute(args);
 }
 
 export { MigrateTestCommand };

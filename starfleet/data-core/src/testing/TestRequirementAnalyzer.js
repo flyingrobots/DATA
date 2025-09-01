@@ -8,7 +8,7 @@
  * @module TestRequirementAnalyzer
  */
 
-const { EventEmitter } = require('events');
+import { EventEmitter } from 'events';
 
 /**
  * Test requirement types
@@ -4483,8 +4483,4 @@ class TestRequirementAnalyzer extends EventEmitter {
   }
 }
 
-module.exports = {
-  TestRequirementAnalyzer,
-  TEST_TYPES,
-  TEST_PRIORITIES
-};
+export { TestRequirementAnalyzer, TEST_TYPES, TEST_PRIORITIES };

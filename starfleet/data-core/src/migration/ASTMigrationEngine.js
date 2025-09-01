@@ -1,14 +1,5 @@
-/**
- * AST-based Migration Engine for D.A.T.A.
- *
- * Pure JavaScript PostgreSQL migration generator using AST parsing
- * No Python dependencies, no temporary databases
- *
- * @module ASTMigrationEngine
- */
-
-const { parse } = require('pgsql-parser');
-const { EventEmitter } = require('events');
+import { parse } from 'pgsql-parser';
+import { EventEmitter } from 'events';
 
 /**
  * Represents a single migration operation
@@ -85,23 +76,23 @@ class ASTMigrationEngine extends EventEmitter {
       const migrations = [];
 
       // Tables (most complex - includes columns, constraints)
-      migrations.push(...await this.diffTables(fromSchema.tables, toSchema.tables));
+      migrations.push(...(await this.diffTables(fromSchema.tables, toSchema.tables)));
 
       // Functions and Triggers
-      migrations.push(...await this.diffFunctions(fromSchema.functions, toSchema.functions));
-      migrations.push(...await this.diffTriggers(fromSchema.triggers, toSchema.triggers));
+      migrations.push(...(await this.diffFunctions(fromSchema.functions, toSchema.functions)));
+      migrations.push(...(await this.diffTriggers(fromSchema.triggers, toSchema.triggers)));
 
       // RLS Policies (Supabase critical)
-      migrations.push(...await this.diffPolicies(fromSchema.policies, toSchema.policies));
+      migrations.push(...(await this.diffPolicies(fromSchema.policies, toSchema.policies)));
 
       // Enums and Custom Types
-      migrations.push(...await this.diffEnums(fromSchema.enums, toSchema.enums));
+      migrations.push(...(await this.diffEnums(fromSchema.enums, toSchema.enums)));
 
       // Indexes
-      migrations.push(...await this.diffIndexes(fromSchema.indexes, toSchema.indexes));
+      migrations.push(...(await this.diffIndexes(fromSchema.indexes, toSchema.indexes)));
 
       // Views
-      migrations.push(...await this.diffViews(fromSchema.views, toSchema.views));
+      migrations.push(...(await this.diffViews(fromSchema.views, toSchema.views)));
 
       // Detect destructive operations
       const destructive = migrations.filter(m => m.type === 'DESTRUCTIVE');
@@ -777,4 +768,4 @@ class ASTMigrationEngine extends EventEmitter {
   }
 }
 
-module.exports = ASTMigrationEngine;
+export default ASTMigrationEngine;
