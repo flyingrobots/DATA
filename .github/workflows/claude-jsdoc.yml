@@ -2,7 +2,7 @@ name: Claude JSDoc Enhancement
 
 on:
   push:
-    branches: [refactor-core]
+    # Triggers on ANY push to ANY branch with JS changes
     paths:
       - "**/*.js"
       - "**/*.mjs"
