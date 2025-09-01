@@ -1,6 +1,9 @@
 # DATA — Database Automation, Testing, and Alignment 🖖
 
-> [!CAUTION] **ABANDONED SHIP**  
+![status: abandoned](https://img.shields.io/badge/status-abandoned-red)
+
+## [!CAUTION] **ABANDONED SHIP**  
+
 > I have stopped working on this project to focus my efforts on its successor. Stay tuned and follow for more.  
 > _– flyingrobots, 2025/09/01_  
 
