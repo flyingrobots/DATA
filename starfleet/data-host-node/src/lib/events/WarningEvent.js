@@ -84,7 +84,13 @@ class WarningEvent extends CommandEvent {
    * @param {import('./CommandEvent').EventDetails} [details={}] - Additional details
    * @returns {WarningEvent} New configuration warning event
    */
-  static configuration(message, setting, currentValue = null, recommendedValue = null, details = {}) {
+  static configuration(
+    message,
+    setting,
+    currentValue = null,
+    recommendedValue = null,
+    details = {}
+  ) {
     return new WarningEvent(
       message,
       {

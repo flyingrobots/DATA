@@ -188,10 +188,20 @@ class OutputConfig {
 
   _resolveAllPaths() {
     const pathProps = [
-      'projectRoot', 'supabaseDir', 'migrationsDir', 'testsDir',
-      'sqlDir', 'functionsDir', 'seedDir', 'supabaseConfig',
-      'dataConfig', 'buildDir', 'cacheDir', 'tempDir',
-      'logFile', 'errorLogFile'
+      'projectRoot',
+      'supabaseDir',
+      'migrationsDir',
+      'testsDir',
+      'sqlDir',
+      'functionsDir',
+      'seedDir',
+      'supabaseConfig',
+      'dataConfig',
+      'buildDir',
+      'cacheDir',
+      'tempDir',
+      'logFile',
+      'errorLogFile'
     ];
 
     for (const prop of pathProps) {
@@ -202,12 +212,7 @@ class OutputConfig {
   }
 
   _validatePaths() {
-    const createIfMissing = [
-      this.buildDir,
-      this.cacheDir,
-      this.tempDir,
-      this.migrationsDir
-    ];
+    const createIfMissing = [this.buildDir, this.cacheDir, this.tempDir, this.migrationsDir];
 
     for (const dir of createIfMissing) {
       if (dir && !fs.existsSync(dir)) {
@@ -235,11 +240,11 @@ class OutputConfig {
     console.log('═'.repeat(60));
 
     const categories = {
-      'Core': ['projectRoot', 'supabaseDir'],
-      'Supabase': ['migrationsDir', 'testsDir', 'sqlDir', 'functionsDir', 'seedDir'],
-      'Config': ['supabaseConfig', 'dataConfig'],
-      'Output': ['buildDir', 'cacheDir', 'tempDir'],
-      'Logs': ['logFile', 'errorLogFile']
+      Core: ['projectRoot', 'supabaseDir'],
+      Supabase: ['migrationsDir', 'testsDir', 'sqlDir', 'functionsDir', 'seedDir'],
+      Config: ['supabaseConfig', 'dataConfig'],
+      Output: ['buildDir', 'cacheDir', 'tempDir'],
+      Logs: ['logFile', 'errorLogFile']
     };
 
     for (const [category, props] of Object.entries(categories)) {

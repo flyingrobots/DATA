@@ -26,10 +26,14 @@ class Config {
     const config = {
       environments: {
         local: {
-          db: this.envVars.DATABASE_URL || this.envVars.data_DATABASE_URL || 'postgresql://postgres:postgres@127.0.0.1:54332/postgres',
+          db:
+            this.envVars.DATABASE_URL ||
+            this.envVars.data_DATABASE_URL ||
+            'postgresql://postgres:postgres@127.0.0.1:54332/postgres',
           supabase_url: this.envVars.SUPABASE_URL || this.envVars.data_SUPABASE_URL,
           supabase_anon_key: this.envVars.SUPABASE_ANON_KEY || this.envVars.data_ANON_KEY,
-          supabase_service_role_key: this.envVars.SUPABASE_SERVICE_ROLE_KEY || this.envVars.data_SERVICE_ROLE_KEY
+          supabase_service_role_key:
+            this.envVars.SUPABASE_SERVICE_ROLE_KEY || this.envVars.data_SERVICE_ROLE_KEY
         }
       },
       paths: {
@@ -94,7 +98,7 @@ class Config {
         } else {
           // Log validation errors but use what we can
           console.warn(`Configuration validation warnings in ${configFile}:`);
-          parseResult.error.errors.forEach(err => {
+          parseResult.error.errors.forEach((err) => {
             console.warn(`  - ${err.path.join('.')}: ${err.message}`);
           });
           // Fall back to manual merge for partial configs
@@ -109,7 +113,7 @@ class Config {
     });
 
     const configs = await Promise.all(configPromises);
-    const validConfig = configs.find(config => config !== null);
+    const validConfig = configs.find((config) => config !== null);
 
     if (validConfig) {
       return validConfig;
@@ -126,7 +130,11 @@ class Config {
     const result = { ...defaults };
 
     for (const key in overrides) {
-      if (typeof overrides[key] === 'object' && !Array.isArray(overrides[key]) && overrides[key] !== null) {
+      if (
+        typeof overrides[key] === 'object' &&
+        !Array.isArray(overrides[key]) &&
+        overrides[key] !== null
+      ) {
         result[key] = this.merge(defaults[key] || {}, overrides[key]);
       } else {
         result[key] = overrides[key];

@@ -45,7 +45,7 @@ class MemoryMonitor {
    * @static
    */
   static shouldTriggerCleanup(currentMB, maxMB) {
-    return currentMB > (maxMB * 0.8); // Trigger at 80% of max
+    return currentMB > maxMB * 0.8; // Trigger at 80% of max
   }
 
   /**

@@ -229,7 +229,9 @@ describe('TestTemplateGenerator - Table Tests', () => {
         name: 'invalid-table-name'
       };
 
-      expect(() => generator.generateTemplate(invalidRequirement)).toThrow('Name must contain only letters, numbers, and underscores');
+      expect(() => generator.generateTemplate(invalidRequirement)).toThrow(
+        'Name must contain only letters, numbers, and underscores'
+      );
     });
   });
 });

@@ -8,7 +8,13 @@ import { EventEmitter } from 'events';
 
 const require = createRequire(import.meta.url);
 import CliReporter from '../packages/data-cli/src/reporters/CliReporter.js';
-import { CommandEvent, ProgressEvent, ErrorEvent, SuccessEvent, WarningEvent } from '../src/lib/events/CommandEvents.js';
+import {
+  CommandEvent,
+  ProgressEvent,
+  ErrorEvent,
+  SuccessEvent,
+  WarningEvent
+} from '../src/lib/events/CommandEvents.js';
 
 describe('CliReporter', () => {
   let reporter;
@@ -36,9 +42,7 @@ describe('CliReporter', () => {
     it('should handle legacy progress events', () => {
       mockCommand.emit('progress', { message: 'Legacy progress' });
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🔄 Legacy progress')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('🔄 Legacy progress'));
     });
 
     it('should handle legacy warning events', () => {
@@ -59,28 +63,20 @@ describe('CliReporter', () => {
         error: testError
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('✗ Legacy error')
-      );
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Test error')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('✗ Legacy error'));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Test error'));
     });
 
     it('should handle legacy success events', () => {
       mockCommand.emit('success', { message: 'Legacy success' });
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('✓ Legacy success')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('✓ Legacy success'));
     });
 
     it('should handle legacy start events with isProd', () => {
       mockCommand.emit('start', { isProd: true });
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🚨 PRODUCTION MODE 🚨')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('🚨 PRODUCTION MODE 🚨'));
     });
   });
 
@@ -89,9 +85,7 @@ describe('CliReporter', () => {
       const progressEvent = new ProgressEvent('Typed progress');
       mockCommand.emit('progress', progressEvent);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🔄 Typed progress')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('🔄 Typed progress'));
     });
 
     it('should handle typed warning events', () => {
@@ -113,18 +107,14 @@ describe('CliReporter', () => {
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('✗ Typed error message')
       );
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Typed error')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Typed error'));
     });
 
     it('should handle typed success events', () => {
       const successEvent = new SuccessEvent('Typed success');
       mockCommand.emit('success', successEvent);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('✓ Typed success')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('✓ Typed success'));
     });
 
     it('should handle typed start events with isProd', () => {
@@ -133,9 +123,7 @@ describe('CliReporter', () => {
       startEvent.isProd = true;
       mockCommand.emit('start', startEvent);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🚨 PRODUCTION MODE 🚨')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('🚨 PRODUCTION MODE 🚨'));
     });
   });
 
@@ -189,12 +177,8 @@ describe('CliReporter', () => {
       const typedEvent = new ProgressEvent('Typed progress');
       mockCommand.emit('progress', typedEvent);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🔄 Legacy progress')
-      );
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🔄 Typed progress')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('🔄 Legacy progress'));
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('🔄 Typed progress'));
       expect(consoleLogSpy).toHaveBeenCalledTimes(2);
     });
   });

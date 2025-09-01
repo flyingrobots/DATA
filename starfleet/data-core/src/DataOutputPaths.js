@@ -158,13 +158,14 @@ class DataOutputPaths {
     }
 
     // Start resolution
-    this._resolving[key] = this.pathResolver.resolveDirectoryForWrite(this._config[key])
-      .then(resolved => {
+    this._resolving[key] = this.pathResolver
+      .resolveDirectoryForWrite(this._config[key])
+      .then((resolved) => {
         this._resolvedPaths[key] = resolved;
         delete this._resolving[key];
         return resolved;
       })
-      .catch(_error => {
+      .catch((_error) => {
         delete this._resolving[key];
         throw new Error(`Failed to resolve output path ${key}: ${error.message}`);
       });

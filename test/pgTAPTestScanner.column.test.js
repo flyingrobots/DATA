@@ -259,14 +259,16 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
       const assertions = scanner.extractAssertions(sql);
 
       // Manually build coverage map for testing
-      scanner.testFiles = [{
-        filePath: '/test/column_test.sql',
-        fileName: 'column_test.sql',
-        assertions,
-        planCount: 5,
-        dependencies: [],
-        metadata: {}
-      }];
+      scanner.testFiles = [
+        {
+          filePath: '/test/column_test.sql',
+          fileName: 'column_test.sql',
+          assertions,
+          planCount: 5,
+          dependencies: [],
+          metadata: {}
+        }
+      ];
 
       scanner._buildCoverageMap();
       const coverageMap = scanner.getCoverageMap();
@@ -292,14 +294,16 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
 
       const assertions = scanner.extractAssertions(sql);
 
-      scanner.testFiles = [{
-        filePath: '/test/column_test.sql',
-        fileName: 'column_test.sql',
-        assertions,
-        planCount: 3,
-        dependencies: [],
-        metadata: {}
-      }];
+      scanner.testFiles = [
+        {
+          filePath: '/test/column_test.sql',
+          fileName: 'column_test.sql',
+          assertions,
+          planCount: 3,
+          dependencies: [],
+          metadata: {}
+        }
+      ];
 
       scanner._buildCoverageMap();
       const stats = scanner.getStatistics();
@@ -324,13 +328,13 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
 
       expect(assertions).toHaveLength(6); // Excludes the plan statement
 
-      const columnAssertions = assertions.filter(a =>
-        a.type.includes('column') || a.type.startsWith('col_')
+      const columnAssertions = assertions.filter(
+        (a) => a.type.includes('column') || a.type.startsWith('col_')
       );
       expect(columnAssertions).toHaveLength(4);
 
-      const otherAssertions = assertions.filter(a =>
-        !a.type.includes('column') && !a.type.startsWith('col_')
+      const otherAssertions = assertions.filter(
+        (a) => !a.type.includes('column') && !a.type.startsWith('col_')
       );
       expect(otherAssertions).toHaveLength(2);
     });
@@ -377,7 +381,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
 
       expect(assertions).toHaveLength(10);
 
-      const assertionTypes = assertions.map(a => a.type);
+      const assertionTypes = assertions.map((a) => a.type);
       expect(assertionTypes).toContain('has_column');
       expect(assertionTypes).toContain('hasnt_column');
       expect(assertionTypes).toContain('col_type_is');
@@ -390,8 +394,8 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
       expect(assertionTypes).toContain('col_isnt_pk');
 
       // All should be categorized as column assertions
-      const columnAssertions = assertions.filter(a =>
-        a.type.includes('column') || a.type.startsWith('col_')
+      const columnAssertions = assertions.filter(
+        (a) => a.type.includes('column') || a.type.startsWith('col_')
       );
       expect(columnAssertions).toHaveLength(10);
     });
@@ -419,13 +423,18 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     });
 
     it('should handle complex default values in col_default_is', () => {
-      const sql = "SELECT col_default_is('users', 'settings', '{\"theme\": \"dark\", \"notifications\": true}');";
+      const sql =
+        'SELECT col_default_is(\'users\', \'settings\', \'{"theme": "dark", "notifications": true}\');';
       const assertions = scanner.extractAssertions(sql);
 
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_default_is');
       expect(assertions[0].target).toBe('users.settings');
-      expect(assertions[0].parameters).toEqual(['users', 'settings', '{"theme": "dark", "notifications": true}']);
+      expect(assertions[0].parameters).toEqual([
+        'users',
+        'settings',
+        '{"theme": "dark", "notifications": true}'
+      ]);
     });
 
     it('should handle numeric default values', () => {

@@ -141,7 +141,8 @@ export class TemplateEngine {
     }
 
     // Check for nested conditionals (not supported)
-    const nestedRegex = /\{\{#if\s+\w+\}\}[\s\S]*?\{\{#if\s+\w+\}\}[\s\S]*?\{\{\/if\}\}[\s\S]*?\{\{\/if\}\}/;
+    const nestedRegex =
+      /\{\{#if\s+\w+\}\}[\s\S]*?\{\{#if\s+\w+\}\}[\s\S]*?\{\{\/if\}\}[\s\S]*?\{\{\/if\}\}/;
     if (nestedRegex.test(template)) {
       errors.push('Nested conditional blocks are not supported');
     }

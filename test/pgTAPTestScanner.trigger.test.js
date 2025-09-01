@@ -65,7 +65,13 @@ describe('pgTAPTestScanner Trigger Assertion Parsing', () => {
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('trigger_is');
       expect(assertions[0].target).toBe('public.posts.audit_trigger');
-      expect(assertions[0].parameters).toEqual(['public', 'posts', 'audit_trigger', 'audit', 'log_changes']);
+      expect(assertions[0].parameters).toEqual([
+        'public',
+        'posts',
+        'audit_trigger',
+        'audit',
+        'log_changes'
+      ]);
     });
   });
 
@@ -127,13 +133,18 @@ describe('pgTAPTestScanner Trigger Assertion Parsing', () => {
     });
 
     it('should parse triggers_are with schema, table, and trigger array', () => {
-      const sql = "SELECT triggers_are('public', 'posts', ARRAY['audit_trigger', 'notify_trigger']);";
+      const sql =
+        "SELECT triggers_are('public', 'posts', ARRAY['audit_trigger', 'notify_trigger']);";
       const assertions = scanner.extractAssertions(sql);
 
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('triggers_are');
       expect(assertions[0].target).toBe('public.posts');
-      expect(assertions[0].parameters).toEqual(['public', 'posts', "'audit_trigger', 'notify_trigger'"]);
+      expect(assertions[0].parameters).toEqual([
+        'public',
+        'posts',
+        "'audit_trigger', 'notify_trigger'"
+      ]);
     });
   });
 
@@ -149,14 +160,16 @@ describe('pgTAPTestScanner Trigger Assertion Parsing', () => {
       const assertions = scanner.extractAssertions(sql);
 
       // Mock test file structure
-      scanner.testFiles = [{
-        filePath: '/test/triggers.sql',
-        fileName: 'triggers.sql',
-        assertions,
-        planCount: assertions.length,
-        dependencies: [],
-        metadata: { size: sql.length, lines: sql.split('\n').length, parsed: new Date() }
-      }];
+      scanner.testFiles = [
+        {
+          filePath: '/test/triggers.sql',
+          fileName: 'triggers.sql',
+          assertions,
+          planCount: assertions.length,
+          dependencies: [],
+          metadata: { size: sql.length, lines: sql.split('\n').length, parsed: new Date() }
+        }
+      ];
 
       scanner._buildCoverageMap();
       const coverageMap = scanner.getCoverageMap();
@@ -171,9 +184,7 @@ describe('pgTAPTestScanner Trigger Assertion Parsing', () => {
         'trigger_fires_on'
       ]);
 
-      expect(coverageMap.triggers['public.posts.audit_trigger']).toEqual([
-        'is_trigger_on'
-      ]);
+      expect(coverageMap.triggers['public.posts.audit_trigger']).toEqual(['is_trigger_on']);
     });
 
     it('should include trigger statistics in coverage stats', () => {
@@ -184,14 +195,16 @@ describe('pgTAPTestScanner Trigger Assertion Parsing', () => {
 
       const assertions = scanner.extractAssertions(sql);
 
-      scanner.testFiles = [{
-        filePath: '/test/triggers.sql',
-        fileName: 'triggers.sql',
-        assertions,
-        planCount: assertions.length,
-        dependencies: [],
-        metadata: { size: sql.length, lines: sql.split('\n').length, parsed: new Date() }
-      }];
+      scanner.testFiles = [
+        {
+          filePath: '/test/triggers.sql',
+          fileName: 'triggers.sql',
+          assertions,
+          planCount: assertions.length,
+          dependencies: [],
+          metadata: { size: sql.length, lines: sql.split('\n').length, parsed: new Date() }
+        }
+      ];
 
       scanner._buildCoverageMap();
       const stats = scanner.getStatistics();
@@ -220,17 +233,17 @@ describe('pgTAPTestScanner Trigger Assertion Parsing', () => {
       expect(assertions).toHaveLength(7);
 
       // Verify all assertions are properly categorized
-      const triggerAssertions = assertions.filter(a => a.type.includes('trigger'));
+      const triggerAssertions = assertions.filter((a) => a.type.includes('trigger'));
       expect(triggerAssertions).toHaveLength(7);
 
       // Verify target extraction works correctly
-      const updateTriggerAssertions = assertions.filter(a =>
-        a.target === 'public.users.update_timestamp_trigger'
+      const updateTriggerAssertions = assertions.filter(
+        (a) => a.target === 'public.users.update_timestamp_trigger'
       );
       expect(updateTriggerAssertions).toHaveLength(5);
 
-      const auditTriggerAssertions = assertions.filter(a =>
-        a.target === 'public.posts.audit_trigger'
+      const auditTriggerAssertions = assertions.filter(
+        (a) => a.target === 'public.posts.audit_trigger'
       );
       expect(auditTriggerAssertions).toHaveLength(2);
     });

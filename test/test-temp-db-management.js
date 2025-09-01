@@ -43,7 +43,9 @@ async function runTempDbTests() {
     `;
 
     const applyResult = await diffEngine.applySchemaToTemp(dbUrl, testSchema);
-    console.log(`✅ Schema applied successfully. Statements executed: ${applyResult.statementsExecuted}`);
+    console.log(
+      `✅ Schema applied successfully. Statements executed: ${applyResult.statementsExecuted}`
+    );
 
     // Test 3: Check tracking
     console.log('\n📋 Test 3: Checking temp database tracking...');
@@ -68,7 +70,6 @@ async function runTempDbTests() {
     console.log('✅ Cleanup summary:', cleanupSummary);
 
     console.log('\n🎉 All temp database management tests passed!\n');
-
   } catch (error) {
     console.error('\n💥 Test failed:', error.message);
     console.error('Stack trace:', error.stack);
@@ -85,13 +86,15 @@ async function runTempDbTests() {
 
 // Run tests if this file is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  runTempDbTests().then(() => {
-    console.log('✅ Test execution complete');
-    process.exit(0);
-  }).catch((error) => {
-    console.error('❌ Test execution failed:', error);
-    process.exit(1);
-  });
+  runTempDbTests()
+    .then(() => {
+      console.log('✅ Test execution complete');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('❌ Test execution failed:', error);
+      process.exit(1);
+    });
 }
 
 export default { runTempDbTests };

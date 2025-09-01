@@ -35,13 +35,7 @@ class BuildCommand extends Command {
    * @param {boolean} isProd - Whether running in production mode
    * @param {PathResolver} pathResolver - Optional PathResolver instance
    */
-  constructor(
-    inputDir,
-    outputDir,
-    logger = null,
-    isProd = false,
-    pathResolver = null
-  ) {
+  constructor(inputDir, outputDir, logger = null, isProd = false, pathResolver = null) {
     // Call parent with minimal config
     super(null, logger, isProd, null);
 

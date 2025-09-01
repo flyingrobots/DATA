@@ -33,24 +33,62 @@ class ValidateCommand extends TestCommand {
     // Valid pgTAP function names
     this.pgTapFunctions = new Set([
       // Basic test functions
-      'ok', 'nok', 'pass', 'fail',
+      'ok',
+      'nok',
+      'pass',
+      'fail',
       // Comparison functions
-      'is', 'isnt', 'like', 'unlike', 'matches', 'imatches',
+      'is',
+      'isnt',
+      'like',
+      'unlike',
+      'matches',
+      'imatches',
       // NULL testing
-      'is_empty', 'isnt_empty', 'is_null', 'isnt_null', 'is_not_null',
+      'is_empty',
+      'isnt_empty',
+      'is_null',
+      'isnt_null',
+      'is_not_null',
       // Numeric comparison
       'cmp_ok',
       // Schema testing
-      'has_schema', 'hasnt_schema', 'schema_owner_is',
-      'has_table', 'hasnt_table', 'has_view', 'hasnt_view',
-      'has_function', 'hasnt_function', 'function_returns',
-      'has_column', 'hasnt_column', 'col_type_is', 'col_is_null', 'col_not_null',
-      'col_has_default', 'col_default_is',
+      'has_schema',
+      'hasnt_schema',
+      'schema_owner_is',
+      'has_table',
+      'hasnt_table',
+      'has_view',
+      'hasnt_view',
+      'has_function',
+      'hasnt_function',
+      'function_returns',
+      'has_column',
+      'hasnt_column',
+      'col_type_is',
+      'col_is_null',
+      'col_not_null',
+      'col_has_default',
+      'col_default_is',
       // Row testing
-      'results_eq', 'results_ne', 'set_eq', 'set_ne', 'bag_eq', 'bag_ne',
-      'row_eq', 'throws_ok', 'throws_like', 'throws_matching', 'lives_ok',
+      'results_eq',
+      'results_ne',
+      'set_eq',
+      'set_ne',
+      'bag_eq',
+      'bag_ne',
+      'row_eq',
+      'throws_ok',
+      'throws_like',
+      'throws_matching',
+      'lives_ok',
       // Test control
-      'plan', 'finish', 'diag', 'skip', 'todo', 'todo_skip'
+      'plan',
+      'finish',
+      'diag',
+      'skip',
+      'todo',
+      'todo_skip'
     ]);
 
     this.validationResults = {
@@ -163,7 +201,7 @@ class ValidateCommand extends TestCommand {
 
       // Validate each test file
       for (const filePath of testFiles) {
-        if (cacheEnabled && await this.isCacheValid(filePath)) {
+        if (cacheEnabled && (await this.isCacheValid(filePath))) {
           const fileHash = await this.calculateFileHash(filePath);
           const cached = this.getCachedResult(filePath, fileHash);
           if (cached && !cached.hasErrors) {
@@ -197,12 +235,13 @@ class ValidateCommand extends TestCommand {
       this.reportResults();
 
       if (cachedCount > 0) {
-        this.success(`${cachedCount} files validated from cache, ${validatedCount} files validated`);
+        this.success(
+          `${cachedCount} files validated from cache, ${validatedCount} files validated`
+        );
       }
 
       this.emit('complete', { validation: this.validationResults });
       return this.validationResults;
-
     } catch (error) {
       this.error('Failed to validate tests', error);
       this.emit('failed', { error });
@@ -229,7 +268,6 @@ class ValidateCommand extends TestCommand {
 
       // Test function structure validation
       this.validateTestStructure(fileName, content);
-
     } catch (error) {
       this.addSyntaxError(path.basename(filePath), 0, `File read error: ${error.message}`);
     }
@@ -328,7 +366,8 @@ class ValidateCommand extends TestCommand {
    */
   validateTestStructure(fileName, content) {
     // Check for test function declarations
-    const testFunctionRegex = /CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+test\.(\w+)\s*\(([^)]*)\)\s*RETURNS\s+(\w+(?:\s+\w+)*)/gi;
+    const testFunctionRegex =
+      /CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+test\.(\w+)\s*\(([^)]*)\)\s*RETURNS\s+(\w+(?:\s+\w+)*)/gi;
     let match;
 
     let hasTestFunctions = false;
@@ -338,40 +377,61 @@ class ValidateCommand extends TestCommand {
       const returnType = match[3].toUpperCase();
 
       // Skip helper functions (they don't need to be pgTAP test functions)
-      const isHelperFunction = functionName.startsWith('create_') ||
-                               functionName.startsWith('cleanup_') ||
-                               functionName.startsWith('set_') ||
-                               functionName.includes('_helper') ||
-                               functionName.includes('_util');
+      const isHelperFunction =
+        functionName.startsWith('create_') ||
+        functionName.startsWith('cleanup_') ||
+        functionName.startsWith('set_') ||
+        functionName.includes('_helper') ||
+        functionName.includes('_util');
 
       if (!isHelperFunction) {
         hasTestFunctions = true;
 
         // Check return type for actual test functions
         if (!returnType.includes('SETOF TEXT')) {
-          this.addStructureWarning(fileName, 0, `Function test.${functionName} should return SETOF TEXT for pgTAP compatibility`);
+          this.addStructureWarning(
+            fileName,
+            0,
+            `Function test.${functionName} should return SETOF TEXT for pgTAP compatibility`
+          );
         }
 
         // Check function name pattern for actual test functions
         if (!functionName.includes('test') && !functionName.startsWith('run_')) {
-          this.addStructureWarning(fileName, 0, `Function test.${functionName} should include 'test' or start with 'run_' for clarity`);
+          this.addStructureWarning(
+            fileName,
+            0,
+            `Function test.${functionName} should include 'test' or start with 'run_' for clarity`
+          );
         }
       }
     }
 
     // Check if file has any test functions
     if (!hasTestFunctions && fileName.endsWith('.sql') && !fileName.startsWith('00_')) {
-      this.addStructureWarning(fileName, 0, 'File appears to be a test file but contains no test functions');
+      this.addStructureWarning(
+        fileName,
+        0,
+        'File appears to be a test file but contains no test functions'
+      );
     }
 
     // Check for plan() call
     if (hasTestFunctions && !content.match(/tap\.plan\s*\(/i)) {
-      this.addStructureWarning(fileName, 0, 'Test functions should include tap.plan() to specify expected test count');
+      this.addStructureWarning(
+        fileName,
+        0,
+        'Test functions should include tap.plan() to specify expected test count'
+      );
     }
 
     // Check for finish() call
     if (hasTestFunctions && !content.match(/tap\.finish\s*\(\s*\)/i)) {
-      this.addStructureWarning(fileName, 0, 'Test functions should include tap.finish() at the end');
+      this.addStructureWarning(
+        fileName,
+        0,
+        'Test functions should include tap.finish() at the end'
+      );
     }
   }
 
@@ -402,14 +462,15 @@ class ValidateCommand extends TestCommand {
    * Report validation results
    */
   reportResults() {
-    const { filesProcessed, syntaxErrors, pgTapIssues, structureWarnings, hasErrors } = this.validationResults;
+    const { filesProcessed, syntaxErrors, pgTapIssues, structureWarnings, hasErrors } =
+      this.validationResults;
 
     this.progress(`Processed ${filesProcessed} test files`);
 
     // Report syntax errors
     if (syntaxErrors.length > 0) {
       this.error(`Found ${syntaxErrors.length} syntax errors:`);
-      syntaxErrors.forEach(error => {
+      syntaxErrors.forEach((error) => {
         this.error(`  ${error.fileName}:${error.lineNum} - ${error.message}`);
       });
     }
@@ -417,7 +478,7 @@ class ValidateCommand extends TestCommand {
     // Report pgTAP issues
     if (pgTapIssues.length > 0) {
       this.error(`Found ${pgTapIssues.length} pgTAP issues:`);
-      pgTapIssues.forEach(issue => {
+      pgTapIssues.forEach((issue) => {
         this.error(`  ${issue.fileName}:${issue.lineNum} - ${issue.message}`);
       });
     }
@@ -425,7 +486,7 @@ class ValidateCommand extends TestCommand {
     // Report structure warnings
     if (structureWarnings.length > 0) {
       this.warn(`Found ${structureWarnings.length} structure warnings:`);
-      structureWarnings.forEach(warning => {
+      structureWarnings.forEach((warning) => {
         this.warn(`  ${warning.fileName}:${warning.lineNum} - ${warning.message}`);
       });
     }

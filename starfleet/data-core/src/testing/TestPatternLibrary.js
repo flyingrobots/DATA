@@ -80,7 +80,7 @@ class TestPatternLibrary {
    */
   getRecommendedPatterns(testType) {
     const patternNames = this.testTypePatterns[testType] || [];
-    return patternNames.map(name => this.patterns.get(name)).filter(Boolean);
+    return patternNames.map((name) => this.patterns.get(name)).filter(Boolean);
   }
 
   /**
@@ -120,8 +120,9 @@ class TestPatternLibrary {
    * @returns {Array<TestPattern>} Patterns at the specified difficulty
    */
   getPatternsByDifficulty(difficulty) {
-    return Array.from(this.patterns.values())
-      .filter(pattern => pattern.difficulty === difficulty);
+    return Array.from(this.patterns.values()).filter(
+      (pattern) => pattern.difficulty === difficulty
+    );
   }
 
   /**
@@ -258,9 +259,7 @@ RETURN NEXT tap.has_table(
         'Include schema name for clarity',
         'Use descriptive test messages'
       ],
-      examples: [
-        "renderPattern('table_exists_basic', { schema: 'public', tableName: 'users' })"
-      ],
+      examples: ["renderPattern('table_exists_basic', { schema: 'public', tableName: 'users' })"],
       difficulty: 'basic',
       dependencies: []
     });
@@ -268,7 +267,8 @@ RETURN NEXT tap.has_table(
     patterns.set('column_structure_validation', {
       name: 'column_structure_validation',
       category: 'data_validation',
-      description: 'Comprehensive column structure validation including type, constraints, and defaults',
+      description:
+        'Comprehensive column structure validation including type, constraints, and defaults',
       sqlTemplate: `-- Column: \${columnName}
 RETURN NEXT tap.has_column(
   '\${schema}',
@@ -286,12 +286,27 @@ RETURN NEXT tap.has_column(
 \${primaryKeyTest}
 
 \${foreignKeyTest}`,
-      placeholders: ['schema', 'tableName', 'columnName', 'dataTypeTest', 'notNullTest', 'defaultValueTest', 'primaryKeyTest', 'foreignKeyTest'],
+      placeholders: [
+        'schema',
+        'tableName',
+        'columnName',
+        'dataTypeTest',
+        'notNullTest',
+        'defaultValueTest',
+        'primaryKeyTest',
+        'foreignKeyTest'
+      ],
       metadata: {
         testType: 'structure',
         complexity: 'medium',
         executionTime: 'medium',
-        conditionalSections: ['dataTypeTest', 'notNullTest', 'defaultValueTest', 'primaryKeyTest', 'foreignKeyTest']
+        conditionalSections: [
+          'dataTypeTest',
+          'notNullTest',
+          'defaultValueTest',
+          'primaryKeyTest',
+          'foreignKeyTest'
+        ]
       },
       bestPractices: [
         'Test column existence before testing properties',
@@ -332,7 +347,16 @@ RETURN NEXT tap.throws_ok(
 
 -- Test: Cascade behavior (if applicable)
 \${cascadeTest}`,
-      placeholders: ['sourceSchema', 'sourceTable', 'sourceColumn', 'targetSchema', 'targetTable', 'targetColumn', 'invalidValue', 'cascadeTest'],
+      placeholders: [
+        'sourceSchema',
+        'sourceTable',
+        'sourceColumn',
+        'targetSchema',
+        'targetTable',
+        'targetColumn',
+        'invalidValue',
+        'cascadeTest'
+      ],
       metadata: {
         testType: 'integrity',
         complexity: 'medium',
@@ -384,7 +408,15 @@ RETURN NEXT tap.throws_ok(
 
 -- Test: Boundary conditions
 \${boundaryTests}`,
-      placeholders: ['schema', 'tableName', 'constraintName', 'testColumns', 'validValues', 'invalidValues', 'boundaryTests'],
+      placeholders: [
+        'schema',
+        'tableName',
+        'constraintName',
+        'testColumns',
+        'validValues',
+        'invalidValues',
+        'boundaryTests'
+      ],
       metadata: {
         testType: 'validation',
         complexity: 'medium',
@@ -443,10 +475,7 @@ RETURN NEXT tap.ok(
         'Test RLS configuration before testing policies',
         'Include both positive and negative checks'
       ],
-      examples: [
-        'Check RLS on users table',
-        'Verify RLS enforcement on sensitive data tables'
-      ],
+      examples: ['Check RLS on users table', 'Verify RLS enforcement on sensitive data tables'],
       difficulty: 'basic',
       dependencies: []
     });
@@ -583,7 +612,13 @@ RETURN NEXT tap.throws_ok(
 
 -- Test: User cannot access restricted schemas
 \${restrictedSchemaTest}`,
-      placeholders: ['privilegeEscalationAttempt', 'expectedErrorCode', 'escalationType', 'functionBypassTest', 'restrictedSchemaTest'],
+      placeholders: [
+        'privilegeEscalationAttempt',
+        'expectedErrorCode',
+        'escalationType',
+        'functionBypassTest',
+        'restrictedSchemaTest'
+      ],
       metadata: {
         testType: 'security_hardening',
         complexity: 'high',
@@ -629,7 +664,14 @@ RETURN NEXT tap.has_index(
 
 -- Performance baseline test
 \${performanceTest}`,
-      placeholders: ['schema', 'tableName', 'indexName', 'queryPlanTest', 'selectivityTest', 'performanceTest'],
+      placeholders: [
+        'schema',
+        'tableName',
+        'indexName',
+        'queryPlanTest',
+        'selectivityTest',
+        'performanceTest'
+      ],
       metadata: {
         testType: 'performance_validation',
         complexity: 'high',
@@ -680,7 +722,13 @@ END;
 
 -- Test: Function resource usage is reasonable
 \${resourceUsageTest}`,
-      placeholders: ['functionCall', 'maxExecutionTime', 'functionName', 'concurrencyTest', 'resourceUsageTest'],
+      placeholders: [
+        'functionCall',
+        'maxExecutionTime',
+        'functionName',
+        'concurrencyTest',
+        'resourceUsageTest'
+      ],
       metadata: {
         testType: 'performance_validation',
         complexity: 'high',
@@ -737,7 +785,16 @@ RETURN NEXT tap.throws_ok(
   '23503',
   'Foreign key constraint violation properly detected: \${constraintName}'
 );`,
-      placeholders: ['schema', 'tableName', 'columns', 'nullValues', 'constraintName', 'duplicateInsert', 'invalidValues', 'orphanValues'],
+      placeholders: [
+        'schema',
+        'tableName',
+        'columns',
+        'nullValues',
+        'constraintName',
+        'duplicateInsert',
+        'invalidValues',
+        'orphanValues'
+      ],
       metadata: {
         testType: 'error_validation',
         complexity: 'medium',
@@ -797,7 +854,16 @@ EXCEPTION
   WHEN OTHERS THEN
     RETURN NEXT tap.fail('Function \${functionName} should maintain transaction integrity on error');
 END;`,
-      placeholders: ['schema', 'functionName', 'invalidInput', 'errorInput', 'expectedErrorCode', 'errorMessage', 'transactionSetup', 'transactionStateCheck'],
+      placeholders: [
+        'schema',
+        'functionName',
+        'invalidInput',
+        'errorInput',
+        'expectedErrorCode',
+        'errorMessage',
+        'transactionSetup',
+        'transactionStateCheck'
+      ],
       metadata: {
         testType: 'error_validation',
         complexity: 'high',
@@ -942,7 +1008,15 @@ BEGIN
     'No cross-user data leakage detected'
   );
 END;`,
-      placeholders: ['createUser1Data', 'createUser2Data', 'schema', 'tableName', 'expectedUser1Count', 'expectedUser2Count', 'user2Filter'],
+      placeholders: [
+        'createUser1Data',
+        'createUser2Data',
+        'schema',
+        'tableName',
+        'expectedUser1Count',
+        'expectedUser2Count',
+        'user2Filter'
+      ],
       metadata: {
         testType: 'isolation_validation',
         complexity: 'high',
@@ -1069,10 +1143,7 @@ END;`,
       ],
 
       // Index tests
-      index: [
-        'index_usage_verification',
-        'function_performance_test'
-      ]
+      index: ['index_usage_verification', 'function_performance_test']
     };
   }
 
@@ -1085,8 +1156,8 @@ END;`,
     const patterns = this.getRecommendedPatterns(testType);
     const practices = new Set();
 
-    patterns.forEach(pattern => {
-      pattern.bestPractices.forEach(practice => practices.add(practice));
+    patterns.forEach((pattern) => {
+      pattern.bestPractices.forEach((practice) => practices.add(practice));
     });
 
     return Array.from(practices);
@@ -1101,7 +1172,7 @@ END;`,
     const patterns = this.getRecommendedPatterns(testType);
     const examples = [];
 
-    patterns.forEach(pattern => {
+    patterns.forEach((pattern) => {
       if (pattern.examples && pattern.examples.length > 0) {
         examples.push(...pattern.examples);
       }
@@ -1126,26 +1197,26 @@ END;`,
       doc += `${category.description}\n\n`;
 
       doc += '### Common Use Cases\n';
-      category.commonUseCases.forEach(useCase => {
+      category.commonUseCases.forEach((useCase) => {
         doc += `- ${useCase}\n`;
       });
       doc += '\n';
 
       doc += '### Best Practices\n';
-      category.bestPractices.forEach(practice => {
+      category.bestPractices.forEach((practice) => {
         doc += `- ${practice}\n`;
       });
       doc += '\n';
 
       doc += '### Available Patterns\n';
-      category.patterns.forEach(pattern => {
+      category.patterns.forEach((pattern) => {
         doc += `#### ${pattern.name}\n`;
         doc += `**Difficulty:** ${pattern.difficulty}\n`;
         doc += `**Description:** ${pattern.description}\n\n`;
 
         if (pattern.examples && pattern.examples.length > 0) {
           doc += '**Examples:**\n';
-          pattern.examples.forEach(example => {
+          pattern.examples.forEach((example) => {
             doc += `- ${example}\n`;
           });
           doc += '\n';

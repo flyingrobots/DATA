@@ -265,7 +265,7 @@ export class DIContainer {
     }
 
     const dependencies = this._extractParameterNames(constructor);
-    const resolvedDependencies = dependencies.map(name => {
+    const resolvedDependencies = dependencies.map((name) => {
       if (overrides.hasOwnProperty(name)) {
         return overrides[name];
       }
@@ -310,11 +310,11 @@ export class DIContainer {
   _resolveDependencies(service) {
     if (service.dependencies) {
       // Use explicitly specified dependencies
-      return service.dependencies.map(dep => this.resolve(dep));
+      return service.dependencies.map((dep) => this.resolve(dep));
     } else {
       // Try to auto-wire constructor parameters
       const paramNames = this._extractParameterNames(service.constructor);
-      return paramNames.map(name => {
+      return paramNames.map((name) => {
         try {
           return this.resolve(name);
         } catch (error) {
@@ -343,11 +343,11 @@ export class DIContainer {
 
     return match[1]
       .split(',')
-      .map(param => {
+      .map((param) => {
         // Handle default parameters: name = 'default' -> name
         const cleaned = param.trim().split('=')[0].trim();
         return cleaned.split(/\s+/)[0]; // Remove type annotations
       })
-      .filter(param => param && param !== '...' && !param.startsWith('{')); // Filter out rest params and destructuring
+      .filter((param) => param && param !== '...' && !param.startsWith('{')); // Filter out rest params and destructuring
   }
 }

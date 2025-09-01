@@ -50,8 +50,8 @@ class ValidateCommand extends Command {
       }
 
       // Emit validation summary
-      const valid = results.filter(r => r.isValid);
-      const invalid = results.filter(r => !r.isValid);
+      const valid = results.filter((r) => r.isValid);
+      const invalid = results.filter((r) => !r.isValid);
 
       this.emit('validation-complete', {
         total: results.length,
@@ -62,19 +62,18 @@ class ValidateCommand extends Command {
 
       if (invalid.length > 0) {
         this.warn(`Validation completed with ${invalid.length} issue(s)`, {
-          invalid: invalid.map(f => ({
+          invalid: invalid.map((f) => ({
             function: f.function,
             issues: f.issues
           }))
         });
       } else {
         this.success(`✅ All ${valid.length} function(s) passed validation`, {
-          validated: valid.map(v => v.function)
+          validated: valid.map((v) => v.function)
         });
       }
 
       return results;
-
     } catch (error) {
       this.error('Functions validation failed', error);
       throw error;
@@ -105,9 +104,9 @@ class ValidateCommand extends Command {
     // Get all functions in directory
     const entries = fs.readdirSync(this.outputConfig.functionsDir, { withFileTypes: true });
     return entries
-      .filter(entry => entry.isDirectory())
-      .map(entry => entry.name)
-      .filter(name => !name.startsWith('.'));
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((name) => !name.startsWith('.'));
   }
 
   /**
@@ -256,7 +255,9 @@ class ValidateCommand extends Command {
     if (fs.existsSync(importMapPath)) {
       try {
         const importMap = JSON.parse(fs.readFileSync(importMapPath, 'utf8'));
-        this.progress(`Function ${functionName} has access to import map with ${Object.keys(importMap.imports || {}).length} imports`);
+        this.progress(
+          `Function ${functionName} has access to import map with ${Object.keys(importMap.imports || {}).length} imports`
+        );
       } catch (error) {
         issues.push('import_map.json exists but is invalid JSON');
       }

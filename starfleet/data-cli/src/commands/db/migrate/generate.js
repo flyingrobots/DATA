@@ -64,7 +64,6 @@ class MigrateGenerateCommand extends Command {
       }
 
       return migration;
-
     } catch (error) {
       this.error('Failed to generate migration', error, {
         operation: 'generate',
@@ -97,7 +96,8 @@ INSERT INTO example_table (name) VALUES ('test_data');
 
       this.progress('Generated placeholder migration SQL');
 
-      const migrationSql = this.generateMigrationHeader(name, { stats: { filesProcessed: 1 } }) + '\n' + placeholder;
+      const migrationSql =
+        this.generateMigrationHeader(name, { stats: { filesProcessed: 1 } }) + '\n' + placeholder;
 
       return {
         name,
@@ -111,7 +111,6 @@ INSERT INTO example_table (name) VALUES ('test_data');
         },
         generatedAt: new Date().toISOString()
       };
-
     } catch (error) {
       this.error('Failed to generate migration', error, {
         migrationName: name
@@ -164,7 +163,6 @@ INSERT INTO example_table (name) VALUES ('test_data');
       });
 
       return migrationDir;
-
     } catch (error) {
       this.error('Failed to save migration to staging', error, {
         migrationName: name
@@ -221,9 +219,9 @@ INSERT INTO example_table (name) VALUES ('test_data');
     // Simple parsing - split on semicolons and filter
     return sql
       .split(';')
-      .map(stmt => stmt.trim())
-      .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'))
-      .map(stmt => stmt + ';');
+      .map((stmt) => stmt.trim())
+      .filter((stmt) => stmt.length > 0 && !stmt.startsWith('--'))
+      .map((stmt) => stmt + ';');
   }
 
   /**

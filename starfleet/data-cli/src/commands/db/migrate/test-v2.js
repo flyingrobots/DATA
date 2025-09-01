@@ -85,12 +85,10 @@ class MigrateTestCommand extends Command {
       });
 
       return testResults;
-
     } catch (error) {
       this.error('Migration test failed', error);
       this.emit('failed', { error });
       throw error;
-
     } finally {
       try {
         // Always cleanup test schema unless explicitly kept
@@ -154,7 +152,6 @@ class MigrateTestCommand extends Command {
       });
 
       if (pathError) throw pathError;
-
     } catch (error) {
       throw new Error(`Failed to create test schema: ${error.message}`);
     }
@@ -188,7 +185,6 @@ class MigrateTestCommand extends Command {
       });
 
       if (error) throw error;
-
     } catch (error) {
       throw new Error(`Failed to apply migration: ${error.message}`);
     }
@@ -201,7 +197,7 @@ class MigrateTestCommand extends Command {
     try {
       // Check if pgTAP exists
       const { data, error } = await this.supabase.rpc('exec_sql', {
-        sql: 'SELECT 1 FROM pg_extension WHERE extname = \'pgtap\';'
+        sql: "SELECT 1 FROM pg_extension WHERE extname = 'pgtap';"
       });
 
       if (error) throw error;
@@ -302,7 +298,6 @@ class MigrateTestCommand extends Command {
           } else {
             this.success(`✓ ${functionName}: All ${tapResults.passed} test(s) passed`);
           }
-
         } catch (error) {
           this.error(`Failed to run ${functionName}: ${error.message}`);
           results.success = false;
@@ -315,7 +310,6 @@ class MigrateTestCommand extends Command {
       }
 
       return results;
-
     } catch (error) {
       throw new Error(`Test execution failed: ${error.message}`);
     }
@@ -373,7 +367,7 @@ class MigrateTestCommand extends Command {
       this.error(`\n✗ ${results.testsFailed} test(s) failed`);
 
       // Show failed test details
-      const failedTests = results.details.filter(d => d.failed > 0 || d.error);
+      const failedTests = results.details.filter((d) => d.failed > 0 || d.error);
       if (failedTests.length > 0) {
         console.log('\nFailed Tests:');
         for (const test of failedTests) {

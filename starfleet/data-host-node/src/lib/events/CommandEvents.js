@@ -112,7 +112,10 @@ class ProgressEvent extends CommandEvent {
     this.percentage = percentage;
 
     // Validate percentage if provided
-    if (percentage !== null && (typeof percentage !== 'number' || percentage < 0 || percentage > 100)) {
+    if (
+      percentage !== null &&
+      (typeof percentage !== 'number' || percentage < 0 || percentage > 100)
+    ) {
       throw new Error('Percentage must be a number between 0 and 100, or null');
     }
   }
@@ -187,12 +190,7 @@ class ErrorEvent extends CommandEvent {
    * @returns {ErrorEvent} New error event
    */
   static fromError(error, context = 'Operation failed', details = {}) {
-    return new ErrorEvent(
-      `${context}: ${error.message}`,
-      error,
-      error.code || null,
-      details
-    );
+    return new ErrorEvent(`${context}: ${error.message}`, error, error.code || null, details);
   }
 
   /**
@@ -245,12 +243,10 @@ class DirectoryEvent extends CommandEvent {
    * @returns {DirectoryEvent} New directory scan event
    */
   static scan(directoryPath, fileCount = 0, details = {}) {
-    return new DirectoryEvent(
-      `Scanning directory: ${directoryPath}`,
-      directoryPath,
-      'scan',
-      { ...details, fileCount }
-    );
+    return new DirectoryEvent(`Scanning directory: ${directoryPath}`, directoryPath, 'scan', {
+      ...details,
+      fileCount
+    });
   }
 
   /**
@@ -320,7 +316,7 @@ class SuccessEvent extends CommandEvent {
       return `${this.duration}ms`;
     }
 
-    const seconds = Math.round(this.duration / 1000 * 100) / 100;
+    const seconds = Math.round((this.duration / 1000) * 100) / 100;
     return `${seconds}s`;
   }
 }
@@ -641,9 +637,7 @@ function validateCommandEvent(event, expectedClass) {
   if (!(event instanceof expectedClass)) {
     const actualType = event?.constructor?.name || typeof event;
     const expectedType = expectedClass.name;
-    throw new TypeError(
-      `Invalid event type: expected ${expectedType}, got ${actualType}`
-    );
+    throw new TypeError(`Invalid event type: expected ${expectedType}, got ${actualType}`);
   }
   return true;
 }
@@ -678,7 +672,9 @@ function createCommandEvent(type, ...args) {
 
   const EventClass = eventClasses[type];
   if (!EventClass) {
-    throw new Error(`Unknown event type: ${type}. Available types: ${Object.keys(eventClasses).join(', ')}`);
+    throw new Error(
+      `Unknown event type: ${type}. Available types: ${Object.keys(eventClasses).join(', ')}`
+    );
   }
 
   return new EventClass(...args);

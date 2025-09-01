@@ -138,13 +138,19 @@ describe('pgTAPTestScanner RLS Policy Assertion Parsing', () => {
     });
 
     it('should parse policy_roles_are with schema, table, policy, and role array', () => {
-      const sql = "SELECT policy_roles_are('public', 'users', 'admin_policy', ARRAY['admin', 'moderator']);";
+      const sql =
+        "SELECT policy_roles_are('public', 'users', 'admin_policy', ARRAY['admin', 'moderator']);";
       const assertions = scanner.extractAssertions(sql);
 
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('policy_roles_are');
       expect(assertions[0].target).toBe('public.users.admin_policy');
-      expect(assertions[0].parameters).toEqual(['public', 'users', 'admin_policy', "'admin', 'moderator'"]);
+      expect(assertions[0].parameters).toEqual([
+        'public',
+        'users',
+        'admin_policy',
+        "'admin', 'moderator'"
+      ]);
     });
 
     it('should parse multiple role arrays', () => {
@@ -174,23 +180,34 @@ describe('pgTAPTestScanner RLS Policy Assertion Parsing', () => {
     });
 
     it('should parse policies_are with schema, table, and policy array', () => {
-      const sql = "SELECT policies_are('public', 'users', ARRAY['user_select', 'user_insert', 'user_update']);";
+      const sql =
+        "SELECT policies_are('public', 'users', ARRAY['user_select', 'user_insert', 'user_update']);";
       const assertions = scanner.extractAssertions(sql);
 
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('policies_are');
       expect(assertions[0].target).toBe('public.users');
-      expect(assertions[0].parameters).toEqual(['public', 'users', "'user_select', 'user_insert', 'user_update'"]);
+      expect(assertions[0].parameters).toEqual([
+        'public',
+        'users',
+        "'user_select', 'user_insert', 'user_update'"
+      ]);
     });
 
     it('should parse policies_are with optional description', () => {
-      const sql = "SELECT policies_are('public', 'users', ARRAY['select_policy', 'insert_policy'], 'All user policies');";
+      const sql =
+        "SELECT policies_are('public', 'users', ARRAY['select_policy', 'insert_policy'], 'All user policies');";
       const assertions = scanner.extractAssertions(sql);
 
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('policies_are');
       expect(assertions[0].target).toBe('public.users');
-      expect(assertions[0].parameters).toEqual(['public', 'users', "'select_policy', 'insert_policy'", 'All user policies']);
+      expect(assertions[0].parameters).toEqual([
+        'public',
+        'users',
+        "'select_policy', 'insert_policy'",
+        'All user policies'
+      ]);
     });
 
     it('should parse single policy in array', () => {
@@ -229,7 +246,7 @@ describe('pgTAPTestScanner RLS Policy Assertion Parsing', () => {
       const assertions = scanner.extractAssertions(sql);
 
       expect(assertions).toHaveLength(9);
-      expect(assertions.map(a => a.type)).toEqual([
+      expect(assertions.map((a) => a.type)).toEqual([
         'is_rls_enabled',
         'policy_exists',
         'policy_exists',
@@ -274,14 +291,16 @@ describe('pgTAPTestScanner RLS Policy Assertion Parsing', () => {
       const assertions = scanner.extractAssertions(sql);
 
       // Simulate building coverage map
-      scanner.testFiles = [{
-        filePath: '/test/rls.sql',
-        fileName: 'rls.sql',
-        assertions,
-        planCount: assertions.length,
-        dependencies: [],
-        metadata: {}
-      }];
+      scanner.testFiles = [
+        {
+          filePath: '/test/rls.sql',
+          fileName: 'rls.sql',
+          assertions,
+          planCount: assertions.length,
+          dependencies: [],
+          metadata: {}
+        }
+      ];
 
       scanner._buildCoverageMap();
       const coverageMap = scanner.getCoverageMap();
@@ -305,21 +324,24 @@ describe('pgTAPTestScanner RLS Policy Assertion Parsing', () => {
 
       const assertions = scanner.extractAssertions(sql);
 
-      scanner.testFiles = [{
-        filePath: '/test/user_rls.sql',
-        fileName: 'user_rls.sql',
-        assertions: [assertions[0]],
-        planCount: 1,
-        dependencies: [],
-        metadata: {}
-      }, {
-        filePath: '/test/post_rls.sql',
-        fileName: 'post_rls.sql',
-        assertions: [assertions[1]],
-        planCount: 1,
-        dependencies: [],
-        metadata: {}
-      }];
+      scanner.testFiles = [
+        {
+          filePath: '/test/user_rls.sql',
+          fileName: 'user_rls.sql',
+          assertions: [assertions[0]],
+          planCount: 1,
+          dependencies: [],
+          metadata: {}
+        },
+        {
+          filePath: '/test/post_rls.sql',
+          fileName: 'post_rls.sql',
+          assertions: [assertions[1]],
+          planCount: 1,
+          dependencies: [],
+          metadata: {}
+        }
+      ];
 
       scanner._buildCoverageMap();
       const coverageMap = scanner.getCoverageMap();
@@ -509,14 +531,16 @@ describe('pgTAPTestScanner RLS Policy Assertion Parsing', () => {
       `;
 
       const assertions = scanner.extractAssertions(sql);
-      scanner.testFiles = [{
-        filePath: '/test/rls.sql',
-        fileName: 'rls.sql',
-        assertions,
-        planCount: assertions.length,
-        dependencies: [],
-        metadata: {}
-      }];
+      scanner.testFiles = [
+        {
+          filePath: '/test/rls.sql',
+          fileName: 'rls.sql',
+          assertions,
+          planCount: assertions.length,
+          dependencies: [],
+          metadata: {}
+        }
+      ];
 
       // Need to set totalAssertions manually or via processing
       scanner.totalAssertions = assertions.length;

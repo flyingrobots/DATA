@@ -14,12 +14,7 @@ import BuildCommand from '../../lib/BuildCommand.js';
  * @class
  */
 class CompileCommand extends BuildCommand {
-  constructor(
-    inputDir,
-    outputDir,
-    logger = null,
-    isProd = false
-  ) {
+  constructor(inputDir, outputDir, logger = null, isProd = false) {
     super(inputDir, outputDir, logger, isProd);
 
     // Paths will be validated when performExecute is called
@@ -39,7 +34,9 @@ class CompileCommand extends BuildCommand {
     try {
       // Validate paths are provided
       if (!this.inputDir || !this.outputDir) {
-        throw new Error('CompileCommand requires input and output directories. Use --sql-dir and --migrations-dir options.');
+        throw new Error(
+          'CompileCommand requires input and output directories. Use --sql-dir and --migrations-dir options.'
+        );
       }
 
       // Load the migration compiler from core
@@ -116,7 +113,6 @@ class CompileCommand extends BuildCommand {
       await deployCommand.execute(options.functionsToDeploy, deployOptions);
 
       this.success('✅ Functions deployment completed as part of migration');
-
     } catch (error) {
       this.error('Functions deployment failed during migration', error);
 

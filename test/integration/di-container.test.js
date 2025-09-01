@@ -35,7 +35,7 @@ class MockFileSystemAdapter extends FileSystemPort {
   }
 
   async glob(patterns, cwd) {
-    return patterns.map(pattern => `${cwd}/${pattern}`);
+    return patterns.map((pattern) => `${cwd}/${pattern}`);
   }
 }
 
@@ -274,10 +274,14 @@ describe('DIContainer', () => {
     });
 
     it('should support singleton factories', () => {
-      container.registerFactory('singletonFactory', () => ({
-        id: Math.random(),
-        type: 'singleton'
-      }), { singleton: true });
+      container.registerFactory(
+        'singletonFactory',
+        () => ({
+          id: Math.random(),
+          type: 'singleton'
+        }),
+        { singleton: true }
+      );
 
       const instance1 = container.resolve('singletonFactory');
       const instance2 = container.resolve('singletonFactory');
@@ -347,9 +351,7 @@ describe('DIContainer', () => {
         dependencies: ['serviceA']
       });
 
-      expect(() => container.resolve('serviceA')).toThrow(
-        'Circular dependency detected:'
-      );
+      expect(() => container.resolve('serviceA')).toThrow('Circular dependency detected:');
     });
 
     it('should allow self-contained dependency trees', () => {
@@ -369,11 +371,7 @@ describe('DIContainer', () => {
     });
 
     it('should resolve multiple services at once', () => {
-      const resolved = container.resolveMultiple([
-        'fileSystem',
-        'crypto',
-        'process'
-      ]);
+      const resolved = container.resolveMultiple(['fileSystem', 'crypto', 'process']);
 
       expect(resolved.fileSystem).toBeInstanceOf(MockFileSystemAdapter);
       expect(resolved.crypto).toBeInstanceOf(MockCryptoAdapter);
@@ -386,10 +384,9 @@ describe('DIContainer', () => {
     });
 
     it('should throw for invalid service in array', () => {
-      expect(() => container.resolveMultiple([
-        'fileSystem',
-        'nonexistent'
-      ])).toThrow("Service 'nonexistent' not registered");
+      expect(() => container.resolveMultiple(['fileSystem', 'nonexistent'])).toThrow(
+        "Service 'nonexistent' not registered"
+      );
     });
   });
 
@@ -543,12 +540,8 @@ describe('DIContainer', () => {
     });
 
     it('should throw for invalid resolution parameters', () => {
-      expect(() => container.resolve(123)).toThrow(
-        'Service name must be a string'
-      );
-      expect(() => container.resolve(null)).toThrow(
-        'Service name must be a string'
-      );
+      expect(() => container.resolve(123)).toThrow('Service name must be a string');
+      expect(() => container.resolve(null)).toThrow('Service name must be a string');
     });
 
     it('should throw for invalid factory functions', () => {
@@ -558,9 +551,7 @@ describe('DIContainer', () => {
     });
 
     it('should throw for invalid auto-wire constructors', () => {
-      expect(() => container.autoWire('not a function')).toThrow(
-        'Constructor must be a function'
-      );
+      expect(() => container.autoWire('not a function')).toThrow('Constructor must be a function');
     });
 
     it('should handle constructor errors gracefully', () => {
@@ -679,7 +670,7 @@ describe('DIContainer', () => {
       expect(duration).toBeLessThan(1000); // Should be fast
 
       // All should be different instances (non-singleton)
-      const ids = resolvedServices.map(s => s.id);
+      const ids = resolvedServices.map((s) => s.id);
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(100);
     });
@@ -708,7 +699,7 @@ describe('DIContainer', () => {
       };
 
       // Register services from configuration
-      serviceConfig.services.forEach(service => {
+      serviceConfig.services.forEach((service) => {
         container.register(service.name, service.constructor, {
           singleton: service.singleton,
           dependencies: service.dependencies,
@@ -767,7 +758,7 @@ describe('DIContainer', () => {
 
       // All should be the same instance (singleton)
       const firstInstance = instances[0];
-      instances.forEach(instance => {
+      instances.forEach((instance) => {
         expect(instance).toBe(firstInstance);
       });
 

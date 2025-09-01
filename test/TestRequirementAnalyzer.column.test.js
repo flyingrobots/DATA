@@ -4,7 +4,11 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TestRequirementAnalyzer, TEST_TYPES, TEST_PRIORITIES } from '../src/lib/testing/TestRequirementAnalyzer.js';
+import {
+  TestRequirementAnalyzer,
+  TEST_TYPES,
+  TEST_PRIORITIES
+} from '../src/lib/testing/TestRequirementAnalyzer.js';
 
 describe('TestRequirementAnalyzer - Column Test Mapping', () => {
   let analyzer;
@@ -283,9 +287,13 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
 
   describe('Column parsing helpers', () => {
     it('should extract column names correctly', () => {
-      expect(analyzer._extractColumnName('ADD COLUMN email VARCHAR(255)', 'ADD COLUMN')).toBe('email');
+      expect(analyzer._extractColumnName('ADD COLUMN email VARCHAR(255)', 'ADD COLUMN')).toBe(
+        'email'
+      );
       expect(analyzer._extractColumnName('DROP COLUMN old_field', 'DROP COLUMN')).toBe('old_field');
-      expect(analyzer._extractColumnName('ALTER COLUMN name TYPE TEXT', 'ALTER COLUMN')).toBe('name');
+      expect(analyzer._extractColumnName('ALTER COLUMN name TYPE TEXT', 'ALTER COLUMN')).toBe(
+        'name'
+      );
     });
 
     it('should parse column definitions correctly', () => {
@@ -300,10 +308,20 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
     });
 
     it('should identify constraint types correctly', () => {
-      expect(analyzer._identifyConstraintType('ADD CONSTRAINT pk_test PRIMARY KEY (id)')).toBe('PRIMARY_KEY');
-      expect(analyzer._identifyConstraintType('ADD CONSTRAINT fk_test FOREIGN KEY (user_id) REFERENCES users(id)')).toBe('FOREIGN_KEY');
-      expect(analyzer._identifyConstraintType('ADD CONSTRAINT uk_test UNIQUE (email)')).toBe('UNIQUE');
-      expect(analyzer._identifyConstraintType('ADD CONSTRAINT chk_test CHECK (age > 0)')).toBe('CHECK');
+      expect(analyzer._identifyConstraintType('ADD CONSTRAINT pk_test PRIMARY KEY (id)')).toBe(
+        'PRIMARY_KEY'
+      );
+      expect(
+        analyzer._identifyConstraintType(
+          'ADD CONSTRAINT fk_test FOREIGN KEY (user_id) REFERENCES users(id)'
+        )
+      ).toBe('FOREIGN_KEY');
+      expect(analyzer._identifyConstraintType('ADD CONSTRAINT uk_test UNIQUE (email)')).toBe(
+        'UNIQUE'
+      );
+      expect(analyzer._identifyConstraintType('ADD CONSTRAINT chk_test CHECK (age > 0)')).toBe(
+        'CHECK'
+      );
     });
   });
 });

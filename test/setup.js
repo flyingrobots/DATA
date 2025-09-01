@@ -49,7 +49,6 @@ afterAll(async () => {
         console.warn('Failed to close connection in afterAll:', error.message);
       }
     }
-
   } finally {
     // Force exit after longer timeout to prevent hanging
     setTimeout(() => {

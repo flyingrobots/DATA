@@ -107,8 +107,16 @@ describe('MigrationOperation', () => {
     });
 
     it('should generate consistent hashes for same operation', () => {
-      const op1 = new MigrationOperation(OperationType.CREATE_TABLE, 'test', 'CREATE TABLE test (id INT)');
-      const op2 = new MigrationOperation(OperationType.CREATE_TABLE, 'test', 'CREATE TABLE test (id INT)');
+      const op1 = new MigrationOperation(
+        OperationType.CREATE_TABLE,
+        'test',
+        'CREATE TABLE test (id INT)'
+      );
+      const op2 = new MigrationOperation(
+        OperationType.CREATE_TABLE,
+        'test',
+        'CREATE TABLE test (id INT)'
+      );
 
       const hash1 = op1.generateHash(mockCrypto);
       const hash2 = op2.generateHash(mockCrypto);
@@ -120,7 +128,11 @@ describe('MigrationOperation', () => {
     });
 
     it('should include type, name, and SQL in hash data', () => {
-      const op = new MigrationOperation(OperationType.ALTER_TABLE, 'users', 'ALTER TABLE users ADD COLUMN name VARCHAR(100)');
+      const op = new MigrationOperation(
+        OperationType.ALTER_TABLE,
+        'users',
+        'ALTER TABLE users ADD COLUMN name VARCHAR(100)'
+      );
       const spy = vi.spyOn(mockCrypto, 'hash');
 
       op.generateHash(mockCrypto);
@@ -139,7 +151,7 @@ describe('MigrationOperation', () => {
         new MigrationOperation(OperationType.DELETE_DATA, 'test', 'DELETE FROM test')
       ];
 
-      destructiveOps.forEach(op => {
+      destructiveOps.forEach((op) => {
         expect(op.isDestructive()).toBe(true);
       });
     });
@@ -155,7 +167,7 @@ describe('MigrationOperation', () => {
         new MigrationOperation(OperationType.UPDATE_DATA, 'test', 'UPDATE test')
       ];
 
-      nonDestructiveOps.forEach(op => {
+      nonDestructiveOps.forEach((op) => {
         expect(op.isDestructive()).toBe(false);
       });
     });
@@ -178,7 +190,7 @@ describe('MigrationOperation', () => {
         new MigrationOperation(OperationType.DELETE_DATA, 'test', '')
       ];
 
-      const priorities = operations.map(op => op.getPriority());
+      const priorities = operations.map((op) => op.getPriority());
       const expectedPriorities = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
       expect(priorities).toEqual(expectedPriorities);
@@ -411,7 +423,7 @@ describe('DiffEngine', () => {
 
       expect(operations).toHaveLength(4);
 
-      const types = operations.map(op => op.type).sort();
+      const types = operations.map((op) => op.type).sort();
       const expectedTypes = [
         OperationType.CREATE_TABLE,
         OperationType.CREATE_VIEW,
@@ -430,7 +442,11 @@ describe('DiffEngine', () => {
 
       // Target state
       targetState.addObject('tables', 'new_table', { sql: 'CREATE TABLE new_table' });
-      targetState.addObject('views', 'shared_view', { name: 'shared_view', version: 2, sql: 'ALTER VIEW' });
+      targetState.addObject('views', 'shared_view', {
+        name: 'shared_view',
+        version: 2,
+        sql: 'ALTER VIEW'
+      });
       targetState.addObject('indexes', 'new_index', { sql: 'CREATE INDEX new_index' });
 
       const operations = diffEngine.calculateDiff(currentState, targetState);
@@ -439,19 +455,17 @@ describe('DiffEngine', () => {
       // ALTER shared_view, CREATE new_index
       expect(operations).toHaveLength(5);
 
-      const dropOps = operations.filter(op => [
-        OperationType.DROP_TABLE,
-        OperationType.DROP_FUNCTION
-      ].includes(op.type));
+      const dropOps = operations.filter((op) =>
+        [OperationType.DROP_TABLE, OperationType.DROP_FUNCTION].includes(op.type)
+      );
       expect(dropOps).toHaveLength(2);
 
-      const createOps = operations.filter(op => [
-        OperationType.CREATE_TABLE,
-        OperationType.CREATE_INDEX
-      ].includes(op.type));
+      const createOps = operations.filter((op) =>
+        [OperationType.CREATE_TABLE, OperationType.CREATE_INDEX].includes(op.type)
+      );
       expect(createOps).toHaveLength(2);
 
-      const alterOps = operations.filter(op => op.type === OperationType.ALTER_TABLE);
+      const alterOps = operations.filter((op) => op.type === OperationType.ALTER_TABLE);
       expect(alterOps).toHaveLength(1);
     });
   });
@@ -496,19 +510,19 @@ describe('DiffEngine', () => {
 
       expect(operations).toHaveLength(4);
 
-      const tableOp = operations.find(op => op.objectName === 'drop_table');
+      const tableOp = operations.find((op) => op.objectName === 'drop_table');
       expect(tableOp.type).toBe(OperationType.DROP_TABLE);
       expect(tableOp.sql).toBe('DROP TABLE IF EXISTS drop_table');
 
-      const viewOp = operations.find(op => op.objectName === 'drop_view');
+      const viewOp = operations.find((op) => op.objectName === 'drop_view');
       expect(viewOp.type).toBe(OperationType.DROP_VIEW);
       expect(viewOp.sql).toBe('DROP VIEW IF EXISTS drop_view');
 
-      const functionOp = operations.find(op => op.objectName === 'drop_function');
+      const functionOp = operations.find((op) => op.objectName === 'drop_function');
       expect(functionOp.type).toBe(OperationType.DROP_FUNCTION);
       expect(functionOp.sql).toBe('DROP FUNCTION IF EXISTS drop_function');
 
-      const indexOp = operations.find(op => op.objectName === 'drop_index');
+      const indexOp = operations.find((op) => op.objectName === 'drop_index');
       expect(indexOp.type).toBe(OperationType.DROP_INDEX);
       expect(indexOp.sql).toBe('DROP INDEX IF EXISTS drop_index');
     });
@@ -701,7 +715,7 @@ describe('DiffEngine', () => {
       expect(operations.length).toBeGreaterThan(0);
 
       // Verify all operations have hashes
-      operations.forEach(op => {
+      operations.forEach((op) => {
         expect(op.hash).toBeTruthy();
       });
     });

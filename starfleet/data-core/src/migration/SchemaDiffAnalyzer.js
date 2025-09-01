@@ -118,7 +118,9 @@ class SchemaDiffAnalyzer extends EventEmitter {
       }
 
       // Update performance impact
-      if (this.comparePerformanceImpact(opAnalysis.performanceImpact, analysis.performanceImpact) > 0) {
+      if (
+        this.comparePerformanceImpact(opAnalysis.performanceImpact, analysis.performanceImpact) > 0
+      ) {
         analysis.performanceImpact = opAnalysis.performanceImpact;
       }
 
@@ -483,7 +485,8 @@ class SchemaDiffAnalyzer extends EventEmitter {
       if (sql.includes('DROP COLUMN')) stats.droppedColumns++;
       if (sql.includes('CREATE INDEX') || sql.includes('CREATE UNIQUE INDEX')) stats.newIndexes++;
       if (sql.includes('DROP INDEX')) stats.droppedIndexes++;
-      if (sql.includes('CREATE FUNCTION') || sql.includes('CREATE OR REPLACE FUNCTION')) stats.newFunctions++;
+      if (sql.includes('CREATE FUNCTION') || sql.includes('CREATE OR REPLACE FUNCTION'))
+        stats.newFunctions++;
       if (sql.includes('DROP FUNCTION')) stats.droppedFunctions++;
       if (sql.includes('CREATE POLICY') || sql.includes('DROP POLICY')) stats.rlsPolicies++;
     }
@@ -512,7 +515,12 @@ class SchemaDiffAnalyzer extends EventEmitter {
   }
 
   comparePerformanceImpact(impact1, impact2) {
-    const impacts = [PERFORMANCE_IMPACT.NONE, PERFORMANCE_IMPACT.LOW, PERFORMANCE_IMPACT.MEDIUM, PERFORMANCE_IMPACT.HIGH];
+    const impacts = [
+      PERFORMANCE_IMPACT.NONE,
+      PERFORMANCE_IMPACT.LOW,
+      PERFORMANCE_IMPACT.MEDIUM,
+      PERFORMANCE_IMPACT.HIGH
+    ];
     return impacts.indexOf(impact1) - impacts.indexOf(impact2);
   }
 
@@ -522,8 +530,4 @@ class SchemaDiffAnalyzer extends EventEmitter {
   }
 }
 
-export {
-  SchemaDiffAnalyzer,
-  RISK_LEVELS,
-  PERFORMANCE_IMPACT
-};
+export { SchemaDiffAnalyzer, RISK_LEVELS, PERFORMANCE_IMPACT };

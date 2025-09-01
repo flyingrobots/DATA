@@ -35,7 +35,7 @@ export default [
       }
     },
     plugins: {
-      'promise': promisePlugin
+      promise: promisePlugin
     },
     rules: {
       // Promise-specific rules for proper async handling
@@ -56,23 +56,25 @@ export default [
       // ESM-specific rules
       'no-console': 'off',
       'no-undef': 'error',
-      'no-unused-vars': ['error', {
-        'argsIgnorePattern': '^_',
-        'varsIgnorePattern': '^_'
-      }],
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_'
+        }
+      ],
 
       // Modern JavaScript best practices
       'prefer-const': 'error',
       'prefer-arrow-callback': 'error',
       'no-var': 'error',
       'object-shorthand': 'error',
-      'semi': ['error', 'always'],
-      'quotes': ['error', 'single', { 'avoidEscape': true }],
+      semi: ['error', 'always'],
+      quotes: ['error', 'single', { avoidEscape: true }],
       'comma-dangle': ['error', 'never'],
-      'indent': ['error', 2],
+      indent: ['error', 2],
       'no-trailing-spaces': 'error',
       'eol-last': 'error'
     }
   }
 ];
-

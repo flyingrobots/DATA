@@ -11,7 +11,9 @@ export class GitPortNodeAdapter {
     const [statusResult, branchResult, remoteResult] = await Promise.all([
       exec('git', ['status', '--porcelain']),
       exec('git', ['rev-parse', '--abbrev-ref', 'HEAD']),
-      exec('git', ['rev-list', '--left-right', '--count', 'HEAD...@{u}']).catch(() => ({ stdout: '0\t0' }))
+      exec('git', ['rev-list', '--left-right', '--count', 'HEAD...@{u}']).catch(() => ({
+        stdout: '0\t0'
+      }))
     ]);
 
     const statusLines = statusResult.stdout.trim().split('\n').filter(Boolean);

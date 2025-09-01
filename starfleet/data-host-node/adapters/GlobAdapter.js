@@ -83,9 +83,7 @@ export class GlobAdapter {
    */
   async findMultiple(patterns, options = {}) {
     try {
-      const allMatches = await Promise.all(
-        patterns.map(pattern => this.find(pattern, options))
-      );
+      const allMatches = await Promise.all(patterns.map((pattern) => this.find(pattern, options)));
 
       // Flatten and deduplicate results
       const uniqueMatches = [...new Set(allMatches.flat())];
@@ -110,8 +108,8 @@ export class GlobAdapter {
   matches(filePath, pattern, options = {}) {
     try {
       const cwd = options.cwd || this.defaultCwd;
-      const caseSensitive = options.caseSensitive !== undefined ?
-        options.caseSensitive : this.caseSensitive;
+      const caseSensitive =
+        options.caseSensitive !== undefined ? options.caseSensitive : this.caseSensitive;
 
       // Normalize path relative to cwd if not absolute
       let normalizedPath = filePath;
@@ -144,7 +142,7 @@ export class GlobAdapter {
    * @returns {boolean} True if path matches any pattern
    */
   matchesAny(filePath, patterns, options = {}) {
-    return patterns.some(pattern => this.matches(filePath, pattern, options));
+    return patterns.some((pattern) => this.matches(filePath, pattern, options));
   }
 
   /**
@@ -158,14 +156,14 @@ export class GlobAdapter {
    * @returns {Array<string>} Filtered file paths
    */
   filter(filePaths, includePatterns, excludePatterns = [], options = {}) {
-    return filePaths.filter(filePath => {
+    return filePaths.filter((filePath) => {
       // Must match at least one include pattern
-      const included = includePatterns.length === 0 ||
-        this.matchesAny(filePath, includePatterns, options);
+      const included =
+        includePatterns.length === 0 || this.matchesAny(filePath, includePatterns, options);
 
       // Must not match any exclude pattern
-      const excluded = excludePatterns.length > 0 &&
-        this.matchesAny(filePath, excludePatterns, options);
+      const excluded =
+        excludePatterns.length > 0 && this.matchesAny(filePath, excludePatterns, options);
 
       return included && !excluded;
     });
@@ -234,7 +232,11 @@ export class GlobAdapter {
         getWatched: () => watcher.getWatched()
       };
     } catch (error) {
-      throw this._normalizeError(error, 'watch', Array.isArray(patterns) ? patterns.join(', ') : patterns);
+      throw this._normalizeError(
+        error,
+        'watch',
+        Array.isArray(patterns) ? patterns.join(', ') : patterns
+      );
     }
   }
 

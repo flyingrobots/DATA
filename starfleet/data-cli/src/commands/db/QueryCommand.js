@@ -35,9 +35,7 @@ class QueryCommand extends DatabaseCommand {
       query: sqlContent.substring(0, 200) + (sqlContent.length > 200 ? '...' : '')
     });
 
-    return this.confirm(
-      'Are you sure you want to execute this query in PRODUCTION?'
-    );
+    return this.confirm('Are you sure you want to execute this query in PRODUCTION?');
   }
 
   /**
@@ -88,7 +86,7 @@ class QueryCommand extends DatabaseCommand {
       /\bUPDATE\s+.*\s+SET/i
     ];
 
-    return destructivePatterns.some(pattern => pattern.test(sql));
+    return destructivePatterns.some((pattern) => pattern.test(sql));
   }
 
   /**
@@ -98,7 +96,9 @@ class QueryCommand extends DatabaseCommand {
     const env = this.config.getEnvironment(this.isProd);
 
     if (!env.db) {
-      throw new Error(`Database connection string not configured for ${this.isProd ? 'production' : 'local'} environment`);
+      throw new Error(
+        `Database connection string not configured for ${this.isProd ? 'production' : 'local'} environment`
+      );
     }
 
     const client = new Client({
@@ -113,11 +113,14 @@ class QueryCommand extends DatabaseCommand {
       const result = await client.query(sql);
 
       // Log result details
-      this.logger.debug({
-        rowCount: result.rowCount,
-        fields: result.fields?.map(f => f.name),
-        command: result.command
-      }, 'Query executed');
+      this.logger.debug(
+        {
+          rowCount: result.rowCount,
+          fields: result.fields?.map((f) => f.name),
+          command: result.command
+        },
+        'Query executed'
+      );
 
       return result;
     } finally {

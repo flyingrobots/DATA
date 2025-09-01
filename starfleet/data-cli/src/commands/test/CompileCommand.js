@@ -11,12 +11,7 @@ import BuildCommand from '../../lib/BuildCommand.js';
  * Uses the existing MigrationCompiler but configured for test directory
  */
 class CompileCommand extends BuildCommand {
-  constructor(
-    testsDir,
-    outputDir,
-    logger = null,
-    isProd = false
-  ) {
+  constructor(testsDir, outputDir, logger = null, isProd = false) {
     super(testsDir, outputDir, logger, isProd);
 
     // Validate paths are provided
@@ -40,7 +35,9 @@ class CompileCommand extends BuildCommand {
       // TODO: Implement native test compilation
       // The legacy build system has been removed. This command needs to be reimplemented
       // using a native test compiler approach
-      throw new Error('Test compilation not yet implemented. Legacy build system has been removed.');
+      throw new Error(
+        'Test compilation not yet implemented. Legacy build system has been removed.'
+      );
 
       // Validate pgTAP function signatures
       await this.validatePgTapFunctions(result.outputFile);
@@ -163,9 +160,7 @@ class CompileCommand extends BuildCommand {
 
     // Get all SQL files in tests directory
     const files = await fs.readdir(testDir);
-    const sqlFiles = files
-      .filter(f => f.endsWith('.sql'))
-      .sort(); // Sort for consistent ordering (important for test setup)
+    const sqlFiles = files.filter((f) => f.endsWith('.sql')).sort(); // Sort for consistent ordering (important for test setup)
 
     this.emit('compilation:progress', {
       stage: 'processing_files',
@@ -243,7 +238,6 @@ ${content}
         file: filename,
         processedCount: compiler.stats.filesProcessed
       });
-
     } catch (error) {
       compiler.emit('file:error', {
         file: filename,
@@ -261,7 +255,8 @@ ${content}
     const lines = content.split('\n');
 
     // Look for test function definitions
-    const testFunctionPattern = /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+test\.([a-zA-Z0-9_]+)\s*\(\s*\)/i;
+    const testFunctionPattern =
+      /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+test\.([a-zA-Z0-9_]+)\s*\(\s*\)/i;
     const tapPlanPattern = /tap\.plan\s*\(\s*(\d+)\s*\)/i;
     const tapFinishPattern = /tap\.finish\s*\(\s*\)/i;
 
@@ -333,7 +328,8 @@ ${content}
       const content = await fs.readFile(outputFile, 'utf8');
 
       // Look for all test function definitions
-      const testFunctionPattern = /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+test\.([a-zA-Z0-9_]+)\s*\(\s*\)/gi;
+      const testFunctionPattern =
+        /CREATE\s+OR\s+REPLACE\s+FUNCTION\s+test\.([a-zA-Z0-9_]+)\s*\(\s*\)/gi;
       const functions = [];
       let match;
 
@@ -349,7 +345,10 @@ ${content}
 
       // Validate that each function has proper pgTAP structure
       for (const func of functions) {
-        const funcRegex = new RegExp(`CREATE\\s+OR\\s+REPLACE\\s+FUNCTION\\s+test\\.${func}[\\s\\S]*?\\$\\$;`, 'i');
+        const funcRegex = new RegExp(
+          `CREATE\\s+OR\\s+REPLACE\\s+FUNCTION\\s+test\\.${func}[\\s\\S]*?\\$\\$;`,
+          'i'
+        );
         const funcMatch = content.match(funcRegex);
 
         if (funcMatch) {
@@ -362,7 +361,6 @@ ${content}
           }
         }
       }
-
     } catch (error) {
       this.warn(`Could not validate pgTAP functions: ${error.message}`);
     }

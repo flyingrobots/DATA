@@ -181,7 +181,6 @@ class TestTemplateGenerator {
           summary[requirement.type] = 0;
         }
         summary[requirement.type]++;
-
       } catch (error) {
         errors.push({
           index,
@@ -267,7 +266,7 @@ class TestTemplateGenerator {
       for (const patternName of additionalPatterns) {
         try {
           const pattern = this.getPattern(patternName);
-          if (pattern && !allPatterns.find(p => p.name === patternName)) {
+          if (pattern && !allPatterns.find((p) => p.name === patternName)) {
             allPatterns.push(pattern);
           } else if (!pattern) {
             warnings.push(`Pattern '${patternName}' not found in library`);
@@ -286,11 +285,17 @@ class TestTemplateGenerator {
 
       try {
         // Add pattern-based enhancements with error recovery
-        const patternEnhancements = this.generatePatternEnhancements(requirement, allPatterns, variables);
+        const patternEnhancements = this.generatePatternEnhancements(
+          requirement,
+          allPatterns,
+          variables
+        );
         if (patternEnhancements.trim()) {
-          enhancedContent += '\n\n-- =========================================================================\n';
+          enhancedContent +=
+            '\n\n-- =========================================================================\n';
           enhancedContent += '-- ENHANCED PATTERNS FROM LIBRARY\n';
-          enhancedContent += '-- =========================================================================\n\n';
+          enhancedContent +=
+            '-- =========================================================================\n\n';
           enhancedContent += patternEnhancements;
         }
       } catch (patternError) {
@@ -308,7 +313,7 @@ class TestTemplateGenerator {
         content: this.formatTest(enhancedContent),
         metadata: {
           ...baseTemplate.metadata,
-          patternsUsed: allPatterns.map(p => p.name),
+          patternsUsed: allPatterns.map((p) => p.name),
           enhancementLevel: 'advanced',
           generationMethod: 'pattern-enhanced',
           errors: errors.length > 0 ? errors : undefined,
@@ -322,10 +327,11 @@ class TestTemplateGenerator {
       }
 
       return enhancedTemplate;
-
     } catch (enhancementError) {
       // Rollback to basic template if enhancement completely fails
-      console.warn(`Enhancement failed for ${requirement.type} test '${requirement.name}': ${enhancementError.message}`);
+      console.warn(
+        `Enhancement failed for ${requirement.type} test '${requirement.name}': ${enhancementError.message}`
+      );
       console.warn('Falling back to basic template generation');
 
       try {
@@ -347,7 +353,9 @@ class TestTemplateGenerator {
           }
         };
       } catch (fallbackError) {
-        throw new Error(`Both enhanced and basic template generation failed: Enhancement: ${enhancementError.message}, Fallback: ${fallbackError.message}`);
+        throw new Error(
+          `Both enhanced and basic template generation failed: Enhancement: ${enhancementError.message}, Fallback: ${fallbackError.message}`
+        );
       }
     }
   }
@@ -386,10 +394,11 @@ class TestTemplateGenerator {
       }
 
       // Check for pgTAP plan statement (could be SELECT plan() or RETURN NEXT tap.plan())
-      const hasPlan = content.includes('SELECT plan(') ||
-                      content.includes('select plan(') ||
-                      content.includes('tap.plan(') ||
-                      content.includes('TAP.PLAN(');
+      const hasPlan =
+        content.includes('SELECT plan(') ||
+        content.includes('select plan(') ||
+        content.includes('tap.plan(') ||
+        content.includes('TAP.PLAN(');
 
       if (!hasPlan) {
         console.error('Template validation failed: Missing pgTAP plan() statement');
@@ -402,12 +411,15 @@ class TestTemplateGenerator {
       const hasCommit = content.includes('COMMIT;') || content.includes('commit;');
 
       if (!hasEnd && !hasRollback && !hasCommit) {
-        console.error('Template validation failed: Missing proper ending statement (END, ROLLBACK, or COMMIT)');
+        console.error(
+          'Template validation failed: Missing proper ending statement (END, ROLLBACK, or COMMIT)'
+        );
         return false;
       }
 
       // Validate that content has at least one actual test function call
-      const testFunctionPattern = /(tap\.|^|\s)(ok|is|isnt|like|unlike|pass|fail|throws_ok|lives_ok|cmp_ok|is_empty|isnt_empty|has_table|has_column|has_function|has_view|has_trigger|has_index)\s*\(/i;
+      const testFunctionPattern =
+        /(tap\.|^|\s)(ok|is|isnt|like|unlike|pass|fail|throws_ok|lives_ok|cmp_ok|is_empty|isnt_empty|has_table|has_column|has_function|has_view|has_trigger|has_index)\s*\(/i;
 
       if (!testFunctionPattern.test(content)) {
         console.error('Template validation failed: No pgTAP test functions found in content');
@@ -420,7 +432,7 @@ class TestTemplateGenerator {
         /;\s*DELETE\s+FROM\s+(?!.*WHERE)/i,
         /;\s*UPDATE\s+.*SET\s+.*(?!WHERE)/i,
         /UNION\s+SELECT/i,
-        /--\s*'[^']*'[^;]*;/  // SQL comments with quotes followed by statements (more specific injection pattern)
+        /--\s*'[^']*'[^;]*;/ // SQL comments with quotes followed by statements (more specific injection pattern)
       ];
 
       for (const pattern of suspiciousPatterns) {
@@ -446,13 +458,17 @@ class TestTemplateGenerator {
       }
 
       // Check for reasonable plan count
-      if (metadata.planCount && (typeof metadata.planCount !== 'number' || metadata.planCount < 1 || metadata.planCount > 1000)) {
+      if (
+        metadata.planCount &&
+        (typeof metadata.planCount !== 'number' ||
+          metadata.planCount < 1 ||
+          metadata.planCount > 1000)
+      ) {
         console.error('Template validation failed: Invalid planCount in metadata');
         return false;
       }
 
       return true;
-
     } catch (validationError) {
       console.error(`Template validation failed with exception: ${validationError.message}`);
       return false;
@@ -474,7 +490,7 @@ class TestTemplateGenerator {
 
     if (practices.length > 0) {
       doc += '-- Best Practices:\n';
-      practices.forEach(practice => {
+      practices.forEach((practice) => {
         doc += `-- • ${practice}\n`;
       });
       doc += '\n';
@@ -482,7 +498,7 @@ class TestTemplateGenerator {
 
     if (examples.length > 0) {
       doc += '-- Usage Examples:\n';
-      examples.forEach(example => {
+      examples.forEach((example) => {
         doc += `-- • ${example}\n`;
       });
       doc += '\n';
@@ -491,7 +507,7 @@ class TestTemplateGenerator {
     const recommendedPatterns = this.getRecommendedPatterns(testType);
     if (recommendedPatterns.length > 0) {
       doc += '-- Recommended Patterns:\n';
-      recommendedPatterns.forEach(pattern => {
+      recommendedPatterns.forEach((pattern) => {
         doc += `-- • ${pattern.name}: ${pattern.description}\n`;
       });
     }
@@ -602,9 +618,9 @@ const batchResult = generator.generateBatch(requirements);`
 
     // Remove excessive blank lines and normalize line endings
     let formatted = template
-      .replace(/\r\n/g, '\n')  // Normalize line endings
-      .replace(/\n{3,}/g, '\n\n')  // Reduce multiple blank lines to max 2
-      .trim();  // Remove leading/trailing whitespace
+      .replace(/\r\n/g, '\n') // Normalize line endings
+      .replace(/\n{3,}/g, '\n\n') // Reduce multiple blank lines to max 2
+      .trim(); // Remove leading/trailing whitespace
 
     // Ensure proper pgTAP structure formatting
     formatted = this.formatPgTapStructure(formatted);
@@ -677,9 +693,9 @@ const batchResult = generator.generateBatch(requirements);`
 
     // Build parameter placeholders if parameters are specified
     const hasParams = requirement.parameters && requirement.parameters.length > 0;
-    const paramPlaceholder = hasParams ?
-      `(${requirement.parameters.map(() => 'TODO: param').join(', ')})` :
-      '()';
+    const paramPlaceholder = hasParams
+      ? `(${requirement.parameters.map(() => 'TODO: param').join(', ')})`
+      : '()';
 
     return `-- =========================================================================
 -- RPC FUNCTION TESTS: ${functionName}
@@ -722,7 +738,7 @@ BEGIN
   RETURN NEXT tap.has_function(
     '${schema}', 
     '${functionName}',
-    ${hasParams ? `ARRAY[${requirement.parameters.map(p => `'${p}'`).join(', ')}]` : 'ARRAY[]::text[]'},
+    ${hasParams ? `ARRAY[${requirement.parameters.map((p) => `'${p}'`).join(', ')}]` : 'ARRAY[]::text[]'},
     'Function ${functionName} has correct signature'
   );
   
@@ -997,9 +1013,9 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${constraintName} c
 
     // Build parameter signature for testing
     const hasParams = parameterTypes.length > 0;
-    const parameterSignature = hasParams ?
-      `ARRAY[${parameterTypes.map(type => `'${type}'`).join(', ')}]` :
-      'ARRAY[]::text[]';
+    const parameterSignature = hasParams
+      ? `ARRAY[${parameterTypes.map((type) => `'${type}'`).join(', ')}]`
+      : 'ARRAY[]::text[]';
 
     // Generate sample test parameters based on types
     const sampleParams = this.generateSampleParameters(parameterTypes);
@@ -1036,10 +1052,14 @@ BEGIN
   -- Plan our tests (adjust count as needed based on metadata)
   RETURN NEXT tap.plan(${planCount});
   
-  ${requiresSecurityTesting ? `-- Setup: Create test users for security testing
+  ${
+  requiresSecurityTesting
+    ? `-- Setup: Create test users for security testing
   v_admin_id := test.create_test_admin();
   v_user_id := test.create_test_user();
-  ` : ''}
+  `
+    : ''
+}
   -- ===================================================================
   -- BASIC FUNCTION EXISTENCE AND SIGNATURE TESTS
   -- ===================================================================
@@ -1051,21 +1071,25 @@ BEGIN
     'Function ${functionName} exists'
   );
   
-  ${hasParams ? `-- Test 2: Function has correct parameter signature
+  ${
+  hasParams
+    ? `-- Test 2: Function has correct parameter signature
   RETURN NEXT tap.has_function(
     '${schema}',
     '${functionName}',
     ${parameterSignature},
     'Function ${functionName} has correct parameter types: ${parameterTypes.join(', ')}'
   );
-  ` : `-- Test 2: Function has no parameters
+  `
+    : `-- Test 2: Function has no parameters
   RETURN NEXT tap.has_function(
     '${schema}',
     '${functionName}',
     ARRAY[]::text[],
     'Function ${functionName} takes no parameters'
   );
-  `}
+  `
+}
   -- Test 3: Function returns correct type
   RETURN NEXT tap.function_returns(
     '${schema}',
@@ -1075,7 +1099,9 @@ BEGIN
     'Function ${functionName} returns ${returnType}'
   );
   
-  ${language !== 'sql' ? `-- Test 4: Function uses correct language
+  ${
+  language !== 'sql'
+    ? `-- Test 4: Function uses correct language
   RETURN NEXT tap.function_lang_is(
     '${schema}',
     '${functionName}',
@@ -1083,23 +1109,29 @@ BEGIN
     '${language}',
     'Function ${functionName} is written in ${language}'
   );
-  ` : ''}
+  `
+    : ''
+}
   
-  ${metadata.securityDefiner ? `-- Test 5: Function is security definer
+  ${
+  metadata.securityDefiner
+    ? `-- Test 5: Function is security definer
   RETURN NEXT tap.is_definer(
     '${schema}',
     '${functionName}',
     ${hasParams ? parameterSignature + ',' : ''}
     'Function ${functionName} is security definer'
   );
-  ` : `-- Test 5: Function is NOT security definer (security invoker)
+  `
+    : `-- Test 5: Function is NOT security definer (security invoker)
   RETURN NEXT tap.isnt_definer(
     '${schema}',
     '${functionName}',
     ${hasParams ? parameterSignature + ',' : ''}
     'Function ${functionName} is security invoker'
   );
-  `}
+  `
+}
   
   -- ===================================================================
   -- BEHAVIORAL TESTS WITH SAMPLE INPUTS
@@ -1120,32 +1152,46 @@ BEGIN
       );
   END;
   
-  ${testCases.length > 0 ? testCases.map((testCase, index) => `
+  ${
+  testCases.length > 0
+    ? testCases
+      .map(
+        (testCase, index) => `
   -- Test ${7 + index}: Custom test case - ${testCase.description || `Test case ${index + 1}`}
   BEGIN
     ${testCase.input ? `SELECT ${schema}.${functionName}(${testCase.input}) INTO v_result;` : `SELECT ${schema}.${functionName}() INTO v_result;`}
     
-    ${testCase.expectedOutput !== undefined ? `RETURN NEXT tap.is(
+    ${
+  testCase.expectedOutput !== undefined
+    ? `RETURN NEXT tap.is(
       v_result,
       ${typeof testCase.expectedOutput === 'string' ? `'${testCase.expectedOutput}'` : testCase.expectedOutput}::${returnType},
       'Function ${functionName} returns expected result: ${testCase.description || `test case ${index + 1}`}'
-    );` : `RETURN NEXT tap.ok(
+    );`
+    : `RETURN NEXT tap.ok(
       v_result IS NOT NULL,
       'Function ${functionName} executes successfully: ${testCase.description || `test case ${index + 1}`}'
-    );`}
+    );`
+}
   EXCEPTION
     WHEN OTHERS THEN
       RETURN NEXT tap.fail(
         'Function ${functionName} test case failed: ${testCase.description || `test case ${index + 1}`} - ' || SQLERRM
       );
   END;
-  `).join('') : ''}
+  `
+      )
+      .join('')
+    : ''
+}
   
   -- ===================================================================
   -- ERROR CONDITION AND VALIDATION TESTS
   -- ===================================================================
   
-  ${hasParams ? `-- Test: Function handles invalid input appropriately
+  ${
+  hasParams
+    ? `-- Test: Function handles invalid input appropriately
   BEGIN
     v_error_caught := false;
     BEGIN
@@ -1161,9 +1207,13 @@ BEGIN
       'Function ${functionName} handles invalid input appropriately (either raises exception or returns null)'
     );
   END;
-  ` : ''}
+  `
+    : ''
+}
   
-  ${requiresSecurityTesting ? `-- ===================================================================
+  ${
+  requiresSecurityTesting
+    ? `-- ===================================================================
   -- AUTHORIZATION AND SECURITY TESTS
   -- ===================================================================
   
@@ -1204,16 +1254,21 @@ BEGIN
         'Function ${functionName} should work with admin context: ' || SQLERRM
       );
   END;
-  ` : ''}
+  `
+    : ''
+}
   
-  ${isVolatile ? `-- ===================================================================
+  ${
+  isVolatile
+    ? `-- ===================================================================
   -- SIDE EFFECTS AND STATE TESTS (for volatile functions)
   -- ===================================================================
   
   -- Test: Function maintains data consistency
   -- TODO: Add specific tests for function side effects
   RETURN NEXT tap.pass('TODO: Test function side effects and data consistency');
-  ` : `-- ===================================================================
+  `
+    : `-- ===================================================================
   -- IMMUTABILITY TESTS (for stable/immutable functions)
   -- ===================================================================
   
@@ -1222,9 +1277,13 @@ BEGIN
     v_result1 ${returnType};
     v_result2 ${returnType};
   BEGIN
-    ${sampleParams ? `SELECT ${schema}.${functionName}(${sampleParams}) INTO v_result1;
-    SELECT ${schema}.${functionName}(${sampleParams}) INTO v_result2;` : `SELECT ${schema}.${functionName}() INTO v_result1;
-    SELECT ${schema}.${functionName}() INTO v_result2;`}
+    ${
+  sampleParams
+    ? `SELECT ${schema}.${functionName}(${sampleParams}) INTO v_result1;
+    SELECT ${schema}.${functionName}(${sampleParams}) INTO v_result2;`
+    : `SELECT ${schema}.${functionName}() INTO v_result1;
+    SELECT ${schema}.${functionName}() INTO v_result2;`
+}
     
     RETURN NEXT tap.is(
       v_result1,
@@ -1237,7 +1296,8 @@ BEGIN
         'Function ${functionName} consistency test failed: ' || SQLERRM
       );
   END;
-  `}
+  `
+}
   
   -- ===================================================================
   -- PERFORMANCE AND RESOURCE TESTS (optional)
@@ -1310,7 +1370,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
 `;
 
     if (policies && policies.length > 0) {
-      policies.forEach(policy => {
+      policies.forEach((policy) => {
         tests += `  -- Test: Policy '${policy.name}' exists
   RETURN NEXT tap.ok(
     (SELECT COUNT(*) > 0 FROM pg_policies 
@@ -1355,9 +1415,9 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
 `;
 
     if (policies && policies.length > 0) {
-      policies.forEach(policy => {
+      policies.forEach((policy) => {
         if (policy.commands && policy.commands.length > 0) {
-          policy.commands.forEach(cmd => {
+          policy.commands.forEach((cmd) => {
             tests += `  -- Test: Policy '${policy.name}' applies to ${cmd} command
   RETURN NEXT tap.ok(
     (SELECT COUNT(*) > 0 FROM pg_policies 
@@ -1404,16 +1464,16 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
 `;
 
     if (policies && policies.length > 0) {
-      policies.forEach(policy => {
+      policies.forEach((policy) => {
         if (policy.roles && policy.roles.length > 0) {
-          const _roleList = policy.roles.map(role => `'${role}'`).join(', ');
+          const _roleList = policy.roles.map((role) => `'${role}'`).join(', ');
           tests += `  -- Test: Policy '${policy.name}' applies to correct roles
   RETURN NEXT tap.set_eq(
     $$SELECT unnest(roles) FROM pg_policies 
       WHERE schemaname = '${schema}' 
       AND tablename = '${tableName}'
       AND policyname = '${policy.name}'$$,
-    $$VALUES (${policy.roles.map(role => `'${role}'`).join('), (')})$$,
+    $$VALUES (${policy.roles.map((role) => `'${role}'`).join('), (')})$$,
     'Policy "${policy.name}" applies to correct roles: ${policy.roles.join(', ')}'
   );
   
@@ -1574,14 +1634,19 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${fun
     const columnTests = this.generateColumnTestAssertions(schema, tableName, columns);
 
     // Generate constraint test assertions
-    const constraintTests = this.generateConstraintTestAssertions(schema, tableName, expectedConstraints);
+    const constraintTests = this.generateConstraintTestAssertions(
+      schema,
+      tableName,
+      expectedConstraints
+    );
 
     // Generate index test assertions
     const indexTests = this.generateIndexTestAssertions(schema, tableName, indexes);
 
     // Generate RLS test assertions if required
-    const rlsTests = requiresRowLevelSecurity ?
-      this.generateRlsTestAssertions(schema, tableName) : '';
+    const rlsTests = requiresRowLevelSecurity
+      ? this.generateRlsTestAssertions(schema, tableName)
+      : '';
 
     return `-- =========================================================================
 -- TABLE TESTS: ${tableName}
@@ -1714,7 +1779,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Comprehensive tests for ${tab
     const whereClause = requirement.whereClause || '';
 
     // Build column array string for pgTAP
-    const columnsArrayStr = indexedColumns.map(col => `'${col}'`).join(', ');
+    const columnsArrayStr = indexedColumns.map((col) => `'${col}'`).join(', ');
 
     return `-- =========================================================================
 -- INDEX TESTS: ${indexName}
@@ -1767,7 +1832,9 @@ BEGIN
     'Index ${indexName} is of type ${indexType}'
   );
   
-${isUnique ? `  -- Test 4: Index enforces uniqueness
+${
+  isUnique
+    ? `  -- Test 4: Index enforces uniqueness
   RETURN NEXT tap.index_is_unique(
     '${schema}',
     '${tableName}',
@@ -1794,21 +1861,27 @@ ${isUnique ? `  -- Test 4: Index enforces uniqueness
       -- If setup fails, mark as TODO
       RETURN NEXT tap.pass('TODO: Set up unique constraint validation test');
   END;
-` : `  -- Test 4: Non-unique index allows duplicates (if applicable)
+`
+    : `  -- Test 4: Non-unique index allows duplicates (if applicable)
   -- TODO: Add test for non-unique index behavior if relevant
   RETURN NEXT tap.pass('TODO: Add non-unique index behavior test if applicable');
   
   -- Test 5: Index performance characteristics
   -- TODO: Add performance validation tests (comments about expected usage patterns)
   RETURN NEXT tap.pass('TODO: Add performance validation tests');
-`}
-${isPartial ? `  -- Test 6: Partial index WHERE clause validation
+`
+}
+${
+  isPartial
+    ? `  -- Test 6: Partial index WHERE clause validation
   -- TODO: Verify partial index WHERE clause: ${whereClause}
   RETURN NEXT tap.pass('TODO: Test partial index WHERE clause behavior');
-` : `  -- Test 6: Full index coverage (not partial)
+`
+    : `  -- Test 6: Full index coverage (not partial)
   -- TODO: Verify index covers all table rows (no WHERE clause)
   RETURN NEXT tap.pass('TODO: Verify full index coverage');
-`}
+`
+}
   -- Test 7: Index usage in query plans (performance validation)
   -- NOTE: This is a comment-based test for manual verification
   -- Query patterns that should use this index:
@@ -1987,7 +2060,7 @@ ${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : '-- Partial: No'}
   -- =========================================================================
   `;
 
-    expectedConstraints.forEach(constraintName => {
+    expectedConstraints.forEach((constraintName) => {
       assertions += `
   -- Constraint: ${constraintName}
   RETURN NEXT tap.has_check(
@@ -2031,7 +2104,7 @@ ${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : '-- Partial: No'}
   -- =========================================================================
   `;
 
-    indexes.forEach(index => {
+    indexes.forEach((index) => {
       const indexName = index.targetName || index.name;
       const metadata = index.metadata || {};
 
@@ -2224,9 +2297,10 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
   );`);
 
       if (requirement.expectedDefaultValue !== undefined) {
-        const defaultValue = typeof requirement.expectedDefaultValue === 'string'
-          ? `'${requirement.expectedDefaultValue}'`
-          : requirement.expectedDefaultValue;
+        const defaultValue =
+          typeof requirement.expectedDefaultValue === 'string'
+            ? `'${requirement.expectedDefaultValue}'`
+            : requirement.expectedDefaultValue;
         assertions.push(`  -- Test ${testNumber++}: Column has correct default value
   RETURN NEXT tap.col_default_is(
     '${schema}',
@@ -2250,7 +2324,11 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
     }
 
     // Test 6: Foreign key
-    if (requirement.isForeignKey === true && requirement.referencedTable && requirement.referencedColumn) {
+    if (
+      requirement.isForeignKey === true &&
+      requirement.referencedTable &&
+      requirement.referencedColumn
+    ) {
       assertions.push(`  -- Test ${testNumber++}: Foreign key relationship
   RETURN NEXT tap.fk_ok(
     '${schema}', '${tableName}', '${columnName}',
@@ -2296,10 +2374,25 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
    * @private
    */
   isNumericType(dataType) {
-    const numericTypes = ['integer', 'int', 'int4', 'bigint', 'int8', 'smallint', 'int2',
-      'decimal', 'numeric', 'real', 'float4', 'double precision', 'float8',
-      'serial', 'bigserial', 'smallserial'];
-    return numericTypes.some(type => dataType.toLowerCase().includes(type));
+    const numericTypes = [
+      'integer',
+      'int',
+      'int4',
+      'bigint',
+      'int8',
+      'smallint',
+      'int2',
+      'decimal',
+      'numeric',
+      'real',
+      'float4',
+      'double precision',
+      'float8',
+      'serial',
+      'bigserial',
+      'smallserial'
+    ];
+    return numericTypes.some((type) => dataType.toLowerCase().includes(type));
   }
 
   /**
@@ -2337,7 +2430,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
         baseCount += metadata.policies.length * 2; // 2 tests per policy (existence + commands)
 
         // Additional tests for policies with role restrictions
-        metadata.policies.forEach(policy => {
+        metadata.policies.forEach((policy) => {
           if (policy.roles && policy.roles.length > 0) {
             baseCount += 1; // Policy role test
           }
@@ -2459,7 +2552,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
       return null;
     }
 
-    const sampleValues = parameterTypes.map(type => {
+    const sampleValues = parameterTypes.map((type) => {
       const lowerType = type.toLowerCase();
 
       // Handle array types
@@ -2485,7 +2578,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
       return null;
     }
 
-    const invalidValues = parameterTypes.map(type => {
+    const invalidValues = parameterTypes.map((type) => {
       const lowerType = type.toLowerCase();
       return this.getInvalidValue(lowerType);
     });
@@ -2502,62 +2595,62 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
   getSampleValue(type) {
     const typeMap = {
       // Integer types
-      'integer': '42',
-      'int': '42',
-      'int4': '42',
-      'bigint': '123456789',
-      'int8': '123456789',
-      'smallint': '123',
-      'int2': '123',
+      integer: '42',
+      int: '42',
+      int4: '42',
+      bigint: '123456789',
+      int8: '123456789',
+      smallint: '123',
+      int2: '123',
 
       // Decimal types
-      'decimal': '123.45',
-      'numeric': '123.45',
-      'real': '123.45',
-      'float4': '123.45',
+      decimal: '123.45',
+      numeric: '123.45',
+      real: '123.45',
+      float4: '123.45',
       'double precision': '123.45',
-      'float8': '123.45',
+      float8: '123.45',
 
       // String types
-      'text': "'sample text'",
-      'varchar': "'sample varchar'",
+      text: "'sample text'",
+      varchar: "'sample varchar'",
       'character varying': "'sample varchar'",
-      'char': "'S'",
-      'character': "'S'",
+      char: "'S'",
+      character: "'S'",
 
       // Boolean
-      'boolean': 'true',
-      'bool': 'true',
+      boolean: 'true',
+      bool: 'true',
 
       // Date/Time
-      'date': "'2024-01-01'",
-      'time': "'12:00:00'",
-      'timestamp': "'2024-01-01 12:00:00'",
-      'timestamptz': "'2024-01-01 12:00:00+00'",
-      'interval': "'1 hour'",
+      date: "'2024-01-01'",
+      time: "'12:00:00'",
+      timestamp: "'2024-01-01 12:00:00'",
+      timestamptz: "'2024-01-01 12:00:00+00'",
+      interval: "'1 hour'",
 
       // UUID
-      'uuid': "'00000000-0000-0000-0000-000000000001'::uuid",
+      uuid: "'00000000-0000-0000-0000-000000000001'::uuid",
 
       // JSON
-      'json': "'{\"key\": \"value\"}'::json",
-      'jsonb': "'{\"key\": \"value\"}'::jsonb",
+      json: '\'{"key": "value"}\'::json',
+      jsonb: '\'{"key": "value"}\'::jsonb',
 
       // Binary
-      'bytea': "'\\x414243'",
+      bytea: "'\\x414243'",
 
       // Network types
-      'inet': "'192.168.1.1'",
-      'cidr': "'192.168.1.0/24'",
-      'macaddr': "'08:00:2b:01:02:03'",
+      inet: "'192.168.1.1'",
+      cidr: "'192.168.1.0/24'",
+      macaddr: "'08:00:2b:01:02:03'",
 
       // Geometric types (simplified)
-      'point': "'(1,2)'",
-      'polygon': "'((0,0),(1,1),(1,0))'",
-      'circle': "'<(0,0),1>'",
+      point: "'(1,2)'",
+      polygon: "'((0,0),(1,1),(1,0))'",
+      circle: "'<(0,0),1>'",
 
       // Default fallback
-      'default': "'sample_value'"
+      default: "'sample_value'"
     };
 
     return typeMap[type] || typeMap['default'];
@@ -2595,40 +2688,40 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
   getInvalidValue(type) {
     const invalidMap = {
       // Integer types - use string that can't be converted
-      'integer': "'not_a_number'",
-      'int': "'not_a_number'",
-      'int4': "'not_a_number'",
-      'bigint': "'not_a_number'",
-      'int8': "'not_a_number'",
-      'smallint': "'not_a_number'",
+      integer: "'not_a_number'",
+      int: "'not_a_number'",
+      int4: "'not_a_number'",
+      bigint: "'not_a_number'",
+      int8: "'not_a_number'",
+      smallint: "'not_a_number'",
 
       // For numeric types, use invalid string
-      'decimal': "'invalid_decimal'",
-      'numeric': "'invalid_numeric'",
-      'real': "'invalid_real'",
+      decimal: "'invalid_decimal'",
+      numeric: "'invalid_numeric'",
+      real: "'invalid_real'",
 
       // For dates, use invalid format
-      'date': "'invalid-date'",
-      'timestamp': "'invalid-timestamp'",
-      'timestamptz': "'invalid-timestamp'",
+      date: "'invalid-date'",
+      timestamp: "'invalid-timestamp'",
+      timestamptz: "'invalid-timestamp'",
 
       // For UUID, use invalid format
-      'uuid': "'invalid-uuid-format'",
+      uuid: "'invalid-uuid-format'",
 
       // For JSON, use invalid syntax
-      'json': "'invalid json syntax{'",
-      'jsonb': "'invalid json syntax{'",
+      json: "'invalid json syntax{'",
+      jsonb: "'invalid json syntax{'",
 
       // For boolean, use invalid string
-      'boolean': "'maybe'",
-      'bool': "'maybe'",
+      boolean: "'maybe'",
+      bool: "'maybe'",
 
       // For network types, use invalid formats
-      'inet': "'invalid.ip.address'",
-      'cidr': "'invalid/cidr'",
+      inet: "'invalid.ip.address'",
+      cidr: "'invalid/cidr'",
 
       // Default: null (which might be invalid for NOT NULL columns)
-      'default': 'NULL'
+      default: 'NULL'
     };
 
     return invalidMap[type] || invalidMap['default'];
@@ -2643,10 +2736,10 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
   formatPgTapStructure(content) {
     // Ensure consistent indentation for pgTAP functions
     return content
-      .replace(/^(\s*RETURN NEXT tap\.)/gm, '  $1')  // Standardize pgTAP function indentation
-      .replace(/^(\s*--)/gm, '$1')  // Keep comment indentation as-is
-      .replace(/^(\s*PERFORM)/gm, '  $1')  // Standardize PERFORM indentation
-      .replace(/^(\s*SELECT)/gm, '  $1');  // Standardize SELECT indentation
+      .replace(/^(\s*RETURN NEXT tap\.)/gm, '  $1') // Standardize pgTAP function indentation
+      .replace(/^(\s*--)/gm, '$1') // Keep comment indentation as-is
+      .replace(/^(\s*PERFORM)/gm, '  $1') // Standardize PERFORM indentation
+      .replace(/^(\s*SELECT)/gm, '  $1'); // Standardize SELECT indentation
   }
 
   /**
@@ -2719,7 +2812,7 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
   generatePatternEnhancements(requirement, patterns, variables) {
     let enhancements = '';
 
-    patterns.forEach(pattern => {
+    patterns.forEach((pattern) => {
       try {
         // Skip patterns that are already covered by the base template
         if (this.isPatternCoveredByBase(pattern, requirement)) {
@@ -2732,7 +2825,6 @@ COMMENT ON FUNCTION test.${testFunctionName}() IS 'Tests for ${columnName} colum
         enhancements += `-- Pattern: ${pattern.name} (${pattern.category})\n`;
         enhancements += `-- ${pattern.description}\n`;
         enhancements += renderedPattern + '\n\n';
-
       } catch (error) {
         // Log pattern rendering errors but don't fail the whole generation
         enhancements += `-- Pattern ${pattern.name} could not be rendered: ${error.message}\n\n`;

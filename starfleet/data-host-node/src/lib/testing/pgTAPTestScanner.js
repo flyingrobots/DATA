@@ -222,112 +222,274 @@ class pgTAPTestScanner extends EventEmitter {
 
     // Table testing - Enhanced patterns to handle more variations
     // Pattern for SELECT has_table(...) with optional schema, table name, and description
-    patterns.set('has_table_select', /SELECT\s+has_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    patterns.set('hasnt_table_select', /SELECT\s+hasnt_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'has_table_select',
+      /SELECT\s+has_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_table_select',
+      /SELECT\s+hasnt_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // Pattern for ok(has_table(...), 'description') format
-    patterns.set('has_table_ok', /ok\s*\(\s*has_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)\s*(?:,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    patterns.set('hasnt_table_ok', /ok\s*\(\s*hasnt_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)\s*(?:,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'has_table_ok',
+      /ok\s*\(\s*has_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)\s*(?:,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_table_ok',
+      /ok\s*\(\s*hasnt_table\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)\s*(?:,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // Table privilege testing
     // table_privs_are('table', 'role', ARRAY['privs']) or table_privs_are('schema', 'table', 'role', ARRAY['privs'])
-    patterns.set('table_privs_are', /SELECT\s+table_privs_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\s*\[\s*(.*?)\s*\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'table_privs_are',
+      /SELECT\s+table_privs_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\s*\[\s*(.*?)\s*\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // Table ownership testing
     // table_owner_is('table', 'owner') or table_owner_is('schema', 'table', 'owner')
-    patterns.set('table_owner_is', /SELECT\s+table_owner_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'table_owner_is',
+      /SELECT\s+table_owner_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // Table enumeration testing
     // tables_are('schema', ARRAY['table1', 'table2']) or tables_are(ARRAY['table1', 'table2'])
-    patterns.set('tables_are', /SELECT\s+tables_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?ARRAY\s*\[\s*(.*?)\s*\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'tables_are',
+      /SELECT\s+tables_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?ARRAY\s*\[\s*(.*?)\s*\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // Column testing
-    patterns.set('has_column', /SELECT\s+has_column\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('hasnt_column', /SELECT\s+hasnt_column\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('col_type_is', /SELECT\s+col_type_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('col_not_null', /SELECT\s+col_not_null\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('col_is_null', /SELECT\s+col_is_null\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('col_has_default', /SELECT\s+col_has_default\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('col_hasnt_default', /SELECT\s+col_hasnt_default\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('col_default_is', /SELECT\s+col_default_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*((?:[^'"`(),]|['"`][^'"`]*['"`]|\([^)]*\))+)\s*\)/gi);
-    patterns.set('col_is_pk', /SELECT\s+col_is_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('col_isnt_pk', /SELECT\s+col_isnt_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
+    patterns.set(
+      'has_column',
+      /SELECT\s+has_column\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_column',
+      /SELECT\s+hasnt_column\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'col_type_is',
+      /SELECT\s+col_type_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'col_not_null',
+      /SELECT\s+col_not_null\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'col_is_null',
+      /SELECT\s+col_is_null\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'col_has_default',
+      /SELECT\s+col_has_default\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'col_hasnt_default',
+      /SELECT\s+col_hasnt_default\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'col_default_is',
+      /SELECT\s+col_default_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*((?:[^'"`(),]|['"`][^'"`]*['"`]|\([^)]*\))+)\s*\)/gi
+    );
+    patterns.set(
+      'col_is_pk',
+      /SELECT\s+col_is_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'col_isnt_pk',
+      /SELECT\s+col_isnt_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
 
     // Primary key testing
-    patterns.set('has_pk', /SELECT\s+has_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('hasnt_pk', /SELECT\s+hasnt_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
+    patterns.set(
+      'has_pk',
+      /SELECT\s+has_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_pk',
+      /SELECT\s+hasnt_pk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi
+    );
 
     // Foreign key testing
-    patterns.set('has_fk', /SELECT\s+has_fk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
-    patterns.set('hasnt_fk', /SELECT\s+hasnt_fk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
+    patterns.set(
+      'has_fk',
+      /SELECT\s+has_fk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_fk',
+      /SELECT\s+hasnt_fk\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi
+    );
 
     // Index testing - Enhanced patterns for comprehensive index coverage
     // has_index('table', 'index_name') or has_index('schema', 'table', 'index_name')
-    patterns.set('has_index', /SELECT\s+has_index\s*\(\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
-    patterns.set('hasnt_index', /SELECT\s+hasnt_index\s*\(\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
+    patterns.set(
+      'has_index',
+      /SELECT\s+has_index\s*\(\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_index',
+      /SELECT\s+hasnt_index\s*\(\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi
+    );
 
     // index_is_on('table', 'index', ARRAY['column']) - tests what columns an index covers
-    patterns.set('index_is_on', /SELECT\s+index_is_on\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\s*\[\s*(.*?)\s*\]\s*\)/gi);
+    patterns.set(
+      'index_is_on',
+      /SELECT\s+index_is_on\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\s*\[\s*(.*?)\s*\]\s*\)/gi
+    );
 
     // index_is_type('table', 'index', 'type') - tests index type (btree, gin, etc.)
-    patterns.set('index_is_type', /SELECT\s+index_is_type\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
+    patterns.set(
+      'index_is_type',
+      /SELECT\s+index_is_type\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
 
     // has_unique('table', 'constraint_name') - tests unique constraints
-    patterns.set('has_unique', /SELECT\s+has_unique\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
-    patterns.set('hasnt_unique', /SELECT\s+hasnt_unique\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
+    patterns.set(
+      'has_unique',
+      /SELECT\s+has_unique\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_unique',
+      /SELECT\s+hasnt_unique\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi
+    );
 
     // index_is_primary('table', 'index') - tests if index is primary key
-    patterns.set('index_is_primary', /SELECT\s+index_is_primary\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
+    patterns.set(
+      'index_is_primary',
+      /SELECT\s+index_is_primary\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi
+    );
 
     // Function testing
-    patterns.set('has_function', /SELECT\s+has_function\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    patterns.set('hasnt_function', /SELECT\s+hasnt_function\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    patterns.set('function_returns', /SELECT\s+function_returns\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    patterns.set('function_lang_is', /SELECT\s+function_lang_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    patterns.set('is_definer', /SELECT\s+is_definer\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    patterns.set('isnt_definer', /SELECT\s+isnt_definer\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    patterns.set('volatility_is', /SELECT\s+volatility_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    patterns.set('function_privs_are', /SELECT\s+function_privs_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\[(.*?)\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'has_function',
+      /SELECT\s+has_function\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_function',
+      /SELECT\s+hasnt_function\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'function_returns',
+      /SELECT\s+function_returns\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'function_lang_is',
+      /SELECT\s+function_lang_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'is_definer',
+      /SELECT\s+is_definer\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'isnt_definer',
+      /SELECT\s+isnt_definer\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'volatility_is',
+      /SELECT\s+volatility_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'function_privs_are',
+      /SELECT\s+function_privs_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*ARRAY\[(.*?)\])?\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\[(.*?)\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // View testing
-    patterns.set('has_view', /SELECT\s+has_view\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('hasnt_view', /SELECT\s+hasnt_view\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
+    patterns.set(
+      'has_view',
+      /SELECT\s+has_view\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_view',
+      /SELECT\s+hasnt_view\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi
+    );
 
     // Type testing
-    patterns.set('has_type', /SELECT\s+has_type\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('hasnt_type', /SELECT\s+hasnt_type\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
+    patterns.set(
+      'has_type',
+      /SELECT\s+has_type\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_type',
+      /SELECT\s+hasnt_type\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi
+    );
 
     // Result testing
-    patterns.set('results_eq', /SELECT\s+results_eq\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
-    patterns.set('results_ne', /SELECT\s+results_ne\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
+    patterns.set(
+      'results_eq',
+      /SELECT\s+results_eq\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'results_ne',
+      /SELECT\s+results_ne\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi
+    );
 
     // RLS (Row Level Security) policy testing
-    patterns.set('is_rls_enabled', /SELECT\s+is_rls_enabled\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('policy_exists', /SELECT\s+policy_exists\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('policy_cmd_is', /SELECT\s+policy_cmd_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi);
-    patterns.set('policy_roles_are', /SELECT\s+policy_roles_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\[(.*?)\]\s*\)/gi);
-    patterns.set('policies_are', /SELECT\s+policies_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*ARRAY\[(.*?)\](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi);
+    patterns.set(
+      'is_rls_enabled',
+      /SELECT\s+is_rls_enabled\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'policy_exists',
+      /SELECT\s+policy_exists\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'policy_cmd_is',
+      /SELECT\s+policy_cmd_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*\)/gi
+    );
+    patterns.set(
+      'policy_roles_are',
+      /SELECT\s+policy_roles_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*ARRAY\[(.*?)\]\s*\)/gi
+    );
+    patterns.set(
+      'policies_are',
+      /SELECT\s+policies_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*ARRAY\[(.*?)\](?:\s*,\s*['"`]([^'"`]+)['"`])?\s*\)/gi
+    );
 
     // Trigger testing
     // has_trigger('table', 'trigger_name') or has_trigger('schema', 'table', 'trigger_name')
     // Also supports optional description: has_trigger('table', 'trigger', 'description')
-    patterns.set('has_trigger', /SELECT\s+has_trigger\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
-    patterns.set('hasnt_trigger', /SELECT\s+hasnt_trigger\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'has_trigger',
+      /SELECT\s+has_trigger\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
+    patterns.set(
+      'hasnt_trigger',
+      /SELECT\s+hasnt_trigger\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]+)['"`])?(?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // trigger_is('table', 'trigger', 'function') or trigger_is('schema', 'table', 'trigger', 'func_schema', 'function')
-    patterns.set('trigger_is', /SELECT\s+trigger_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'trigger_is',
+      /SELECT\s+trigger_is\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // is_trigger_on('table', 'trigger', 'events') - tests trigger events (INSERT, UPDATE, DELETE)
-    patterns.set('is_trigger_on', /SELECT\s+is_trigger_on\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'is_trigger_on',
+      /SELECT\s+is_trigger_on\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // trigger_fires_on('table', 'trigger', 'timing') - tests trigger timing (BEFORE, AFTER, INSTEAD OF)
-    patterns.set('trigger_fires_on', /SELECT\s+trigger_fires_on\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'trigger_fires_on',
+      /SELECT\s+trigger_fires_on\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // trigger_is_for('table', 'trigger', 'level') - tests trigger level (ROW, STATEMENT)
-    patterns.set('trigger_is_for', /SELECT\s+trigger_is_for\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'trigger_is_for',
+      /SELECT\s+trigger_is_for\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     // triggers_are('table', ARRAY['trigger_names']) - tests all triggers on a table
-    patterns.set('triggers_are', /SELECT\s+triggers_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*ARRAY\s*\[\s*(.*?)\s*\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi);
+    patterns.set(
+      'triggers_are',
+      /SELECT\s+triggers_are\s*\(\s*(?:['"`]([^'"`]+)['"`]\s*,\s*)?['"`]([^'"`]+)['"`]\s*,\s*ARRAY\s*\[\s*(.*?)\s*\](?:\s*,\s*['"`]([^'"`]*)['"`])?\s*\)/gi
+    );
 
     return patterns;
   }
@@ -425,7 +587,6 @@ class pgTAPTestScanner extends EventEmitter {
       });
 
       return this.testFiles;
-
     } catch (error) {
       const errorEvent = ErrorEvent.fromError(error, `Failed to scan tests directory: ${testsDir}`);
       this.emit('error', {
@@ -490,7 +651,6 @@ class pgTAPTestScanner extends EventEmitter {
       };
 
       return testFile;
-
     } catch (error) {
       throw new Error(`Failed to parse test file ${filePath}: ${error.message}`);
     }
@@ -527,7 +687,7 @@ class pgTAPTestScanner extends EventEmitter {
         const lineNumber = beforeMatch.split('\n').length;
 
         // Extract parameters (filter out undefined captures)
-        const parameters = match.slice(1).filter(param => param !== undefined);
+        const parameters = match.slice(1).filter((param) => param !== undefined);
 
         // Clean parameters for specific assertion types
         this._cleanParameters(assertionType, parameters);
@@ -544,7 +704,11 @@ class pgTAPTestScanner extends EventEmitter {
         };
 
         // Add function metadata for function-related assertions
-        if (assertionType.includes('function') || assertionType.includes('definer') || assertionType === 'volatility_is') {
+        if (
+          assertionType.includes('function') ||
+          assertionType.includes('definer') ||
+          assertionType === 'volatility_is'
+        ) {
           assertion.functionMetadata = this._extractFunctionMetadata(assertionType, parameters);
         }
 
@@ -555,7 +719,11 @@ class pgTAPTestScanner extends EventEmitter {
         }
 
         // Add RLS policy metadata for policy-related assertions
-        if (assertionType.includes('policy') || assertionType.includes('policies') || assertionType === 'is_rls_enabled') {
+        if (
+          assertionType.includes('policy') ||
+          assertionType.includes('policies') ||
+          assertionType === 'is_rls_enabled'
+        ) {
           assertion.policyMetadata = this._extractPolicyMetadata(assertionType, parameters);
         }
 
@@ -673,18 +841,15 @@ class pgTAPTestScanner extends EventEmitter {
             // Recursively search subdirectories, passing the root directory
             const subFiles = await this._findTestFiles(fullPath, depth + 1, testsRootDir);
             files.push(...subFiles);
-
           } else if (entry.isFile()) {
             // Check if file should be included
             if (await this._shouldIncludeFile(fullPath, relativePath)) {
               files.push(fullPath);
             }
-
           } else if (entry.isSymbolicLink() && this.options.followSymlinks) {
             // Handle symbolic links if enabled
             await this._handleSymlink(fullPath, relativePath, files, depth, testsRootDir);
           }
-
         } catch (error) {
           // Handle permission errors gracefully
           if (error.code === 'EACCES' || error.code === 'EPERM') {
@@ -709,7 +874,6 @@ class pgTAPTestScanner extends EventEmitter {
         timestamp: new Date(),
         type: 'progress'
       });
-
     } catch (error) {
       if (error.code === 'EACCES' || error.code === 'EPERM') {
         this.emit('warning', {
@@ -742,7 +906,7 @@ class pgTAPTestScanner extends EventEmitter {
     }
 
     // Check include patterns using minimatch for consistency
-    const matchesInclude = this.options.includePatterns.some(pattern =>
+    const matchesInclude = this.options.includePatterns.some((pattern) =>
       minimatch(relativePath, pattern, { dot: true })
     );
 
@@ -751,7 +915,7 @@ class pgTAPTestScanner extends EventEmitter {
     }
 
     // Check legacy RegExp patterns
-    if (this.options.ignorePatterns.some(pattern => pattern.test(fullPath))) {
+    if (this.options.ignorePatterns.some((pattern) => pattern.test(fullPath))) {
       return false;
     }
 
@@ -766,7 +930,7 @@ class pgTAPTestScanner extends EventEmitter {
    * @private
    */
   _isExcluded(relativePath) {
-    return this.options.excludePatterns.some(pattern =>
+    return this.options.excludePatterns.some((pattern) =>
       minimatch(relativePath, pattern, { dot: true })
     );
   }
@@ -780,7 +944,7 @@ class pgTAPTestScanner extends EventEmitter {
    */
   _shouldIncludeHidden(relativePath) {
     // Check if any include pattern explicitly matches this hidden path
-    return this.options.includePatterns.some(pattern => {
+    return this.options.includePatterns.some((pattern) => {
       // Only include hidden files if they're explicitly matched by an include pattern
       return pattern.includes('.') && this._matchesPattern(relativePath, pattern);
     });
@@ -817,14 +981,12 @@ class pgTAPTestScanner extends EventEmitter {
 
         const subFiles = await this._findTestFiles(realPath, depth + 1, testsRootDir);
         files.push(...subFiles);
-
       } else if (stat.isFile()) {
         // Process symlinked file
         if (await this._shouldIncludeFile(realPath, realpathRelative)) {
           files.push(realPath); // Use the real path, not the symlink path
         }
       }
-
     } catch (error) {
       if (error.code === 'ENOENT') {
         this.emit('warning', {
@@ -882,19 +1044,19 @@ class pgTAPTestScanner extends EventEmitter {
 
     // Handle glob patterns BEFORE escaping special regex chars
     regexPattern = regexPattern
-      .replace(/\*\*/g, '__DOUBLESTAR__')    // Temporarily mark **
-      .replace(/\*/g, '__SINGLESTAR__')      // Temporarily mark *
-      .replace(/\?/g, '__QUESTION__');       // Temporarily mark ?
+      .replace(/\*\*/g, '__DOUBLESTAR__') // Temporarily mark **
+      .replace(/\*/g, '__SINGLESTAR__') // Temporarily mark *
+      .replace(/\?/g, '__QUESTION__'); // Temporarily mark ?
 
     // Now escape special regex characters
     regexPattern = regexPattern.replace(/[.+^${}()|[\]\\]/g, '\\$&');
 
     // Convert back to regex patterns
     regexPattern = regexPattern
-      .replace(/__LEADINGMATCH__/g, '')      // Remove the leading match marker
-      .replace(/__DOUBLESTAR__/g, '.*')      // ** matches any chars including /
-      .replace(/__SINGLESTAR__/g, '[^/]*')   // * matches any chars except /
-      .replace(/__QUESTION__/g, '[^/]');     // ? matches single char except /
+      .replace(/__LEADINGMATCH__/g, '') // Remove the leading match marker
+      .replace(/__DOUBLESTAR__/g, '.*') // ** matches any chars including /
+      .replace(/__SINGLESTAR__/g, '[^/]*') // * matches any chars except /
+      .replace(/__QUESTION__/g, '[^/]'); // ? matches single char except /
 
     try {
       const regex = new RegExp('^' + regexPattern + '$');
@@ -902,7 +1064,9 @@ class pgTAPTestScanner extends EventEmitter {
 
       // Debug logging (enable when needed)
       if (process.env.DEBUG_PATTERNS) {
-        console.log(`Pattern: '${normalizedPattern}' => Regex: '^${regexPattern}$', Path: '${normalizedPath}', Result: ${result}`);
+        console.log(
+          `Pattern: '${normalizedPattern}' => Regex: '^${regexPattern}$', Path: '${normalizedPath}', Result: ${result}`
+        );
       }
 
       return result;
@@ -974,7 +1138,11 @@ class pgTAPTestScanner extends EventEmitter {
         } else if (parameters.length === 2) {
           // Two parameters: could be [schema, table] or [table, description]
           // Heuristic: if second param looks like a description (long text or empty), treat first as table
-          if (parameters[1].length === 0 || parameters[1].length > 30 || parameters[1].includes(' ')) {
+          if (
+            parameters[1].length === 0 ||
+            parameters[1].length > 30 ||
+            parameters[1].includes(' ')
+          ) {
             // Likely [table, description] (including empty description)
             return `public.${parameters[0]}`;
           } else {
@@ -994,7 +1162,11 @@ class pgTAPTestScanner extends EventEmitter {
         } else if (parameters.length === 2) {
           // Two parameters: could be [table, outer_desc] or [schema, table]
           // Check if second param looks like description
-          if (parameters[1].length === 0 || parameters[1].length > 30 || parameters[1].includes(' ')) {
+          if (
+            parameters[1].length === 0 ||
+            parameters[1].length > 30 ||
+            parameters[1].includes(' ')
+          ) {
             // Likely [table, outer_description] (including empty description)
             return `public.${parameters[0]}`;
           } else {
@@ -1004,7 +1176,12 @@ class pgTAPTestScanner extends EventEmitter {
         } else if (parameters.length >= 3) {
           // Three or more parameters: [schema, table, ...] or [table, inner_desc, outer_desc]
           // Check if first two look like schema.table pattern
-          if (parameters[0].length < 20 && parameters[1].length < 20 && !parameters[0].includes(' ') && !parameters[1].includes(' ')) {
+          if (
+            parameters[0].length < 20 &&
+            parameters[1].length < 20 &&
+            !parameters[0].includes(' ') &&
+            !parameters[1].includes(' ')
+          ) {
             // Likely [schema, table, ...]
             return `${parameters[0]}.${parameters[1]}`;
           } else {
@@ -1041,7 +1218,9 @@ class pgTAPTestScanner extends EventEmitter {
         }
       } else {
         // Legacy table patterns
-        return parameters.length > 1 ? `${parameters[0]}.${parameters[1]}` : `public.${parameters[0]}`;
+        return parameters.length > 1
+          ? `${parameters[0]}.${parameters[1]}`
+          : `public.${parameters[0]}`;
       }
     }
 
@@ -1070,7 +1249,11 @@ class pgTAPTestScanner extends EventEmitter {
     }
 
     // For function assertions - handle specific function testing patterns
-    if (assertionType.includes('function') || assertionType.includes('definer') || assertionType === 'volatility_is') {
+    if (
+      assertionType.includes('function') ||
+      assertionType.includes('definer') ||
+      assertionType === 'volatility_is'
+    ) {
       // Extract function name and schema for different assertion patterns
 
       // Handle has_function, hasnt_function patterns:
@@ -1228,7 +1411,11 @@ class pgTAPTestScanner extends EventEmitter {
     }
 
     // For RLS policy assertions
-    if (assertionType.includes('policy') || assertionType.includes('policies') || assertionType === 'is_rls_enabled') {
+    if (
+      assertionType.includes('policy') ||
+      assertionType.includes('policies') ||
+      assertionType === 'is_rls_enabled'
+    ) {
       if (assertionType === 'is_rls_enabled') {
         // is_rls_enabled('table') or is_rls_enabled('schema', 'table')
         return parameters.length > 1 ? `${parameters[0]}.${parameters[1]}` : parameters[0];
@@ -1280,8 +1467,11 @@ class pgTAPTestScanner extends EventEmitter {
         } else if (parameters.length === 3) {
           // Could be: schema, table, trigger OR table, trigger, description
           // Heuristic: if 3rd param looks like a description (contains spaces, is very long, or contains descriptive words), treat as table, trigger, description
-          if (parameters[2].length > 50 || parameters[2].includes(' ') ||
-              (parameters[2].toLowerCase().includes('trigger') && parameters[2].length > 20)) {
+          if (
+            parameters[2].length > 50 ||
+            parameters[2].includes(' ') ||
+            (parameters[2].toLowerCase().includes('trigger') && parameters[2].length > 20)
+          ) {
             // Table, trigger, description
             return `public.${parameters[0]}.${parameters[1]}`;
           } else {
@@ -1307,7 +1497,11 @@ class pgTAPTestScanner extends EventEmitter {
             return `${parameters[0]}.${parameters[1]}.${parameters[2]}`;
           }
         }
-      } else if (assertionType === 'is_trigger_on' || assertionType === 'trigger_fires_on' || assertionType === 'trigger_is_for') {
+      } else if (
+        assertionType === 'is_trigger_on' ||
+        assertionType === 'trigger_fires_on' ||
+        assertionType === 'trigger_is_for'
+      ) {
         // is_trigger_on('table', 'trigger', 'events') or is_trigger_on('schema', 'table', 'trigger', 'events')
         // trigger_fires_on('table', 'trigger', 'timing') or trigger_fires_on('schema', 'table', 'trigger', 'timing')
         // trigger_is_for('table', 'trigger', 'level') or trigger_is_for('schema', 'table', 'trigger', 'level')
@@ -1331,7 +1525,7 @@ class pgTAPTestScanner extends EventEmitter {
     }
 
     // Default: join non-empty parameters
-    return parameters.filter(p => p).join('.');
+    return parameters.filter((p) => p).join('.');
   }
 
   /**
@@ -1388,7 +1582,11 @@ class pgTAPTestScanner extends EventEmitter {
           metadata.tableName = parameters[0];
         } else if (parameters.length === 2) {
           // [schema, table] or [table, description]
-          if (parameters[1].length === 0 || parameters[1].length > 30 || parameters[1].includes(' ')) {
+          if (
+            parameters[1].length === 0 ||
+            parameters[1].length > 30 ||
+            parameters[1].includes(' ')
+          ) {
             // [table, description] (including empty description)
             metadata.schema = 'public';
             metadata.tableName = parameters[0];
@@ -1414,7 +1612,11 @@ class pgTAPTestScanner extends EventEmitter {
           metadata.tableName = parameters[0];
         } else if (parameters.length === 2) {
           // [table, outer_desc] or [schema, table]
-          if (parameters[1].length === 0 || parameters[1].length > 30 || parameters[1].includes(' ')) {
+          if (
+            parameters[1].length === 0 ||
+            parameters[1].length > 30 ||
+            parameters[1].includes(' ')
+          ) {
             // [table, outer_description] (including empty description)
             metadata.schema = 'public';
             metadata.tableName = parameters[0];
@@ -1428,7 +1630,12 @@ class pgTAPTestScanner extends EventEmitter {
           }
         } else if (parameters.length >= 3) {
           // [schema, table, outer_desc] or [table, inner_desc, outer_desc]
-          if (parameters[0].length < 20 && parameters[1].length < 20 && !parameters[0].includes(' ') && !parameters[1].includes(' ')) {
+          if (
+            parameters[0].length < 20 &&
+            parameters[1].length < 20 &&
+            !parameters[0].includes(' ') &&
+            !parameters[1].includes(' ')
+          ) {
             // [schema, table, outer_desc]
             metadata.schema = parameters[0];
             metadata.tableName = parameters[1];
@@ -1531,9 +1738,17 @@ class pgTAPTestScanner extends EventEmitter {
           this._addToCoverageMap('tables', target, type, testFile, assertion);
         } else if (type.includes('column') || type.startsWith('col_')) {
           this._addToCoverageMap('columns', target, type, testFile);
-        } else if (type.includes('function') || type.includes('definer') || type === 'volatility_is') {
+        } else if (
+          type.includes('function') ||
+          type.includes('definer') ||
+          type === 'volatility_is'
+        ) {
           this._addToCoverageMap('functions', target, type, testFile);
-        } else if (type.includes('policy') || type.includes('policies') || type === 'is_rls_enabled') {
+        } else if (
+          type.includes('policy') ||
+          type.includes('policies') ||
+          type === 'is_rls_enabled'
+        ) {
           this._addToCoverageMap('policies', target, type, testFile);
         } else if (type.includes('index') || type.includes('unique')) {
           this._addToCoverageMap('indexes', target, type, testFile);
@@ -1628,8 +1843,8 @@ class pgTAPTestScanner extends EventEmitter {
   _getCoverageStats() {
     // Calculate enhanced table statistics
     const tableStats = Object.values(this.coverageMap.tables);
-    const tablesWithDescriptions = tableStats.filter(table =>
-      typeof table === 'object' && table.descriptions && table.descriptions.length > 0
+    const tablesWithDescriptions = tableStats.filter(
+      (table) => typeof table === 'object' && table.descriptions && table.descriptions.length > 0
     ).length;
 
     return {
@@ -1656,7 +1871,7 @@ class pgTAPTestScanner extends EventEmitter {
     if (!arrayStr || !arrayStr.includes("'")) return [];
     // Handle both ARRAY['item1', 'item2'] and just 'item1', 'item2' formats
     const matches = arrayStr.match(/'([^']*)'/g);
-    return matches ? matches.map(m => m.slice(1, -1)) : [];
+    return matches ? matches.map((m) => m.slice(1, -1)) : [];
   }
 
   /**
@@ -1674,8 +1889,19 @@ class pgTAPTestScanner extends EventEmitter {
     const isLikelySchema = (param, nextParam) => {
       if (!nextParam) return false;
       // Common schema names
-      const commonSchemas = ['public', 'auth', 'storage', 'extensions', 'pg_catalog', 'information_schema'];
-      return commonSchemas.includes(param.toLowerCase()) || param.includes('_schema') || param.includes('_db');
+      const commonSchemas = [
+        'public',
+        'auth',
+        'storage',
+        'extensions',
+        'pg_catalog',
+        'information_schema'
+      ];
+      return (
+        commonSchemas.includes(param.toLowerCase()) ||
+        param.includes('_schema') ||
+        param.includes('_db')
+      );
     };
 
     if (parameters.length === 0) return metadata;
@@ -1744,7 +1970,11 @@ class pgTAPTestScanner extends EventEmitter {
 
     case 'function_lang_is':
       // Patterns similar to function_returns but last param is language
-      if (parameters.length >= 3 && !parameters[1].startsWith('ARRAY') && !parameters[2].startsWith('ARRAY')) {
+      if (
+        parameters.length >= 3 &&
+          !parameters[1].startsWith('ARRAY') &&
+          !parameters[2].startsWith('ARRAY')
+      ) {
         // Schema, function, language pattern
         metadata.schema = parameters[0];
         metadata.name = parameters[1];
@@ -1770,7 +2000,11 @@ class pgTAPTestScanner extends EventEmitter {
     case 'is_definer':
     case 'isnt_definer':
       // Similar patterns to has_function
-      if (parameters.length >= 2 && !parameters[1].includes("'") && !parameters[1].startsWith('ARRAY')) {
+      if (
+        parameters.length >= 2 &&
+          !parameters[1].includes("'") &&
+          !parameters[1].startsWith('ARRAY')
+      ) {
         metadata.schema = parameters[0];
         metadata.name = parameters[1];
 
@@ -1790,7 +2024,11 @@ class pgTAPTestScanner extends EventEmitter {
 
     case 'volatility_is':
       // Similar patterns to function_lang_is but last param is volatility
-      if (parameters.length >= 3 && !parameters[1].startsWith('ARRAY') && !parameters[2].startsWith('ARRAY')) {
+      if (
+        parameters.length >= 3 &&
+          !parameters[1].startsWith('ARRAY') &&
+          !parameters[2].startsWith('ARRAY')
+      ) {
         // Schema, function, volatility pattern
         metadata.schema = parameters[0];
         metadata.name = parameters[1];
@@ -1872,7 +2110,7 @@ class pgTAPTestScanner extends EventEmitter {
       if (!arrayStr || !arrayStr.includes("'")) return [];
       // Extract quoted items from array string
       const matches = arrayStr.match(/'([^']*)'/g);
-      return matches ? matches.map(m => m.slice(1, -1)) : [];
+      return matches ? matches.map((m) => m.slice(1, -1)) : [];
     };
 
     if (parameters.length === 0) return metadata;
@@ -1966,13 +2204,17 @@ class pgTAPTestScanner extends EventEmitter {
    * @public
    */
   async buildCoverageDatabase() {
-    this.emit('progress', new ProgressEvent('Building coverage database with memory management...'));
+    this.emit(
+      'progress',
+      new ProgressEvent('Building coverage database with memory management...')
+    );
 
     // Check if we should use streaming mode based on file count and memory
     const initialMemory = MemoryMonitor.getMemoryUsage();
-    const shouldStream = this.options.enableStreaming &&
-                        (this.testFiles.length > this.options.batchSize ||
-                         initialMemory.heapUsed > (this.options.maxMemoryMB * 0.5));
+    const shouldStream =
+      this.options.enableStreaming &&
+      (this.testFiles.length > this.options.batchSize ||
+        initialMemory.heapUsed > this.options.maxMemoryMB * 0.5);
 
     if (shouldStream) {
       return this._buildCoverageDatabaseBatched();
@@ -2006,12 +2248,15 @@ class pgTAPTestScanner extends EventEmitter {
     this._identifyCoverageGaps(database);
     this.coverageDatabase = database;
 
-    this.emit('success', new SuccessEvent('Coverage database built successfully', {
-      totalObjects: this._getTotalIndexedObjects(database),
-      totalAssertions: database.assertionCounts.total,
-      coverage: this._calculateOverallCoverage(database),
-      memoryStats: this.getMemoryStats()
-    }));
+    this.emit(
+      'success',
+      new SuccessEvent('Coverage database built successfully', {
+        totalObjects: this._getTotalIndexedObjects(database),
+        totalAssertions: database.assertionCounts.total,
+        coverage: this._calculateOverallCoverage(database),
+        memoryStats: this.getMemoryStats()
+      })
+    );
 
     return database;
   }
@@ -2025,42 +2270,42 @@ class pgTAPTestScanner extends EventEmitter {
     const database = this._createEmptyDatabase();
 
     // Use BatchProcessor for memory-managed processing
-    await this.batchProcessor.processBatches(
-      this.testFiles,
-      async (batch, batchIndex) => {
-        // Check if streaming DB should limit objects
-        if (this.streamingDB) {
-          for (const testFile of batch) {
-            if (!this.streamingDB.addObject('files', testFile.filePath, testFile)) {
-              this.emit('warning', {
-                type: 'memory_limit',
-                message: `File processing limit reached at batch ${batchIndex}`
-              });
-              break;
-            }
+    await this.batchProcessor.processBatches(this.testFiles, async (batch, batchIndex) => {
+      // Check if streaming DB should limit objects
+      if (this.streamingDB) {
+        for (const testFile of batch) {
+          if (!this.streamingDB.addObject('files', testFile.filePath, testFile)) {
+            this.emit('warning', {
+              type: 'memory_limit',
+              message: `File processing limit reached at batch ${batchIndex}`
+            });
+            break;
           }
         }
-
-        // Process batch files
-        for (const testFile of batch) {
-          this._processFileForDatabase(testFile, database);
-        }
-
-        this.memoryState.batchesProcessed++;
-
-        return batch.map(f => f.filePath);
       }
-    );
+
+      // Process batch files
+      for (const testFile of batch) {
+        this._processFileForDatabase(testFile, database);
+      }
+
+      this.memoryState.batchesProcessed++;
+
+      return batch.map((f) => f.filePath);
+    });
 
     this._identifyCoverageGaps(database);
     this.coverageDatabase = database;
 
-    this.emit('success', new SuccessEvent('Batched coverage database built successfully', {
-      totalObjects: this._getTotalIndexedObjects(database),
-      totalAssertions: database.assertionCounts.total,
-      coverage: this._calculateOverallCoverage(database),
-      memoryStats: this.getMemoryStats()
-    }));
+    this.emit(
+      'success',
+      new SuccessEvent('Batched coverage database built successfully', {
+        totalObjects: this._getTotalIndexedObjects(database),
+        totalAssertions: database.assertionCounts.total,
+        coverage: this._calculateOverallCoverage(database),
+        memoryStats: this.getMemoryStats()
+      })
+    );
 
     return database;
   }
@@ -2160,20 +2405,21 @@ class pgTAPTestScanner extends EventEmitter {
 
     // Calculate coverage percentage for this object
     const totalPossibleAssertions = this._estimateMaxAssertions(normalizedType, objectName);
-    const coveragePercentage = totalPossibleAssertions > 0
-      ? Math.round((objectCoverage.assertions.length / totalPossibleAssertions) * 100)
-      : 100;
+    const coveragePercentage =
+      totalPossibleAssertions > 0
+        ? Math.round((objectCoverage.assertions.length / totalPossibleAssertions) * 100)
+        : 100;
 
     return {
       objectType: normalizedType,
       objectName,
       assertionCount: objectCoverage.assertions.length,
       assertionTypes: [...objectCoverage.assertionTypes],
-      testFiles: [...objectCoverage.testFiles].map(f => f.fileName),
+      testFiles: [...objectCoverage.testFiles].map((f) => f.fileName),
       metadata: objectCoverage.metadata,
       coveragePercentage,
       lastTested: objectCoverage.lastTested,
-      assertions: objectCoverage.assertions.map(a => ({
+      assertions: objectCoverage.assertions.map((a) => ({
         type: a.type,
         testFile: a.testFile.fileName,
         lineNumber: a.lineNumber,
@@ -2362,7 +2608,10 @@ class pgTAPTestScanner extends EventEmitter {
 
     // Store additional metadata based on assertion type
     if (assertion.functionMetadata) {
-      objectEntry.metadata.function = { ...objectEntry.metadata.function, ...assertion.functionMetadata };
+      objectEntry.metadata.function = {
+        ...objectEntry.metadata.function,
+        ...assertion.functionMetadata
+      };
     }
     if (assertion.policyMetadata) {
       objectEntry.metadata.policy = { ...objectEntry.metadata.policy, ...assertion.policyMetadata };
@@ -2468,8 +2717,7 @@ class pgTAPTestScanner extends EventEmitter {
    * @private
    */
   _getTotalIndexedObjects(database) {
-    return Object.values(database.objects)
-      .reduce((total, objectMap) => total + objectMap.size, 0);
+    return Object.values(database.objects).reduce((total, objectMap) => total + objectMap.size, 0);
   }
 
   /**
@@ -2555,7 +2803,8 @@ class pgTAPTestScanner extends EventEmitter {
     let highCoverageCount = 0;
 
     for (const testFile of this.testFiles) {
-      if (testFile.assertions.length >= 5) { // Arbitrary threshold
+      if (testFile.assertions.length >= 5) {
+        // Arbitrary threshold
         highCoverageCount++;
       }
     }
@@ -2576,7 +2825,8 @@ class pgTAPTestScanner extends EventEmitter {
 
     for (const objectMap of Object.values(this.coverageDatabase.objects)) {
       for (const [, objectData] of objectMap.entries()) {
-        if (objectData.assertionTypes.size >= 3) { // Multiple assertion types
+        if (objectData.assertionTypes.size >= 3) {
+          // Multiple assertion types
           multiTestedCount++;
         }
       }
@@ -2664,9 +2914,7 @@ class pgTAPTestScanner extends EventEmitter {
       }
     }
 
-    return objectStats
-      .sort((a, b) => b.assertionCount - a.assertionCount)
-      .slice(0, limit);
+    return objectStats.sort((a, b) => b.assertionCount - a.assertionCount).slice(0, limit);
   }
 
   /**
@@ -2699,7 +2947,7 @@ class pgTAPTestScanner extends EventEmitter {
         };
 
         if (includeDetails) {
-          objectReport.assertions = objectData.assertions.map(a => ({
+          objectReport.assertions = objectData.assertions.map((a) => ({
             type: a.type,
             testFile: a.testFile.fileName,
             lineNumber: a.lineNumber,
@@ -2727,18 +2975,19 @@ class pgTAPTestScanner extends EventEmitter {
     for (const [objectType, objects] of Object.entries(report.coverage)) {
       for (const [objectName, data] of Object.entries(objects)) {
         const maxAssertions = this._estimateMaxAssertions(objectType, objectName);
-        const coverage = maxAssertions > 0
-          ? Math.round((data.assertionCount / maxAssertions) * 100)
-          : 100;
+        const coverage =
+          maxAssertions > 0 ? Math.round((data.assertionCount / maxAssertions) * 100) : 100;
 
-        lines.push([
-          objectType,
-          objectName,
-          data.assertionCount,
-          data.assertionTypes.length,
-          data.testFileCount,
-          coverage
-        ].join(','));
+        lines.push(
+          [
+            objectType,
+            objectName,
+            data.assertionCount,
+            data.assertionTypes.length,
+            data.testFileCount,
+            coverage
+          ].join(',')
+        );
       }
     }
 
@@ -2826,11 +3075,12 @@ class pgTAPTestScanner extends EventEmitter {
 
       for (const [objectName, data] of Object.entries(objects)) {
         const maxAssertions = this._estimateMaxAssertions(objectType, objectName);
-        const coverage = maxAssertions > 0
-          ? Math.round((data.assertionCount / maxAssertions) * 100)
-          : 100;
+        const coverage =
+          maxAssertions > 0 ? Math.round((data.assertionCount / maxAssertions) * 100) : 100;
 
-        lines.push(`| ${objectName} | ${data.assertionCount} | ${data.assertionTypes.length} | ${data.testFileCount} | ${coverage}% |`);
+        lines.push(
+          `| ${objectName} | ${data.assertionCount} | ${data.assertionTypes.length} | ${data.testFileCount} | ${coverage}% |`
+        );
       }
 
       lines.push('');
@@ -2852,12 +3102,11 @@ class pgTAPTestScanner extends EventEmitter {
     for (const [objectType, objects] of Object.entries(coverage)) {
       for (const [objectName, data] of Object.entries(objects)) {
         const maxAssertions = this._estimateMaxAssertions(objectType, objectName);
-        const coverage = maxAssertions > 0
-          ? Math.round((data.assertionCount / maxAssertions) * 100)
-          : 100;
+        const coverage =
+          maxAssertions > 0 ? Math.round((data.assertionCount / maxAssertions) * 100) : 100;
 
-        const coverageClass = coverage >= 80 ? 'high-coverage' :
-          coverage >= 50 ? 'medium-coverage' : 'low-coverage';
+        const coverageClass =
+          coverage >= 80 ? 'high-coverage' : coverage >= 50 ? 'medium-coverage' : 'low-coverage';
 
         rows.push(`    <tr class="${coverageClass}">
       <td>${objectType}</td>
@@ -2919,7 +3168,6 @@ class pgTAPTestScanner extends EventEmitter {
     });
   }
 
-
   /**
    * Perform memory cleanup operations
    * @private
@@ -2963,7 +3211,7 @@ class pgTAPTestScanner extends EventEmitter {
    */
   _limitObjectAccumulation() {
     // Limit coverage map sizes
-    Object.keys(this.coverageMap).forEach(type => {
+    Object.keys(this.coverageMap).forEach((type) => {
       if (type === 'filesByTarget') return;
 
       const objects = this.coverageMap[type];
@@ -2974,7 +3222,7 @@ class pgTAPTestScanner extends EventEmitter {
         const toKeep = objectKeys.slice(-Math.floor(this.options.maxObjectsPerType * 0.8));
         const newObjects = {};
 
-        toKeep.forEach(key => {
+        toKeep.forEach((key) => {
           newObjects[key] = objects[key];
         });
 
@@ -2987,7 +3235,6 @@ class pgTAPTestScanner extends EventEmitter {
       }
     });
   }
-
 
   /**
    * Cleanup resources

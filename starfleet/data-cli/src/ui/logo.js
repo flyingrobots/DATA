@@ -15,14 +15,35 @@ async function displayLogo() {
 
     // All available oh-my-logo palettes
     const allPalettes = [
-      'grad-blue', 'sunset', 'dawn', 'nebula', 'mono', 'ocean',
-      'fire', 'forest', 'gold', 'purple', 'mint', 'coral', 'matrix'
+      'grad-blue',
+      'sunset',
+      'dawn',
+      'nebula',
+      'mono',
+      'ocean',
+      'fire',
+      'forest',
+      'gold',
+      'purple',
+      'mint',
+      'coral',
+      'matrix'
     ];
 
     // All available block fonts for filled mode
     const allFonts = [
-      '3d', 'block', 'chrome', 'grid', 'huge', 'pallet',
-      'shade', 'simple', 'simple3d', 'simpleBlock', 'slick', 'tiny'
+      '3d',
+      'block',
+      'chrome',
+      'grid',
+      'huge',
+      'pallet',
+      'shade',
+      'simple',
+      'simple3d',
+      'simpleBlock',
+      'slick',
+      'tiny'
     ];
 
     // Pick random palette AND random font - MAXIMUM CHAOS! 🎲
@@ -31,13 +52,12 @@ async function displayLogo() {
 
     await renderFilled('Supa', {
       palette: randomPalette,
-      font: randomFont  // RANDOM FONT EVERY TIME! WHEEEEE! 🎉
+      font: randomFont // RANDOM FONT EVERY TIME! WHEEEEE! 🎉
     });
     await renderFilled('DATA', {
       palette: randomPalette,
-      font: randomFont  // RANDOM FONT EVERY TIME! WHEEEEE! 🎉
+      font: randomFont // RANDOM FONT EVERY TIME! WHEEEEE! 🎉
     });
-
   } catch {
     // Fallback: Simple console log if logo rendering fails
     console.log('D • A • T • A');
@@ -56,6 +76,4 @@ async function displayLogo() {
   console.log('');
 }
 
-export {
-  displayLogo
-};
+export { displayLogo };

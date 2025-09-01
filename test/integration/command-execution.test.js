@@ -96,7 +96,7 @@ class TestCommand extends Command {
     // Simulate some async work with progress updates
     for (let i = 0; i < 5; i++) {
       this.progress(`Processing step ${i + 1}`, { step: i + 1, total: 5 });
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     }
   }
 }
@@ -137,9 +137,13 @@ class InteractiveCommand extends Command {
   prompt(type, options) {
     // Emit the event before resolving for consistency with base class
     return new Promise((resolve) => {
-      this.emit('prompt', { type, options, resolve: (response) => {
-        resolve(this.userResponses.get(type) || response || false);
-      }});
+      this.emit('prompt', {
+        type,
+        options,
+        resolve: (response) => {
+          resolve(this.userResponses.get(type) || response || false);
+        }
+      });
     });
   }
 }
@@ -204,7 +208,7 @@ describe('Command execution integration', () => {
   function captureEvents(command) {
     const events = ['start', 'progress', 'warning', 'error', 'success', 'complete', 'cancelled'];
 
-    events.forEach(eventType => {
+    events.forEach((eventType) => {
       command.on(eventType, (data) => {
         eventLog.push({
           type: eventType,
@@ -226,19 +230,19 @@ describe('Command execution integration', () => {
       expect(command.executeCount).toBe(1);
 
       // Verify event flow
-      const eventTypes = eventLog.map(e => e.type);
+      const eventTypes = eventLog.map((e) => e.type);
       expect(eventTypes).toContain('start');
       expect(eventTypes).toContain('progress');
       expect(eventTypes).toContain('success');
       expect(eventTypes).toContain('complete');
 
       // Verify start event
-      const startEvent = eventLog.find(e => e.type === 'start');
+      const startEvent = eventLog.find((e) => e.type === 'start');
       expect(startEvent.data.message).toBe('Starting TestCommand');
       expect(startEvent.data.isProd).toBe(false);
 
       // Verify complete event
-      const completeEvent = eventLog.find(e => e.type === 'complete');
+      const completeEvent = eventLog.find((e) => e.type === 'complete');
       expect(completeEvent.data.message).toBe('TestCommand completed successfully');
       expect(completeEvent.data.result).toEqual({ success: true, args: ['arg1', 'arg2'] });
     });
@@ -251,7 +255,7 @@ describe('Command execution integration', () => {
 
       await expect(command.execute()).rejects.toThrow('Test command failed');
 
-      const eventTypes = eventLog.map(e => e.type);
+      const eventTypes = eventLog.map((e) => e.type);
       expect(eventTypes).toContain('start');
       expect(eventTypes).toContain('error');
       expect(eventTypes).not.toContain('complete');
@@ -263,19 +267,15 @@ describe('Command execution integration', () => {
 
       await command.execute();
 
-      const progressEvents = eventLog.filter(e => e.type === 'progress');
+      const progressEvents = eventLog.filter((e) => e.type === 'progress');
       expect(progressEvents.length).toBeGreaterThan(1);
 
       // Verify first progress event
-      const firstProgress = progressEvents.find(e =>
-        e.data.message === 'Starting test command'
-      );
+      const firstProgress = progressEvents.find((e) => e.data.message === 'Starting test command');
       expect(firstProgress).toBeDefined();
 
       // Verify step progress events
-      const stepEvents = progressEvents.filter(e =>
-        e.data.message.startsWith('Processing step')
-      );
+      const stepEvents = progressEvents.filter((e) => e.data.message.startsWith('Processing step'));
       expect(stepEvents).toHaveLength(5);
     });
 
@@ -301,7 +301,7 @@ describe('Command execution integration', () => {
       expect(result.environment).toBe('production');
 
       // Should not have cancelled event
-      const eventTypes = eventLog.map(e => e.type);
+      const eventTypes = eventLog.map((e) => e.type);
       expect(eventTypes).not.toContain('cancelled');
     });
 
@@ -336,10 +336,10 @@ describe('Command execution integration', () => {
 
       expect(result).toBeUndefined(); // Cancelled commands return undefined
 
-      const eventTypes = eventLog.map(e => e.type);
+      const eventTypes = eventLog.map((e) => e.type);
       expect(eventTypes).toContain('cancelled');
 
-      const cancelledEvent = eventLog.find(e => e.type === 'cancelled');
+      const cancelledEvent = eventLog.find((e) => e.type === 'cancelled');
       expect(cancelledEvent.data.message).toBe('Operation cancelled');
     });
 
@@ -351,11 +351,11 @@ describe('Command execution integration', () => {
 
       await command.execute();
 
-      const warningEvents = eventLog.filter(e => e.type === 'warning');
+      const warningEvents = eventLog.filter((e) => e.type === 'warning');
       expect(warningEvents.length).toBeGreaterThan(0);
 
-      const prodWarning = warningEvents.find(e =>
-        e.data.message === 'Production operation requested!'
+      const prodWarning = warningEvents.find(
+        (e) => e.data.message === 'Production operation requested!'
       );
       expect(prodWarning).toBeDefined();
       expect(prodWarning.data.data.environment).toBe('PRODUCTION');
@@ -424,7 +424,7 @@ describe('Command execution integration', () => {
 
       await command.execute();
 
-      eventLog.forEach(event => {
+      eventLog.forEach((event) => {
         expect(event.type).toBeTruthy();
         expect(event.data).toBeDefined();
         expect(event.timestamp).toBeInstanceOf(Date);
@@ -459,9 +459,7 @@ describe('Command execution integration', () => {
 
       // Verify specific log calls
       const infoCalls = mockLogger.info.mock.calls;
-      const progressLogs = infoCalls.filter(call =>
-        call[1]?.includes('Starting test command')
-      );
+      const progressLogs = infoCalls.filter((call) => call[1]?.includes('Starting test command'));
       expect(progressLogs.length).toBeGreaterThan(0);
     });
 
@@ -475,9 +473,7 @@ describe('Command execution integration', () => {
       expect(mockLogger.error).toHaveBeenCalled();
 
       const errorCalls = mockLogger.error.mock.calls;
-      const errorLog = errorCalls.find(call =>
-        call[1]?.includes('Command failed')
-      );
+      const errorLog = errorCalls.find((call) => call[1]?.includes('Command failed'));
       expect(errorLog).toBeDefined();
     });
 
@@ -562,7 +558,7 @@ describe('Command execution integration', () => {
       expect(command.logger).toBeDefined();
 
       // Events should have been emitted and completed
-      const completeEvent = eventLog.find(e => e.type === 'complete');
+      const completeEvent = eventLog.find((e) => e.type === 'complete');
       expect(completeEvent).toBeDefined();
     });
 
@@ -601,7 +597,7 @@ describe('Command execution integration', () => {
         CancelledEvent
       ];
 
-      events.forEach(EventClass => {
+      events.forEach((EventClass) => {
         expect(EventClass).toBeDefined();
         expect(typeof EventClass).toBe('function');
 
@@ -668,7 +664,7 @@ describe('Command execution integration', () => {
 
         async performExecute() {
           startTimes.push({ id: this.id, time: Date.now() });
-          await new Promise(resolve => setTimeout(resolve, 50));
+          await new Promise((resolve) => setTimeout(resolve, 50));
           return { id: this.id };
         }
       }
@@ -679,15 +675,13 @@ describe('Command execution integration', () => {
         new ParallelCommand(mockConfig, mockLogger, false, mockOutputConfig, 'C')
       ];
 
-      const results = await Promise.all(
-        commands.map(command => command.execute())
-      );
+      const results = await Promise.all(commands.map((command) => command.execute()));
 
       expect(results).toHaveLength(3);
-      expect(results.map(r => r.id).sort()).toEqual(['A', 'B', 'C']);
+      expect(results.map((r) => r.id).sort()).toEqual(['A', 'B', 'C']);
 
       // Verify they started roughly at the same time (within 100ms)
-      const times = startTimes.map(s => s.time);
+      const times = startTimes.map((s) => s.time);
       const maxDiff = Math.max(...times) - Math.min(...times);
       expect(maxDiff).toBeLessThan(100);
     });

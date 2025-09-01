@@ -68,23 +68,34 @@ describe('pgTAPTestScanner Index Assertion Parsing', () => {
     });
 
     it('should parse index_is_on with table, index, and multiple columns', () => {
-      const sql = "SELECT index_is_on('orders', 'idx_orders_status_date', ARRAY['status', 'created_at']);";
+      const sql =
+        "SELECT index_is_on('orders', 'idx_orders_status_date', ARRAY['status', 'created_at']);";
       const assertions = scanner.extractAssertions(sql);
 
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('index_is_on');
       expect(assertions[0].target).toBe('orders.idx_orders_status_date');
-      expect(assertions[0].parameters).toEqual(['orders', 'idx_orders_status_date', "'status', 'created_at'"]);
+      expect(assertions[0].parameters).toEqual([
+        'orders',
+        'idx_orders_status_date',
+        "'status', 'created_at'"
+      ]);
     });
 
     it('should parse index_is_on with schema, table, index, and columns', () => {
-      const sql = "SELECT index_is_on('public', 'orders', 'idx_orders_status_date', ARRAY['status', 'created_at']);";
+      const sql =
+        "SELECT index_is_on('public', 'orders', 'idx_orders_status_date', ARRAY['status', 'created_at']);";
       const assertions = scanner.extractAssertions(sql);
 
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('index_is_on');
       expect(assertions[0].target).toBe('public.orders.idx_orders_status_date');
-      expect(assertions[0].parameters).toEqual(['public', 'orders', 'idx_orders_status_date', "'status', 'created_at'"]);
+      expect(assertions[0].parameters).toEqual([
+        'public',
+        'orders',
+        'idx_orders_status_date',
+        "'status', 'created_at'"
+      ]);
     });
   });
 
@@ -176,14 +187,16 @@ describe('pgTAPTestScanner Index Assertion Parsing', () => {
       const assertions = scanner.extractAssertions(sql);
 
       // Manually build coverage map for testing
-      scanner.testFiles = [{
-        filePath: '/test/index_test.sql',
-        fileName: 'index_test.sql',
-        assertions,
-        planCount: 4,
-        dependencies: [],
-        metadata: {}
-      }];
+      scanner.testFiles = [
+        {
+          filePath: '/test/index_test.sql',
+          fileName: 'index_test.sql',
+          assertions,
+          planCount: 4,
+          dependencies: [],
+          metadata: {}
+        }
+      ];
 
       scanner._buildCoverageMap();
       const coverageMap = scanner.getCoverageMap();
@@ -207,14 +220,16 @@ describe('pgTAPTestScanner Index Assertion Parsing', () => {
 
       const assertions = scanner.extractAssertions(sql);
 
-      scanner.testFiles = [{
-        filePath: '/test/index_test.sql',
-        fileName: 'index_test.sql',
-        assertions,
-        planCount: 3,
-        dependencies: [],
-        metadata: {}
-      }];
+      scanner.testFiles = [
+        {
+          filePath: '/test/index_test.sql',
+          fileName: 'index_test.sql',
+          assertions,
+          planCount: 3,
+          dependencies: [],
+          metadata: {}
+        }
+      ];
 
       scanner._buildCoverageMap();
       const stats = scanner.getStatistics();
@@ -238,13 +253,13 @@ describe('pgTAPTestScanner Index Assertion Parsing', () => {
 
       expect(assertions).toHaveLength(5); // Excludes the plan statement
 
-      const indexAssertions = assertions.filter(a =>
-        a.type.includes('index') || a.type.includes('unique')
+      const indexAssertions = assertions.filter(
+        (a) => a.type.includes('index') || a.type.includes('unique')
       );
       expect(indexAssertions).toHaveLength(3);
 
-      const tableColumnAssertions = assertions.filter(a =>
-        a.type.includes('table') || a.type.includes('column')
+      const tableColumnAssertions = assertions.filter(
+        (a) => a.type.includes('table') || a.type.includes('column')
       );
       expect(tableColumnAssertions).toHaveLength(2);
     });
@@ -288,7 +303,7 @@ describe('pgTAPTestScanner Index Assertion Parsing', () => {
 
       expect(assertions).toHaveLength(7);
 
-      const assertionTypes = assertions.map(a => a.type);
+      const assertionTypes = assertions.map((a) => a.type);
       expect(assertionTypes).toContain('has_index');
       expect(assertionTypes).toContain('hasnt_index');
       expect(assertionTypes).toContain('index_is_on');
@@ -298,8 +313,8 @@ describe('pgTAPTestScanner Index Assertion Parsing', () => {
       expect(assertionTypes).toContain('index_is_primary');
 
       // All should be categorized as index assertions
-      const indexAssertions = assertions.filter(a =>
-        a.type.includes('index') || a.type.includes('unique')
+      const indexAssertions = assertions.filter(
+        (a) => a.type.includes('index') || a.type.includes('unique')
       );
       expect(indexAssertions).toHaveLength(7);
     });

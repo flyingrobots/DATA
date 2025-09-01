@@ -54,9 +54,7 @@ function validateCommandEvent(event, expectedClass) {
   if (!(event instanceof expectedClass)) {
     const actualType = event?.constructor?.name || typeof event;
     const expectedType = expectedClass.name;
-    throw new TypeError(
-      `Invalid event type: expected ${expectedType}, got ${actualType}`
-    );
+    throw new TypeError(`Invalid event type: expected ${expectedType}, got ${actualType}`);
   }
   return true;
 }
@@ -129,7 +127,9 @@ function createCommandEvent(type, ...args) {
 
   const EventClass = eventClasses[type];
   if (!EventClass) {
-    throw new Error(`Unknown event type: ${type}. Available types: ${Object.keys(eventClasses).join(', ')}`);
+    throw new Error(
+      `Unknown event type: ${type}. Available types: ${Object.keys(eventClasses).join(', ')}`
+    );
   }
 
   return new EventClass(...args);

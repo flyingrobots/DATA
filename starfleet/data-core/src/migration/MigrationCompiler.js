@@ -124,7 +124,6 @@ class MigrationCompiler extends EventEmitter {
       });
 
       return result;
-
     } catch (error) {
       this.emit('error', {
         error,
@@ -161,9 +160,7 @@ class MigrationCompiler extends EventEmitter {
     const entries = await fs.readdir(this.config.sqlDir, { withFileTypes: true });
 
     // Get all directories
-    const availableDirs = entries
-      .filter(entry => entry.isDirectory())
-      .map(entry => entry.name);
+    const availableDirs = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
 
     // Order directories according to DIRECTORY_ORDER
     const orderedDirs = [];
@@ -174,7 +171,7 @@ class MigrationCompiler extends EventEmitter {
     }
 
     // Add any directories not in our standard list (for custom directories)
-    const customDirs = availableDirs.filter(dir => !DIRECTORY_ORDER.includes(dir));
+    const customDirs = availableDirs.filter((dir) => !DIRECTORY_ORDER.includes(dir));
     if (customDirs.length > 0) {
       this.emit('warning', {
         message: `Found non-standard directories: ${customDirs.join(', ')}. These will be processed last.`,
@@ -294,7 +291,6 @@ class MigrationCompiler extends EventEmitter {
         lineCount: lines.length,
         timestamp: new Date()
       });
-
     } catch (error) {
       this.emit('file:error', {
         file: relativePath,

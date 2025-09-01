@@ -143,10 +143,11 @@ export class ProcessAdapter extends ProcessPort {
           stdin: child.stdin,
           pid: child.pid,
           kill: (signal = 'SIGTERM') => child.kill(signal),
-          wait: () => new Promise((res, rej) => {
-            child.on('close', (code, sig) => res({ exitCode: code, signal: sig }));
-            child.on('error', rej);
-          })
+          wait: () =>
+            new Promise((res, rej) => {
+              child.on('close', (code, sig) => res({ exitCode: code, signal: sig }));
+              child.on('error', rej);
+            })
         });
       } catch (error) {
         reject(this._normalizeError(error, `${command} ${args.join(' ')}`));

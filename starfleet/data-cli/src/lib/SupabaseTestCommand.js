@@ -41,10 +41,12 @@ class SupabaseTestCommand extends SupabaseCommand {
     super(supabaseUrl, serviceRoleKey, logger, isProd, false);
 
     // Initialize path resolver
-    this.pathResolver = pathResolver || new PathResolver({
-      testsDir: testsDir || path.join(process.cwd(), 'supabase', 'test'),
-      outputDir: outputDir || path.join(process.cwd(), 'supabase', 'test-output')
-    });
+    this.pathResolver =
+      pathResolver ||
+      new PathResolver({
+        testsDir: testsDir || path.join(process.cwd(), 'supabase', 'test'),
+        outputDir: outputDir || path.join(process.cwd(), 'supabase', 'test-output')
+      });
 
     // Store resolved paths
     this.testsDir = this.pathResolver.resolve('testsDir');
@@ -91,7 +93,7 @@ class SupabaseTestCommand extends SupabaseCommand {
         return [];
       }
 
-      return result.data.map(row => row.routine_name);
+      return result.data.map((row) => row.routine_name);
     } catch (error) {
       this.warn(`Failed to discover test functions: ${error.message}`);
       return [];

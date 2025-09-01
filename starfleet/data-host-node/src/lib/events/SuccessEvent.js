@@ -117,16 +117,13 @@ class SuccessEvent extends CommandEvent {
    * @returns {SuccessEvent} New file operation success event
    */
   static fileOperation(operation, filePath, fileSize = null, details = {}) {
-    return new SuccessEvent(
-      `File ${operation} completed: ${filePath}`,
-      {
-        ...details,
-        operation,
-        filePath,
-        fileSize,
-        category: 'file'
-      }
-    );
+    return new SuccessEvent(`File ${operation} completed: ${filePath}`, {
+      ...details,
+      operation,
+      filePath,
+      fileSize,
+      category: 'file'
+    });
   }
 
   /**
@@ -144,7 +141,7 @@ class SuccessEvent extends CommandEvent {
       return `${this.duration}ms`;
     }
 
-    const seconds = Math.round(this.duration / 1000 * 100) / 100;
+    const seconds = Math.round((this.duration / 1000) * 100) / 100;
     return `${seconds}s`;
   }
 

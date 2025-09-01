@@ -26,7 +26,9 @@ async function testMemoryManagement() {
 
   // Listen for memory events
   scanner.on('memory_status', (data) => {
-    console.log(`📊 Memory Status: ${data.current}MB (max: ${data.max}MB, streaming: ${data.streamingMode})`);
+    console.log(
+      `📊 Memory Status: ${data.current}MB (max: ${data.max}MB, streaming: ${data.streamingMode})`
+    );
   });
 
   scanner.on('cleanup', (data) => {
@@ -39,7 +41,9 @@ async function testMemoryManagement() {
 
   scanner.on('progress', (data) => {
     if (data.type === 'batch_progress') {
-      console.log(`⚡ Progress: Batch ${data.batch}/${data.totalBatches} (${data.filesProcessed}/${data.totalFiles} files)`);
+      console.log(
+        `⚡ Progress: Batch ${data.batch}/${data.totalBatches} (${data.filesProcessed}/${data.totalFiles} files)`
+      );
     }
   });
 
@@ -75,13 +79,15 @@ async function testMemoryManagement() {
         scanner.testFiles.push({
           filePath: `/mock/test_${i}.sql`,
           fileName: `test_${i}.sql`,
-          assertions: Array(10).fill(null).map((_, j) => ({
-            type: 'has_table',
-            target: `table_${i}_${j}`,
-            parameters: [`table_${i}_${j}`],
-            lineNumber: j + 1,
-            rawSql: `SELECT has_table('table_${i}_${j}');`
-          })),
+          assertions: Array(10)
+            .fill(null)
+            .map((_, j) => ({
+              type: 'has_table',
+              target: `table_${i}_${j}`,
+              parameters: [`table_${i}_${j}`],
+              lineNumber: j + 1,
+              rawSql: `SELECT has_table('table_${i}_${j}');`
+            })),
           planCount: 1,
           dependencies: [],
           metadata: {}
@@ -104,7 +110,6 @@ async function testMemoryManagement() {
     }
 
     console.log('\n✅ Memory management test completed successfully!');
-
   } catch (error) {
     console.error('❌ Test failed:', error.message);
     console.error(error.stack);

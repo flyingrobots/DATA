@@ -9,8 +9,8 @@ import chalk from 'chalk';
 class CoverageAnalyzer {
   constructor() {
     this.coverageThresholds = {
-      good: 80,    // Green: >80% coverage
-      medium: 50   // Yellow: 50-80%, Red: <50%
+      good: 80, // Green: >80% coverage
+      medium: 50 // Yellow: 50-80%, Red: <50%
     };
   }
 
@@ -30,8 +30,8 @@ class CoverageAnalyzer {
       };
     }
 
-    const tested = rpcResults.filter(item => item.has_test);
-    const untested = rpcResults.filter(item => !item.has_test);
+    const tested = rpcResults.filter((item) => item.has_test);
+    const untested = rpcResults.filter((item) => !item.has_test);
     const percentage = Math.round((tested.length / rpcResults.length) * 100);
 
     // Group by schema
@@ -70,8 +70,8 @@ class CoverageAnalyzer {
       };
     }
 
-    const tested = policyResults.filter(item => item.has_test);
-    const untested = policyResults.filter(item => !item.has_test);
+    const tested = policyResults.filter((item) => item.has_test);
+    const untested = policyResults.filter((item) => !item.has_test);
     const percentage = Math.round((tested.length / policyResults.length) * 100);
 
     // Group by table
@@ -109,7 +109,7 @@ class CoverageAnalyzer {
     }
 
     const summary = {};
-    summaryResults.forEach(item => {
+    summaryResults.forEach((item) => {
       if (item.coverage_type === 'RPC Functions') {
         summary.rpc = {
           total: item.total_count,
@@ -195,26 +195,28 @@ class CoverageAnalyzer {
       output.push(chalk.bold(this.colorizeByPercentage(rpcTitle, rpcAnalysis.percentage)));
 
       // Group by schema
-      Object.keys(rpcAnalysis.bySchema).sort().forEach(schema => {
-        output.push(chalk.cyan(`\n  ${schema} schema:`));
+      Object.keys(rpcAnalysis.bySchema)
+        .sort()
+        .forEach((schema) => {
+          output.push(chalk.cyan(`\n  ${schema} schema:`));
 
-        rpcAnalysis.bySchema[schema].forEach(func => {
-          const status = func.has_test ? '✓' : '✗';
-          const color = func.has_test ? chalk.green : chalk.red;
-          const testInfo = func.has_test ?
-            `(${func.test_count} test${func.test_count !== 1 ? 's' : ''})` :
-            '(0 tests)';
+          rpcAnalysis.bySchema[schema].forEach((func) => {
+            const status = func.has_test ? '✓' : '✗';
+            const color = func.has_test ? chalk.green : chalk.red;
+            const testInfo = func.has_test
+              ? `(${func.test_count} test${func.test_count !== 1 ? 's' : ''})`
+              : '(0 tests)';
 
-          output.push(`    ${color(status)} ${func.function_name} ${chalk.gray(testInfo)}`);
+            output.push(`    ${color(status)} ${func.function_name} ${chalk.gray(testInfo)}`);
 
-          // Show test function names if available
-          if (func.has_test && func.test_function_names && func.test_function_names.length > 0) {
-            func.test_function_names.forEach(testName => {
-              output.push(`      ${chalk.gray('↳')} ${chalk.gray(testName)}`);
-            });
-          }
+            // Show test function names if available
+            if (func.has_test && func.test_function_names && func.test_function_names.length > 0) {
+              func.test_function_names.forEach((testName) => {
+                output.push(`      ${chalk.gray('↳')} ${chalk.gray(testName)}`);
+              });
+            }
+          });
         });
-      });
     }
 
     // RLS Policy Details
@@ -224,57 +226,73 @@ class CoverageAnalyzer {
       output.push(chalk.bold(this.colorizeByPercentage(policyTitle, policyAnalysis.percentage)));
 
       // Group by table
-      Object.keys(policyAnalysis.byTable).sort().forEach(table => {
-        output.push(chalk.cyan(`\n  ${table}:`));
+      Object.keys(policyAnalysis.byTable)
+        .sort()
+        .forEach((table) => {
+          output.push(chalk.cyan(`\n  ${table}:`));
 
-        policyAnalysis.byTable[table].forEach(policy => {
-          const status = policy.has_test ? '✓' : '✗';
-          const color = policy.has_test ? chalk.green : chalk.red;
-          const testInfo = policy.has_test && policy.test_evidence ?
-            `(${policy.test_evidence.length} test${policy.test_evidence.length !== 1 ? 's' : ''})` :
-            '(0 tests)';
+          policyAnalysis.byTable[table].forEach((policy) => {
+            const status = policy.has_test ? '✓' : '✗';
+            const color = policy.has_test ? chalk.green : chalk.red;
+            const testInfo =
+              policy.has_test && policy.test_evidence
+                ? `(${policy.test_evidence.length} test${policy.test_evidence.length !== 1 ? 's' : ''})`
+                : '(0 tests)';
 
-          output.push(`    ${color(status)} ${policy.policy_name} [${policy.policy_type}] ${chalk.gray(testInfo)}`);
+            output.push(
+              `    ${color(status)} ${policy.policy_name} [${policy.policy_type}] ${chalk.gray(testInfo)}`
+            );
 
-          // Show test evidence if available
-          if (policy.has_test && policy.test_evidence && policy.test_evidence.length > 0) {
-            policy.test_evidence.forEach(testName => {
-              output.push(`      ${chalk.gray('↳')} ${chalk.gray(testName)}`);
-            });
-          }
+            // Show test evidence if available
+            if (policy.has_test && policy.test_evidence && policy.test_evidence.length > 0) {
+              policy.test_evidence.forEach((testName) => {
+                output.push(`      ${chalk.gray('↳')} ${chalk.gray(testName)}`);
+              });
+            }
+          });
         });
-      });
     }
 
     // Untested Items Summary
     const allUntested = [];
     if (rpcAnalysis && rpcAnalysis.untested.length > 0) {
-      allUntested.push(...rpcAnalysis.untested.map(item => ({
-        type: 'RPC Function',
-        name: `${item.schema_name}.${item.function_name}`,
-        schema: item.schema_name
-      })));
+      allUntested.push(
+        ...rpcAnalysis.untested.map((item) => ({
+          type: 'RPC Function',
+          name: `${item.schema_name}.${item.function_name}`,
+          schema: item.schema_name
+        }))
+      );
     }
     if (policyAnalysis && policyAnalysis.untested.length > 0) {
-      allUntested.push(...policyAnalysis.untested.map(item => ({
-        type: 'RLS Policy',
-        name: `${item.schema_name}.${item.table_name}.${item.policy_name}`,
-        schema: item.schema_name
-      })));
+      allUntested.push(
+        ...policyAnalysis.untested.map((item) => ({
+          type: 'RLS Policy',
+          name: `${item.schema_name}.${item.table_name}.${item.policy_name}`,
+          schema: item.schema_name
+        }))
+      );
     }
 
     if (allUntested.length > 0) {
       output.push('\n' + chalk.bold.red('🚨 Untested Items:'));
-      allUntested.forEach(item => {
+      allUntested.forEach((item) => {
         output.push(`  ${chalk.red('•')} ${chalk.gray(`[${item.type}]`)} ${item.name}`);
       });
     }
 
     // No coverage found message
-    if ((!rpcAnalysis || rpcAnalysis.total === 0) && (!policyAnalysis || policyAnalysis.total === 0)) {
-      output.push(chalk.yellow('⚠️  No RPC functions or RLS policies found for coverage analysis.'));
+    if (
+      (!rpcAnalysis || rpcAnalysis.total === 0) &&
+      (!policyAnalysis || policyAnalysis.total === 0)
+    ) {
+      output.push(
+        chalk.yellow('⚠️  No RPC functions or RLS policies found for coverage analysis.')
+      );
       output.push(chalk.gray('   This could mean:'));
-      output.push(chalk.gray('   • No functions/policies exist in public, private, or security schemas'));
+      output.push(
+        chalk.gray('   • No functions/policies exist in public, private, or security schemas')
+      );
       output.push(chalk.gray('   • Database connection issues'));
       output.push(chalk.gray('   • Test schema is not properly configured'));
     }
@@ -301,18 +319,22 @@ class CoverageAnalyzer {
         percentage: overallPercentage,
         colorClass: this.getColorClass(overallPercentage)
       },
-      rpc: rpcAnalysis ? {
-        total: rpcAnalysis.total,
-        tested: rpcAnalysis.tested,
-        percentage: rpcAnalysis.percentage,
-        colorClass: rpcAnalysis.colorClass
-      } : null,
-      policies: policyAnalysis ? {
-        total: policyAnalysis.total,
-        tested: policyAnalysis.tested,
-        percentage: policyAnalysis.percentage,
-        colorClass: policyAnalysis.colorClass
-      } : null
+      rpc: rpcAnalysis
+        ? {
+          total: rpcAnalysis.total,
+          tested: rpcAnalysis.tested,
+          percentage: rpcAnalysis.percentage,
+          colorClass: rpcAnalysis.colorClass
+        }
+        : null,
+      policies: policyAnalysis
+        ? {
+          total: policyAnalysis.total,
+          tested: policyAnalysis.tested,
+          percentage: policyAnalysis.percentage,
+          colorClass: policyAnalysis.colorClass
+        }
+        : null
     };
   }
 }

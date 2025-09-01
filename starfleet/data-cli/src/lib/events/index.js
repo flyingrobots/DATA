@@ -121,7 +121,7 @@ function validateEvent(event, expectedTypes = null, options = {}) {
   // Type-specific validation
   if (expectedTypes) {
     const types = Array.isArray(expectedTypes) ? expectedTypes : [expectedTypes];
-    const matches = types.some(Type => {
+    const matches = types.some((Type) => {
       try {
         validateCommandEvent(event, Type);
         return true;
@@ -132,7 +132,7 @@ function validateEvent(event, expectedTypes = null, options = {}) {
     });
 
     if (!matches) {
-      const typeNames = types.map(T => T.name).join(' or ');
+      const typeNames = types.map((T) => T.name).join(' or ');
       errors.push(`Event does not match expected type(s): ${typeNames}`);
     }
   }
@@ -194,7 +194,7 @@ function isEventType(event, EventTypes) {
   if (!event || typeof event !== 'object') return false;
 
   const types = Array.isArray(EventTypes) ? EventTypes : [EventTypes];
-  return types.some(Type => event instanceof Type);
+  return types.some((Type) => event instanceof Type);
 }
 
 /**
@@ -210,7 +210,7 @@ function isEventType(event, EventTypes) {
  * const progressEvents = events.filter(isProgress);
  */
 function createTypeGuard(EventType) {
-  return function(event) {
+  return function (event) {
     return event instanceof EventType;
   };
 }

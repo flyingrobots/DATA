@@ -27,10 +27,7 @@ export {
 } from './ports/index.js';
 
 // Export SQL dependency graph functionality
-export {
-  SqlNode,
-  SqlGraph
-} from './src/migration/SqlGraph.js';
+export { SqlNode, SqlGraph } from './src/migration/SqlGraph.js';
 
 // Export migration diff engine
 export {
@@ -49,14 +46,10 @@ export {
 } from './src/migration/PlanCompiler.js';
 
 // Export migration compiler
-export {
-  MigrationCompiler
-} from './src/migration/MigrationCompiler.js';
+export { MigrationCompiler } from './src/migration/MigrationCompiler.js';
 
 // Export migration metadata
-export {
-  MigrationMetadata
-} from './src/domain/MigrationMetadata.js';
+export { MigrationMetadata } from './src/domain/MigrationMetadata.js';
 
 // Export output configuration
 export { default as OutputConfig } from './src/config/OutputConfig.js';
@@ -147,14 +140,14 @@ export class DataCore {
 
     return {
       totalFiles: sqlFiles.length,
-      executionOrder: executionOrder.map(node => ({
+      executionOrder: executionOrder.map((node) => ({
         name: node.name,
         type: node.type,
         filePath: node.filePath,
-        dependencies: Array.from(node.dependencies).map(dep => dep.name)
+        dependencies: Array.from(node.dependencies).map((dep) => dep.name)
       })),
-      independentNodes: independentNodes.map(node => node.name),
-      terminalNodes: terminalNodes.map(node => node.name),
+      independentNodes: independentNodes.map((node) => node.name),
+      terminalNodes: terminalNodes.map((node) => node.name),
       hasCircularDependencies: hasCircularDeps
     };
   }
@@ -185,7 +178,7 @@ export class DataCore {
     const validation = this.planCompiler.validatePlan(executionPlan);
 
     return {
-      operations: optimizedOperations.map(op => ({
+      operations: optimizedOperations.map((op) => ({
         type: op.type,
         objectName: op.objectName,
         sql: op.sql,
@@ -200,10 +193,12 @@ export class DataCore {
         phases: Array.from(executionPlan.phases.keys()).sort()
       },
       validation,
-      rollbackPlan: validation.valid ? {
-        id: `${executionPlan.id}_rollback`,
-        stepCount: executionPlan.generateRollbackPlan().steps.length
-      } : null
+      rollbackPlan: validation.valid
+        ? {
+          id: `${executionPlan.id}_rollback`,
+          stepCount: executionPlan.generateRollbackPlan().steps.length
+        }
+        : null
     };
   }
 
@@ -262,17 +257,8 @@ export class DataCore {
         circularDependencyDetection: true,
         operationOptimization: true
       },
-      portInterfaces: [
-        'FileSystemPort',
-        'CryptoPort',
-        'ProcessPort',
-        'EnvironmentPort'
-      ],
-      coreEngines: [
-        'SqlGraph',
-        'DiffEngine',
-        'PlanCompiler'
-      ]
+      portInterfaces: ['FileSystemPort', 'CryptoPort', 'ProcessPort', 'EnvironmentPort'],
+      coreEngines: ['SqlGraph', 'DiffEngine', 'PlanCompiler']
     };
   }
 }

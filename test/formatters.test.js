@@ -136,7 +136,7 @@ describe('Test Result Formatters', () => {
 
       expect(parsed.summary.passRate).toBe('66.7'); // 2/3 * 100
       expect(parsed.summary.failRate).toBe('33.3'); // 1/3 * 100
-      expect(parsed.summary.skipRate).toBe('0.0');  // 0/3 * 100
+      expect(parsed.summary.skipRate).toBe('0.0'); // 0/3 * 100
     });
 
     it('should return .json file extension', () => {

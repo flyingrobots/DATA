@@ -104,7 +104,6 @@ export class SafetyGates {
       });
 
       return true;
-
     } catch (error) {
       this.log('error', 'Safety gate FAILED', {
         error: error.message,
@@ -133,20 +132,22 @@ export class SafetyGates {
       const statusOutput = await this.execGitCommand(['status', '--porcelain']);
 
       if (statusOutput.trim()) {
-        const files = statusOutput.split('\n').filter(line => line.trim());
+        const files = statusOutput.split('\n').filter((line) => line.trim());
         this.log('audit', 'Git repository has uncommitted changes', {
           uncommitted_files: files,
           file_count: files.length
         });
 
-        throw new Error(`Git repository has ${files.length} uncommitted changes. Please commit or stash changes before proceeding.`);
+        throw new Error(
+          `Git repository has ${files.length} uncommitted changes. Please commit or stash changes before proceeding.`
+        );
       }
 
       // Check for unpushed commits
       try {
         const unpushedOutput = await this.execGitCommand(['log', '@{u}..HEAD', '--oneline']);
         if (unpushedOutput.trim()) {
-          const commits = unpushedOutput.split('\n').filter(line => line.trim());
+          const commits = unpushedOutput.split('\n').filter((line) => line.trim());
           this.log('warn', 'Git repository has unpushed commits', {
             unpushed_commits: commits,
             commit_count: commits.length
@@ -160,7 +161,6 @@ export class SafetyGates {
       }
 
       this.log('audit', 'Git clean validation PASSED');
-
     } catch (error) {
       if (error.message.includes('not a git repository')) {
         this.log('warn', 'Not in a git repository - skipping git validation');
@@ -189,13 +189,14 @@ export class SafetyGates {
           expected_branch: expectedBranch
         });
 
-        throw new Error(`Current branch is "${branch}" but expected "${expectedBranch}". Please switch to the correct branch.`);
+        throw new Error(
+          `Current branch is "${branch}" but expected "${expectedBranch}". Please switch to the correct branch.`
+        );
       }
 
       this.log('audit', 'Branch validation PASSED', {
         branch
       });
-
     } catch (error) {
       if (error.message.includes('not a git repository')) {
         this.log('warn', 'Not in a git repository - skipping branch validation');
@@ -216,8 +217,8 @@ export class SafetyGates {
 
     try {
       // Check if we have a test command available
-      const hasVitestConfig = await this.fileExists('vitest.config.js') ||
-                               await this.fileExists('vite.config.js');
+      const hasVitestConfig =
+        (await this.fileExists('vitest.config.js')) || (await this.fileExists('vite.config.js'));
       const hasPackageJson = await this.fileExists('package.json');
 
       if (!hasVitestConfig && !hasPackageJson) {
@@ -244,7 +245,9 @@ export class SafetyGates {
           required_coverage: coverageThreshold
         });
 
-        throw new Error(`Test coverage ${testResult.coverage.total}% is below required ${coverageThreshold}%`);
+        throw new Error(
+          `Test coverage ${testResult.coverage.total}% is below required ${coverageThreshold}%`
+        );
       }
 
       // Check for test failures
@@ -255,7 +258,9 @@ export class SafetyGates {
           coverage: testResult.coverage?.total
         });
 
-        throw new Error(`${testResult.failed} tests failed. All tests must pass before production deployment.`);
+        throw new Error(
+          `${testResult.failed} tests failed. All tests must pass before production deployment.`
+        );
       }
 
       this.log('audit', 'Test validation PASSED', {
@@ -263,7 +268,6 @@ export class SafetyGates {
         tests_failed: testResult.failed,
         coverage: testResult.coverage?.total
       });
-
     } catch (error) {
       // Re-throw with context
       throw error;
@@ -305,7 +309,6 @@ export class SafetyGates {
       }
 
       return confirmed;
-
     } finally {
       rl.close();
     }
@@ -316,7 +319,8 @@ export class SafetyGates {
    * @returns {Promise<boolean>} True if force operation confirmed
    */
   async requireForceConfirmation() {
-    const message = 'FORCE MODE BYPASSES ALL SAFETY GATES!\n\nThis is EXTREMELY DANGEROUS and should only be used in emergencies.\nType "I UNDERSTAND THE RISKS" to continue';
+    const message =
+      'FORCE MODE BYPASSES ALL SAFETY GATES!\n\nThis is EXTREMELY DANGEROUS and should only be used in emergencies.\nType "I UNDERSTAND THE RISKS" to continue';
 
     return this.requireConfirmation(message, 'I UNDERSTAND THE RISKS');
   }
@@ -348,7 +352,9 @@ export class SafetyGates {
         if (code === 0) {
           resolve(stdout);
         } else {
-          reject(new Error(`Git command failed (exit ${code}): ${stderr.trim() || 'Unknown error'}`));
+          reject(
+            new Error(`Git command failed (exit ${code}): ${stderr.trim() || 'Unknown error'}`)
+          );
         }
       });
 
@@ -406,7 +412,11 @@ export class SafetyGates {
         if (code === 0) {
           resolve(stdout);
         } else {
-          reject(new Error(`Command failed (exit ${code}): ${stderr.trim() || stdout.trim() || 'Unknown error'}`));
+          reject(
+            new Error(
+              `Command failed (exit ${code}): ${stderr.trim() || stdout.trim() || 'Unknown error'}`
+            )
+          );
         }
       });
 
@@ -489,7 +499,9 @@ export class SafetyGates {
    * @returns {number} Number of gates passed
    */
   getPassedGatesCount() {
-    return this.auditLog.filter(entry => entry.level === 'audit' && entry.message.includes('PASSED')).length;
+    return this.auditLog.filter(
+      (entry) => entry.level === 'audit' && entry.message.includes('PASSED')
+    ).length;
   }
 
   /**
@@ -516,7 +528,10 @@ export class SafetyGates {
       this.logger.log(`[${level.toUpperCase()}] ${message}`, data);
     } else {
       // Fallback to console
-      console.log(`[${level.toUpperCase()}] [${this.currentGate || 'SafetyGates'}] ${message}`, data);
+      console.log(
+        `[${level.toUpperCase()}] [${this.currentGate || 'SafetyGates'}] ${message}`,
+        data
+      );
     }
   }
 

@@ -89,11 +89,7 @@ function validatePortImplementation(portName, implementation) {
  * @returns {Promise<DIContainer>} Configured dependency container
  */
 export async function createContainer(config = {}) {
-  const {
-    validatePorts = true,
-    overrides = {},
-    adapterOptions = {}
-  } = config;
+  const { validatePorts = true, overrides = {}, adapterOptions = {} } = config;
 
   // Create configured adapter instances
   const adaptedPorts = {};
@@ -125,7 +121,7 @@ export async function createContainer(config = {}) {
  */
 export async function createTestContainer(mocks = {}) {
   return createContainer({
-    validatePorts: false,  // Don't validate mocks
+    validatePorts: false, // Don't validate mocks
     overrides: mocks
   });
 }
@@ -189,7 +185,7 @@ export function resetGlobalContainer() {
  */
 export function inject(ClassOrFunction, portNames) {
   return (container) => {
-    const dependencies = portNames.map(name => {
+    const dependencies = portNames.map((name) => {
       if (!(name in container)) {
         throw new Error(`Dependency '${name}' not found in container`);
       }

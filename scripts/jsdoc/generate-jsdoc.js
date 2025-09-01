@@ -105,7 +105,9 @@ Please return only the updated JavaScript code with JSDoc comments added.`;
       // Fallback to heuristic-based JSDoc generation
       return this.generateHeuristicJSDoc(originalContent, filePath);
     } catch (error) {
-      console.warn(`⚠️  AI generation failed, falling back to heuristic approach: ${error.message}`);
+      console.warn(
+        `⚠️  AI generation failed, falling back to heuristic approach: ${error.message}`
+      );
       return this.generateHeuristicJSDoc(originalContent, filePath);
     }
   }
@@ -200,17 +202,19 @@ Please return only the updated JavaScript code with JSDoc comments added.`;
       const line = lines[i];
 
       // Check if this line defines a function and doesn't already have JSDoc
-      const functionMatch = line.match(/^\s*(export\s+)?(async\s+)?function\s+(\w+)\s*\(([^)]*)\)|^\s*(\w+)\s*[:=]\s*(async\s+)?\(?([^)]*)\)?\s*=>/);
+      const functionMatch = line.match(
+        /^\s*(export\s+)?(async\s+)?function\s+(\w+)\s*\(([^)]*)\)|^\s*(\w+)\s*[:=]\s*(async\s+)?\(?([^)]*)\)?\s*=>/
+      );
 
-      if (functionMatch && i > 0 && !lines[i-1].includes('/**')) {
+      if (functionMatch && i > 0 && !lines[i - 1].includes('/**')) {
         const functionName = functionMatch[3] || functionMatch[5];
-        const params = (functionMatch[4] || functionMatch[7] || '').split(',').map(p => p.trim()).filter(p => p);
+        const params = (functionMatch[4] || functionMatch[7] || '')
+          .split(',')
+          .map((p) => p.trim())
+          .filter((p) => p);
 
         // Generate basic JSDoc
-        const jsdocLines = [
-          '/**',
-          ` * ${functionName} function`
-        ];
+        const jsdocLines = ['/**', ` * ${functionName} function`];
 
         // Add parameter documentation
         for (const param of params) {
@@ -251,16 +255,11 @@ Please return only the updated JavaScript code with JSDoc comments added.`;
       // Check if this line defines a class and doesn't already have JSDoc
       const classMatch = line.match(/^\s*(export\s+)?class\s+(\w+)/);
 
-      if (classMatch && i > 0 && !lines[i-1].includes('/**')) {
+      if (classMatch && i > 0 && !lines[i - 1].includes('/**')) {
         const className = classMatch[2];
 
         // Generate basic class JSDoc
-        const jsdocLines = [
-          '/**',
-          ` * ${className} class`,
-          ' * @class',
-          ' */'
-        ];
+        const jsdocLines = ['/**', ` * ${className} class`, ' * @class', ' */'];
 
         // Add JSDoc before the class
         for (const docLine of jsdocLines) {
@@ -281,12 +280,13 @@ Please return only the updated JavaScript code with JSDoc comments added.`;
    */
   hasComprehensiveJSDoc(content) {
     const jsdocBlocks = (content.match(/\/\*\*[\s\S]*?\*\//g) || []).length;
-    const functions = (content.match(/function\s+\w+|=>\s*{|\w+\s*[:=]\s*(?:async\s+)?\(/g) || []).length;
+    const functions = (content.match(/function\s+\w+|=>\s*{|\w+\s*[:=]\s*(?:async\s+)?\(/g) || [])
+      .length;
     const classes = (content.match(/class\s+\w+/g) || []).length;
 
     // Consider comprehensive if we have JSDoc for most functions/classes
     const totalItems = functions + classes;
-    return totalItems > 0 && (jsdocBlocks / totalItems) >= 0.5;
+    return totalItems > 0 && jsdocBlocks / totalItems >= 0.5;
   }
 
   /**
@@ -367,7 +367,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   };
 
   // Get file paths from arguments or stdin
-  const filePaths = args.filter(arg => !arg.startsWith('--') && !arg.startsWith('-'));
+  const filePaths = args.filter((arg) => !arg.startsWith('--') && !arg.startsWith('-'));
 
   if (filePaths.length === 0) {
     console.error('Usage: generate-jsdoc.js [options] <file1.js> [file2.js] ...');
@@ -380,8 +380,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   const generator = new JSDocGenerator(options);
 
-  generator.processFiles(filePaths)
-    .then(results => {
+  generator
+    .processFiles(filePaths)
+    .then((results) => {
       console.log('\n📊 JSDoc Generation Summary:');
       console.log(`   Updated: ${results.updated} files`);
       console.log(`   Skipped: ${results.skipped} files`);
@@ -393,11 +394,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
       return results;
     })
-    .catch(error => {
+    .catch((error) => {
       process.stderr.write(`❌ JSDoc generation failed: ${error.message}\n`);
       process.exit(1);
     });
 }
 
 export { JSDocGenerator };
-

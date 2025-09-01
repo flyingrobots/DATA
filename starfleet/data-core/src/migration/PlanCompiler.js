@@ -72,7 +72,7 @@ export class ExecutionStep {
    * @returns {boolean} True if ready to execute
    */
   isReady() {
-    return Array.from(this.dependencies).every(dep => dep.executed);
+    return Array.from(this.dependencies).every((dep) => dep.executed);
   }
 
   /**
@@ -83,7 +83,8 @@ export class ExecutionStep {
     // Simple heuristic based on SQL statement count and complexity
     const baseTime = 1000; // 1 second base
     const sqlComplexity = this.sql.reduce((total, statement) => {
-      const keywords = (statement.match(/\b(CREATE|ALTER|DROP|INSERT|UPDATE|DELETE)\b/gi) || []).length;
+      const keywords = (statement.match(/\b(CREATE|ALTER|DROP|INSERT|UPDATE|DELETE)\b/gi) || [])
+        .length;
       const tables = (statement.match(/\b(FROM|JOIN|INTO|TABLE)\s+\w+/gi) || []).length;
       return total + keywords * 500 + tables * 200;
     }, 0);
@@ -176,7 +177,7 @@ export class ExecutionPlan {
       return false;
     };
 
-    return this.steps.some(step => visit(step));
+    return this.steps.some((step) => visit(step));
   }
 
   /**
@@ -187,7 +188,7 @@ export class ExecutionPlan {
     const rollbackPlan = new ExecutionPlan(`${this.id}_rollback`, `Rollback: ${this.name}`);
 
     // Create rollback steps in reverse order
-    const executedSteps = this.steps.filter(step => step.executed && step.options.canRollback);
+    const executedSteps = this.steps.filter((step) => step.executed && step.options.canRollback);
     executedSteps.reverse();
 
     for (const [index, step] of executedSteps.entries()) {
@@ -288,7 +289,8 @@ export class PlanCompiler {
       return ExecutionPhase.SCHEMA_DROP;
     }
 
-    if (operation.type <= 8) { // Schema operations
+    if (operation.type <= 8) {
+      // Schema operations
       return ExecutionPhase.SCHEMA_CREATE;
     }
 
@@ -357,11 +359,11 @@ export class PlanCompiler {
    */
   _getOperationTimeout(operation) {
     const timeouts = {
-      0: 60000,  // CREATE TABLE
-      1: 30000,  // DROP TABLE
+      0: 60000, // CREATE TABLE
+      1: 30000, // DROP TABLE
       2: 120000, // ALTER TABLE
-      3: 30000,  // CREATE INDEX
-      4: 15000,  // DROP INDEX
+      3: 30000, // CREATE INDEX
+      4: 15000, // DROP INDEX
       9: 300000, // INSERT DATA
       10: 300000 // UPDATE DATA
     };
@@ -380,7 +382,7 @@ export class PlanCompiler {
       0: [`DROP TABLE IF EXISTS ${operation.objectName}`], // CREATE TABLE
       3: [`DROP INDEX IF EXISTS ${operation.objectName}`], // CREATE INDEX
       5: [`DROP FUNCTION IF EXISTS ${operation.objectName}`], // CREATE FUNCTION
-      7: [`DROP VIEW IF EXISTS ${operation.objectName}`]  // CREATE VIEW
+      7: [`DROP VIEW IF EXISTS ${operation.objectName}`] // CREATE VIEW
     };
     return rollbacks[operation.type] || [];
   }
@@ -447,8 +449,11 @@ export class PlanCompiler {
     }
 
     const totalTime = plan.getTotalEstimatedTime();
-    if (totalTime > 3600000) { // 1 hour
-      warnings.push(`Plan has long estimated execution time: ${Math.round(totalTime / 60000)} minutes`);
+    if (totalTime > 3600000) {
+      // 1 hour
+      warnings.push(
+        `Plan has long estimated execution time: ${Math.round(totalTime / 60000)} minutes`
+      );
     }
 
     return {

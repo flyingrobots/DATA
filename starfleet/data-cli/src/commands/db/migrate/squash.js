@@ -52,20 +52,13 @@ class MigrateSquashCommand extends Command {
       this.progress(`Found ${migrationsToSquash.length} migrations to squash`);
 
       // Generate squashed migration content
-      const squashedContent = await this.generateSquashedMigration(
-        migrationsToSquash
-      );
+      const squashedContent = await this.generateSquashedMigration(migrationsToSquash);
 
       // Create output filename
-      const outputFilename =
-        outputName || this.generateSquashedFilename(migrationsToSquash);
+      const outputFilename = outputName || this.generateSquashedFilename(migrationsToSquash);
 
       if (dryRun) {
-        this.displayDryRunResults(
-          migrationsToSquash,
-          outputFilename,
-          squashedContent
-        );
+        this.displayDryRunResults(migrationsToSquash, outputFilename, squashedContent);
         this.emit('complete', {
           dryRun: true,
           migrations: migrationsToSquash.length
@@ -74,10 +67,7 @@ class MigrateSquashCommand extends Command {
       }
 
       // Confirm squash operation
-      const confirmed = await this.confirmSquashOperation(
-        migrationsToSquash,
-        outputFilename
-      );
+      const confirmed = await this.confirmSquashOperation(migrationsToSquash, outputFilename);
       if (!confirmed) {
         this.success('Squash operation cancelled');
         this.emit('cancelled');
@@ -85,11 +75,7 @@ class MigrateSquashCommand extends Command {
       }
 
       // Perform the squash
-      await this.performSquash(
-        migrationsToSquash,
-        outputFilename,
-        squashedContent
-      );
+      await this.performSquash(migrationsToSquash, outputFilename, squashedContent);
 
       this.success(
         `Successfully squashed ${migrationsToSquash.length} migrations into ${outputFilename}`
@@ -208,9 +194,7 @@ class MigrateSquashCommand extends Command {
       .replace(/\..+/, '')
       .slice(0, 14);
 
-    const firstMigration = migrationFiles[0]
-      .replace(/^\d{14}_/, '')
-      .replace(/\.sql$/, '');
+    const firstMigration = migrationFiles[0].replace(/^\d{14}_/, '').replace(/\.sql$/, '');
     const lastMigration = migrationFiles[migrationFiles.length - 1]
       .replace(/^\d{14}_/, '')
       .replace(/\.sql$/, '');

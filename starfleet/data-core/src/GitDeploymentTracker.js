@@ -68,8 +68,10 @@ export class GitDeploymentLogic {
     }
 
     // Optional rollbackFrom validation
-    if (metadata.rollbackFrom !== undefined &&
-        (typeof metadata.rollbackFrom !== 'string' || metadata.rollbackFrom.trim() === '')) {
+    if (
+      metadata.rollbackFrom !== undefined &&
+      (typeof metadata.rollbackFrom !== 'string' || metadata.rollbackFrom.trim() === '')
+    ) {
       errors.push('rollbackFrom must be a non-empty string if provided');
     }
 
@@ -126,7 +128,8 @@ export class GitDeploymentLogic {
     if (parts.length < 3) {
       return {
         valid: false,
-        error: 'Tag format is invalid - expected format: data-deploy-{environment}-{migrationId}-{timestamp}'
+        error:
+          'Tag format is invalid - expected format: data-deploy-{environment}-{migrationId}-{timestamp}'
       };
     }
 
@@ -257,8 +260,8 @@ export class GitDeploymentLogic {
     }
 
     return tags
-      .map(tag => this.parseDeploymentTag(tag))
-      .filter(parsed => parsed.valid && parsed.environment === environment)
+      .map((tag) => this.parseDeploymentTag(tag))
+      .filter((parsed) => parsed.valid && parsed.environment === environment)
       .sort((a, b) => this.compareDeploymentTags(a.fullTag, b.fullTag));
   }
 
@@ -288,15 +291,16 @@ export class GitDeploymentLogic {
     }
 
     // Find if there's a newer tag with the same migration ID
-    const thisTagData = environmentTags.find(tag => tag.migrationId === metadata.migrationId);
-    const newerTags = environmentTags.filter(tag =>
-      this.compareDeploymentTags(tag.fullTag, thisTagData?.fullTag || '') > 0
+    const thisTagData = environmentTags.find((tag) => tag.migrationId === metadata.migrationId);
+    const newerTags = environmentTags.filter(
+      (tag) => this.compareDeploymentTags(tag.fullTag, thisTagData?.fullTag || '') > 0
     );
 
     return {
       isRollback: newerTags.length > 0,
       possibleRollbackFrom: newerTags.length > 0 ? newerTags[newerTags.length - 1].fullTag : null,
-      reason: newerTags.length > 0 ? 'Deploying older migration after newer ones' : 'Standard deployment'
+      reason:
+        newerTags.length > 0 ? 'Deploying older migration after newer ones' : 'Standard deployment'
     };
   }
 
@@ -308,8 +312,7 @@ export class GitDeploymentLogic {
    */
   _isValidISO8601(dateString) {
     const date = new Date(dateString);
-    return date instanceof Date && !isNaN(date.getTime()) &&
-           dateString === date.toISOString();
+    return date instanceof Date && !isNaN(date.getTime()) && dateString === date.toISOString();
   }
 }
 

@@ -137,12 +137,7 @@ export function createProdAdapters(overrides = {}) {
       absolute: true,
       followSymlinks: false, // Security: don't follow symlinks in prod
       caseSensitive: true,
-      ignore: [
-        'node_modules/**',
-        '.git/**',
-        '**/.env*',
-        '**/.*'
-      ],
+      ignore: ['node_modules/**', '.git/**', '**/.env*', '**/.*'],
       ...overrides.glob
     }
   });
@@ -190,13 +185,7 @@ export function wireAdapters(core, adapters) {
 }
 
 // Export individual adapter classes for advanced use cases
-export {
-  FileSystemAdapter,
-  CryptoAdapter,
-  ProcessAdapter,
-  EnvironmentAdapter,
-  GlobAdapter
-};
+export { FileSystemAdapter, CryptoAdapter, ProcessAdapter, EnvironmentAdapter, GlobAdapter };
 
 /**
  * @typedef {Object} NodeAdapters

@@ -9,16 +9,16 @@
  * @enum {string}
  */
 export const TEST_TYPES = {
-  SCHEMA: 'SCHEMA',           // Table structure tests
-  DATA: 'DATA',               // Data integrity tests
-  CONSTRAINT: 'CONSTRAINT',   // Constraint validation tests
-  INDEX: 'INDEX',             // Index existence and performance tests
-  FUNCTION: 'FUNCTION',       // Function behavior tests
-  TRIGGER: 'TRIGGER',         // Trigger functionality tests
-  RLS: 'RLS',                 // Row Level Security tests
-  VIEW: 'VIEW',               // View definition tests
-  ENUM: 'ENUM',               // Enum type tests
-  PERMISSION: 'PERMISSION'    // Permission and security tests
+  SCHEMA: 'SCHEMA', // Table structure tests
+  DATA: 'DATA', // Data integrity tests
+  CONSTRAINT: 'CONSTRAINT', // Constraint validation tests
+  INDEX: 'INDEX', // Index existence and performance tests
+  FUNCTION: 'FUNCTION', // Function behavior tests
+  TRIGGER: 'TRIGGER', // Trigger functionality tests
+  RLS: 'RLS', // Row Level Security tests
+  VIEW: 'VIEW', // View definition tests
+  ENUM: 'ENUM', // Enum type tests
+  PERMISSION: 'PERMISSION' // Permission and security tests
 };
 
 /**
@@ -27,10 +27,10 @@ export const TEST_TYPES = {
  * @enum {string}
  */
 export const TEST_PRIORITIES = {
-  CRITICAL: 'CRITICAL',       // Must have - blocks deployment
-  HIGH: 'HIGH',               // Should have - important coverage
-  MEDIUM: 'MEDIUM',           // Nice to have - good practice
-  LOW: 'LOW'                  // Optional - comprehensive coverage
+  CRITICAL: 'CRITICAL', // Must have - blocks deployment
+  HIGH: 'HIGH', // Should have - important coverage
+  MEDIUM: 'MEDIUM', // Nice to have - good practice
+  LOW: 'LOW' // Optional - comprehensive coverage
 };
 
 /**

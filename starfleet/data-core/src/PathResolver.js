@@ -66,7 +66,9 @@ class PathResolver {
       if (error.code === 'EACCES') {
         throw new Error(`Directory is not writable: ${absolutePath}`);
       }
-      throw new Error(`Failed to create/access directory for writing: ${absolutePath} - ${error.message}`);
+      throw new Error(
+        `Failed to create/access directory for writing: ${absolutePath} - ${error.message}`
+      );
     }
   }
 

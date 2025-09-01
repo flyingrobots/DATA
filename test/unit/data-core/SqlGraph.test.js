@@ -35,8 +35,8 @@ class MockFileSystemAdapter extends FileSystemPort {
 
   async glob(patterns, cwd) {
     // Simple mock implementation
-    return Array.from(this.files.keys()).filter(path =>
-      patterns.some(pattern => path.includes(pattern.replace('*', '')))
+    return Array.from(this.files.keys()).filter((path) =>
+      patterns.some((pattern) => path.includes(pattern.replace('*', '')))
     );
   }
 }
@@ -144,23 +144,31 @@ describe('SqlGraph', () => {
 
   describe('SQL parsing and object identification', () => {
     beforeEach(() => {
-      mockFileSystem.setFile('/sql/users.sql', `
+      mockFileSystem.setFile(
+        '/sql/users.sql',
+        `
         CREATE TABLE users (
           id SERIAL PRIMARY KEY,
           name VARCHAR(100),
           email VARCHAR(255) UNIQUE
         );
-      `);
+      `
+      );
 
-      mockFileSystem.setFile('/sql/orders.sql', `
+      mockFileSystem.setFile(
+        '/sql/orders.sql',
+        `
         CREATE TABLE orders (
           id SERIAL PRIMARY KEY,
           user_id INTEGER REFERENCES users(id),
           total DECIMAL(10,2)
         );
-      `);
+      `
+      );
 
-      mockFileSystem.setFile('/sql/functions.sql', `
+      mockFileSystem.setFile(
+        '/sql/functions.sql',
+        `
         CREATE OR REPLACE FUNCTION get_user_orders(user_id INT)
         RETURNS TABLE(order_id INT, total DECIMAL) AS $$
         BEGIN
@@ -168,20 +176,27 @@ describe('SqlGraph', () => {
           SELECT id, total FROM orders WHERE orders.user_id = $1;
         END;
         $$ LANGUAGE plpgsql;
-      `);
+      `
+      );
 
-      mockFileSystem.setFile('/sql/views.sql', `
+      mockFileSystem.setFile(
+        '/sql/views.sql',
+        `
         CREATE VIEW user_order_summary AS
         SELECT u.name, COUNT(o.id) as order_count, SUM(o.total) as total_spent
         FROM users u
         LEFT JOIN orders o ON u.id = o.user_id
         GROUP BY u.id, u.name;
-      `);
+      `
+      );
 
-      mockFileSystem.setFile('/sql/migration.sql', `
+      mockFileSystem.setFile(
+        '/sql/migration.sql',
+        `
         INSERT INTO users (name, email) VALUES ('Test User', 'test@example.com');
         UPDATE orders SET total = total * 1.1 WHERE created_at < '2024-01-01';
-      `);
+      `
+      );
     });
 
     it('should identify CREATE TABLE statements', async () => {
@@ -231,7 +246,10 @@ describe('SqlGraph', () => {
     });
 
     it('should handle IF NOT EXISTS syntax', async () => {
-      mockFileSystem.setFile('/sql/conditional.sql', 'CREATE TABLE IF NOT EXISTS test_table (id INT);');
+      mockFileSystem.setFile(
+        '/sql/conditional.sql',
+        'CREATE TABLE IF NOT EXISTS test_table (id INT);'
+      );
       await sqlGraph.buildGraph(['/sql/conditional.sql']);
 
       expect(sqlGraph.nodes.has('test_table')).toBe(true);
@@ -243,28 +261,46 @@ describe('SqlGraph', () => {
   describe('dependency analysis', () => {
     beforeEach(async () => {
       // Set up complex dependency scenario
-      mockFileSystem.setFile('/sql/users.sql', 'CREATE TABLE users (id SERIAL PRIMARY KEY, name VARCHAR(100));');
-      mockFileSystem.setFile('/sql/orders.sql', 'CREATE TABLE orders (id SERIAL, user_id INTEGER REFERENCES users(id));');
-      mockFileSystem.setFile('/sql/products.sql', 'CREATE TABLE products (id SERIAL PRIMARY KEY, name VARCHAR(100));');
-      mockFileSystem.setFile('/sql/order_items.sql', `
+      mockFileSystem.setFile(
+        '/sql/users.sql',
+        'CREATE TABLE users (id SERIAL PRIMARY KEY, name VARCHAR(100));'
+      );
+      mockFileSystem.setFile(
+        '/sql/orders.sql',
+        'CREATE TABLE orders (id SERIAL, user_id INTEGER REFERENCES users(id));'
+      );
+      mockFileSystem.setFile(
+        '/sql/products.sql',
+        'CREATE TABLE products (id SERIAL PRIMARY KEY, name VARCHAR(100));'
+      );
+      mockFileSystem.setFile(
+        '/sql/order_items.sql',
+        `
         CREATE TABLE order_items (
           order_id INTEGER REFERENCES orders(id),
           product_id INTEGER REFERENCES products(id)
         );
-      `);
-      mockFileSystem.setFile('/sql/functions.sql', `
+      `
+      );
+      mockFileSystem.setFile(
+        '/sql/functions.sql',
+        `
         CREATE FUNCTION get_order_total(order_id INT) RETURNS DECIMAL AS $$
         SELECT SUM(p.price) FROM order_items oi
         JOIN products p ON oi.product_id = p.id
         WHERE oi.order_id = $1;
         $$ LANGUAGE SQL;
-      `);
-      mockFileSystem.setFile('/sql/views.sql', `
+      `
+      );
+      mockFileSystem.setFile(
+        '/sql/views.sql',
+        `
         CREATE VIEW order_summary AS
         SELECT o.id, u.name as customer, get_order_total(o.id) as total
         FROM orders o
         JOIN users u ON o.user_id = u.id;
-      `);
+      `
+      );
 
       await sqlGraph.buildGraph([
         '/sql/users.sql',
@@ -334,16 +370,30 @@ describe('SqlGraph', () => {
 
     it('should handle diamond dependency pattern', async () => {
       mockFileSystem.setFile('/sql/base.sql', 'CREATE TABLE base (id INT);');
-      mockFileSystem.setFile('/sql/left.sql', 'CREATE TABLE left_table (base_id INT REFERENCES base(id));');
-      mockFileSystem.setFile('/sql/right.sql', 'CREATE TABLE right_table (base_id INT REFERENCES base(id));');
-      mockFileSystem.setFile('/sql/top.sql', `
+      mockFileSystem.setFile(
+        '/sql/left.sql',
+        'CREATE TABLE left_table (base_id INT REFERENCES base(id));'
+      );
+      mockFileSystem.setFile(
+        '/sql/right.sql',
+        'CREATE TABLE right_table (base_id INT REFERENCES base(id));'
+      );
+      mockFileSystem.setFile(
+        '/sql/top.sql',
+        `
         CREATE TABLE top_table (
           left_id INT REFERENCES left_table(id),
           right_id INT REFERENCES right_table(id)
         );
-      `);
+      `
+      );
 
-      await sqlGraph.buildGraph(['/sql/base.sql', '/sql/left.sql', '/sql/right.sql', '/sql/top.sql']);
+      await sqlGraph.buildGraph([
+        '/sql/base.sql',
+        '/sql/left.sql',
+        '/sql/right.sql',
+        '/sql/top.sql'
+      ]);
       const executionOrder = sqlGraph.getExecutionOrder();
 
       expect(executionOrder.length).toBe(4);
@@ -367,14 +417,21 @@ describe('SqlGraph', () => {
     it('should handle independent nodes correctly', async () => {
       mockFileSystem.setFile('/sql/independent1.sql', 'CREATE TABLE independent1 (id INT);');
       mockFileSystem.setFile('/sql/independent2.sql', 'CREATE TABLE independent2 (id INT);');
-      mockFileSystem.setFile('/sql/dependent.sql', `
+      mockFileSystem.setFile(
+        '/sql/dependent.sql',
+        `
         CREATE TABLE dependent (
           id1 INT REFERENCES independent1(id),
           id2 INT REFERENCES independent2(id)
         );
-      `);
+      `
+      );
 
-      await sqlGraph.buildGraph(['/sql/independent1.sql', '/sql/independent2.sql', '/sql/dependent.sql']);
+      await sqlGraph.buildGraph([
+        '/sql/independent1.sql',
+        '/sql/independent2.sql',
+        '/sql/dependent.sql'
+      ]);
       const executionOrder = sqlGraph.getExecutionOrder();
 
       expect(executionOrder.length).toBe(3);
@@ -389,14 +446,23 @@ describe('SqlGraph', () => {
     beforeEach(async () => {
       mockFileSystem.setFile('/sql/root1.sql', 'CREATE TABLE root1 (id INT);');
       mockFileSystem.setFile('/sql/root2.sql', 'CREATE TABLE root2 (id INT);');
-      mockFileSystem.setFile('/sql/child1.sql', 'CREATE TABLE child1 (root1_id INT REFERENCES root1(id));');
-      mockFileSystem.setFile('/sql/child2.sql', 'CREATE TABLE child2 (root2_id INT REFERENCES root2(id));');
-      mockFileSystem.setFile('/sql/leaf.sql', `
+      mockFileSystem.setFile(
+        '/sql/child1.sql',
+        'CREATE TABLE child1 (root1_id INT REFERENCES root1(id));'
+      );
+      mockFileSystem.setFile(
+        '/sql/child2.sql',
+        'CREATE TABLE child2 (root2_id INT REFERENCES root2(id));'
+      );
+      mockFileSystem.setFile(
+        '/sql/leaf.sql',
+        `
         CREATE TABLE leaf (
           child1_id INT REFERENCES child1(id),
           child2_id INT REFERENCES child2(id)
         );
-      `);
+      `
+      );
 
       await sqlGraph.buildGraph([
         '/sql/root1.sql',
@@ -411,7 +477,7 @@ describe('SqlGraph', () => {
       const independentNodes = sqlGraph.getIndependentNodes();
 
       expect(independentNodes.length).toBe(2);
-      const names = independentNodes.map(node => node.name).sort();
+      const names = independentNodes.map((node) => node.name).sort();
       expect(names).toEqual(['root1', 'root2']);
     });
 
@@ -426,7 +492,7 @@ describe('SqlGraph', () => {
       const allNodes = sqlGraph.getAllNodes();
 
       expect(allNodes.length).toBe(5);
-      const names = allNodes.map(node => node.name).sort();
+      const names = allNodes.map((node) => node.name).sort();
       expect(names).toEqual(['child1', 'child2', 'leaf', 'root1', 'root2']);
     });
 
@@ -436,7 +502,10 @@ describe('SqlGraph', () => {
 
     it('should detect presence of circular dependencies', async () => {
       // Add circular dependency
-      mockFileSystem.setFile('/sql/circular.sql', 'CREATE TABLE circular (leaf_id INT REFERENCES leaf(id));');
+      mockFileSystem.setFile(
+        '/sql/circular.sql',
+        'CREATE TABLE circular (leaf_id INT REFERENCES leaf(id));'
+      );
       const leafNode = sqlGraph.nodes.get('leaf');
       const circularNode = new SqlNode('circular', 'table', '/sql/circular.sql', 'CREATE TABLE...');
       sqlGraph.nodes.set('circular', circularNode);
@@ -479,7 +548,9 @@ describe('SqlGraph', () => {
     });
 
     it('should handle SQL with comments and whitespace', async () => {
-      mockFileSystem.setFile('/sql/commented.sql', `
+      mockFileSystem.setFile(
+        '/sql/commented.sql',
+        `
         -- This is a comment
         /* Multi-line
            comment */
@@ -487,7 +558,8 @@ describe('SqlGraph', () => {
           id SERIAL PRIMARY KEY,
           /* inline comment */ name VARCHAR(100)
         );
-      `);
+      `
+      );
 
       await sqlGraph.buildGraph(['/sql/commented.sql']);
       expect(sqlGraph.nodes.has('commented_table')).toBe(true);
@@ -504,7 +576,7 @@ describe('SqlGraph', () => {
         const fileName = `/sql/table${i}.sql`;
         let sql = `CREATE TABLE table${i} (id SERIAL PRIMARY KEY`;
         if (i > 0) {
-          sql += `, ref INT REFERENCES table${i-1}(id)`;
+          sql += `, ref INT REFERENCES table${i - 1}(id)`;
         }
         sql += ');';
 
@@ -529,10 +601,13 @@ describe('SqlGraph', () => {
 
     it('should handle nodes with same name but different types', async () => {
       // PostgreSQL allows same names for different object types
-      mockFileSystem.setFile('/sql/same_name.sql', `
+      mockFileSystem.setFile(
+        '/sql/same_name.sql',
+        `
         CREATE TABLE user_stats (id INT);
         CREATE VIEW user_stats AS SELECT * FROM user_stats;
-      `);
+      `
+      );
 
       await sqlGraph.buildGraph(['/sql/same_name.sql']);
 

@@ -6,13 +6,7 @@
  * @fileoverview Port factory with configuration support and validation
  */
 
-import {
-  FileSystemPort,
-  CryptoPort,
-  ProcessPort,
-  EnvironmentPort,
-  validatePort
-} from './index.js';
+import { FileSystemPort, CryptoPort, ProcessPort, EnvironmentPort, validatePort } from './index.js';
 
 /**
  * Port configuration options
@@ -182,12 +176,15 @@ export class PortFactory {
       }
     }
 
-    return this.createPorts({
-      fileSystem: configs.fileSystem || {},
-      crypto: configs.crypto || {},
-      process: configs.process || {},
-      environment: configs.environment || {}
-    }, options);
+    return this.createPorts(
+      {
+        fileSystem: configs.fileSystem || {},
+        crypto: configs.crypto || {},
+        process: configs.process || {},
+        environment: configs.environment || {}
+      },
+      options
+    );
   }
 
   /**
@@ -218,9 +215,13 @@ export class PortFactory {
     for (const [type, constructor] of this._portConstructors) {
       const config = portConfigs[type] || {};
 
-      container.registerFactory(type, () => {
-        return this.createPort(type, config);
-      }, { singleton });
+      container.registerFactory(
+        type,
+        () => {
+          return this.createPort(type, config);
+        },
+        { singleton }
+      );
     }
 
     return this;
@@ -361,12 +362,7 @@ export function wireDataCore(DataCore, adapters, configs = {}) {
   const ports = factory.createDataCorePorts(configs);
 
   // Create DataCore instance with wired ports
-  const dataCore = new DataCore(
-    ports.fileSystem,
-    ports.crypto,
-    ports.process,
-    ports.environment
-  );
+  const dataCore = new DataCore(ports.fileSystem, ports.crypto, ports.process, ports.environment);
 
   return { ports, dataCore, factory };
 }

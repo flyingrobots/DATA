@@ -60,7 +60,10 @@ export function makeApplyMigrationPlan({ db, logger, clock, bus }) {
               applied++;
               logger.debug({ path: step.path, id: step.id }, 'Applied migration step');
             } catch (error) {
-              logger.error({ path: step.path, error: error.message }, 'Failed to apply migration step');
+              logger.error(
+                { path: step.path, error: error.message },
+                'Failed to apply migration step'
+              );
               errors.push({ step: step.path, error: error.message });
               throw error; // This will rollback the transaction
             }

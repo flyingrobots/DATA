@@ -46,7 +46,11 @@ container.register('dataCore', DataCore);
 
 // Resolve DataCore - all dependencies automatically injected
 const dataCore1 = container.resolve('dataCore');
-console.log(`✅ DataCore resolved with ports: ${Object.keys(dataCore1).filter(k => k.endsWith('Port')).join(', ')}`);
+console.log(
+  `✅ DataCore resolved with ports: ${Object.keys(dataCore1)
+    .filter((k) => k.endsWith('Port'))
+    .join(', ')}`
+);
 console.log('📊 Container stats:', container.getStats());
 
 console.log('\n---\n');
@@ -72,12 +76,7 @@ const ports = factory.createDataCorePorts({
 });
 
 // Create DataCore with ports
-const dataCore2 = new DataCore(
-  ports.fileSystem,
-  ports.crypto,
-  ports.process,
-  ports.environment
-);
+const dataCore2 = new DataCore(ports.fileSystem, ports.crypto, ports.process, ports.environment);
 
 console.log('✅ DataCore created with factory-generated ports');
 console.log('📊 Factory info:', factory.getPortInfo());
@@ -87,7 +86,11 @@ console.log('\n---\n');
 // === Method 3: Using convenience wireDataCore function ===
 console.log('⚡ Method 3: Using wireDataCore convenience function');
 
-const { ports: wirePorts, dataCore: dataCore3, factory: wireFactory } = wireDataCore(
+const {
+  ports: wirePorts,
+  dataCore: dataCore3,
+  factory: wireFactory
+} = wireDataCore(
   DataCore,
   {
     fileSystem: FileSystemAdapter,
@@ -160,7 +163,6 @@ try {
   console.log('  • Configuration injection');
   console.log('  • Factory pattern for reusability');
   console.log('  • Multiple integration approaches');
-
 } catch (error) {
   console.error('❌ Error testing DataCore:', error.message);
   process.exit(1);

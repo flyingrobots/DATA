@@ -57,7 +57,7 @@ class ChildProcessWrapper extends EventEmitter {
    * Sanitize arguments to prevent injection
    */
   sanitizeArgs(args) {
-    return args.map(arg => {
+    return args.map((arg) => {
       // Remove dangerous characters that could break out of arguments
       const sanitized = String(arg)
         .replace(/[;&|`$(){}[\]<>]/g, '') // Remove shell metacharacters

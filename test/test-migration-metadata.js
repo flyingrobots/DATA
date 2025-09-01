@@ -161,47 +161,51 @@ class MigrationMetadataTests {
 
     // Test status validation
     this.assertThrows(
-      () => metadata.validate({
-        id: '123',
-        name: 'test',
-        generated: '2025-08-28T12:34:56.000Z',
-        status: 'invalid'
-      }),
+      () =>
+        metadata.validate({
+          id: '123',
+          name: 'test',
+          generated: '2025-08-28T12:34:56.000Z',
+          status: 'invalid'
+        }),
       'status must be one of',
       'Validation catches invalid status'
     );
 
     // Test date format validation
     this.assertThrows(
-      () => metadata.validate({
-        id: '123',
-        name: 'test',
-        generated: 'invalid-date',
-        status: 'pending'
-      }),
+      () =>
+        metadata.validate({
+          id: '123',
+          name: 'test',
+          generated: 'invalid-date',
+          status: 'pending'
+        }),
       'generated must be a valid ISO 8601',
       'Validation catches invalid date format'
     );
 
     // Test testing object validation
     this.assertThrows(
-      () => metadata.validate({
-        ...validData,
-        testing: {
-          tested_at: 'invalid-date'
-        }
-      }),
+      () =>
+        metadata.validate({
+          ...validData,
+          testing: {
+            tested_at: 'invalid-date'
+          }
+        }),
       'testing.tested_at must be null or valid ISO 8601',
       'Validation catches invalid testing.tested_at'
     );
 
     this.assertThrows(
-      () => metadata.validate({
-        ...validData,
-        testing: {
-          tests_passed: -1
-        }
-      }),
+      () =>
+        metadata.validate({
+          ...validData,
+          testing: {
+            tests_passed: -1
+          }
+        }),
       'testing.tests_passed must be a non-negative integer',
       'Validation catches negative tests_passed'
     );
@@ -270,7 +274,10 @@ class MigrationMetadataTests {
       }
     });
 
-    this.assert(nestedUpdate.testing.tested_at === '2025-08-28T13:00:00.000Z', 'Update handles nested objects');
+    this.assert(
+      nestedUpdate.testing.tested_at === '2025-08-28T13:00:00.000Z',
+      'Update handles nested objects'
+    );
     this.assert(nestedUpdate.testing.tests_failed === 0, 'Update preserves nested fields');
 
     // Test invalid update
@@ -333,8 +340,7 @@ class MigrationMetadataTests {
    */
   _isValidISO8601(dateString) {
     const date = new Date(dateString);
-    return date instanceof Date && !isNaN(date.getTime()) &&
-           dateString === date.toISOString();
+    return date instanceof Date && !isNaN(date.getTime()) && dateString === date.toISOString();
   }
 
   /**

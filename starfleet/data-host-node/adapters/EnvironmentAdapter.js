@@ -81,9 +81,8 @@ export class EnvironmentAdapter extends EnvironmentPort {
       return this._cache.get(cacheKey);
     }
 
-    const exists = normalizedKey in process.env ||
-                   key in this.defaults ||
-                   normalizedKey in this.defaults;
+    const exists =
+      normalizedKey in process.env || key in this.defaults || normalizedKey in this.defaults;
 
     this._cache.set(cacheKey, exists);
     return exists;
@@ -133,7 +132,8 @@ export class EnvironmentAdapter extends EnvironmentPort {
     // Merge defaults
     for (const [key, value] of Object.entries(this.defaults)) {
       const prefixedKey = filterPrefix ? `${filterPrefix}${key}` : key;
-      const displayKey = filterPrefix && key.startsWith(filterPrefix) ? key.slice(filterPrefix.length) : key;
+      const displayKey =
+        filterPrefix && key.startsWith(filterPrefix) ? key.slice(filterPrefix.length) : key;
 
       if (!filterPrefix || prefixedKey.startsWith(filterPrefix)) {
         if (!(prefixedKey in process.env)) {
@@ -224,19 +224,25 @@ export class EnvironmentAdapter extends EnvironmentPort {
   expand(template, options = {}) {
     const throwOnMissing = options.throwOnMissing || false;
 
-    return String(template).replace(/\$\{([^}]+)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, braced, unbraced) => {
-      const varName = braced || unbraced;
-      const value = this.get(varName);
+    return String(template).replace(
+      /\$\{([^}]+)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g,
+      (match, braced, unbraced) => {
+        const varName = braced || unbraced;
+        const value = this.get(varName);
 
-      if (value === undefined) {
-        if (throwOnMissing) {
-          throw this._createError(`Environment variable "${varName}" not found during expansion`, varName);
+        if (value === undefined) {
+          if (throwOnMissing) {
+            throw this._createError(
+              `Environment variable "${varName}" not found during expansion`,
+              varName
+            );
+          }
+          return match; // Return original if not found and not throwing
         }
-        return match; // Return original if not found and not throwing
-      }
 
-      return value;
-    });
+        return value;
+      }
+    );
   }
 
   /**

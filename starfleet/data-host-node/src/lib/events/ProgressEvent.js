@@ -34,7 +34,10 @@ class ProgressEvent extends CommandEvent {
     super('progress', message, details);
 
     // Validate percentage if provided
-    if (percentage !== null && (typeof percentage !== 'number' || percentage < 0 || percentage > 100)) {
+    if (
+      percentage !== null &&
+      (typeof percentage !== 'number' || percentage < 0 || percentage > 100)
+    ) {
       throw new Error('Percentage must be a number between 0 and 100, or null');
     }
 

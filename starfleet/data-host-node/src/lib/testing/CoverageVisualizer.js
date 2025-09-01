@@ -38,10 +38,10 @@ class CoverageVisualizer {
     // LCARS color scheme
     this.colors = {
       // Primary LCARS colors
-      orange: chalk.rgb(255, 153, 0),      // LCARS Orange
-      blue: chalk.rgb(153, 204, 255),      // LCARS Light Blue
-      purple: chalk.rgb(204, 153, 255),    // LCARS Purple
-      red: chalk.rgb(255, 102, 102),       // LCARS Red
+      orange: chalk.rgb(255, 153, 0), // LCARS Orange
+      blue: chalk.rgb(153, 204, 255), // LCARS Light Blue
+      purple: chalk.rgb(204, 153, 255), // LCARS Purple
+      red: chalk.rgb(255, 102, 102), // LCARS Red
 
       // Coverage status colors
       covered: chalk.green,
@@ -49,8 +49,8 @@ class CoverageVisualizer {
       warning: chalk.yellow,
 
       // UI elements
-      frame: chalk.rgb(0, 153, 255),       // Frame blue
-      accent: chalk.rgb(255, 204, 0),      // Accent yellow
+      frame: chalk.rgb(0, 153, 255), // Frame blue
+      accent: chalk.rgb(255, 204, 0), // Accent yellow
       text: chalk.white,
       dim: chalk.gray
     };
@@ -108,44 +108,59 @@ class CoverageVisualizer {
 
     if (!data.rows || !data.columns || !data.matrix) {
       console.log(this.colors.red('   Invalid matrix data provided'));
-      console.log(this.colors.frame('╚═════════════════════════════════════════════════════════╝\n'));
+      console.log(
+        this.colors.frame('╚═════════════════════════════════════════════════════════╝\n')
+      );
       return;
     }
 
     // Calculate column widths
-    const maxRowNameLength = Math.max(...data.rows.map(r => r.length), 8);
-    const colWidth = Math.max(3, Math.max(...data.columns.map(c => c.length)));
+    const maxRowNameLength = Math.max(...data.rows.map((r) => r.length), 8);
+    const colWidth = Math.max(3, Math.max(...data.columns.map((c) => c.length)));
 
     // Header row with column names
     const headerSpacing = ' '.repeat(maxRowNameLength + 2);
-    const headerRow = headerSpacing + data.columns
-      .map(col => this.colors.blue(col.padEnd(colWidth)))
-      .join(' ');
+    const headerRow =
+      headerSpacing + data.columns.map((col) => this.colors.blue(col.padEnd(colWidth))).join(' ');
     console.log('║ ' + headerRow + ' ║');
 
     // Separator line
-    const separatorLine = '║ ' + '─'.repeat(maxRowNameLength) + '─┼─' +
-      data.columns.map(() => '─'.repeat(colWidth)).join('─┼─') + ' ║';
+    const separatorLine =
+      '║ ' +
+      '─'.repeat(maxRowNameLength) +
+      '─┼─' +
+      data.columns.map(() => '─'.repeat(colWidth)).join('─┼─') +
+      ' ║';
     console.log(this.colors.frame(separatorLine));
 
     // Data rows
     data.matrix.forEach((row, rowIndex) => {
       const rowName = data.rows[rowIndex].padEnd(maxRowNameLength);
-      const cells = row.map((covered, colIndex) => {
-        const char = covered ? this.chars.covered : this.chars.uncovered;
-        const color = covered ? this.colors.covered : this.colors.uncovered;
-        return color(char.padEnd(colWidth));
-      }).join(' ');
+      const cells = row
+        .map((covered, colIndex) => {
+          const char = covered ? this.chars.covered : this.chars.uncovered;
+          const color = covered ? this.colors.covered : this.colors.uncovered;
+          return color(char.padEnd(colWidth));
+        })
+        .join(' ');
 
       console.log('║ ' + this.colors.text(rowName) + ' │ ' + cells + ' ║');
     });
 
     // Legend
     console.log(this.colors.frame('╠═══════════════════════════════════════════════════════════╣'));
-    console.log('║ ' + this.colors.covered(this.chars.covered) + ' Covered   ' +
-                this.colors.uncovered(this.chars.uncovered) + ' Not Covered' +
-                ' '.repeat(39) + ' ║');
-    console.log(this.colors.frame('╚═════════════════════════════════════════════════════════════╝\n'));
+    console.log(
+      '║ ' +
+        this.colors.covered(this.chars.covered) +
+        ' Covered   ' +
+        this.colors.uncovered(this.chars.uncovered) +
+        ' Not Covered' +
+        ' '.repeat(39) +
+        ' ║'
+    );
+    console.log(
+      this.colors.frame('╚═════════════════════════════════════════════════════════════╝\n')
+    );
   }
 
   /**
@@ -167,7 +182,10 @@ class CoverageVisualizer {
     // Progress line with LCARS styling
     const progressLine =
       this.colors.orange('█ ') +
-      this.colors.text(operation) + ': [' + bar + '] ' +
+      this.colors.text(operation) +
+      ': [' +
+      bar +
+      '] ' +
       this.colors.accent(`${percentage}%`) +
       this.colors.dim(` (${current}/${total})`);
 
@@ -185,10 +203,18 @@ class CoverageVisualizer {
    * @private
    */
   _displayHeader() {
-    console.log(this.colors.frame('\n╔══════════════════════════════════════════════════════════╗'));
-    console.log('║ ' + this.colors.orange('█████') + ' ' +
-               this.colors.text('DATABASE COVERAGE ANALYSIS') + ' ' +
-               this.colors.orange('█████') + '      ║');
+    console.log(
+      this.colors.frame('\n╔══════════════════════════════════════════════════════════╗')
+    );
+    console.log(
+      '║ ' +
+        this.colors.orange('█████') +
+        ' ' +
+        this.colors.text('DATABASE COVERAGE ANALYSIS') +
+        ' ' +
+        this.colors.orange('█████') +
+        '      ║'
+    );
     console.log(this.colors.frame('╠══════════════════════════════════════════════════════════╣'));
   }
 
@@ -221,10 +247,21 @@ class CoverageVisualizer {
     const empty = this.chars.empty.repeat(barWidth - filledWidth);
     const bar = statusColor(filled) + this.colors.dim(empty);
 
-    console.log('║ Overall Coverage: [' + bar + '] ' +
-                statusColor(`${percentage}%`) + ' ' + statusColor(statusText) + '  ║');
-    console.log('║ ' + this.colors.dim(`Items: ${coverage.covered}/${coverage.total} covered`) +
-                ' '.repeat(35) + ' ║');
+    console.log(
+      '║ Overall Coverage: [' +
+        bar +
+        '] ' +
+        statusColor(`${percentage}%`) +
+        ' ' +
+        statusColor(statusText) +
+        '  ║'
+    );
+    console.log(
+      '║ ' +
+        this.colors.dim(`Items: ${coverage.covered}/${coverage.total} covered`) +
+        ' '.repeat(35) +
+        ' ║'
+    );
   }
 
   /**
@@ -237,8 +274,7 @@ class CoverageVisualizer {
     }
 
     console.log(this.colors.frame('╠══════════════════════════════════════════════════════════╣'));
-    console.log('║ ' + this.colors.blue('COVERAGE BY CATEGORY') +
-                ' '.repeat(37) + ' ║');
+    console.log('║ ' + this.colors.blue('COVERAGE BY CATEGORY') + ' '.repeat(37) + ' ║');
     console.log(this.colors.frame('╠══════════════════════════════════════════════════════════╣'));
 
     Object.entries(categories).forEach(([category, percentage]) => {
@@ -246,9 +282,12 @@ class CoverageVisualizer {
       const filledWidth = Math.round((percentage / 100) * barWidth);
 
       // Color based on percentage
-      const color = percentage >= 90 ? this.colors.covered :
-        percentage >= 75 ? this.colors.warning :
-          this.colors.uncovered;
+      const color =
+        percentage >= 90
+          ? this.colors.covered
+          : percentage >= 75
+            ? this.colors.warning
+            : this.colors.uncovered;
 
       const filled = this.chars.filled.repeat(filledWidth);
       const empty = this.chars.empty.repeat(barWidth - filledWidth);
@@ -257,9 +296,16 @@ class CoverageVisualizer {
       const categoryName = category.padEnd(12);
       const percentageText = `${Math.round(percentage)}%`.padStart(4);
 
-      console.log('║ ' + this.colors.text(categoryName) +
-                  ' [' + bar + '] ' +
-                  color(percentageText) + ' '.repeat(19) + ' ║');
+      console.log(
+        '║ ' +
+          this.colors.text(categoryName) +
+          ' [' +
+          bar +
+          '] ' +
+          color(percentageText) +
+          ' '.repeat(19) +
+          ' ║'
+      );
     });
   }
 
@@ -269,8 +315,7 @@ class CoverageVisualizer {
    */
   _displayGaps(gaps) {
     console.log(this.colors.frame('╠══════════════════════════════════════════════════════════╣'));
-    console.log('║ ' + this.colors.red('COVERAGE GAPS DETECTED') +
-                ' '.repeat(35) + ' ║');
+    console.log('║ ' + this.colors.red('COVERAGE GAPS DETECTED') + ' '.repeat(35) + ' ║');
     console.log(this.colors.frame('╠══════════════════════════════════════════════════════════╣'));
 
     // Group gaps by category
@@ -283,26 +328,42 @@ class CoverageVisualizer {
     }, {});
 
     Object.entries(groupedGaps).forEach(([category, categoryGaps]) => {
-      console.log('║ ' + this.colors.warning(`${category.toUpperCase()}:`) +
-                  ' '.repeat(55 - category.length) + ' ║');
+      console.log(
+        '║ ' +
+          this.colors.warning(`${category.toUpperCase()}:`) +
+          ' '.repeat(55 - category.length) +
+          ' ║'
+      );
 
-      categoryGaps.slice(0, 5).forEach(gap => { // Limit to first 5 per category
+      categoryGaps.slice(0, 5).forEach((gap) => {
+        // Limit to first 5 per category
         const indicator = this.colors.red('●');
         const name = gap.name.length > 40 ? gap.name.substring(0, 37) + '...' : gap.name;
         const reason = gap.reason ? ` (${gap.reason})` : '';
         const maxReasonLength = Math.max(0, 54 - name.length - reason.length);
-        const truncatedReason = reason.length > maxReasonLength ?
-          reason.substring(0, maxReasonLength - 3) + '...' : reason;
+        const truncatedReason =
+          reason.length > maxReasonLength
+            ? reason.substring(0, maxReasonLength - 3) + '...'
+            : reason;
 
-        console.log('║   ' + indicator + ' ' +
-                    this.colors.text(name) +
-                    this.colors.dim(truncatedReason) +
-                    ' '.repeat(Math.max(0, 54 - name.length - truncatedReason.length)) + ' ║');
+        console.log(
+          '║   ' +
+            indicator +
+            ' ' +
+            this.colors.text(name) +
+            this.colors.dim(truncatedReason) +
+            ' '.repeat(Math.max(0, 54 - name.length - truncatedReason.length)) +
+            ' ║'
+        );
       });
 
       if (categoryGaps.length > 5) {
-        console.log('║   ' + this.colors.dim(`... and ${categoryGaps.length - 5} more`) +
-                    ' '.repeat(45) + ' ║');
+        console.log(
+          '║   ' +
+            this.colors.dim(`... and ${categoryGaps.length - 5} more`) +
+            ' '.repeat(45) +
+            ' ║'
+        );
       }
     });
   }
@@ -313,8 +374,7 @@ class CoverageVisualizer {
    */
   _displaySummary(coverage, gaps) {
     console.log(this.colors.frame('╠══════════════════════════════════════════════════════════╣'));
-    console.log('║ ' + this.colors.blue('ANALYSIS SUMMARY') +
-                ' '.repeat(41) + ' ║');
+    console.log('║ ' + this.colors.blue('ANALYSIS SUMMARY') + ' '.repeat(41) + ' ║');
     console.log(this.colors.frame('╠══════════════════════════════════════════════════════════╣'));
 
     // Status assessment
@@ -342,7 +402,7 @@ class CoverageVisualizer {
     const lines = [];
     let currentLine = '';
 
-    words.forEach(word => {
+    words.forEach((word) => {
       if ((currentLine + word).length <= maxLineLength) {
         currentLine = currentLine ? `${currentLine} ${word}` : word;
       } else {
@@ -352,14 +412,17 @@ class CoverageVisualizer {
     });
     if (currentLine) lines.push(currentLine);
 
-    lines.forEach(line => {
-      console.log('║ ' + priorityColor(line) +
-                  ' '.repeat(Math.max(0, 57 - line.length)) + ' ║');
+    lines.forEach((line) => {
+      console.log('║ ' + priorityColor(line) + ' '.repeat(Math.max(0, 57 - line.length)) + ' ║');
     });
 
     if (gaps && gaps.length > 0) {
-      console.log('║ ' + this.colors.dim(`Priority: Address ${gaps.length} identified gaps`) +
-                  ' '.repeat(25) + ' ║');
+      console.log(
+        '║ ' +
+          this.colors.dim(`Priority: Address ${gaps.length} identified gaps`) +
+          ' '.repeat(25) +
+          ' ║'
+      );
     }
   }
 

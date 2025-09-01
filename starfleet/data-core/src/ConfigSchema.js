@@ -59,7 +59,7 @@ export class ConfigSchema {
     if (!result.success) {
       return {
         valid: false,
-        errors: result.error.errors.map(err => ({
+        errors: result.error.errors.map((err) => ({
           path: err.path.join('.'),
           message: err.message
         }))
@@ -82,9 +82,11 @@ export class ConfigSchema {
     const result = { ...base };
 
     for (const key in overrides) {
-      if (typeof overrides[key] === 'object' &&
-          !Array.isArray(overrides[key]) &&
-          overrides[key] !== null) {
+      if (
+        typeof overrides[key] === 'object' &&
+        !Array.isArray(overrides[key]) &&
+        overrides[key] !== null
+      ) {
         result[key] = this.merge(base[key] || {}, overrides[key]);
       } else {
         result[key] = overrides[key];
@@ -223,10 +225,7 @@ export class ConfigSchema {
    * @returns {Object} Check result with missing fields
    */
   checkRequiredFields(config) {
-    const required = [
-      'environments',
-      'paths'
-    ];
+    const required = ['environments', 'paths'];
 
     const missing = [];
 

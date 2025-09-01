@@ -315,12 +315,9 @@ describe('DirectoryEvent', () => {
 
   describe('constructor and properties', () => {
     it('should create with directory path and operation', () => {
-      const event = new DirectoryEvent(
-        'Scanning source directory',
-        '/src/components',
-        'scan',
-        { fileCount: 25 }
-      );
+      const event = new DirectoryEvent('Scanning source directory', '/src/components', 'scan', {
+        fileCount: 25
+      });
 
       expect(event.type).toBe('directory');
       expect(event.directoryPath).toBe('/src/components');
@@ -367,11 +364,7 @@ describe('SuccessEvent', () => {
 
   describe('constructor and timing', () => {
     it('should create with duration', () => {
-      const event = new SuccessEvent(
-        'Migration completed',
-        { migrationsApplied: 5 },
-        2500
-      );
+      const event = new SuccessEvent('Migration completed', { migrationsApplied: 5 }, 2500);
 
       expect(event.type).toBe('success');
       expect(event.duration).toBe(2500);
@@ -388,11 +381,7 @@ describe('SuccessEvent', () => {
   describe('timing utilities', () => {
     it('should create with calculated timing', () => {
       const startTime = new Date(Date.now() - 3000); // 3 seconds ago
-      const event = SuccessEvent.withTiming(
-        'Build completed',
-        startTime,
-        { outputFiles: 10 }
-      );
+      const event = SuccessEvent.withTiming('Build completed', startTime, { outputFiles: 10 });
 
       expect(event.duration).toBeGreaterThanOrEqual(2900);
       expect(event.duration).toBeLessThanOrEqual(3100);
@@ -462,10 +451,9 @@ describe('StartEvent', () => {
 
   describe('production mode factory', () => {
     it('should create production start event', () => {
-      const event = StartEvent.production(
-        'Starting production deployment',
-        { environment: 'production' }
-      );
+      const event = StartEvent.production('Starting production deployment', {
+        environment: 'production'
+      });
 
       expect(event.type).toBe('start');
       expect(event.details.isProd).toBe(true);
@@ -485,11 +473,7 @@ describe('StatusEvent', () => {
 
   describe('constructor and status checking', () => {
     it('should create with status value', () => {
-      const event = new StatusEvent(
-        'Database connection status',
-        'active',
-        { connectionPool: 5 }
-      );
+      const event = new StatusEvent('Database connection status', 'active', { connectionPool: 5 });
 
       expect(event.status).toBe('active');
       expect(event.details.status).toBe('active');
@@ -499,7 +483,7 @@ describe('StatusEvent', () => {
     it('should identify healthy statuses', () => {
       const healthyStatuses = ['healthy', 'ok', 'success', 'active', 'running'];
 
-      healthyStatuses.forEach(status => {
+      healthyStatuses.forEach((status) => {
         const event = new StatusEvent('Test status', status);
         expect(event.isHealthy()).toBe(true);
       });
@@ -508,7 +492,7 @@ describe('StatusEvent', () => {
     it('should identify unhealthy statuses', () => {
       const unhealthyStatuses = ['error', 'failed', 'inactive', 'stopped', 'degraded'];
 
-      unhealthyStatuses.forEach(status => {
+      unhealthyStatuses.forEach((status) => {
         const event = new StatusEvent('Test status', status);
         expect(event.isHealthy()).toBe(false);
       });
@@ -533,11 +517,7 @@ describe('CompleteEvent', () => {
   describe('constructor with result', () => {
     it('should create with result data', () => {
       const result = { processedFiles: 25, errors: 0 };
-      const event = new CompleteEvent(
-        'Compilation completed',
-        result,
-        { outputDir: '/dist' }
-      );
+      const event = new CompleteEvent('Compilation completed', result, { outputDir: '/dist' });
 
       expect(event.result).toBe(result);
       expect(event.details.result).toBe(result);
@@ -568,11 +548,9 @@ describe('CancelledEvent', () => {
     });
 
     it('should create with custom message and reason', () => {
-      const event = new CancelledEvent(
-        'User cancelled migration',
-        'user_request',
-        { stage: 'confirmation' }
-      );
+      const event = new CancelledEvent('User cancelled migration', 'user_request', {
+        stage: 'confirmation'
+      });
 
       expect(event.message).toBe('User cancelled migration');
       expect(event.reason).toBe('user_request');
@@ -591,12 +569,9 @@ describe('Build-specific events', () => {
     });
 
     it('should create with build stage information', () => {
-      const event = new BuildProgressEvent(
-        'compile',
-        '/src/lib',
-        '/dist/lib',
-        { filesProcessed: 15 }
-      );
+      const event = new BuildProgressEvent('compile', '/src/lib', '/dist/lib', {
+        filesProcessed: 15
+      });
 
       expect(event.type).toBe('build:progress');
       expect(event.stage).toBe('compile');
@@ -625,12 +600,7 @@ describe('Build-specific events', () => {
     });
 
     it('should create with build type information', () => {
-      const event = new BuildStartEvent(
-        'full',
-        '/project/src',
-        '/project/dist',
-        { clean: true }
-      );
+      const event = new BuildStartEvent('full', '/project/src', '/project/dist', { clean: true });
 
       expect(event.type).toBe('build:start');
       expect(event.message).toBe('Starting full build');
@@ -748,9 +718,7 @@ describe('createCommandEvent factory', () => {
   });
 
   it('should throw for unknown event types', () => {
-    expect(() => createCommandEvent('unknown', 'message')).toThrow(
-      'Unknown event type: unknown'
-    );
+    expect(() => createCommandEvent('unknown', 'message')).toThrow('Unknown event type: unknown');
   });
 
   it('should pass arguments to event constructors', () => {
@@ -781,7 +749,7 @@ describe('runtime type safety and inheritance chain', () => {
       new BuildProgressEvent('compile', '/src', '/dist')
     ];
 
-    events.forEach(event => {
+    events.forEach((event) => {
       expect(event).toBeInstanceOf(CommandEvent);
       expect(event).toBeInstanceOf(Object);
     });
@@ -808,7 +776,7 @@ describe('runtime type safety and inheritance chain', () => {
     ];
 
     // All should be treatable as CommandEvent
-    events.forEach(event => {
+    events.forEach((event) => {
       expect(event.type).toBeTruthy();
       expect(event.message).toBeTruthy();
       expect(event.timestamp).toBeInstanceOf(Date);

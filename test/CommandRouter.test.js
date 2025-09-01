@@ -17,9 +17,7 @@ describe('CommandRouter', () => {
     it('should register and execute a simple command', async () => {
       const handler = vi.fn(async (args) => ({ result: 'success', args }));
 
-      router
-        .command('test')
-        .handler(handler);
+      router.command('test').handler(handler);
 
       const result = await router.execute('test', { foo: 'bar' });
 
@@ -36,10 +34,7 @@ describe('CommandRouter', () => {
     it('should handle subcommands', async () => {
       const handler = vi.fn(async () => 'subcommand executed');
 
-      router
-        .command('parent')
-        .subcommand('child')
-        .handler(handler);
+      router.command('parent').subcommand('child').handler(handler);
 
       const result = await router.execute('parent/child', {});
 
@@ -48,8 +43,9 @@ describe('CommandRouter', () => {
     });
 
     it('should throw error for unregistered commands', async () => {
-      await expect(router.execute('nonexistent', {}))
-        .rejects.toThrow('No handler registered for command: nonexistent');
+      await expect(router.execute('nonexistent', {})).rejects.toThrow(
+        'No handler registered for command: nonexistent'
+      );
     });
   });
 
@@ -59,11 +55,13 @@ describe('CommandRouter', () => {
 
       router
         .command('validate')
-        .schema(z.object({
-          name: z.string(),
-          age: z.number().min(0).max(120),
-          email: z.string().email().optional()
-        }))
+        .schema(
+          z.object({
+            name: z.string(),
+            age: z.number().min(0).max(120),
+            email: z.string().email().optional()
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('validate', {
@@ -92,11 +90,13 @@ describe('CommandRouter', () => {
 
       router
         .command('defaults')
-        .schema(z.object({
-          verbose: z.boolean().default(false),
-          output: z.string().default('console'),
-          limit: z.number().default(10)
-        }))
+        .schema(
+          z.object({
+            verbose: z.boolean().default(false),
+            output: z.string().default('console'),
+            limit: z.number().default(10)
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('defaults', {});
@@ -111,16 +111,18 @@ describe('CommandRouter', () => {
     it('should reject invalid arguments', async () => {
       router
         .command('strict')
-        .schema(z.object({
-          count: z.number().int().positive()
-        }))
+        .schema(
+          z.object({
+            count: z.number().int().positive()
+          })
+        )
         .handler(async () => 'should not reach');
 
-      await expect(router.execute('strict', { count: 'not-a-number' }))
-        .rejects.toThrow('Validation failed');
+      await expect(router.execute('strict', { count: 'not-a-number' })).rejects.toThrow(
+        'Validation failed'
+      );
 
-      await expect(router.execute('strict', { count: -5 }))
-        .rejects.toThrow('Validation failed');
+      await expect(router.execute('strict', { count: -5 })).rejects.toThrow('Validation failed');
     });
 
     it('should handle enum schemas', async () => {
@@ -128,9 +130,11 @@ describe('CommandRouter', () => {
 
       router
         .command('format')
-        .schema(z.object({
-          type: z.enum(['json', 'yaml', 'xml']).default('json')
-        }))
+        .schema(
+          z.object({
+            type: z.enum(['json', 'yaml', 'xml']).default('json')
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('format', { type: 'yaml' });
@@ -147,11 +151,13 @@ describe('CommandRouter', () => {
 
       router
         .command('convert')
-        .schema(z.object({
-          firstName: z.string(),
-          lastName: z.string(),
-          phoneNumber: z.string().optional()
-        }))
+        .schema(
+          z.object({
+            firstName: z.string(),
+            lastName: z.string(),
+            phoneNumber: z.string().optional()
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('convert', {
@@ -172,11 +178,13 @@ describe('CommandRouter', () => {
 
       router
         .command('flags')
-        .schema(z.object({
-          verbose: z.boolean().default(false),
-          quiet: z.boolean().default(false),
-          force: z.boolean().default(false)
-        }))
+        .schema(
+          z.object({
+            verbose: z.boolean().default(false),
+            quiet: z.boolean().default(false),
+            force: z.boolean().default(false)
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('flags', {
@@ -200,10 +208,12 @@ describe('CommandRouter', () => {
       router
         .command('helpful')
         .description('A helpful command')
-        .schema(z.object({
-          input: z.string().describe('Input file path'),
-          output: z.string().describe('Output file path')
-        }))
+        .schema(
+          z.object({
+            input: z.string().describe('Input file path'),
+            output: z.string().describe('Output file path')
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('helpful', { '--help': true });
@@ -223,9 +233,7 @@ describe('CommandRouter', () => {
 
       router.use(middleware);
 
-      router
-        .command('middleware-test')
-        .handler(handler);
+      router.command('middleware-test').handler(handler);
 
       const result = await router.execute('middleware-test', { foo: 'bar' });
 
@@ -240,10 +248,7 @@ describe('CommandRouter', () => {
 
       const handler = vi.fn(async (args) => args);
 
-      router
-        .command('route-middleware')
-        .use(routeMiddleware)
-        .handler(handler);
+      router.command('route-middleware').use(routeMiddleware).handler(handler);
 
       const result = await router.execute('route-middleware', {});
 
@@ -256,9 +261,7 @@ describe('CommandRouter', () => {
     it('should match wildcard patterns', async () => {
       const handler = vi.fn(async () => 'wildcard matched');
 
-      router
-        .command('api/*')
-        .handler(handler);
+      router.command('api/*').handler(handler);
 
       const result1 = await router.execute('api/users', {});
       const result2 = await router.execute('api/posts/123', {});
@@ -290,9 +293,7 @@ describe('CommandRouter', () => {
       router.config = { test: 'config' };
       router.logger = console;
 
-      router
-        .command('class-handler')
-        .handler(TestCommand);
+      router.command('class-handler').handler(TestCommand);
 
       const result = await router.execute('class-handler', { prod: true });
 
@@ -327,14 +328,11 @@ describe('CommandRouter', () => {
       const errorHandler = vi.fn();
       router.on('error', errorHandler);
 
-      router
-        .command('failing')
-        .handler(async () => {
-          throw new Error('Command failed');
-        });
+      router.command('failing').handler(async () => {
+        throw new Error('Command failed');
+      });
 
-      await expect(router.execute('failing', {}))
-        .rejects.toThrow('Command failed');
+      await expect(router.execute('failing', {})).rejects.toThrow('Command failed');
 
       expect(errorHandler).toHaveBeenCalledWith(
         expect.objectContaining({

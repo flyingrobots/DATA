@@ -48,13 +48,15 @@ class MigrateCommand extends Command {
       .command('migrate')
       .subcommand('generate')
       .description('Generate migration from schema diff')
-      .schema(z.object({
-        name: z.string().optional().describe('Migration name'),
-        sqlDir: z.string().optional().describe('SQL source directory'),
-        migrationsDir: z.string().optional().describe('Migrations output directory'),
-        dryRun: CommandRouter.schemas.dryRun,
-        verbose: CommandRouter.schemas.verbose
-      }))
+      .schema(
+        z.object({
+          name: z.string().optional().describe('Migration name'),
+          sqlDir: z.string().optional().describe('SQL source directory'),
+          migrationsDir: z.string().optional().describe('Migrations output directory'),
+          dryRun: CommandRouter.schemas.dryRun,
+          verbose: CommandRouter.schemas.verbose
+        })
+      )
       .examples(
         'data db migrate generate',
         'data db migrate generate --name add-users-table',
@@ -70,12 +72,14 @@ class MigrateCommand extends Command {
       .command('migrate')
       .subcommand('test')
       .description('Test migration with pgTAP validation')
-      .schema(z.object({
-        migration: z.string().optional().describe('Migration ID or "latest"'),
-        testsDir: z.string().optional().describe('Tests directory'),
-        verbose: CommandRouter.schemas.verbose,
-        coverage: z.boolean().default(false).describe('Generate coverage report')
-      }))
+      .schema(
+        z.object({
+          migration: z.string().optional().describe('Migration ID or "latest"'),
+          testsDir: z.string().optional().describe('Tests directory'),
+          verbose: CommandRouter.schemas.verbose,
+          coverage: z.boolean().default(false).describe('Generate coverage report')
+        })
+      )
       .examples(
         'data db migrate test',
         'data db migrate test --migration latest',
@@ -91,12 +95,14 @@ class MigrateCommand extends Command {
       .command('migrate')
       .subcommand('promote')
       .description('Promote tested migration to production')
-      .schema(z.object({
-        migration: z.string().optional().describe('Migration ID'),
-        prod: CommandRouter.schemas.prod,
-        force: CommandRouter.schemas.force,
-        skipValidation: z.boolean().default(false).describe('Skip validation checks')
-      }))
+      .schema(
+        z.object({
+          migration: z.string().optional().describe('Migration ID'),
+          prod: CommandRouter.schemas.prod,
+          force: CommandRouter.schemas.force,
+          skipValidation: z.boolean().default(false).describe('Skip validation checks')
+        })
+      )
       .examples(
         'data db migrate promote --migration 20250829_001',
         'data db migrate promote --prod --force'
@@ -111,11 +117,13 @@ class MigrateCommand extends Command {
       .command('migrate')
       .subcommand('status')
       .description('Show current migration status')
-      .schema(z.object({
-        detailed: z.boolean().default(false).describe('Show detailed status'),
-        prod: CommandRouter.schemas.prod,
-        format: z.enum(['table', 'json', 'yaml']).default('table').describe('Output format')
-      }))
+      .schema(
+        z.object({
+          detailed: z.boolean().default(false).describe('Show detailed status'),
+          prod: CommandRouter.schemas.prod,
+          format: z.enum(['table', 'json', 'yaml']).default('table').describe('Output format')
+        })
+      )
       .examples(
         'data db migrate status',
         'data db migrate status --detailed',
@@ -131,13 +139,15 @@ class MigrateCommand extends Command {
       .command('migrate')
       .subcommand('rollback')
       .description('Rollback migration to previous state')
-      .schema(z.object({
-        migration: z.string().optional().describe('Migration to rollback'),
-        to: z.string().optional().describe('Rollback to specific migration'),
-        prod: CommandRouter.schemas.prod,
-        force: CommandRouter.schemas.force,
-        dryRun: CommandRouter.schemas.dryRun
-      }))
+      .schema(
+        z.object({
+          migration: z.string().optional().describe('Migration to rollback'),
+          to: z.string().optional().describe('Rollback to specific migration'),
+          prod: CommandRouter.schemas.prod,
+          force: CommandRouter.schemas.force,
+          dryRun: CommandRouter.schemas.dryRun
+        })
+      )
       .examples(
         'data db migrate rollback',
         'data db migrate rollback --to 20250828_003',
@@ -153,12 +163,14 @@ class MigrateCommand extends Command {
       .command('migrate')
       .subcommand('clean')
       .description('Clean up temporary migration files')
-      .schema(z.object({
-        all: z.boolean().default(false).describe('Clean all temporary files'),
-        failed: z.boolean().default(false).describe('Clean only failed migrations'),
-        older: z.number().optional().describe('Clean migrations older than N days'),
-        dryRun: CommandRouter.schemas.dryRun
-      }))
+      .schema(
+        z.object({
+          all: z.boolean().default(false).describe('Clean all temporary files'),
+          failed: z.boolean().default(false).describe('Clean only failed migrations'),
+          older: z.number().optional().describe('Clean migrations older than N days'),
+          dryRun: CommandRouter.schemas.dryRun
+        })
+      )
       .examples(
         'data db migrate clean',
         'data db migrate clean --all',
@@ -174,13 +186,15 @@ class MigrateCommand extends Command {
       .command('migrate')
       .subcommand('history')
       .description('Show migration history and timeline')
-      .schema(z.object({
-        limit: z.number().int().min(1).default(10).describe('Number of entries to show'),
-        from: z.string().optional().describe('Start date (YYYY-MM-DD)'),
-        to: z.string().optional().describe('End date (YYYY-MM-DD)'),
-        prod: CommandRouter.schemas.prod,
-        format: z.enum(['table', 'json', 'timeline']).default('table').describe('Output format')
-      }))
+      .schema(
+        z.object({
+          limit: z.number().int().min(1).default(10).describe('Number of entries to show'),
+          from: z.string().optional().describe('Start date (YYYY-MM-DD)'),
+          to: z.string().optional().describe('End date (YYYY-MM-DD)'),
+          prod: CommandRouter.schemas.prod,
+          format: z.enum(['table', 'json', 'timeline']).default('table').describe('Output format')
+        })
+      )
       .examples(
         'data db migrate history',
         'data db migrate history --limit 20',
@@ -196,12 +210,14 @@ class MigrateCommand extends Command {
       .command('migrate')
       .subcommand('verify')
       .description('Verify migration integrity')
-      .schema(z.object({
-        migration: z.string().optional().describe('Migration to verify'),
-        all: z.boolean().default(false).describe('Verify all migrations'),
-        checksums: z.boolean().default(true).describe('Verify checksums'),
-        prod: CommandRouter.schemas.prod
-      }))
+      .schema(
+        z.object({
+          migration: z.string().optional().describe('Migration to verify'),
+          all: z.boolean().default(false).describe('Verify all migrations'),
+          checksums: z.boolean().default(true).describe('Verify checksums'),
+          prod: CommandRouter.schemas.prod
+        })
+      )
       .examples(
         'data db migrate verify',
         'data db migrate verify --migration 20250829_001',
@@ -217,13 +233,15 @@ class MigrateCommand extends Command {
       .command('migrate')
       .subcommand('squash')
       .description('Squash multiple migrations into one')
-      .schema(z.object({
-        from: z.string().optional().describe('Starting migration'),
-        to: z.string().optional().describe('Ending migration'),
-        name: z.string().optional().describe('Name for squashed migration'),
-        keepOriginals: z.boolean().default(false).describe('Keep original migration files'),
-        dryRun: CommandRouter.schemas.dryRun
-      }))
+      .schema(
+        z.object({
+          from: z.string().optional().describe('Starting migration'),
+          to: z.string().optional().describe('Ending migration'),
+          name: z.string().optional().describe('Name for squashed migration'),
+          keepOriginals: z.boolean().default(false).describe('Keep original migration files'),
+          dryRun: CommandRouter.schemas.dryRun
+        })
+      )
       .examples(
         'data db migrate squash --from 20250801_001 --to 20250810_005',
         'data db migrate squash --name initial-schema',
@@ -266,7 +284,6 @@ class MigrateCommand extends Command {
       }
 
       return result;
-
     } catch (error) {
       // Check if it's an unknown command
       if (error.message.includes('No handler registered')) {

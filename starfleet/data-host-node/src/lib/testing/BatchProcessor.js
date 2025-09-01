@@ -130,7 +130,7 @@ class BatchProcessor {
    * @returns {Promise<void>}
    */
   async yieldToEventLoop() {
-    return new Promise(resolve => setImmediate(resolve));
+    return new Promise((resolve) => setImmediate(resolve));
   }
 
   /**

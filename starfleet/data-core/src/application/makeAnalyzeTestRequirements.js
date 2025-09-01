@@ -24,7 +24,6 @@ export const AnalysisEvents = {
  * @returns {Function} Analyzer function
  */
 export function makeAnalyzeTestRequirements({ bus, clock = Date } = {}) {
-
   /**
    * Analyze operations for test requirements
    * @param {Array<Object>} operations - Migration operations to analyze
@@ -149,7 +148,9 @@ function analyzeOperation(operation, context) {
   case 'CREATE_POLICY':
   case 'ALTER_POLICY':
   case 'DROP_POLICY':
-    requirements.push(...generatePolicyRequirements(operation, target, basePriority, operationType));
+    requirements.push(
+      ...generatePolicyRequirements(operation, target, basePriority, operationType)
+    );
     break;
 
   case 'ENABLE_RLS':
@@ -478,10 +479,12 @@ function generateSecurityRequirements(operation, target, priority) {
  */
 function requiresSecurityTests(operation) {
   const sql = (operation.sql || '').toUpperCase();
-  return sql.includes('POLICY') ||
-         sql.includes('GRANT') ||
-         sql.includes('REVOKE') ||
-         sql.includes('SECURITY DEFINER');
+  return (
+    sql.includes('POLICY') ||
+    sql.includes('GRANT') ||
+    sql.includes('REVOKE') ||
+    sql.includes('SECURITY DEFINER')
+  );
 }
 
 /**
@@ -489,10 +492,12 @@ function requiresSecurityTests(operation) {
  */
 function isHighRisk(operation) {
   const sql = (operation.sql || '').toUpperCase();
-  return sql.includes('DROP') ||
-         sql.includes('TRUNCATE') ||
-         sql.includes('DELETE FROM') ||
-         operation.type === 'DESTRUCTIVE';
+  return (
+    sql.includes('DROP') ||
+    sql.includes('TRUNCATE') ||
+    sql.includes('DELETE FROM') ||
+    operation.type === 'DESTRUCTIVE'
+  );
 }
 
 /**
@@ -541,19 +546,27 @@ function generateSuggestions(requirements, summary, riskAreas) {
   const suggestions = [];
 
   if (riskAreas.length > 0) {
-    suggestions.push(`⚠️ High-risk operations detected: ${riskAreas.length} destructive changes require careful testing`);
+    suggestions.push(
+      `⚠️ High-risk operations detected: ${riskAreas.length} destructive changes require careful testing`
+    );
   }
 
   if (summary.byType[TEST_TYPES.RLS] > 0 || summary.byType[TEST_TYPES.PERMISSION] > 0) {
-    suggestions.push('🔒 Security tests required: Test with multiple user roles and verify access controls');
+    suggestions.push(
+      '🔒 Security tests required: Test with multiple user roles and verify access controls'
+    );
   }
 
   if (summary.byPriority[TEST_PRIORITIES.CRITICAL] > 5) {
-    suggestions.push(`🚨 ${summary.byPriority[TEST_PRIORITIES.CRITICAL]} critical tests required - allocate sufficient testing time`);
+    suggestions.push(
+      `🚨 ${summary.byPriority[TEST_PRIORITIES.CRITICAL]} critical tests required - allocate sufficient testing time`
+    );
   }
 
   if (summary.totalRequirements === 0) {
-    suggestions.push('ℹ️ No specific test requirements identified - consider adding basic validation tests');
+    suggestions.push(
+      'ℹ️ No specific test requirements identified - consider adding basic validation tests'
+    );
   }
 
   return suggestions;

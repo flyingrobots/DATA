@@ -112,9 +112,7 @@ export class CryptoAdapter extends CryptoPort {
    * @returns {CryptoError} Normalized error
    */
   _normalizeError(error, operation, context = {}) {
-    const normalizedError = new Error(
-      `Crypto ${operation} failed: ${error.message}`
-    );
+    const normalizedError = new Error(`Crypto ${operation} failed: ${error.message}`);
     normalizedError.name = 'CryptoError';
     normalizedError.code = error.code;
     normalizedError.operation = operation;

@@ -77,12 +77,7 @@ const ports = factory.createDataCorePorts({
 });
 
 // Wire DataCore manually
-const dataCore2 = new DataCore(
-  ports.fileSystem,
-  ports.crypto,
-  ports.process,
-  ports.environment
-);
+const dataCore2 = new DataCore(ports.fileSystem, ports.crypto, ports.process, ports.environment);
 
 console.log('✅ DataCore created with PortFactory');
 console.log(`   Generated ports: ${Object.keys(ports).join(', ')}`);
@@ -96,7 +91,11 @@ console.log('\n---\n');
 // === Method 3: wireDataCore Convenience Function ===
 console.log('⚡ Method 3: wireDataCore Convenience Function');
 
-const { ports: wireports, dataCore: dataCore3, factory: wirefactory } = wireDataCore(
+const {
+  ports: wireports,
+  dataCore: dataCore3,
+  factory: wirefactory
+} = wireDataCore(
   DataCore,
   {
     fileSystem: FileSystemAdapter,
@@ -149,7 +148,9 @@ console.log('✅ DataCore resolved from integrated Factory + Container');
 
 // Show container statistics
 const stats = integrationContainer.getStats();
-console.log(`   Container: ${stats.totalServices} services, ${stats.singletonInstances} singletons`);
+console.log(
+  `   Container: ${stats.totalServices} services, ${stats.singletonInstances} singletons`
+);
 
 console.log('\n---\n');
 
@@ -192,7 +193,6 @@ try {
   console.log('  • Port interface validation ensures contract compliance');
   console.log('  • Factory pattern enables reusable, configured instances');
   console.log('  • Multiple integration approaches for different use cases');
-
 } catch (error) {
   console.error('❌ Error testing DataCore functionality:', error.message);
   console.error(error.stack);

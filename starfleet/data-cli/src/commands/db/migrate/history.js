@@ -45,9 +45,7 @@ class MigrateHistoryCommand extends Command {
       }
 
       // Filter history if requested
-      const filteredHistory = filter ?
-        history.filter(entry => entry.action === filter) :
-        history;
+      const filteredHistory = filter ? history.filter((entry) => entry.action === filter) : history;
 
       // Limit results
       const limitedHistory = filteredHistory.slice(-limit).reverse();
@@ -60,7 +58,6 @@ class MigrateHistoryCommand extends Command {
         displayed: limitedHistory.length,
         filter
       });
-
     } catch (error) {
       this.error('Migration history display failed', error);
       this.emit('failed', { error });
@@ -74,7 +71,10 @@ class MigrateHistoryCommand extends Command {
   async loadMigrationHistory() {
     try {
       const historyFile = path.resolve('supabase/.migration_history.json');
-      const historyExists = await fs.access(historyFile).then(() => true).catch(() => false);
+      const historyExists = await fs
+        .access(historyFile)
+        .then(() => true)
+        .catch(() => false);
 
       if (!historyExists) {
         return [];
@@ -82,7 +82,6 @@ class MigrateHistoryCommand extends Command {
 
       const historyContent = await fs.readFile(historyFile, 'utf8');
       return JSON.parse(historyContent);
-
     } catch (error) {
       this.warn('Could not load migration history', { error: error.message });
       return [];
@@ -117,22 +116,33 @@ class MigrateHistoryCommand extends Command {
     }
 
     // Calculate column widths
-    const maxAction = Math.max(6, ...history.map(h => h.action.length));
-    const maxMigration = Math.max(9, ...history.map(h => (h.migration || '').length));
-    const maxStatus = Math.max(6, ...history.map(h => (h.status || '').length));
+    const maxAction = Math.max(6, ...history.map((h) => h.action.length));
+    const maxMigration = Math.max(9, ...history.map((h) => (h.migration || '').length));
+    const maxStatus = Math.max(6, ...history.map((h) => (h.status || '').length));
 
     // Header
     console.log(
-      'Action'.padEnd(maxAction) + ' │ ' +
-      'Migration'.padEnd(maxMigration) + ' │ ' +
-      'Status'.padEnd(maxStatus) + ' │ ' +
-      'Timestamp'
+      'Action'.padEnd(maxAction) +
+        ' │ ' +
+        'Migration'.padEnd(maxMigration) +
+        ' │ ' +
+        'Status'.padEnd(maxStatus) +
+        ' │ ' +
+        'Timestamp'
     );
 
-    console.log('─'.repeat(maxAction) + '─┼─' + '─'.repeat(maxMigration) + '─┼─' + '─'.repeat(maxStatus) + '─┼─' + '─'.repeat(19));
+    console.log(
+      '─'.repeat(maxAction) +
+        '─┼─' +
+        '─'.repeat(maxMigration) +
+        '─┼─' +
+        '─'.repeat(maxStatus) +
+        '─┼─' +
+        '─'.repeat(19)
+    );
 
     // Rows
-    history.forEach(entry => {
+    history.forEach((entry) => {
       const action = this.colorizeAction(entry.action);
       const migration = (entry.migration || '').padEnd(maxMigration);
       const status = this.colorizeStatus(entry.status || '').padEnd(maxStatus);
@@ -154,7 +164,9 @@ class MigrateHistoryCommand extends Command {
       const actionIcon = this.getActionIcon(entry.action);
       const statusColor = this.colorizeStatus(entry.status || 'unknown');
 
-      console.log(`${connector} ${actionIcon} ${entry.action.toUpperCase()}: ${entry.migration || 'Unknown'}`);
+      console.log(
+        `${connector} ${actionIcon} ${entry.action.toUpperCase()}: ${entry.migration || 'Unknown'}`
+      );
       console.log(`${line}   Status: ${statusColor}`);
       console.log(`${line}   Time: ${new Date(entry.timestamp).toLocaleString()}`);
 
@@ -196,11 +208,11 @@ class MigrateHistoryCommand extends Command {
     // In a real implementation, would use chalk or similar for colors
     const colors = {
       generate: action, // blue
-      test: action,     // yellow
-      promote: action,  // green
+      test: action, // yellow
+      promote: action, // green
       rollback: action, // red
-      clean: action,    // magenta
-      verify: action    // cyan
+      clean: action, // magenta
+      verify: action // cyan
     };
 
     return colors[action] || action;
@@ -212,10 +224,10 @@ class MigrateHistoryCommand extends Command {
   colorizeStatus(status) {
     // In a real implementation, would use chalk or similar for colors
     const colors = {
-      completed: status,  // green
-      failed: status,     // red
-      pending: status,    // yellow
-      running: status     // blue
+      completed: status, // green
+      failed: status, // red
+      pending: status, // yellow
+      running: status // blue
     };
 
     return colors[status] || status;

@@ -101,7 +101,7 @@ class CommandRouter extends EventEmitter {
 
     try {
       // Run global middleware
-      await Promise.all(this.globalMiddleware.map(middleware => middleware(context)));
+      await Promise.all(this.globalMiddleware.map((middleware) => middleware(context)));
 
       // Parse and validate arguments with Zod schema
       let parsedArgs = rawArgs;
@@ -124,7 +124,7 @@ class CommandRouter extends EventEmitter {
       context.args = parsedArgs;
 
       // Run route-specific middleware
-      await Promise.all(route.middleware.map(middleware => middleware(context)));
+      await Promise.all(route.middleware.map((middleware) => middleware(context)));
 
       // Execute the handler
       if (!route.handler) {
@@ -132,7 +132,6 @@ class CommandRouter extends EventEmitter {
       }
 
       return route.handler(parsedArgs, context);
-
     } catch (error) {
       this.emit('error', { path: commandPath, error });
       throw error;
@@ -202,7 +201,7 @@ class CommandRouter extends EventEmitter {
         let line = '  ';
 
         // Convert camelCase to kebab-case for CLI
-        const cliName = key.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+        const cliName = key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
         line += `--${cliName}`;
 
         // Get type from Zod schema
@@ -319,7 +318,7 @@ class CommandRouter extends EventEmitter {
 
     for (const [field, fieldErrors] of Object.entries(errors)) {
       if (fieldErrors._errors && fieldErrors._errors.length > 0) {
-        const cliName = field.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+        const cliName = field.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
         console.error(`  --${cliName}: ${fieldErrors._errors.join(', ')}`);
       }
     }
@@ -464,10 +463,19 @@ class CommandBuilder {
 
         // Forward events from subcommand to router
         if (instance.on) {
-          ['start', 'progress', 'warning', 'error', 'success', 'complete', 'failed', 'cancelled', 'prompt']
-            .forEach(event => {
-              instance.on(event, (data) => context.router.emit(event, data));
-            });
+          [
+            'start',
+            'progress',
+            'warning',
+            'error',
+            'success',
+            'complete',
+            'failed',
+            'cancelled',
+            'prompt'
+          ].forEach((event) => {
+            instance.on(event, (data) => context.router.emit(event, data));
+          });
         }
 
         return instance.execute(args);

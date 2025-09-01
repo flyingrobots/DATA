@@ -6,85 +6,116 @@ import { z } from 'zod';
  */
 
 // Test configuration schema
-const TestConfigSchema = z.object({
-  minimum_coverage: z.number().min(0).max(100).default(80).optional(),
-  test_timeout: z.number().min(1).default(300).optional(),
-  output_formats: z.array(
-    z.enum(['console', 'junit', 'json', 'tap', 'html'])
-  ).default(['console']).optional(),
-  parallel: z.boolean().default(false).optional(),
-  verbose: z.boolean().default(false).optional()
-}).strict().optional();
+const TestConfigSchema = z
+  .object({
+    minimum_coverage: z.number().min(0).max(100).default(80).optional(),
+    test_timeout: z.number().min(1).default(300).optional(),
+    output_formats: z
+      .array(z.enum(['console', 'junit', 'json', 'tap', 'html']))
+      .default(['console'])
+      .optional(),
+    parallel: z.boolean().default(false).optional(),
+    verbose: z.boolean().default(false).optional()
+  })
+  .strict()
+  .optional();
 
 // Environment configuration schema
-const EnvironmentSchema = z.object({
-  db: z.string().url().regex(/^postgresql:\/\/.*/, 'Must be a PostgreSQL URL'),
-  supabase_url: z.string().url().optional(),
-  supabase_anon_key: z.string().optional(),
-  supabase_service_role_key: z.string().optional()
-}).strict();
+const EnvironmentSchema = z
+  .object({
+    db: z
+      .string()
+      .url()
+      .regex(/^postgresql:\/\/.*/, 'Must be a PostgreSQL URL'),
+    supabase_url: z.string().url().optional(),
+    supabase_anon_key: z.string().optional(),
+    supabase_service_role_key: z.string().optional()
+  })
+  .strict();
 
 // Paths configuration schema
-const PathsConfigSchema = z.object({
-  sql_dir: z.string().default('./sql').optional(),
-  tests_dir: z.string().default('./tests').optional(),
-  migrations_dir: z.string().default('./migrations').optional(),
-  functions_dir: z.string().default('./functions').optional(),
-  schemas_dir: z.string().default('./schemas').optional()
-}).strict().optional();
+const PathsConfigSchema = z
+  .object({
+    sql_dir: z.string().default('./sql').optional(),
+    tests_dir: z.string().default('./tests').optional(),
+    migrations_dir: z.string().default('./migrations').optional(),
+    functions_dir: z.string().default('./functions').optional(),
+    schemas_dir: z.string().default('./schemas').optional()
+  })
+  .strict()
+  .optional();
 
 // Compile configuration schema
-const CompileConfigSchema = z.object({
-  auto_squash: z.boolean().default(false).optional(),
-  include_comments: z.boolean().default(true).optional(),
-  validate_syntax: z.boolean().default(true).optional()
-}).strict().optional();
+const CompileConfigSchema = z
+  .object({
+    auto_squash: z.boolean().default(false).optional(),
+    include_comments: z.boolean().default(true).optional(),
+    validate_syntax: z.boolean().default(true).optional()
+  })
+  .strict()
+  .optional();
 
 // Migration configuration schema
-const MigrateConfigSchema = z.object({
-  auto_rollback: z.boolean().default(true).optional(),
-  dry_run: z.boolean().default(false).optional(),
-  lock_timeout: z.number().min(1).default(10).optional(),
-  batch_size: z.number().min(1).default(10).optional()
-}).strict().optional();
+const MigrateConfigSchema = z
+  .object({
+    auto_rollback: z.boolean().default(true).optional(),
+    dry_run: z.boolean().default(false).optional(),
+    lock_timeout: z.number().min(1).default(10).optional(),
+    batch_size: z.number().min(1).default(10).optional()
+  })
+  .strict()
+  .optional();
 
 // Functions configuration schema
-const FunctionsConfigSchema = z.object({
-  deploy_on_migrate: z.boolean().default(false).optional(),
-  import_map: z.string().default('./import_map.json').optional(),
-  verify_jwt: z.boolean().default(true).optional()
-}).strict().optional();
+const FunctionsConfigSchema = z
+  .object({
+    deploy_on_migrate: z.boolean().default(false).optional(),
+    import_map: z.string().default('./import_map.json').optional(),
+    verify_jwt: z.boolean().default(true).optional()
+  })
+  .strict()
+  .optional();
 
 // Safety configuration schema
-const SafetyConfigSchema = z.object({
-  require_prod_flag: z.boolean().default(true).optional(),
-  require_confirmation: z.boolean().default(true).optional(),
-  backup_before_migrate: z.boolean().default(true).optional(),
-  max_affected_rows: z.number().min(0).default(10000).optional()
-}).strict().optional();
+const SafetyConfigSchema = z
+  .object({
+    require_prod_flag: z.boolean().default(true).optional(),
+    require_confirmation: z.boolean().default(true).optional(),
+    backup_before_migrate: z.boolean().default(true).optional(),
+    max_affected_rows: z.number().min(0).default(10000).optional()
+  })
+  .strict()
+  .optional();
 
 // Logging configuration schema
-const LoggingConfigSchema = z.object({
-  level: z.enum(['debug', 'info', 'warn', 'error', 'silent']).default('info').optional(),
-  format: z.enum(['text', 'json']).default('text').optional(),
-  timestamps: z.boolean().default(true).optional()
-}).strict().optional();
+const LoggingConfigSchema = z
+  .object({
+    level: z.enum(['debug', 'info', 'warn', 'error', 'silent']).default('info').optional(),
+    format: z.enum(['text', 'json']).default('text').optional(),
+    timestamps: z.boolean().default(true).optional()
+  })
+  .strict()
+  .optional();
 
 // Main data configuration schema
-const DataConfigSchema = z.object({
-  $schema: z.string().optional(), // Allow but don't require the schema reference
-  test: TestConfigSchema,
-  environments: z.record(
-    z.string().regex(/^[a-zA-Z][a-zA-Z0-9_-]*$/, 'Environment name must start with a letter'),
-    EnvironmentSchema
-  ).optional(),
-  paths: PathsConfigSchema,
-  compile: CompileConfigSchema,
-  migrate: MigrateConfigSchema,
-  functions: FunctionsConfigSchema,
-  safety: SafetyConfigSchema,
-  logging: LoggingConfigSchema
-}).strict();
+const DataConfigSchema = z
+  .object({
+    $schema: z.string().optional(), // Allow but don't require the schema reference
+    test: TestConfigSchema,
+    environments: z
+      .record(
+        z.string().regex(/^[a-zA-Z][a-zA-Z0-9_-]*$/, 'Environment name must start with a letter'),
+        EnvironmentSchema
+      )
+      .optional(),
+    paths: PathsConfigSchema,
+    compile: CompileConfigSchema,
+    migrate: MigrateConfigSchema,
+    functions: FunctionsConfigSchema,
+    safety: SafetyConfigSchema,
+    logging: LoggingConfigSchema
+  })
+  .strict();
 
 /**
  * Parse and validate data configuration

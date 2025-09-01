@@ -30,7 +30,10 @@ test('DiffEngine - Class Structure and Instantiation', async (t) => {
 
     assert(engine.config.includeData === false, 'Default includeData should be false');
     assert(Array.isArray(engine.config.excludeSchemas), 'Should have default excludeSchemas');
-    assert(engine.config.includeDropStatements === true, 'Default includeDropStatements should be true');
+    assert(
+      engine.config.includeDropStatements === true,
+      'Default includeDropStatements should be true'
+    );
     assert(engine.config.sortOutput === true, 'Default sortOutput should be true');
   });
 });
@@ -77,7 +80,7 @@ test('DiffEngine - EventEmitter Functionality', async (t) => {
 
     assert(progressEvents.length > 0, 'Should emit at least one progress event');
 
-    const initEvent = progressEvents.find(e => e.step === 'initializing');
+    const initEvent = progressEvents.find((e) => e.step === 'initializing');
     assert(initEvent !== undefined, 'Should emit initializing progress event');
     assert(typeof initEvent.message === 'string', 'Progress event should include message');
     assert(initEvent.timestamp instanceof Date, 'Progress event should include timestamp');
@@ -100,7 +103,10 @@ test('DiffEngine - EventEmitter Functionality', async (t) => {
 
     assert(completeEventReceived, 'Complete event should be emitted');
     assert(completeEventData.diff !== null, 'Complete event should include diff result');
-    assert(typeof completeEventData.duration === 'number', 'Complete event should include duration');
+    assert(
+      typeof completeEventData.duration === 'number',
+      'Complete event should include duration'
+    );
     assert(completeEventData.timestamp instanceof Date, 'Complete event should include timestamp');
   });
 
@@ -168,7 +174,10 @@ test('DiffEngine - State Management', async (t) => {
 
     // Verify the concurrent execution was prevented
     assert(secondDiffError !== null, 'Should have caught an error');
-    assert(secondDiffError.message.includes('already running'), 'Should indicate engine is already running');
+    assert(
+      secondDiffError.message.includes('already running'),
+      'Should indicate engine is already running'
+    );
   });
 
   await t.test('should store and return last diff result', async () => {

@@ -64,12 +64,7 @@ class ErrorEvent extends CommandEvent {
    * }
    */
   static fromError(error, context = 'Operation failed', details = {}) {
-    return new ErrorEvent(
-      `${context}: ${error.message}`,
-      error,
-      error.code || null,
-      details
-    );
+    return new ErrorEvent(`${context}: ${error.message}`, error, error.code || null, details);
   }
 
   /**
@@ -111,16 +106,11 @@ class ErrorEvent extends CommandEvent {
    * @returns {ErrorEvent} New system error event
    */
   static system(message, error, system = 'unknown', details = {}) {
-    return new ErrorEvent(
-      message,
-      error,
-      'SYSTEM_ERROR',
-      {
-        ...details,
-        system,
-        category: 'system'
-      }
-    );
+    return new ErrorEvent(message, error, 'SYSTEM_ERROR', {
+      ...details,
+      system,
+      category: 'system'
+    });
   }
 
   /**

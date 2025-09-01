@@ -392,11 +392,11 @@ describe('FileSystemAdapter', () => {
 
       expect(entries).toHaveLength(3);
 
-      const subdir = entries.find(e => e.name === 'test-subdir');
+      const subdir = entries.find((e) => e.name === 'test-subdir');
       expect(subdir.isDirectory).toBe(true);
       expect(subdir.isFile).toBe(false);
 
-      const file = entries.find(e => e.name === 'file1.txt');
+      const file = entries.find((e) => e.name === 'file1.txt');
       expect(file.isFile).toBe(true);
       expect(file.isDirectory).toBe(false);
     });
@@ -588,9 +588,9 @@ describe('CryptoAdapter', () => {
       const sha1Hash = adapter.hash(input, 'sha1');
       const md5Hash = adapter.hash(input, 'md5');
 
-      expect(sha256Hash.length).toBe(64);  // SHA-256
-      expect(sha1Hash.length).toBe(40);    // SHA-1
-      expect(md5Hash.length).toBe(32);     // MD5
+      expect(sha256Hash.length).toBe(64); // SHA-256
+      expect(sha1Hash.length).toBe(40); // SHA-1
+      expect(md5Hash.length).toBe(32); // MD5
 
       expect(sha256Hash).not.toBe(sha1Hash);
       expect(sha256Hash).not.toBe(md5Hash);
@@ -836,7 +836,7 @@ describe('EnvironmentAdapter', () => {
         calls.push(adapter.get('CONSISTENT_VAR'));
       }
 
-      expect(calls.every(value => value === 'consistent_value')).toBe(true);
+      expect(calls.every((value) => value === 'consistent_value')).toBe(true);
     });
 
     it('should handle concurrent access', async () => {
@@ -848,7 +848,7 @@ describe('EnvironmentAdapter', () => {
       }
 
       const results = await Promise.all(promises);
-      expect(results.every(value => value === 'concurrent_value')).toBe(true);
+      expect(results.every((value) => value === 'concurrent_value')).toBe(true);
     });
   });
 
@@ -867,7 +867,7 @@ describe('EnvironmentAdapter', () => {
       // Test some common CI environment variables that might exist
       const ciVars = ['CI', 'GITHUB_ACTIONS', 'TRAVIS', 'CIRCLECI', 'BUILD_NUMBER'];
 
-      ciVars.forEach(varName => {
+      ciVars.forEach((varName) => {
         const value = adapter.get(varName);
         const exists = adapter.has(varName);
 

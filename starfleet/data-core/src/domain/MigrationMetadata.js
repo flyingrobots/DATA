@@ -54,18 +54,24 @@ export class MigrationMetadata {
       if (typeof metadata.testing !== 'object') {
         errors.push('testing must be an object');
       } else {
-        if (metadata.testing.tested_at !== null &&
-            (!metadata.testing.tested_at || !this._isValidISO8601(metadata.testing.tested_at))) {
+        if (
+          metadata.testing.tested_at !== null &&
+          (!metadata.testing.tested_at || !this._isValidISO8601(metadata.testing.tested_at))
+        ) {
           errors.push('testing.tested_at must be null or valid ISO 8601 date string');
         }
 
-        if (metadata.testing.tests_passed !== undefined &&
-            (!Number.isInteger(metadata.testing.tests_passed) || metadata.testing.tests_passed < 0)) {
+        if (
+          metadata.testing.tests_passed !== undefined &&
+          (!Number.isInteger(metadata.testing.tests_passed) || metadata.testing.tests_passed < 0)
+        ) {
           errors.push('testing.tests_passed must be a non-negative integer');
         }
 
-        if (metadata.testing.tests_failed !== undefined &&
-            (!Number.isInteger(metadata.testing.tests_failed) || metadata.testing.tests_failed < 0)) {
+        if (
+          metadata.testing.tests_failed !== undefined &&
+          (!Number.isInteger(metadata.testing.tests_failed) || metadata.testing.tests_failed < 0)
+        ) {
           errors.push('testing.tests_failed must be a non-negative integer');
         }
       }
@@ -76,13 +82,17 @@ export class MigrationMetadata {
       if (typeof metadata.promotion !== 'object') {
         errors.push('promotion must be an object');
       } else {
-        if (metadata.promotion.promoted_at !== null &&
-            (!metadata.promotion.promoted_at || !this._isValidISO8601(metadata.promotion.promoted_at))) {
+        if (
+          metadata.promotion.promoted_at !== null &&
+          (!metadata.promotion.promoted_at || !this._isValidISO8601(metadata.promotion.promoted_at))
+        ) {
           errors.push('promotion.promoted_at must be null or valid ISO 8601 date string');
         }
 
-        if (metadata.promotion.promoted_by !== null &&
-            (!metadata.promotion.promoted_by || typeof metadata.promotion.promoted_by !== 'string')) {
+        if (
+          metadata.promotion.promoted_by !== null &&
+          (!metadata.promotion.promoted_by || typeof metadata.promotion.promoted_by !== 'string')
+        ) {
           errors.push('promotion.promoted_by must be null or a non-empty string');
         }
       }
@@ -247,18 +257,22 @@ export class MigrationMetadata {
       generated: metadata.generated,
       valid: validation.valid,
       errors: validation.errors || [],
-      testingSummary: metadata.testing ? {
-        tested: metadata.testing.tested_at !== null,
-        testedAt: metadata.testing.tested_at,
-        passed: metadata.testing.tests_passed || 0,
-        failed: metadata.testing.tests_failed || 0,
-        total: (metadata.testing.tests_passed || 0) + (metadata.testing.tests_failed || 0)
-      } : null,
-      promotionSummary: metadata.promotion ? {
-        promoted: metadata.promotion.promoted_at !== null,
-        promotedAt: metadata.promotion.promoted_at,
-        promotedBy: metadata.promotion.promoted_by
-      } : null
+      testingSummary: metadata.testing
+        ? {
+          tested: metadata.testing.tested_at !== null,
+          testedAt: metadata.testing.tested_at,
+          passed: metadata.testing.tests_passed || 0,
+          failed: metadata.testing.tests_failed || 0,
+          total: (metadata.testing.tests_passed || 0) + (metadata.testing.tests_failed || 0)
+        }
+        : null,
+      promotionSummary: metadata.promotion
+        ? {
+          promoted: metadata.promotion.promoted_at !== null,
+          promotedAt: metadata.promotion.promoted_at,
+          promotedBy: metadata.promotion.promoted_by
+        }
+        : null
     };
   }
 
@@ -303,8 +317,7 @@ export class MigrationMetadata {
    */
   _isValidISO8601(dateString) {
     const date = new Date(dateString);
-    return date instanceof Date && !isNaN(date.getTime()) &&
-           dateString === date.toISOString();
+    return date instanceof Date && !isNaN(date.getTime()) && dateString === date.toISOString();
   }
 
   /**

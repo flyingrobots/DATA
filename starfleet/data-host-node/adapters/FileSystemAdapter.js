@@ -164,7 +164,7 @@ export class FileSystemAdapter extends FileSystemPort {
 
       if (options.withFileTypes) {
         const entries = await fs.readdir(resolvedPath, { withFileTypes: true });
-        return entries.map(entry => ({
+        return entries.map((entry) => ({
           name: entry.name,
           isFile: entry.isFile(),
           isDirectory: entry.isDirectory()

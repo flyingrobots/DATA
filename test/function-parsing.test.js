@@ -197,14 +197,16 @@ describe('pgTAPTestScanner Function Assertion Parsing', () => {
       expect(assertions).toHaveLength(4);
 
       // Mock test file structure for coverage map building
-      scanner.testFiles = [{
-        filePath: '/test/functions.sql',
-        fileName: 'functions.sql',
-        assertions,
-        planCount: 4,
-        dependencies: [],
-        metadata: {}
-      }];
+      scanner.testFiles = [
+        {
+          filePath: '/test/functions.sql',
+          fileName: 'functions.sql',
+          assertions,
+          planCount: 4,
+          dependencies: [],
+          metadata: {}
+        }
+      ];
 
       scanner._buildCoverageMap();
 
