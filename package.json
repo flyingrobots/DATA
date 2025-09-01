@@ -29,11 +29,10 @@
     "migrate:dev": "npm run migrate:generate && npm run migrate:test",
     "migrate:prod": "npm run migrate:test && npm run migrate:promote",
     "migrate:ci": "npm run migrate:verify && npm run migrate:test",
-    "jsdoc:generate": "find src bin scripts -name '*.js' -type f | xargs node ./scripts/jsdoc/generate-jsdoc.js",
-    "jsdoc:generate:verbose": "find src bin scripts -name '*.js' -type f | xargs node ./scripts/jsdoc/generate-jsdoc.js --verbose",
-    "jsdoc:generate:force": "find src bin scripts -name '*.js' -type f | xargs node ./scripts/jsdoc/generate-jsdoc.js --force",
-    "jsdoc:files": "node ./scripts/jsdoc/generate-jsdoc.js",
-    "jsdoc:dry-run": "find src bin scripts -name '*.js' -type f | xargs node ./scripts/jsdoc/generate-jsdoc.js --dry-run --verbose",
+    "jsdoc:ai": "node scripts/jsdoc-ai.js",
+    "jsdoc:staged": "node scripts/jsdoc-ai.js",
+    "jsdoc:all": "find src bin scripts -name '*.js' -type f -not -path '*/node_modules/*' | xargs node scripts/jsdoc-ai.js",
+    "jsdoc:starfleet": "find starfleet -name '*.js' -type f -not -path '*/node_modules/*' | xargs node scripts/jsdoc-ai.js",
     "prepare": "husky"
   },
   "keywords": [

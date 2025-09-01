@@ -6,7 +6,7 @@
  * Simple executable that imports and runs the CLI
  */
 
-import { cli } from '../index.js';
+import { cli } from '../src/index.js';
 
 // Run CLI with process arguments
 cli(process.argv).catch(error => {

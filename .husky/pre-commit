@@ -16,6 +16,13 @@ if [ -z "$STAGED" ]; then
   exit 0
 fi
 
+# AI-powered JSDoc generation for JS files
+JS_STAGED="$(echo "$STAGED" | grep '\.js$' || true)"
+if [ -n "$JS_STAGED" ] && [ -f "scripts/jsdoc-ai.js" ]; then
+  echo "🤖 Generating AI-powered JSDoc comments..."
+  node scripts/jsdoc-ai.js || echo "⚠ JSDoc generation failed, continuing with commit"
+fi
+
 # Prefer pnpm if available, otherwise fallback
 if command -v pnpm >/dev/null 2>&1; then
   echo "🔧 Linting with pnpm exec eslint"
