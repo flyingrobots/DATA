@@ -4,7 +4,11 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TestRequirementAnalyzer, TEST_TYPES, TEST_PRIORITIES } from '../src/lib/testing/TestRequirementAnalyzer.js';
+import {
+  TestRequirementAnalyzer,
+  TEST_TYPES,
+  TEST_PRIORITIES
+} from '../src/lib/testing/TestRequirementAnalyzer.js';
 
 describe('TestRequirementAnalyzer - Column Test Mapping', () => {
   let analyzer;
@@ -29,7 +33,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
       );
 
       expect(requirements).toHaveLength(1);
-      
+
       const req = requirements[0];
       expect(req.type).toBe(TEST_TYPES.SCHEMA);
       expect(req.priority).toBe(TEST_PRIORITIES.HIGH);
@@ -42,7 +46,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
 
     it('should generate test requirements for DROP_COLUMN operation', () => {
       const operation = {
-        sql: "ALTER TABLE users DROP COLUMN old_field;",
+        sql: 'ALTER TABLE users DROP COLUMN old_field;',
         type: 'ALTER_TABLE'
       };
 
@@ -55,7 +59,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
       );
 
       expect(requirements).toHaveLength(2); // Drop test + comprehensive validation
-      
+
       const dropReq = requirements[0];
       expect(dropReq.type).toBe(TEST_TYPES.SCHEMA);
       expect(dropReq.priority).toBe(TEST_PRIORITIES.CRITICAL);
@@ -66,7 +70,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
 
     it('should generate test requirements for ALTER_TYPE operation', () => {
       const operation = {
-        sql: "ALTER TABLE users ALTER COLUMN age TYPE INTEGER;",
+        sql: 'ALTER TABLE users ALTER COLUMN age TYPE INTEGER;',
         type: 'ALTER_TABLE'
       };
 
@@ -93,7 +97,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
 
     it('should generate test requirements for SET_NOT_NULL operation', () => {
       const operation = {
-        sql: "ALTER TABLE users ALTER COLUMN name SET NOT NULL;",
+        sql: 'ALTER TABLE users ALTER COLUMN name SET NOT NULL;',
         type: 'ALTER_TABLE'
       };
 
@@ -116,7 +120,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
 
     it('should generate test requirements for DROP_NOT_NULL operation', () => {
       const operation = {
-        sql: "ALTER TABLE users ALTER COLUMN description DROP NOT NULL;",
+        sql: 'ALTER TABLE users ALTER COLUMN description DROP NOT NULL;',
         type: 'ALTER_TABLE'
       };
 
@@ -163,7 +167,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
 
     it('should generate test requirements for DROP_DEFAULT operation', () => {
       const operation = {
-        sql: "ALTER TABLE users ALTER COLUMN status DROP DEFAULT;",
+        sql: 'ALTER TABLE users ALTER COLUMN status DROP DEFAULT;',
         type: 'ALTER_TABLE'
       };
 
@@ -186,7 +190,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
 
     it('should handle unknown column operations gracefully', () => {
       const operation = {
-        sql: "ALTER TABLE users ALTER COLUMN some_field SOME_UNKNOWN_OP;",
+        sql: 'ALTER TABLE users ALTER COLUMN some_field SOME_UNKNOWN_OP;',
         type: 'ALTER_TABLE'
       };
 
@@ -212,7 +216,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
   describe('_generateConstraintTests', () => {
     it('should generate primary key constraint tests', () => {
       const operation = {
-        sql: "ALTER TABLE users ADD CONSTRAINT pk_users PRIMARY KEY (id);",
+        sql: 'ALTER TABLE users ADD CONSTRAINT pk_users PRIMARY KEY (id);',
         type: 'ALTER_TABLE'
       };
 
@@ -234,7 +238,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
 
     it('should generate foreign key constraint tests', () => {
       const operation = {
-        sql: "ALTER TABLE posts ADD CONSTRAINT fk_posts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;",
+        sql: 'ALTER TABLE posts ADD CONSTRAINT fk_posts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;',
         type: 'ALTER_TABLE'
       };
 
@@ -259,7 +263,7 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
 
     it('should generate check constraint tests', () => {
       const operation = {
-        sql: "ALTER TABLE users ADD CONSTRAINT chk_age CHECK (age >= 18);",
+        sql: 'ALTER TABLE users ADD CONSTRAINT chk_age CHECK (age >= 18);',
         type: 'ALTER_TABLE'
       };
 
@@ -283,14 +287,18 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
 
   describe('Column parsing helpers', () => {
     it('should extract column names correctly', () => {
-      expect(analyzer._extractColumnName("ADD COLUMN email VARCHAR(255)", "ADD COLUMN")).toBe("email");
-      expect(analyzer._extractColumnName("DROP COLUMN old_field", "DROP COLUMN")).toBe("old_field");
-      expect(analyzer._extractColumnName("ALTER COLUMN name TYPE TEXT", "ALTER COLUMN")).toBe("name");
+      expect(analyzer._extractColumnName('ADD COLUMN email VARCHAR(255)', 'ADD COLUMN')).toBe(
+        'email'
+      );
+      expect(analyzer._extractColumnName('DROP COLUMN old_field', 'DROP COLUMN')).toBe('old_field');
+      expect(analyzer._extractColumnName('ALTER COLUMN name TYPE TEXT', 'ALTER COLUMN')).toBe(
+        'name'
+      );
     });
 
     it('should parse column definitions correctly', () => {
       const sql = "ADD COLUMN email VARCHAR(255) NOT NULL DEFAULT 'user@example.com' UNIQUE";
-      const metadata = analyzer._parseColumnConstraints(sql, "email");
+      const metadata = analyzer._parseColumnConstraints(sql, 'email');
 
       expect(metadata.type).toBe('VARCHAR(255)');
       expect(metadata.notNull).toBe(true);
@@ -300,10 +308,20 @@ describe('TestRequirementAnalyzer - Column Test Mapping', () => {
     });
 
     it('should identify constraint types correctly', () => {
-      expect(analyzer._identifyConstraintType("ADD CONSTRAINT pk_test PRIMARY KEY (id)")).toBe('PRIMARY_KEY');
-      expect(analyzer._identifyConstraintType("ADD CONSTRAINT fk_test FOREIGN KEY (user_id) REFERENCES users(id)")).toBe('FOREIGN_KEY');
-      expect(analyzer._identifyConstraintType("ADD CONSTRAINT uk_test UNIQUE (email)")).toBe('UNIQUE');
-      expect(analyzer._identifyConstraintType("ADD CONSTRAINT chk_test CHECK (age > 0)")).toBe('CHECK');
+      expect(analyzer._identifyConstraintType('ADD CONSTRAINT pk_test PRIMARY KEY (id)')).toBe(
+        'PRIMARY_KEY'
+      );
+      expect(
+        analyzer._identifyConstraintType(
+          'ADD CONSTRAINT fk_test FOREIGN KEY (user_id) REFERENCES users(id)'
+        )
+      ).toBe('FOREIGN_KEY');
+      expect(analyzer._identifyConstraintType('ADD CONSTRAINT uk_test UNIQUE (email)')).toBe(
+        'UNIQUE'
+      );
+      expect(analyzer._identifyConstraintType('ADD CONSTRAINT chk_test CHECK (age > 0)')).toBe(
+        'CHECK'
+      );
     });
   });
 });

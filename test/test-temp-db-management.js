@@ -1,6 +1,6 @@
 /**
  * Test for temp database management functionality in DiffEngine
- * 
+ *
  * This test verifies:
  * - createTempDatabase creates unique temp DB
  * - cleanupTempDatabase drops temp DB
@@ -8,7 +8,7 @@
  * - Resource tracking prevents orphans
  */
 
-const DiffEngine = require('../src/lib/DiffEngine');
+import DiffEngine from '../src/lib/DiffEngine.js';
 
 async function runTempDbTests() {
   console.log('🧪 Testing Temp Database Management...\n');
@@ -43,7 +43,9 @@ async function runTempDbTests() {
     `;
 
     const applyResult = await diffEngine.applySchemaToTemp(dbUrl, testSchema);
-    console.log(`✅ Schema applied successfully. Statements executed: ${applyResult.statementsExecuted}`);
+    console.log(
+      `✅ Schema applied successfully. Statements executed: ${applyResult.statementsExecuted}`
+    );
 
     // Test 3: Check tracking
     console.log('\n📋 Test 3: Checking temp database tracking...');
@@ -65,14 +67,13 @@ async function runTempDbTests() {
     // Test 6: Cleanup all remaining databases
     console.log('\n🧹 Test 6: Cleaning up all remaining databases...');
     const cleanupSummary = await diffEngine.cleanupAllTempDatabases();
-    console.log(`✅ Cleanup summary:`, cleanupSummary);
+    console.log('✅ Cleanup summary:', cleanupSummary);
 
     console.log('\n🎉 All temp database management tests passed!\n');
-
   } catch (error) {
     console.error('\n💥 Test failed:', error.message);
     console.error('Stack trace:', error.stack);
-    
+
     // Attempt cleanup even if tests fail
     try {
       console.log('\n🧹 Attempting emergency cleanup...');
@@ -84,14 +85,16 @@ async function runTempDbTests() {
 }
 
 // Run tests if this file is executed directly
-if (require.main === module) {
-  runTempDbTests().then(() => {
-    console.log('✅ Test execution complete');
-    process.exit(0);
-  }).catch((error) => {
-    console.error('❌ Test execution failed:', error);
-    process.exit(1);
-  });
+if (import.meta.url === `file://${process.argv[1]}`) {
+  runTempDbTests()
+    .then(() => {
+      console.log('✅ Test execution complete');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('❌ Test execution failed:', error);
+      process.exit(1);
+    });
 }
 
-module.exports = { runTempDbTests };
+export default { runTempDbTests };

@@ -1,0 +1,275 @@
+{
+  "coordinator": {
+    "role": "execution_orchestrator",
+    "version": "1.0.0",
+    "project": "DATA JavaScript ESM Refactor",
+    "responsibilities": [
+      "Monitor system resources (CPU, memory, I/O)",
+      "Manage task frontier (ready queue)",
+      "Assign tasks to workers based on capabilities",
+      "Enforce resource limits and mutual exclusions",
+      "Handle backpressure and circuit breaking",
+      "Track progress and manage checkpoints",
+      "Coordinate rollbacks on failure"
+    ],
+    "state_management": {
+      "task_states": {
+        "blocked": "Dependencies not met",
+        "ready": "In frontier, awaiting resources",
+        "queued": "Resources available, awaiting worker",
+        "assigned": "Assigned to worker",
+        "running": "Actively executing",
+        "paused": "Temporarily suspended for resources",
+        "checkpointed": "At a checkpoint, can resume",
+        "completed": "Successfully finished",
+        "failed": "Execution failed",
+        "rolled_back": "Reverted after failure"
+      },
+      "frontier_management": {
+        "ready_queue": [],
+        "resource_wait_queue": [],
+        "worker_assignments": {},
+        "resource_allocations": {},
+        "checkpoint_registry": {}
+      }
+    },
+    "scheduling_loop": {
+      "interval_ms": 1000,
+      "steps": [
+        "update_frontier()",
+        "check_system_health()",
+        "apply_backpressure()",
+        "prioritize_ready_tasks()",
+        "match_tasks_to_workers()",
+        "dispatch_tasks()",
+        "monitor_running_tasks()",
+        "handle_completions()",
+        "update_metrics()"
+      ]
+    },
+    "policies": {
+      "backpressure": {
+        "triggers": [
+          {"metric": "cpu_usage", "threshold": 80, "action": "pause_low_priority"},
+          {"metric": "memory_usage", "threshold": 85, "action": "defer_memory_intensive"},
+          {"metric": "error_rate", "threshold": 5, "action": "circuit_break"},
+          {"metric": "test_suite_usage", "threshold": 4, "action": "queue_test_tasks"}
+        ],
+        "recovery": {
+          "cool_down_seconds": 30,
+          "gradual_resume": true,
+          "resume_rate": 1
+        }
+      },
+      "resource_allocation": {
+        "strategy": "bin_packing_with_headroom",
+        "headroom_percent": 20,
+        "oversubscription_allowed": false,
+        "preemption_enabled": true,
+        "preemption_priorities": ["low", "medium", "high", "critical"],
+        "special_resources": {
+          "package_json": {
+            "type": "exclusive",
+            "max_holders": 1,
+            "timeout_ms": 180000
+          },
+          ".eslintrc.json": {
+            "type": "exclusive",
+            "max_holders": 1,
+            "timeout_ms": 180000
+          },
+          "test_suite": {
+            "type": "shared_pool",
+            "max_concurrent": 4,
+            "queue_when_full": true
+          }
+        }
+      },
+      "worker_matching": {
+        "strategy": "capability_and_load_balanced",
+        "prefer_specialized_workers": true,
+        "max_tasks_per_worker": 2,
+        "capability_requirements": {
+          "P1.T001": ["javascript", "esm", "node"],
+          "P1.T002": ["javascript", "architecture", "pure-js"],
+          "P1.T003": ["node", "javascript", "adapters"],
+          "P1.T004": ["javascript", "events", "runtime-validation"],
+          "P1.T005": ["javascript", "esm", "migration"],
+          "P1.T006": ["deno", "edge-functions", "templates"],
+          "P1.T007": ["javascript", "dependency-injection"],
+          "P1.T008": ["ai", "jsdoc", "git-hooks"],
+          "P1.T009": ["jsdoc", "documentation"],
+          "P1.T010": ["javascript", "safety-gates"],
+          "P1.T011": ["testing", "vitest", "javascript"],
+          "P1.T012": ["validation", "zero-build"]
+        }
+      },
+      "failure_handling": {
+        "retry_policy": "exponential_backoff",
+        "max_retries": 3,
+        "failure_threshold": 0.2,
+        "cascade_prevention": true,
+        "checkpoint_recovery": true,
+        "rollback_strategy": {
+          "P1.T001": "restore_original_configs",
+          "P1.T002": "remove_package_directory",
+          "P1.T003": "remove_package_directory",
+          "P1.T004": "restore_from_checkpoint",
+          "P1.T005": "restore_from_checkpoint",
+          "P1.T006": "remove_templates",
+          "P1.T007": "restore_from_checkpoint",
+          "P1.T008": "remove_hooks",
+          "P1.T009": "continue_without",
+          "P1.T010": "restore_from_checkpoint",
+          "P1.T011": "restore_from_checkpoint",
+          "P1.T012": "continue_without"
+        }
+      }
+    },
+    "monitoring": {
+      "metrics_collection_interval": 10,
+      "metrics": [
+        "task_throughput",
+        "average_wait_time",
+        "resource_utilization",
+        "failure_rate",
+        "checkpoint_success_rate",
+        "test_suite_utilization",
+        "jsdoc_coverage",
+        "esm_migration_progress"
+      ],
+      "alerts": [
+        {
+          "condition": "failure_rate > 0.1",
+          "action": "reduce_concurrency",
+          "notify": "logs/alerts.log"
+        },
+        {
+          "condition": "test_suite_utilization > 0.9",
+          "action": "throttle_test_tasks",
+          "notify": "logs/resource-alerts.log"
+        },
+        {
+          "condition": "memory_usage > 0.85",
+          "action": "pause_memory_intensive",
+          "notify": "logs/memory-alerts.log"
+        }
+      ],
+      "progress_tracking": {
+        "checkpoints": {
+          "foundation_complete": ["P1.T001"],
+          "core_packages_ready": ["P1.T002", "P1.T003"],
+          "event_system_ready": ["P1.T004"],
+          "commands_migrated": ["P1.T005"],
+          "edge_templates_ready": ["P1.T006"],
+          "dependency_injection_ready": ["P1.T007"],
+          "jsdoc_pipeline_ready": ["P1.T008"],
+          "documentation_complete": ["P1.T009"],
+          "safety_gates_ready": ["P1.T010"],
+          "tests_complete": ["P1.T011"],
+          "validation_complete": ["P1.T012"]
+        },
+        "milestones": [
+          {"at": "10%", "name": "ESM configured", "tasks": ["P1.T001"]},
+          {"at": "25%", "name": "Core packages created", "tasks": ["P1.T002", "P1.T003"]},
+          {"at": "40%", "name": "Event system ready", "tasks": ["P1.T004"]},
+          {"at": "55%", "name": "Commands migrated", "tasks": ["P1.T005"]},
+          {"at": "70%", "name": "Infrastructure complete", "tasks": ["P1.T006", "P1.T007", "P1.T008"]},
+          {"at": "85%", "name": "Documentation added", "tasks": ["P1.T009", "P1.T010"]},
+          {"at": "95%", "name": "Tests passing", "tasks": ["P1.T011"]},
+          {"at": "100%", "name": "Zero build validated", "tasks": ["P1.T012"]}
+        ]
+      }
+    }
+  },
+  "worker_pool": {
+    "min_workers": 2,
+    "max_workers": 4,
+    "scaling_policy": "adaptive",
+    "scale_up_threshold": {
+      "ready_queue_size": 3,
+      "avg_wait_time_seconds": 300
+    },
+    "scale_down_threshold": {
+      "idle_workers": 2,
+      "idle_duration_seconds": 600
+    },
+    "worker_template": {
+      "capabilities": ["javascript", "node", "testing", "migration"],
+      "resource_capacity": {
+        "cpu_cores": 2,
+        "memory_mb": 2048,
+        "disk_io_mbps": 30
+      },
+      "execution_protocol": {
+        "heartbeat_interval": 30,
+        "progress_updates": true,
+        "can_checkpoint": true
+      }
+    },
+    "specialized_workers": [
+      {
+        "id": "worker-javascript",
+        "capabilities": ["javascript", "esm", "node", "migration", "pure-js"],
+        "preferred_tasks": ["P1.T001", "P1.T002", "P1.T005"]
+      },
+      {
+        "id": "worker-infrastructure",
+        "capabilities": ["node", "adapters", "dependency-injection", "safety-gates"],
+        "preferred_tasks": ["P1.T003", "P1.T007", "P1.T010"]
+      },
+      {
+        "id": "worker-events",
+        "capabilities": ["javascript", "events", "runtime-validation", "deno", "edge-functions"],
+        "preferred_tasks": ["P1.T004", "P1.T006"]
+      },
+      {
+        "id": "worker-documentation",
+        "capabilities": ["jsdoc", "ai", "git-hooks", "documentation", "testing"],
+        "preferred_tasks": ["P1.T008", "P1.T009", "P1.T011"]
+      },
+      {
+        "id": "worker-validation",
+        "capabilities": ["validation", "zero-build", "testing"],
+        "preferred_tasks": ["P1.T012"]
+      }
+    ]
+  },
+  "execution_hints": {
+    "optimal_sequence": [
+      "P1.T001",
+      ["P1.T002", "P1.T003", "P1.T008"],
+      ["P1.T004", "P1.T006", "P1.T007"],
+      "P1.T005",
+      ["P1.T009", "P1.T010"],
+      "P1.T011",
+      "P1.T012"
+    ],
+    "critical_path_optimization": [
+      {
+        "optimization": "Prioritize P1.T001 with dedicated resources",
+        "impact": "Unblocks all subsequent tasks"
+      },
+      {
+        "optimization": "Parallelize package creation (T002-T003) with JSDoc setup (T008)",
+        "impact": "Save 2-3 hours"
+      },
+      {
+        "optimization": "Run JSDoc generation concurrently with safety gates",
+        "impact": "Optimize documentation phase"
+      }
+    ],
+    "resource_optimization": [
+      {
+        "resource": "package.json",
+        "strategy": "Complete early modifications in T001 and T008",
+        "impact": "Avoid contention"
+      },
+      {
+        "resource": "memory",
+        "strategy": "JavaScript uses less memory than TypeScript compilation",
+        "impact": "Lower resource requirements overall"
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 /**
  * pgTAPTestScanner Column Assertion Parsing Tests
- * 
+ *
  * Tests the column assertion parsing capabilities of pgTAPTestScanner
  */
 
@@ -18,7 +18,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse has_column with table and column', () => {
       const sql = "SELECT has_column('users', 'email');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('has_column');
       expect(assertions[0].target).toBe('users.email');
@@ -28,7 +28,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse has_column with schema, table, and column', () => {
       const sql = "SELECT has_column('public', 'users', 'email');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('has_column');
       expect(assertions[0].target).toBe('public.users.email');
@@ -38,7 +38,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse hasnt_column with table and column', () => {
       const sql = "SELECT hasnt_column('users', 'old_field');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('hasnt_column');
       expect(assertions[0].target).toBe('users.old_field');
@@ -48,7 +48,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse hasnt_column with schema, table, and column', () => {
       const sql = "SELECT hasnt_column('private', 'sessions', 'deprecated_field');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('hasnt_column');
       expect(assertions[0].target).toBe('private.sessions.deprecated_field');
@@ -60,7 +60,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_type_is with table, column, and type', () => {
       const sql = "SELECT col_type_is('users', 'email', 'character varying');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_type_is');
       expect(assertions[0].target).toBe('users.email');
@@ -70,7 +70,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_type_is with schema, table, column, and type', () => {
       const sql = "SELECT col_type_is('public', 'users', 'age', 'integer');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_type_is');
       expect(assertions[0].target).toBe('public.users.age');
@@ -82,7 +82,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_not_null with table and column', () => {
       const sql = "SELECT col_not_null('users', 'email');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_not_null');
       expect(assertions[0].target).toBe('users.email');
@@ -92,7 +92,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_not_null with schema, table, and column', () => {
       const sql = "SELECT col_not_null('public', 'users', 'email');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_not_null');
       expect(assertions[0].target).toBe('public.users.email');
@@ -102,7 +102,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_is_null with table and column', () => {
       const sql = "SELECT col_is_null('users', 'description');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_is_null');
       expect(assertions[0].target).toBe('users.description');
@@ -112,7 +112,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_is_null with schema, table, and column', () => {
       const sql = "SELECT col_is_null('public', 'users', 'description');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_is_null');
       expect(assertions[0].target).toBe('public.users.description');
@@ -124,7 +124,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_has_default with table and column', () => {
       const sql = "SELECT col_has_default('users', 'status');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_has_default');
       expect(assertions[0].target).toBe('users.status');
@@ -134,7 +134,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_has_default with schema, table, and column', () => {
       const sql = "SELECT col_has_default('public', 'users', 'status');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_has_default');
       expect(assertions[0].target).toBe('public.users.status');
@@ -144,7 +144,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_hasnt_default with table and column', () => {
       const sql = "SELECT col_hasnt_default('users', 'temp_field');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_hasnt_default');
       expect(assertions[0].target).toBe('users.temp_field');
@@ -154,7 +154,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_hasnt_default with schema, table, and column', () => {
       const sql = "SELECT col_hasnt_default('public', 'users', 'temp_field');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_hasnt_default');
       expect(assertions[0].target).toBe('public.users.temp_field');
@@ -166,7 +166,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_default_is with table, column, and default value', () => {
       const sql = "SELECT col_default_is('users', 'status', 'active');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_default_is');
       expect(assertions[0].target).toBe('users.status');
@@ -176,7 +176,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_default_is with schema, table, column, and default value', () => {
       const sql = "SELECT col_default_is('public', 'users', 'status', 'pending');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_default_is');
       expect(assertions[0].target).toBe('public.users.status');
@@ -186,7 +186,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_default_is with quoted string default values', () => {
       const sql = "SELECT col_default_is('users', 'email', ''user@example.com''::text);";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_default_is');
       expect(assertions[0].target).toBe('users.email');
@@ -196,7 +196,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_default_is with function default values', () => {
       const sql = "SELECT col_default_is('users', 'created_at', 'now()');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_default_is');
       expect(assertions[0].target).toBe('users.created_at');
@@ -208,7 +208,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_is_pk with table and column', () => {
       const sql = "SELECT col_is_pk('users', 'id');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_is_pk');
       expect(assertions[0].target).toBe('users.id');
@@ -218,7 +218,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_is_pk with schema, table, and column', () => {
       const sql = "SELECT col_is_pk('public', 'users', 'id');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_is_pk');
       expect(assertions[0].target).toBe('public.users.id');
@@ -228,7 +228,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_isnt_pk with table and column', () => {
       const sql = "SELECT col_isnt_pk('users', 'email');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_isnt_pk');
       expect(assertions[0].target).toBe('users.email');
@@ -238,7 +238,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should parse col_isnt_pk with schema, table, and column', () => {
       const sql = "SELECT col_isnt_pk('public', 'users', 'email');";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_isnt_pk');
       expect(assertions[0].target).toBe('public.users.email');
@@ -255,27 +255,29 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
         SELECT col_has_default('users', 'status');
         SELECT col_is_pk('users', 'id');
       `;
-      
+
       const assertions = scanner.extractAssertions(sql);
-      
+
       // Manually build coverage map for testing
-      scanner.testFiles = [{
-        filePath: '/test/column_test.sql',
-        fileName: 'column_test.sql',
-        assertions,
-        planCount: 5,
-        dependencies: [],
-        metadata: {}
-      }];
-      
+      scanner.testFiles = [
+        {
+          filePath: '/test/column_test.sql',
+          fileName: 'column_test.sql',
+          assertions,
+          planCount: 5,
+          dependencies: [],
+          metadata: {}
+        }
+      ];
+
       scanner._buildCoverageMap();
       const coverageMap = scanner.getCoverageMap();
-      
+
       expect(coverageMap.columns).toBeDefined();
       expect(Object.keys(coverageMap.columns)).toContain('users.email');
       expect(Object.keys(coverageMap.columns)).toContain('users.status');
       expect(Object.keys(coverageMap.columns)).toContain('users.id');
-      
+
       expect(coverageMap.columns['users.email']).toContain('has_column');
       expect(coverageMap.columns['users.email']).toContain('col_type_is');
       expect(coverageMap.columns['users.email']).toContain('col_not_null');
@@ -289,21 +291,23 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
         SELECT has_column('posts', 'title');
         SELECT col_is_pk('orders', 'id');
       `;
-      
+
       const assertions = scanner.extractAssertions(sql);
-      
-      scanner.testFiles = [{
-        filePath: '/test/column_test.sql',
-        fileName: 'column_test.sql',
-        assertions,
-        planCount: 3,
-        dependencies: [],
-        metadata: {}
-      }];
-      
+
+      scanner.testFiles = [
+        {
+          filePath: '/test/column_test.sql',
+          fileName: 'column_test.sql',
+          assertions,
+          planCount: 3,
+          dependencies: [],
+          metadata: {}
+        }
+      ];
+
       scanner._buildCoverageMap();
       const stats = scanner.getStatistics();
-      
+
       expect(stats.coverageStats.columnsWithTests).toBe(3); // 'users.email', 'posts.title', 'orders.id'
     });
   });
@@ -319,18 +323,18 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
         SELECT has_index('users', 'idx_users_email');
         SELECT col_is_pk('users', 'id');
       `;
-      
+
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(6); // Excludes the plan statement
-      
-      const columnAssertions = assertions.filter(a => 
-        a.type.includes('column') || a.type.startsWith('col_')
+
+      const columnAssertions = assertions.filter(
+        (a) => a.type.includes('column') || a.type.startsWith('col_')
       );
       expect(columnAssertions).toHaveLength(4);
-      
-      const otherAssertions = assertions.filter(a => 
-        !a.type.includes('column') && !a.type.startsWith('col_')
+
+      const otherAssertions = assertions.filter(
+        (a) => !a.type.includes('column') && !a.type.startsWith('col_')
       );
       expect(otherAssertions).toHaveLength(2);
     });
@@ -346,14 +350,14 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
         );
         SELECT col_not_null('users','email');
       `;
-      
+
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(3);
       expect(assertions[0].type).toBe('has_column');
       expect(assertions[1].type).toBe('col_type_is');
       expect(assertions[2].type).toBe('col_not_null');
-      
+
       expect(assertions[0].target).toBe('users.email');
       expect(assertions[1].target).toBe('public.users.description');
       expect(assertions[2].target).toBe('users.email');
@@ -372,12 +376,12 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
         SELECT col_is_pk('users', 'id');
         SELECT col_isnt_pk('users', 'email');
       `;
-      
+
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(10);
-      
-      const assertionTypes = assertions.map(a => a.type);
+
+      const assertionTypes = assertions.map((a) => a.type);
       expect(assertionTypes).toContain('has_column');
       expect(assertionTypes).toContain('hasnt_column');
       expect(assertionTypes).toContain('col_type_is');
@@ -388,10 +392,10 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
       expect(assertionTypes).toContain('col_default_is');
       expect(assertionTypes).toContain('col_is_pk');
       expect(assertionTypes).toContain('col_isnt_pk');
-      
+
       // All should be categorized as column assertions
-      const columnAssertions = assertions.filter(a => 
-        a.type.includes('column') || a.type.startsWith('col_')
+      const columnAssertions = assertions.filter(
+        (a) => a.type.includes('column') || a.type.startsWith('col_')
       );
       expect(columnAssertions).toHaveLength(10);
     });
@@ -401,7 +405,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should handle quoted column names', () => {
       const sql = 'SELECT has_column("users", "user-email");';
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('has_column');
       expect(assertions[0].target).toBe('users.user-email');
@@ -411,7 +415,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should handle backtick quoted column names', () => {
       const sql = 'SELECT has_column(`users`, `user_email`);';
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('has_column');
       expect(assertions[0].target).toBe('users.user_email');
@@ -419,19 +423,24 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     });
 
     it('should handle complex default values in col_default_is', () => {
-      const sql = "SELECT col_default_is('users', 'settings', '{\"theme\": \"dark\", \"notifications\": true}');";
+      const sql =
+        'SELECT col_default_is(\'users\', \'settings\', \'{"theme": "dark", "notifications": true}\');';
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_default_is');
       expect(assertions[0].target).toBe('users.settings');
-      expect(assertions[0].parameters).toEqual(['users', 'settings', '{"theme": "dark", "notifications": true}']);
+      expect(assertions[0].parameters).toEqual([
+        'users',
+        'settings',
+        '{"theme": "dark", "notifications": true}'
+      ]);
     });
 
     it('should handle numeric default values', () => {
       const sql = "SELECT col_default_is('users', 'score', 0);";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_default_is');
       expect(assertions[0].target).toBe('users.score');
@@ -441,7 +450,7 @@ describe('pgTAPTestScanner Column Assertion Parsing', () => {
     it('should handle boolean default values', () => {
       const sql = "SELECT col_default_is('users', 'is_active', true);";
       const assertions = scanner.extractAssertions(sql);
-      
+
       expect(assertions).toHaveLength(1);
       expect(assertions[0].type).toBe('col_default_is');
       expect(assertions[0].target).toBe('users.is_active');

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🖖 D.A.T.A. pre-commit"
+
+GIT_ROOT="$(git rev-parse --show-toplevel)"
+cd "$GIT_ROOT"
+
+# Only staged JS/TS files in repo (not node_modules / dist)
+STAGED="$(git diff --cached --name-only --diff-filter=ACM \
+  | grep -E '\.(mjs|cjs|js|ts|tsx)$' \
+  | grep -Ev '(^|/)(node_modules|dist|build)/' || true)"
+
+if [ -z "$STAGED" ]; then
+  echo "✅ No JS/TS staged — skipping lint"
+  exit 0
+fi
+
+# AI-powered JSDoc generation for JS files
+JS_STAGED="$(echo "$STAGED" | grep '\.js$' || true)"
+if [ -n "$JS_STAGED" ] && [ -f "scripts/jsdoc-ai.js" ]; then
+  echo "🤖 Generating AI-powered JSDoc comments..."
+  node scripts/jsdoc-ai.js || echo "⚠ JSDoc generation failed, continuing with commit"
+fi
+
+# Prefer pnpm if available, otherwise fallback
+if command -v pnpm >/dev/null 2>&1; then
+  echo "🔧 Linting with pnpm exec eslint"
+  pnpm exec eslint --max-warnings=0 $STAGED
+else
+  echo "🔧 Linting with npx eslint"
+  npx eslint --max-warnings=0 $STAGED
+fi
+
+# Optional: run related tests (uncomment once tests exist)
+# if command -v pnpm >/dev/null 2>&1; then
+#   pnpm exec vitest --run --passWithNoTests --findRelatedTests $STAGED
+# fi
+
+echo "✅ Hook OK"

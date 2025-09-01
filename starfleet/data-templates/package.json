@@ -1,0 +1,43 @@
+{
+  "name": "@starfleet/templates",
+  "version": "1.0.0",
+  "description": "Template generation system for Supabase Edge Functions with Deno runtime",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./lib/TemplateEngine": "./lib/TemplateEngine.js",
+    "./lib/EdgeFunctionGenerator": "./lib/EdgeFunctionGenerator.js"
+  },
+  "scripts": {
+    "lint": "eslint \"*.js\" \"lib/**/*.{js,mjs,cjs}\"",
+    "test": "vitest --run --passWithNoTests",
+    "build": "echo \"No build needed for pure JS\""
+  },
+  "keywords": [
+    "supabase",
+    "edge-functions",
+    "deno",
+    "templates",
+    "web-api"
+  ],
+  "author": "Flyingrobots Development Team",
+  "license": "MIT",
+  "dependencies": {},
+  "peerDependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "engines": {
+    "node": ">=18",
+    "deno": ">=1.40.0"
+  },
+  "files": [
+    "src",
+    "lib",
+    "index.js"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

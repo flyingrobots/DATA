@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import CommandRouter from '../src/lib/CommandRouter.js';
+import CommandRouter from '../packages/data-cli/src/lib/CommandRouter.js';
 import { z } from 'zod';
 
 describe('CommandRouter', () => {
@@ -16,13 +16,11 @@ describe('CommandRouter', () => {
   describe('Basic Routing', () => {
     it('should register and execute a simple command', async () => {
       const handler = vi.fn(async (args) => ({ result: 'success', args }));
-      
-      router
-        .command('test')
-        .handler(handler);
+
+      router.command('test').handler(handler);
 
       const result = await router.execute('test', { foo: 'bar' });
-      
+
       expect(handler).toHaveBeenCalledWith(
         { foo: 'bar' },
         expect.objectContaining({
@@ -35,35 +33,35 @@ describe('CommandRouter', () => {
 
     it('should handle subcommands', async () => {
       const handler = vi.fn(async () => 'subcommand executed');
-      
-      router
-        .command('parent')
-        .subcommand('child')
-        .handler(handler);
+
+      router.command('parent').subcommand('child').handler(handler);
 
       const result = await router.execute('parent/child', {});
-      
+
       expect(handler).toHaveBeenCalled();
       expect(result).toBe('subcommand executed');
     });
 
     it('should throw error for unregistered commands', async () => {
-      await expect(router.execute('nonexistent', {}))
-        .rejects.toThrow('No handler registered for command: nonexistent');
+      await expect(router.execute('nonexistent', {})).rejects.toThrow(
+        'No handler registered for command: nonexistent'
+      );
     });
   });
 
   describe('Zod Schema Validation', () => {
     it('should validate arguments with Zod schema', async () => {
       const handler = vi.fn(async (args) => args);
-      
+
       router
         .command('validate')
-        .schema(z.object({
-          name: z.string(),
-          age: z.number().min(0).max(120),
-          email: z.string().email().optional()
-        }))
+        .schema(
+          z.object({
+            name: z.string(),
+            age: z.number().min(0).max(120),
+            email: z.string().email().optional()
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('validate', {
@@ -89,14 +87,16 @@ describe('CommandRouter', () => {
 
     it('should apply default values from schema', async () => {
       const handler = vi.fn(async (args) => args);
-      
+
       router
         .command('defaults')
-        .schema(z.object({
-          verbose: z.boolean().default(false),
-          output: z.string().default('console'),
-          limit: z.number().default(10)
-        }))
+        .schema(
+          z.object({
+            verbose: z.boolean().default(false),
+            output: z.string().default('console'),
+            limit: z.number().default(10)
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('defaults', {});
@@ -111,26 +111,30 @@ describe('CommandRouter', () => {
     it('should reject invalid arguments', async () => {
       router
         .command('strict')
-        .schema(z.object({
-          count: z.number().int().positive()
-        }))
+        .schema(
+          z.object({
+            count: z.number().int().positive()
+          })
+        )
         .handler(async () => 'should not reach');
 
-      await expect(router.execute('strict', { count: 'not-a-number' }))
-        .rejects.toThrow('Validation failed');
+      await expect(router.execute('strict', { count: 'not-a-number' })).rejects.toThrow(
+        'Validation failed'
+      );
 
-      await expect(router.execute('strict', { count: -5 }))
-        .rejects.toThrow('Validation failed');
+      await expect(router.execute('strict', { count: -5 })).rejects.toThrow('Validation failed');
     });
 
     it('should handle enum schemas', async () => {
       const handler = vi.fn(async (args) => args);
-      
+
       router
         .command('format')
-        .schema(z.object({
-          type: z.enum(['json', 'yaml', 'xml']).default('json')
-        }))
+        .schema(
+          z.object({
+            type: z.enum(['json', 'yaml', 'xml']).default('json')
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('format', { type: 'yaml' });
@@ -144,14 +148,16 @@ describe('CommandRouter', () => {
   describe('CLI Argument Conversion', () => {
     it('should convert kebab-case CLI args to camelCase', async () => {
       const handler = vi.fn(async (args) => args);
-      
+
       router
         .command('convert')
-        .schema(z.object({
-          firstName: z.string(),
-          lastName: z.string(),
-          phoneNumber: z.string().optional()
-        }))
+        .schema(
+          z.object({
+            firstName: z.string(),
+            lastName: z.string(),
+            phoneNumber: z.string().optional()
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('convert', {
@@ -169,14 +175,16 @@ describe('CommandRouter', () => {
 
     it('should handle boolean flags correctly', async () => {
       const handler = vi.fn(async (args) => args);
-      
+
       router
         .command('flags')
-        .schema(z.object({
-          verbose: z.boolean().default(false),
-          quiet: z.boolean().default(false),
-          force: z.boolean().default(false)
-        }))
+        .schema(
+          z.object({
+            verbose: z.boolean().default(false),
+            quiet: z.boolean().default(false),
+            force: z.boolean().default(false)
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('flags', {
@@ -196,18 +204,20 @@ describe('CommandRouter', () => {
   describe('Help Generation', () => {
     it('should return help flag when --help is passed', async () => {
       const handler = vi.fn();
-      
+
       router
         .command('helpful')
         .description('A helpful command')
-        .schema(z.object({
-          input: z.string().describe('Input file path'),
-          output: z.string().describe('Output file path')
-        }))
+        .schema(
+          z.object({
+            input: z.string().describe('Input file path'),
+            output: z.string().describe('Output file path')
+          })
+        )
         .handler(handler);
 
       const result = await router.execute('helpful', { '--help': true });
-      
+
       expect(result).toEqual({ help: true });
       expect(handler).not.toHaveBeenCalled();
     });
@@ -218,17 +228,15 @@ describe('CommandRouter', () => {
       const middleware = vi.fn(async (context) => {
         context.args.middlewareRan = true;
       });
-      
+
       const handler = vi.fn(async (args) => args);
-      
+
       router.use(middleware);
-      
-      router
-        .command('middleware-test')
-        .handler(handler);
+
+      router.command('middleware-test').handler(handler);
 
       const result = await router.execute('middleware-test', { foo: 'bar' });
-      
+
       expect(middleware).toHaveBeenCalled();
       expect(result.middlewareRan).toBe(true);
     });
@@ -237,16 +245,13 @@ describe('CommandRouter', () => {
       const routeMiddleware = vi.fn(async (context) => {
         context.args.routeSpecific = true;
       });
-      
+
       const handler = vi.fn(async (args) => args);
-      
-      router
-        .command('route-middleware')
-        .use(routeMiddleware)
-        .handler(handler);
+
+      router.command('route-middleware').use(routeMiddleware).handler(handler);
 
       const result = await router.execute('route-middleware', {});
-      
+
       expect(routeMiddleware).toHaveBeenCalled();
       expect(result.routeSpecific).toBe(true);
     });
@@ -255,14 +260,12 @@ describe('CommandRouter', () => {
   describe('Pattern Matching', () => {
     it('should match wildcard patterns', async () => {
       const handler = vi.fn(async () => 'wildcard matched');
-      
-      router
-        .command('api/*')
-        .handler(handler);
+
+      router.command('api/*').handler(handler);
 
       const result1 = await router.execute('api/users', {});
       const result2 = await router.execute('api/posts/123', {});
-      
+
       expect(result1).toBe('wildcard matched');
       expect(result2).toBe('wildcard matched');
       expect(handler).toHaveBeenCalledTimes(2);
@@ -277,7 +280,7 @@ describe('CommandRouter', () => {
           this.logger = logger;
           this.isProd = isProd;
         }
-        
+
         async execute(args) {
           return {
             executed: true,
@@ -286,16 +289,14 @@ describe('CommandRouter', () => {
           };
         }
       }
-      
+
       router.config = { test: 'config' };
       router.logger = console;
-      
-      router
-        .command('class-handler')
-        .handler(TestCommand);
+
+      router.command('class-handler').handler(TestCommand);
 
       const result = await router.execute('class-handler', { prod: true });
-      
+
       expect(result.executed).toBe(true);
       expect(result.hasConfig).toBe(true);
     });
@@ -313,7 +314,7 @@ describe('CommandRouter', () => {
 
     it('should validate port numbers correctly', () => {
       const portSchema = CommandRouter.schemas.port;
-      
+
       expect(portSchema.safeParse(3000).success).toBe(true);
       expect(portSchema.safeParse(80).success).toBe(true);
       expect(portSchema.safeParse(0).success).toBe(false);
@@ -326,16 +327,13 @@ describe('CommandRouter', () => {
     it('should emit error events on failure', async () => {
       const errorHandler = vi.fn();
       router.on('error', errorHandler);
-      
-      router
-        .command('failing')
-        .handler(async () => {
-          throw new Error('Command failed');
-        });
 
-      await expect(router.execute('failing', {}))
-        .rejects.toThrow('Command failed');
-      
+      router.command('failing').handler(async () => {
+        throw new Error('Command failed');
+      });
+
+      await expect(router.execute('failing', {})).rejects.toThrow('Command failed');
+
       expect(errorHandler).toHaveBeenCalledWith(
         expect.objectContaining({
           path: 'failing',
@@ -352,7 +350,7 @@ describe('CommandRouter', () => {
         .description('First command')
         .schema(z.object({ test: z.string() }))
         .handler(async () => {});
-      
+
       router
         .command('second')
         .subcommand('sub')
@@ -360,7 +358,7 @@ describe('CommandRouter', () => {
         .handler(async () => {});
 
       const routes = router.getRoutes();
-      
+
       expect(routes).toHaveLength(2);
       expect(routes[0]).toEqual({
         path: 'first',

@@ -5,11 +5,11 @@
  * through migration generation, testing, and deployment with diff tracking.
  */
 
-const { describe, it, expect, beforeEach, afterEach } = require('vitest');
-const fs = require('fs').promises;
-const path = require('path');
-const { exec } = require('child_process');
-const { promisify } = require('util');
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import fs from 'fs'.promises;
+import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 const execAsync = promisify(exec);
 
 describe('D.A.T.A. Full Migration Workflow', () => {

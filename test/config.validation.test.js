@@ -1,10 +1,10 @@
-const { describe, it, expect } = require('vitest');
-const { 
+import { describe, it, expect } from 'vitest';
+import {
   DataConfigSchema,
   parsedataConfig,
   safeParsedataConfig,
-  mergeConfigs 
-} = require('../src/lib/schemas/DataConfigSchema');
+  mergeConfigs
+} from '../src/lib/schemas/DataConfigSchema.js';
 
 describe('dataConfigSchema', () => {
   describe('parsedataConfig', () => {
@@ -16,7 +16,7 @@ describe('dataConfigSchema', () => {
           }
         }
       };
-      
+
       expect(() => parsedataConfig(config)).not.toThrow();
     });
 
@@ -33,7 +33,7 @@ describe('dataConfigSchema', () => {
           }
         }
       };
-      
+
       expect(() => parsedataConfig(config)).toThrow();
     });
 
@@ -45,7 +45,7 @@ describe('dataConfigSchema', () => {
           }
         }
       };
-      
+
       expect(() => parsedataConfig(config)).toThrow();
     });
 
@@ -104,7 +104,7 @@ describe('dataConfigSchema', () => {
           timestamps: false
         }
       };
-      
+
       const parsed = parsedataConfig(config);
       expect(parsed).toMatchObject(config);
     });
@@ -118,7 +118,7 @@ describe('dataConfigSchema', () => {
           }
         }
       };
-      
+
       expect(() => parsedataConfig(config)).not.toThrow();
     });
 
@@ -131,7 +131,7 @@ describe('dataConfigSchema', () => {
           }
         }
       };
-      
+
       expect(() => parsedataConfig(config)).toThrow();
     });
 
@@ -141,15 +141,15 @@ describe('dataConfigSchema', () => {
           minimum_coverage: 150
         }
       };
-      
+
       expect(() => parsedataConfig(invalidConfig)).toThrow();
-      
+
       const validConfig = {
         test: {
           minimum_coverage: 85
         }
       };
-      
+
       expect(() => parsedataConfig(validConfig)).not.toThrow();
     });
 
@@ -159,15 +159,15 @@ describe('dataConfigSchema', () => {
           output_formats: ['console', 'invalid-format']
         }
       };
-      
+
       expect(() => parsedataConfig(invalidConfig)).toThrow();
-      
+
       const validConfig = {
         test: {
           output_formats: ['console', 'json', 'junit', 'tap', 'html']
         }
       };
-      
+
       expect(() => parsedataConfig(validConfig)).not.toThrow();
     });
 
@@ -177,15 +177,15 @@ describe('dataConfigSchema', () => {
           level: 'invalid-level'
         }
       };
-      
+
       expect(() => parsedataConfig(invalidConfig)).toThrow();
-      
+
       const validConfig = {
         logging: {
           level: 'debug'
         }
       };
-      
+
       expect(() => parsedataConfig(validConfig)).not.toThrow();
     });
   });
@@ -199,7 +199,7 @@ describe('dataConfigSchema', () => {
           }
         }
       };
-      
+
       const result = safeParsedataConfig(config);
       expect(result.success).toBe(true);
       expect(result.data).toMatchObject(config);
@@ -213,7 +213,7 @@ describe('dataConfigSchema', () => {
           }
         }
       };
-      
+
       const result = safeParsedataConfig(config);
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
@@ -232,7 +232,7 @@ describe('dataConfigSchema', () => {
           }
         }
       };
-      
+
       const result = safeParsedataConfig(config);
       expect(result.success).toBe(false);
       expect(result.error.errors.length).toBeGreaterThan(1);
@@ -252,7 +252,7 @@ describe('dataConfigSchema', () => {
           }
         }
       };
-      
+
       const override = {
         test: {
           minimum_coverage: 90
@@ -263,7 +263,7 @@ describe('dataConfigSchema', () => {
           }
         }
       };
-      
+
       const merged = mergeConfigs(base, override);
       expect(merged.test.minimum_coverage).toBe(90);
       expect(merged.test.test_timeout).toBe(300);
@@ -277,20 +277,20 @@ describe('dataConfigSchema', () => {
           minimum_coverage: 80
         }
       };
-      
+
       const override = {
         test: {
           minimum_coverage: 200 // Invalid
         }
       };
-      
+
       expect(() => mergeConfigs(base, override)).toThrow();
     });
 
     it('should handle empty configs', () => {
       const base = {};
       const override = {};
-      
+
       expect(() => mergeConfigs(base, override)).not.toThrow();
     });
 
@@ -300,13 +300,13 @@ describe('dataConfigSchema', () => {
           output_formats: ['console', 'json']
         }
       };
-      
+
       const override = {
         test: {
           output_formats: ['junit']
         }
       };
-      
+
       const merged = mergeConfigs(base, override);
       expect(merged.test.output_formats).toEqual(['junit']);
     });

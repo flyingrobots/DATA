@@ -1,0 +1,42 @@
+{
+  "name": "@starfleet/data-core",
+  "version": "1.0.0",
+  "description": "Pure JavaScript logic core for D.A.T.A. with zero I/O dependencies",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./migration/*": "./src/migration/*",
+    "./domain/*": "./src/domain/*",
+    "./config/*": "./src/config/*",
+    "./testing/*": "./src/testing/*",
+    "./application/*": "./src/application/*",
+    "./events/*": "./src/events/*",
+    "./ports/*": "./src/ports/*"
+  },
+  "scripts": {
+    "lint": "eslint \"src/**/*.{js,mjs,cjs,ts,tsx}\"",
+    "test": "vitest --run --passWithNoTests",
+    "build": "echo \"No build needed for pure JS\""
+  },
+  "keywords": [
+    "data",
+    "database",
+    "migration",
+    "sql",
+    "dependency-injection",
+    "ports-adapters"
+  ],
+  "author": "Flyingrobots Development Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "src"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

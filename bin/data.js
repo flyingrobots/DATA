@@ -2,7 +2,7 @@
 
 /**
  * D.A.T.A. CLI - Database Automation, Testing, and Alignment
- * 
+ *
  * 🖖 "Computer, prepare for database operations."
  * Provides safe, powerful database management for local and production environments
  */
@@ -14,13 +14,14 @@ process.on('unhandledRejection', (err) => {
 });
 
 // Load environment variables
-require('dotenv').config();
+import { config } from 'dotenv';
+config();
 
 // Import the main CLI
-const { cli } = require('../src/index');
+import { cli } from '../src/index.js';
 
 // Run the CLI with process arguments
-cli(process.argv).catch(error => {
+cli(process.argv).catch((error) => {
   console.error('Fatal error:', error.message);
   if (process.env.DEBUG) {
     console.error(error.stack);

@@ -1,28 +1,31 @@
-const js = require('@eslint/js');
-const tsPlugin = require('@typescript-eslint/eslint-plugin');
-const tsParser = require('@typescript-eslint/parser');
-const promisePlugin = require('eslint-plugin-promise');
+import js from '@eslint/js';
+import promisePlugin from 'eslint-plugin-promise';
 
-module.exports = [
+export default [
   js.configs.recommended,
+  {
+    ignores: [
+      'node_modules/**',
+      '.obsidian/**',
+      'dist/**',
+      'build/**',
+      'coverage/**',
+      '*.min.js',
+      '.git/**',
+      '.vitest/**',
+      '.nyc_output/**',
+      'test-results/**'
+    ]
+  },
   {
     files: ['**/*.js'],
     languageOptions: {
-      ecmaVersion: 2021,
+      ecmaVersion: 2022,
       sourceType: 'module',
-      parser: tsParser,
-      parserOptions: {
-        project: false
-      },
       globals: {
         console: 'readonly',
         process: 'readonly',
         Buffer: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        require: 'readonly',
-        module: 'readonly',
-        exports: 'readonly',
         global: 'readonly',
         Promise: 'readonly',
         setTimeout: 'readonly',
@@ -32,39 +35,46 @@ module.exports = [
       }
     },
     plugins: {
-      '@typescript-eslint': tsPlugin,
-      'promise': promisePlugin
+      promise: promisePlugin
     },
     rules: {
-      // Promise-specific rules (these work without type info)
-      
-      // Promise-specific rules
+      // Promise-specific rules for proper async handling
       'promise/catch-or-return': 'error',
       'promise/always-return': 'error',
       'promise/no-return-wrap': 'error',
-      
+      'promise/param-names': 'error',
+
       // Require await in async functions
       'require-await': 'error',
-      
+
       // Other async best practices
       'no-async-promise-executor': 'error',
       'no-await-in-loop': 'warn',
+      'no-return-await': 'error',
       'prefer-promise-reject-errors': 'error',
-      
-      // Allow console and require
+
+      // ESM-specific rules
       'no-console': 'off',
       'no-undef': 'error',
-      
-      // Allow unused args with underscore prefix
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { 
-        'argsIgnorePattern': '^_',
-        'varsIgnorePattern': '^_'
-      }],
-      
-      // Node.js specific
-      '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/no-require-imports': 'off'
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_'
+        }
+      ],
+
+      // Modern JavaScript best practices
+      'prefer-const': 'error',
+      'prefer-arrow-callback': 'error',
+      'no-var': 'error',
+      'object-shorthand': 'error',
+      semi: ['error', 'always'],
+      quotes: ['error', 'single', { avoidEscape: true }],
+      'comma-dangle': ['error', 'never'],
+      indent: ['error', 2],
+      'no-trailing-spaces': 'error',
+      'eol-last': 'error'
     }
   }
 ];
