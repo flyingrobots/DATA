@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * data CLI Main Entry Point
  */
@@ -20,27 +22,27 @@ const { version } = JSON.parse(readFileSync(join(__dirname, '../package.json'), 
 async function cli(argv) {
   // Check if this is a help request or no arguments (which shows help)
   const isHelpRequest = argv.includes('--help') || argv.includes('-h') || argv.length <= 2;
-  
+
   // Display logo for interactive sessions and help requests
   if ((process.stdout.isTTY && !process.env.CI) || isHelpRequest) {
     await displayLogo();
   }
-  
+
   // Configuration now handled via CLI args and env vars
-  
+
   // Create main command
   const program = new Command();
-  
+
   // Initialize paths and database credentials in preAction hook
   let paths = null;
   let databaseUrl = null;
   let serviceRoleKey = null;
   let anonKey = null;
   let outputConfig = null;
-  
+
   program.hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
-    
+
     // Collect path options
     paths = {
       // Input paths
@@ -52,12 +54,12 @@ async function cli(argv) {
       buildDir: opts.buildDir || process.env.data_BUILD_DIR || './build',
       reportsDir: opts.reportsDir || process.env.data_REPORTS_DIR || './reports'
     };
-    
+
     // Get database credentials from environment
     databaseUrl = process.env.DATABASE_URL || process.env.data_DATABASE_URL;
     serviceRoleKey = process.env.data_SERVICE_ROLE_KEY;
     anonKey = process.env.data_ANON_KEY;
-    
+
     // Initialize OutputConfig
     const { default: OutputConfig } = await import('./lib/OutputConfig.js');
     outputConfig = new OutputConfig(
@@ -70,7 +72,7 @@ async function cli(argv) {
       paths.buildDir,
       null // cliProjectRoot
     );
-    
+
     // Debug output if requested
     if (process.env.data_DEBUG_PATHS) {
       console.log('data Path Configuration:');
@@ -86,7 +88,7 @@ async function cli(argv) {
       });
     }
   });
-  
+
   program
     .name('data')
     .description('⛰️ Advanced Resource Command Hub for PostgreSQL')
@@ -103,7 +105,7 @@ async function cli(argv) {
     .option('--migrations-dir <path>', 'Directory for migration output')
     .option('--build-dir <path>', 'Directory for build artifacts')
     .option('--reports-dir <path>', 'Directory for test reports and coverage');
-  
+
   // Add init command
   program
     .command('init')
@@ -112,13 +114,13 @@ async function cli(argv) {
     .action(async (options) => {
       const { default: InitCommand } = await import('./commands/InitCommand.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new InitCommand({
         path: options.path || process.cwd()
       });
       const reporter = new CliReporter(program.opts().json);
       reporter.attach(command);
-      
+
       try {
         await command.execute();
       } catch (error) {
@@ -132,14 +134,14 @@ async function cli(argv) {
   const db = program
     .command('db')
     .description('Database operations');
-  
+
   db.command('reset')
     .description('Reset the local database')
     .action(async (options) => {
       const parentOpts = program.opts();
       const { default: ResetCommand } = await import('./commands/db/ResetCommand.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new ResetCommand(
         databaseUrl,
         serviceRoleKey,
@@ -151,7 +153,7 @@ async function cli(argv) {
       command.outputConfig = outputConfig;
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute();
       } catch (error) {
@@ -160,7 +162,7 @@ async function cli(argv) {
         }
       }
     });
-  
+
   db.command('query <sql>')
     .description('Run an SQL query')
     .option('-f, --file', 'Treat input as file path instead of SQL')
@@ -168,7 +170,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { QueryCommand } = await import('./commands/db/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new QueryCommand(
         databaseUrl,
         serviceRoleKey,
@@ -178,7 +180,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(sql, options.file);
       } catch (error) {
@@ -187,7 +189,7 @@ async function cli(argv) {
         }
       }
     });
-  
+
   db.command('compile')
     .description('Compile SQL sources into migration with optional functions deployment')
     .option('--deploy-functions', 'Deploy Edge Functions after successful compilation')
@@ -198,7 +200,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { CompileCommand } = await import('./commands/db/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new CompileCommand(
         paths.sqlDir,
         paths.migrationsDir,
@@ -207,7 +209,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       // Prepare compile options with functions deployment
       const compileOptions = {
         deployFunctions: options.deployFunctions,
@@ -215,7 +217,7 @@ async function cli(argv) {
         skipImportMap: options.skipImportMap,
         debug: options.debugFunctions
       };
-      
+
       try {
         await command.execute(compileOptions);
       } catch (error) {
@@ -224,12 +226,12 @@ async function cli(argv) {
         }
       }
     });
-  
+
   // Add migrate subcommands
   const migrate = db
     .command('migrate')
     .description('Database migration management');
-  
+
   migrate.command('generate')
     .description('Generate migration from schema diff')
     .option('--name <name>', 'Migration name (required)')
@@ -241,15 +243,15 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { default: MigrateGenerateCommand } = await import('./commands/db/migrate/generate.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new MigrateGenerateCommand(
         null, // config will use default
-        null, // logger will be added by CliReporter  
+        null, // logger will be added by CliReporter
         parentOpts.prod
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         // Convert commander options to args array for our command
         const args = [];
@@ -268,7 +270,7 @@ async function cli(argv) {
         if (options.desiredDb) {
           args.push('--desired-db', options.desiredDb);
         }
-        
+
         await command.execute(args);
       } catch (error) {
         if (!parentOpts.json) {
@@ -285,7 +287,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { default: MigratePromoteCommand } = await import('./commands/db/migrate/promote.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new MigratePromoteCommand(
         null, // config will use default
         null, // logger will be added by CliReporter
@@ -293,7 +295,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(options);
       } catch (error) {
@@ -317,11 +319,11 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { DeployCommand } = await import('./commands/functions/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new DeployCommand(paths.functionsDir, null, parentOpts.prod);
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(functionNames, options);
       } catch (error) {
@@ -337,7 +339,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { ValidateCommand } = await import('./commands/functions/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new ValidateCommand(
         paths.testsDir,
         paths.reportsDir,
@@ -346,7 +348,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(functionNames);
       } catch (error) {
@@ -362,11 +364,11 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { StatusCommand } = await import('./commands/functions/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new StatusCommand(paths.functionsDir, null, parentOpts.prod);
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(functionNames);
       } catch (error) {
@@ -387,7 +389,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { CompileCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new CompileCommand(
         paths.testsDir,
         paths.migrationsDir,
@@ -396,7 +398,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute();
       } catch (error) {
@@ -419,7 +421,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { RunCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new RunCommand(
         databaseUrl,
         serviceRoleKey,
@@ -430,10 +432,10 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         const results = await command.execute(options);
-        
+
         // Set proper exit code based on test results
         if (results && command.getExitCode) {
           const exitCode = command.getExitCode(results);
@@ -459,7 +461,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { default: DevCycleCommand } = await import('./commands/test/DevCycleCommand.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new DevCycleCommand(
         databaseUrl,
         serviceRoleKey,
@@ -470,10 +472,10 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         const results = await command.execute(options);
-        
+
         // Set proper exit code based on test results
         if (results && command.getExitCode) {
           const exitCode = command.getExitCode(results);
@@ -500,7 +502,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { CoverageCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new CoverageCommand(
         databaseUrl,
         serviceRoleKey,
@@ -511,7 +513,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(options);
       } catch (error) {
@@ -529,7 +531,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { WatchCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new WatchCommand(
         databaseUrl,
         serviceRoleKey,
@@ -540,7 +542,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(options);
       } catch (error) {
@@ -557,7 +559,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { ValidateCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new ValidateCommand(
         databaseUrl,
         serviceRoleKey,
@@ -568,7 +570,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(options);
       } catch (error) {
@@ -586,7 +588,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { GenerateCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       // Determine test type and name from options
       let testType, testName;
       if (options.rpc) {
@@ -599,7 +601,7 @@ async function cli(argv) {
         console.error('Error: Must specify either --rpc <name> or --rls <name>');
         process.exit(1);
       }
-      
+
       const command = new GenerateCommand(
         paths.testsDir,
         paths.reportsDir,
@@ -608,7 +610,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute({ type: testType, name: testName });
       } catch (error) {
@@ -617,7 +619,7 @@ async function cli(argv) {
         }
       }
     });
-  
+
   test.command('generate-template')
     .description('Generate pgTAP test templates using TestTemplateGenerator and TestRequirementAnalyzer')
     .option('--migration <file>', 'Migration file to analyze for test requirements')
@@ -632,7 +634,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { GenerateTemplateCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new GenerateTemplateCommand(
         paths.testsDir,
         paths.reportsDir,
@@ -641,7 +643,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(options);
       } catch (error) {
@@ -659,7 +661,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { CIValidateCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new CIValidateCommand(
         databaseUrl,
         serviceRoleKey,
@@ -670,7 +672,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(options);
       } catch (error) {
@@ -690,7 +692,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { CIRunCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new CIRunCommand(
         databaseUrl,
         serviceRoleKey,
@@ -701,10 +703,10 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         const results = await command.execute(options);
-        
+
         // CI commands handle their own exit codes
         const exitCode = command.getExitCode(results);
         process.exit(exitCode);
@@ -725,7 +727,7 @@ async function cli(argv) {
       const parentOpts = program.opts();
       const { CICoverageCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
-      
+
       const command = new CICoverageCommand(
         null, // config - uses default
         null, // logger - added by reporter
@@ -733,7 +735,7 @@ async function cli(argv) {
       );
       const reporter = new CliReporter(parentOpts.json);
       reporter.attach(command);
-      
+
       try {
         await command.execute(options);
         // CI coverage command handles its own exit codes via process.exitCode
@@ -747,8 +749,8 @@ async function cli(argv) {
   //   .command('maintenance')
   //   .alias('maint')
   //   .description('Maintenance mode management');
-  
-  // TODO: Add status command when implemented  
+
+  // TODO: Add status command when implemented
   // program
   //   .command('status')
   //   .description('Show comprehensive system status')
@@ -756,10 +758,10 @@ async function cli(argv) {
   //     const parentOpts = program.opts();
   //     await statusCommand.execute({ ...options, ...parentOpts, config });
   //   });
-  
+
   // Parse arguments
   await program.parseAsync(argv);
-  
+
   // Show help if no command provided
   if (argv.length === 2) {
     program.help();

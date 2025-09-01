@@ -28,7 +28,16 @@
     "@supabase/supabase-js": "^2.45.0"
   },
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=18",
     "deno": ">=1.40.0"
+  },
+  "files": [
+    "src",
+    "lib",
+    "index.js"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
   }
 }
