@@ -1,7 +1,0 @@
-node_modules/
-.obsidian/
-*.min.js
-dist/
-build/
-coverage/
-.git/

@@ -4,6 +4,20 @@ import promisePlugin from 'eslint-plugin-promise';
 export default [
   js.configs.recommended,
   {
+    ignores: [
+      'node_modules/**',
+      '.obsidian/**',
+      'dist/**',
+      'build/**',
+      'coverage/**',
+      '*.min.js',
+      '.git/**',
+      '.vitest/**',
+      '.nyc_output/**',
+      'test-results/**'
+    ]
+  },
+  {
     files: ['**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
@@ -29,24 +43,24 @@ export default [
       'promise/always-return': 'error',
       'promise/no-return-wrap': 'error',
       'promise/param-names': 'error',
-      
+
       // Require await in async functions
       'require-await': 'error',
-      
+
       // Other async best practices
       'no-async-promise-executor': 'error',
       'no-await-in-loop': 'warn',
       'no-return-await': 'error',
       'prefer-promise-reject-errors': 'error',
-      
+
       // ESM-specific rules
       'no-console': 'off',
       'no-undef': 'error',
-      'no-unused-vars': ['error', { 
+      'no-unused-vars': ['error', {
         'argsIgnorePattern': '^_',
         'varsIgnorePattern': '^_'
       }],
-      
+
       // Modern JavaScript best practices
       'prefer-const': 'error',
       'prefer-arrow-callback': 'error',
@@ -61,3 +75,4 @@ export default [
     }
   }
 ];
+
