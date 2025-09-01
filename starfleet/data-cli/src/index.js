@@ -125,6 +125,7 @@ async function cli(argv) {
         await command.execute();
       } catch (error) {
         if (!program.opts().json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -137,7 +138,7 @@ async function cli(argv) {
 
   db.command('reset')
     .description('Reset the local database')
-    .action(async (options) => {
+    .action(async () => {
       const parentOpts = program.opts();
       const { default: ResetCommand } = await import('./commands/db/ResetCommand.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
@@ -158,6 +159,7 @@ async function cli(argv) {
         await command.execute();
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -185,6 +187,7 @@ async function cli(argv) {
         await command.execute(sql, options.file);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -222,6 +225,7 @@ async function cli(argv) {
         await command.execute(compileOptions);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -274,6 +278,7 @@ async function cli(argv) {
         await command.execute(args);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -300,6 +305,7 @@ async function cli(argv) {
         await command.execute(options);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -328,6 +334,7 @@ async function cli(argv) {
         await command.execute(functionNames, options);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -335,7 +342,7 @@ async function cli(argv) {
 
   functions.command('validate [functions...]')
     .description('Validate Edge Functions without deploying')
-    .action(async (functionNames, options) => {
+    .action(async (functionNames, _options) => {
       const parentOpts = program.opts();
       const { ValidateCommand } = await import('./commands/functions/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
@@ -353,6 +360,7 @@ async function cli(argv) {
         await command.execute(functionNames);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -360,7 +368,7 @@ async function cli(argv) {
 
   functions.command('status [functions...]')
     .description('Show Edge Functions deployment status')
-    .action(async (functionNames, options) => {
+    .action(async (functionNames, _options) => {
       const parentOpts = program.opts();
       const { StatusCommand } = await import('./commands/functions/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
@@ -373,6 +381,7 @@ async function cli(argv) {
         await command.execute(functionNames);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -385,7 +394,7 @@ async function cli(argv) {
 
   test.command('compile')
     .description('Compile tests for execution')
-    .action(async (options) => {
+    .action(async () => {
       const parentOpts = program.opts();
       const { CompileCommand } = await import('./commands/test/index.js');
       const { default: CliReporter } = await import('./reporters/CliReporter.js');
@@ -403,6 +412,7 @@ async function cli(argv) {
         await command.execute();
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -445,6 +455,7 @@ async function cli(argv) {
         }
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -485,6 +496,7 @@ async function cli(argv) {
         }
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -518,6 +530,7 @@ async function cli(argv) {
         await command.execute(options);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -547,6 +560,7 @@ async function cli(argv) {
         await command.execute(options);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -575,6 +589,7 @@ async function cli(argv) {
         await command.execute(options);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -615,6 +630,7 @@ async function cli(argv) {
         await command.execute({ type: testType, name: testName });
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -648,6 +664,7 @@ async function cli(argv) {
         await command.execute(options);
       } catch (error) {
         if (!parentOpts.json) {
+          console.error('Command failed:', error.message);
           process.exit(1);
         }
       }
@@ -677,6 +694,7 @@ async function cli(argv) {
         await command.execute(options);
       } catch (error) {
         // CI commands always exit with proper codes
+        console.error('CI command failed:', error.message);
         process.exit(1);
       }
     });
@@ -711,6 +729,7 @@ async function cli(argv) {
         const exitCode = command.getExitCode(results);
         process.exit(exitCode);
       } catch (error) {
+        console.error('CI command failed:', error.message);
         process.exit(1);
       }
     });
@@ -740,6 +759,7 @@ async function cli(argv) {
         await command.execute(options);
         // CI coverage command handles its own exit codes via process.exitCode
       } catch (error) {
+        console.error('CI command failed:', error.message);
         process.exit(1);
       }
     });
