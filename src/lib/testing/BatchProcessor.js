@@ -24,7 +24,7 @@ class BatchProcessor {
     this.options = {
       batchSize: options.batchSize || 100,
       maxMemoryMB: options.maxMemoryMB || 500,
-      enableGC: options.enableGC || true,
+      enableGC: options.enableGC ?? true,
       ...options,
     };
 
@@ -54,10 +54,13 @@ class BatchProcessor {
           this.options.maxMemoryMB,
         )
       ) {
+        // We must run cleanup BEFORE proceeding to the next await to avoid OOM.
+        // eslint-disable-next-line no-await-in-loop
         await this.performCleanup();
       }
 
-      // Process batch
+      // Process batch SEQUENTIALLY to keep memory bounded (intentional).
+      // eslint-disable-next-line no-await-in-loop
       const batchResults = await processor(batch, i);
       results = results.concat(batchResults);
 
@@ -73,7 +76,8 @@ class BatchProcessor {
         memoryUsage: MemoryMonitor.getMemoryUsage(),
       });
 
-      // Yield to event loop
+      // Yield to event loop to keep UI/other tasks responsive.
+      // eslint-disable-next-line no-await-in-loop
       await this.yieldToEventLoop();
     }
 
@@ -95,9 +99,9 @@ class BatchProcessor {
 
   /**
    * Perform memory cleanup operations
-   * @returns {Promise<void>}
+   * (Synchronous; callers can still `await` this safely.)
    */
-  async performCleanup() {
+  performCleanup() {
     // Clear temporary references
     if (this.scanner.weakRefs) {
       this.scanner.weakRefs = new WeakMap();
@@ -132,10 +136,11 @@ class BatchProcessor {
 
   /**
    * Yield control to event loop
-   * @returns {Promise<void>}
+   * Return a Promise; no need for `async`.
    */
-  async yieldToEventLoop() {
-    return new Promise((resolve) => setImmediate(resolve));
+  yieldToEventLoop() {
+    // Avoid setImmediate no-undef; setTimeout(0) is fine here.
+    return new Promise((resolve) => setTimeout(resolve, 0));
   }
 
   /**

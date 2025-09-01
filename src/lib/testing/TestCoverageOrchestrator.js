@@ -16,6 +16,13 @@ const TestTemplateGenerator = require("./TestTemplateGenerator");
 const path = require("path");
 const fs = require("fs").promises;
 
+const {
+  TestCoverageError,
+  ValidationError,
+  CoverageEnforcementError,
+  ParsingError,
+} = require("./errors");
+
 /**
  * @typedef {Object} CoverageCheckResult
  * @property {boolean} passed - Whether coverage check passed
@@ -24,6 +31,7 @@ const fs = require("fs").promises;
  * @property {Array} suggestions - Test suggestions for gaps
  * @property {boolean} shouldBlock - Whether deployment should be blocked
  * @property {string} [bypassReason] - Reason if coverage was bypassed
+ * @property {Array} [templates] - Generated templates for gaps
  */
 
 /**
@@ -34,7 +42,7 @@ const fs = require("fs").promises;
  * @property {boolean} [generateTemplates] - Whether to generate test templates for gaps
  * @property {Object} [thresholds] - Coverage thresholds by object type
  * @property {boolean} [allowBypass] - Whether to allow coverage bypass
- * @property {Function} [logger] - Logger function
+ * @property {Console|{info:Function,warn:Function,error:Function}} [logger] - Logger
  */
 
 class TestCoverageOrchestrator extends EventEmitter {
@@ -51,7 +59,7 @@ class TestCoverageOrchestrator extends EventEmitter {
     this.generateTemplates = options.generateTemplates || false;
     this.thresholds = options.thresholds || {};
     this.allowBypass = options.allowBypass || false;
-    this.logger = options.logger || console.log;
+    this.logger = options.logger || console;
 
     // Initialize components
     this.analyzer = new TestRequirementAnalyzer();
@@ -103,6 +111,7 @@ class TestCoverageOrchestrator extends EventEmitter {
    * @param {Array} operations - Migration operations from AST analysis
    * @param {Object} options - Check options
    * @returns {Promise<CoverageCheckResult>} Coverage check results
+   * @throws {ValidationError|CoverageEnforcementError|ParsingError|TestCoverageError}
    */
   async checkCoverage(operations, options = {}) {
     this.emit("start", {
@@ -154,12 +163,23 @@ class TestCoverageOrchestrator extends EventEmitter {
       });
 
       return result;
-    } catch (error) {
-      this.emit("error", {
-        message: "Test coverage analysis failed",
-        error: error.message,
-      });
-      throw error;
+    } catch (err) {
+      // Emit structured error info; rethrow without wrapping to preserve type
+      if (err instanceof TestCoverageError) {
+        this.emit("error", {
+          message: "Test coverage analysis failed",
+          name: err.name,
+          code: err.code,
+          details: err.details,
+        });
+      } else {
+        this.emit("error", {
+          message: "Test coverage analysis failed",
+          name: err?.name || "Error",
+          error: err?.message,
+        });
+      }
+      throw err;
     }
   }
 
@@ -167,9 +187,9 @@ class TestCoverageOrchestrator extends EventEmitter {
    * Analyze migration operations to determine test requirements
    * @param {Array} operations - Migration operations
    * @returns {Promise<Object>} Test requirements analysis
+   * @throws {ValidationError}
    */
   async analyzeRequirements(operations) {
-    // Use TestRequirementAnalyzer to determine what tests are needed
     const analysis = await this.analyzer.analyzeOperations(operations, {
       includeDataTests: true,
       includeConstraintTests: true,
@@ -189,12 +209,13 @@ class TestCoverageOrchestrator extends EventEmitter {
   /**
    * Scan existing tests for coverage
    * @returns {Promise<Object>} Coverage scan results
+   * @throws {ParsingError|ValidationError}
    */
   async scanTestCoverage() {
-    // Check if tests directory exists
     try {
       await fs.access(this.testsDir);
-    } catch (error) {
+    } catch {
+      // No tests directory: warn and proceed with empty coverage (not an error)
       this.emit("warning", {
         message: "Tests directory not found",
         path: this.testsDir,
@@ -202,13 +223,8 @@ class TestCoverageOrchestrator extends EventEmitter {
       return { coverage: [], statistics: {} };
     }
 
-    // Scan all test files
     await this.scanner.scanDirectory(this.testsDir);
-
-    // Build coverage database
     const database = this.scanner.buildCoverageDatabase();
-
-    // Get coverage statistics
     const stats = this.scanner.getCoverageStatistics();
 
     this.emit("progress", {
@@ -230,12 +246,11 @@ class TestCoverageOrchestrator extends EventEmitter {
    * @param {Object} coverage - Current test coverage
    * @param {Object} options - Enforcement options
    * @returns {Promise<Object>} Enforcement results
+   * @throws {CoverageEnforcementError|ValidationError}
    */
   async enforceCoverage(requirements, coverage, options = {}) {
-    // Convert coverage database to format expected by enforcer
     const coverageArray = this.convertCoverageToArray(coverage.coverage);
 
-    // Run enforcement
     const enforcement = await this.enforcer.enforce(
       requirements.requirements,
       coverageArray,
@@ -270,10 +285,20 @@ class TestCoverageOrchestrator extends EventEmitter {
           path: this.getTemplateOutputPath(gap.requirement),
         });
       } catch (error) {
-        this.emit("warning", {
-          message: `Failed to generate template for ${gap.requirement.name}`,
-          error: error.message,
-        });
+        // Preserve typed error details in warnings for better debugging / logs
+        if (error instanceof TestCoverageError) {
+          this.emit("warning", {
+            message: `Failed to generate template for ${gap.requirement.name}`,
+            name: error.name,
+            code: error.code,
+            details: error.details,
+          });
+        } else {
+          this.emit("warning", {
+            message: `Failed to generate template for ${gap.requirement.name}`,
+            error: error.message,
+          });
+        }
       }
     }
 
@@ -295,8 +320,8 @@ class TestCoverageOrchestrator extends EventEmitter {
     for (const [type, objects] of Object.entries(coverageMap)) {
       for (const [name, data] of Object.entries(objects)) {
         coverageArray.push({
-          type: type,
-          name: name,
+          type,
+          name,
           schema: data.schema || "public",
           assertions: data.assertions || [],
           files: data.files || [],
@@ -337,10 +362,7 @@ class TestCoverageOrchestrator extends EventEmitter {
     for (const { template, path: templatePath } of templates) {
       const dir = path.dirname(templatePath);
 
-      // Ensure directory exists
       await fs.mkdir(dir, { recursive: true });
-
-      // Write template
       await fs.writeFile(templatePath, template, "utf8");
 
       this.emit("progress", {

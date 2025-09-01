@@ -8,6 +8,7 @@
  */
 
 const { EventEmitter } = require("events");
+const { ValidationError } = require("./errors");
 
 /**
  * Coverage enforcement levels
@@ -243,12 +244,14 @@ class CoverageEnforcer extends EventEmitter {
     const type = (item.type || "").toLowerCase().trim();
 
     // Validate components
-    if (!name) {
-      throw new Error(`Invalid coverage item: missing name property`);
-    }
-    if (!type) {
-      throw new Error(`Invalid coverage item: missing type property`);
-    }
+    if (!item.name)
+      throw new ValidationError("Invalid coverage item: missing name", {
+        item,
+      });
+    if (!item.type)
+      throw new ValidationError("Invalid coverage item: missing type", {
+        item,
+      });
 
     // Use separator that won't appear in PostgreSQL identifiers
     const separator = "::";

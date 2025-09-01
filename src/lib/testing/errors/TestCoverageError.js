@@ -5,6 +5,7 @@ class TestCoverageError extends Error {
     this.name = "TestCoverageError";
     this.code = code;
     this.details = details;
+    this.timestamp = new Date().toISOString();
   }
   toJSON() {
     return {

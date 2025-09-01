@@ -19,11 +19,14 @@ import {
   DirectoryEvent,
   ErrorEvent,
   SuccessEvent,
-  WarningEvent,
+  // WarningEvent,
 } from "../events/CommandEvents.js";
 import MemoryMonitor from "./MemoryMonitor.js";
 import StreamingCoverageDatabase from "./StreamingCoverageDatabase.js";
 import BatchProcessor from "./BatchProcessor.js";
+import { ValidationError, ParsingError } from "./errors/index.js";
+/* eslint-env node */
+const { process, console, setInterval, clearInterval } = globalThis;
 
 /**
  * @typedef {Object} TestAssertion
@@ -165,8 +168,10 @@ class pgTAPTestScanner extends EventEmitter {
 
     /**
      * @type {AbortController} For cancelling operations
+     *
+     *  Use global AbortController (Node 16+) so ESLint doesn’t flag no-undef in ESM.
      */
-    this.abortController = new AbortController();
+    this.abortController = new globalThis.AbortController();
 
     /**
      * @type {StreamingCoverageDatabase} Memory-aware coverage database
@@ -523,7 +528,7 @@ class pgTAPTestScanner extends EventEmitter {
       // Check if directory exists
       const stat = await fs.stat(testsDir);
       if (!stat.isDirectory()) {
-        throw new Error(`Path is not a directory: ${testsDir}`);
+        throw new ParsingError(`Path is not a directory: ${testsDir}`);
       }
 
       // Find all test files
@@ -672,7 +677,7 @@ class pgTAPTestScanner extends EventEmitter {
 
       return testFile;
     } catch (error) {
-      throw new Error(
+      throw new ParsingError(
         `Failed to parse test file ${filePath}: ${error.message}`,
       );
     }
@@ -694,8 +699,7 @@ class pgTAPTestScanner extends EventEmitter {
     }
 
     // Split into lines for line number tracking
-    const lines = processedSql.split("\n");
-
+    // const lines = processedSql.split("\n");
     // Search for each assertion pattern
     for (const [assertionType, pattern] of this.assertionPatterns) {
       let match;
@@ -929,7 +933,9 @@ class pgTAPTestScanner extends EventEmitter {
           type: "warning",
         });
       } else {
-        throw new Error(`Failed to read directory ${dir}: ${error.message}`);
+        throw new ParsingError(
+          `Failed to read directory ${dir}: ${error.message}`,
+        );
       }
     }
 
@@ -1980,7 +1986,7 @@ class pgTAPTestScanner extends EventEmitter {
     const metadata = {};
 
     // Helper function to determine if a parameter is likely a schema vs function name
-    const isLikelySchema = (param, nextParam) => {
+    const _isLikelySchema = (param, nextParam) => {
       if (!nextParam) return false;
       // Common schema names
       const commonSchemas = [
@@ -2676,7 +2682,7 @@ class pgTAPTestScanner extends EventEmitter {
         return this._formatReportAsMarkdown(report);
 
       default:
-        throw new Error(`Unsupported export format: ${format}`);
+        throw new ValidationError(`Unsupported export format: ${format}`);
     }
   }
 
@@ -2888,7 +2894,7 @@ class pgTAPTestScanner extends EventEmitter {
    * @returns {number} Estimated maximum assertions
    * @private
    */
-  _estimateMaxAssertions(objectType, objectName) {
+  _estimateMaxAssertions(objectType, _objectName) {
     // These are rough estimates - could be enhanced with actual schema introspection
     switch (objectType) {
       case "tables":

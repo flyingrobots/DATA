@@ -9,7 +9,7 @@
  * @author D.A.T.A. Engineering Team
  * @version 1.0.0
  */
-
+const { ValidationError } = require("./errors"); // using your barrel export
 /**
  * @typedef {Object} TestPattern
  * @property {string} name - Pattern name identifier
@@ -92,7 +92,7 @@ class TestPatternLibrary {
   renderPattern(patternName, variables = {}) {
     const pattern = this.getPattern(patternName);
     if (!pattern) {
-      throw new Error(`Pattern not found: ${patternName}`);
+      throw new ValidationError(`Pattern not found: ${patternName}`);
     }
 
     let rendered = pattern.sqlTemplate;

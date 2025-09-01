@@ -7,7 +7,7 @@
  */
 
 const TestPatternLibrary = require("./TestPatternLibrary");
-
+const { ValidationError, ParsingError } = require("../errors/index");
 /**
  * @typedef {Object} TestRequirement
  * @property {string} type - Type of test ('rpc' | 'rls' | 'trigger' | 'constraint' | 'function' | 'table' | 'column' | 'index')
@@ -136,7 +136,7 @@ class TestTemplateGenerator {
 
     const generator = this.templateGenerators[requirement.type];
     if (!generator) {
-      throw new Error(`Unsupported test type: ${requirement.type}`);
+      throw new ValidationError(`Unsupported test type: ${requirement.type}`);
     }
 
     const content = generator(requirement);
@@ -166,7 +166,7 @@ class TestTemplateGenerator {
    */
   generateBatch(requirements) {
     if (!Array.isArray(requirements)) {
-      throw new Error("Requirements must be an array");
+      throw new ValidationErrorError("Requirements must be an array");
     }
 
     const templates = [];
@@ -257,7 +257,7 @@ class TestTemplateGenerator {
       // Start with base template
       const baseTemplate = this.generateTemplate(requirement);
       if (!baseTemplate || !baseTemplate.content) {
-        throw new Error("Failed to generate base template");
+        throw new ParsingError("Failed to generate base template");
       }
 
       // Get recommended patterns for this test type
@@ -325,7 +325,7 @@ class TestTemplateGenerator {
 
       // Validate the generated template before returning
       if (!this._validateTemplate(enhancedTemplate)) {
-        throw new Error("Generated template failed validation");
+        throw new ParsingError("Generated template failed validation");
       }
 
       return enhancedTemplate;
@@ -341,7 +341,9 @@ class TestTemplateGenerator {
 
         // Validate basic template before returning
         if (!this._validateTemplate(basicTemplate)) {
-          throw new Error("Basic template fallback also failed validation");
+          throw new ParsingError(
+            "Basic template fallback also failed validation",
+          );
         }
 
         return {
@@ -355,7 +357,7 @@ class TestTemplateGenerator {
           },
         };
       } catch (fallbackError) {
-        throw new Error(
+        throw new ParsingError(
           `Both enhanced and basic template generation failed: Enhancement: ${enhancementError.message}, Fallback: ${fallbackError.message}`,
         );
       }
@@ -633,7 +635,7 @@ const batchResult = generator.generateBatch(requirements);`,
    */
   formatTest(template) {
     if (!template || typeof template !== "string") {
-      throw new Error("Template content must be a non-empty string");
+      throw new ValidationError("Template content must be a non-empty string");
     }
 
     // Remove excessive blank lines and normalize line endings
@@ -657,24 +659,24 @@ const batchResult = generator.generateBatch(requirements);`,
    */
   validateRequirement(requirement) {
     if (!requirement || typeof requirement !== "object") {
-      throw new Error("Requirement must be an object");
+      throw new ValidationError("Requirement must be an object");
     }
 
     if (!requirement.type || typeof requirement.type !== "string") {
-      throw new Error("Requirement must have a valid type");
+      throw new ValidationError("Requirement must have a valid type");
     }
 
     if (!requirement.name || typeof requirement.name !== "string") {
-      throw new Error("Requirement must have a valid name");
+      throw new ValidationError("Requirement must have a valid name");
     }
 
     if (!this.templateGenerators[requirement.type]) {
-      throw new Error(`Unsupported test type: ${requirement.type}`);
+      throw new ValidationError(`Unsupported test type: ${requirement.type}`);
     }
 
     // Validate name format
     if (!/^[a-zA-Z0-9_]+$/.test(requirement.name)) {
-      throw new Error(
+      throw new ValidationError(
         "Name must contain only letters, numbers, and underscores",
       );
     }
@@ -2231,7 +2233,9 @@ ${isPartial ? `-- Partial: Yes (WHERE ${whereClause})` : "-- Partial: No"}
     const planCount = this.calculatePlanCount(requirement, "column");
 
     if (!tableName) {
-      throw new Error("Column test requirement must specify tableName");
+      throw new ValidationError(
+        "Column test requirement must specify tableName",
+      );
     }
 
     // Build test assertions based on column metadata

@@ -7,10 +7,18 @@
  * Provides safe, powerful database management for local and production environments
  */
 
-// Enable better error messages
+// Typed testing error handler (instanceof → exit codes + structured logs)
+const { handleTestingError } = require("../src/lib/testing/handleTestingError");
+
+// Route all top-level failures through the typed handler
 process.on("unhandledRejection", (err) => {
-  console.error("Unhandled promise rejection:", err);
-  process.exit(1);
+  handleTestingError(err, console);
+  process.exit(process.exitCode ?? 1);
+});
+
+process.on("uncaughtException", (err) => {
+  handleTestingError(err, console);
+  process.exit(process.exitCode ?? 1);
 });
 
 // Load environment variables
@@ -19,11 +27,12 @@ require("dotenv").config();
 // Import the main CLI
 const { cli } = require("../src/index");
 
-// Run the CLI with process arguments
-cli(process.argv).catch((error) => {
-  console.error("Fatal error:", error.message);
-  if (process.env.DEBUG) {
-    console.error(error.stack);
+// Run the CLI with process arguments (typed-error aware)
+(async () => {
+  try {
+    await cli(process.argv);
+  } catch (err) {
+    handleTestingError(err, console);
+    process.exit(process.exitCode ?? 1);
   }
-  process.exit(1);
-});
+})();

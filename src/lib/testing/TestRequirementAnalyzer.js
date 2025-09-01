@@ -9,7 +9,7 @@
  */
 
 const { EventEmitter } = require("events");
-
+const { ValidationError } = require("../errors");
 /**
  * Test requirement types
  * @readonly
@@ -206,18 +206,18 @@ class TestRequirementAnalyzer extends EventEmitter {
   _validateOperation(operation) {
     // Check operation is an object
     if (!operation || typeof operation !== "object") {
-      throw new Error("Invalid operation: must be a non-null object");
+      throw new ValidationError("Invalid operation: must be a non-null object");
     }
 
     // Check required properties
     if (!operation.sql || typeof operation.sql !== "string") {
-      throw new Error(
+      throw new ValidationError(
         `Invalid operation: missing or invalid 'sql' property (got ${typeof operation.sql})`,
       );
     }
 
     if (!operation.type || typeof operation.type !== "string") {
-      throw new Error(
+      throw new ValidationError(
         `Invalid operation: missing or invalid 'type' property (got ${typeof operation.type})`,
       );
     }
@@ -234,24 +234,26 @@ class TestRequirementAnalyzer extends EventEmitter {
 
     // Validate optional properties if present
     if (operation.description && typeof operation.description !== "string") {
-      throw new Error(
+      throw new ValidationError(
         `Invalid operation: 'description' must be a string (got ${typeof operation.description})`,
       );
     }
 
     if (operation.warning && typeof operation.warning !== "string") {
-      throw new Error(
+      throw new ValidationError(
         `Invalid operation: 'warning' must be a string (got ${typeof operation.warning})`,
       );
     }
 
     // Check for malformed SQL (basic validation)
     if (operation.sql.length === 0) {
-      throw new Error("Invalid operation: SQL cannot be empty");
+      throw new ValidationError("Invalid operation: SQL cannot be empty");
     }
 
     if (operation.sql.length > 100000) {
-      throw new Error("Invalid operation: SQL exceeds maximum length (100KB)");
+      throw new ValidationError(
+        "Invalid operation: SQL exceeds maximum length (100KB)",
+      );
     }
 
     return true;
